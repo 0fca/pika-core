@@ -4,9 +4,9 @@
 @{
     ViewData["Title"] = "Browse - Admin";
     object lastPath = TempData["LastPath"]; 
+    int id = 0;
 }
 
-<label hidden id="pathLbl">@lastPath</label>
 <h2>Index</h2>
 
 <table class="table">
@@ -18,12 +18,17 @@
             <th>
                 Type
             </th>
+            <th>
+                Size
+            </th>
+            <th>
+                Options
+            </th>
         </tr>
     </thead>
 
     <tbody>
-
-        @foreach (IFileInfo item in Model.Contents)
+         @foreach (IFileInfo item in Model.Contents)
         {
             <tr>
                 <td>
@@ -33,13 +38,23 @@
                     }
                     else
                     {
-                        <a href="" download=@item.Name>@item.Name</a>
+                        <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
                     }
                 </td>
                 <td>
                     @(@File.Exists(@item.PhysicalPath) ? "File" : "Directory")
                 </td>
+                <td>
+                    @if(!item.IsDirectory){
+                        long i = @item.Length/(1000*1000);
+                        <p>@i MB</p>
+                    }
+                </td>
+                <td>
+                    Some options...
+                </td>
             </tr>
+            id++;
         }
     </tbody>
 </table>

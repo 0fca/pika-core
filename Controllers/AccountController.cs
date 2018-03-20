@@ -444,14 +444,14 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [Authorize(Roles="Admin")]
-        private IActionResult AdminUserView(){
-            return View();
+        public IActionResult AdminUserPanel(){
+            return View(_userManager.Users);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles="Admin")]
-        private async Task<IActionResult> AdminUserViewConfirmation(){
+        public async Task<IActionResult> AdminUserViewConfirmation(){
             return View();
         }
 

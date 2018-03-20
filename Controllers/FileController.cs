@@ -27,31 +27,34 @@ namespace FMS2.Controllers
         [AllowAnonymous]
         public IActionResult Index(string path)
         {
-            
+            lrmv.Contents = getContents(path);
+
+            if(_signInManager.Context.User.IsInRole("Admin")){
+                return RedirectToAction(nameof(AdminFileView));
+            }
+            return View(lrmv);
+        }
+
+        private IDirectoryContents getContents(string path)
+        {
             if(String.IsNullOrEmpty(path)){
                 path = Constants.RootPath;
             }
-            var contents = _fileProvider.GetDirectoryContents(path);
-            
-            lrmv.Contents = contents;
+            return _fileProvider.GetDirectoryContents(path);
+        }
+
+        [Authorize(Roles="Admin")]
+        public IActionResult AdminFileView(){
             return View(lrmv);
-           
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public FileResult Download(int id){
+        public async Task<FileResult> Download(int id){
             var conts = lrmv.Contents.ToList();
             string path = "";
-            int i = 0;
-            foreach(var fileInfo in conts){
-                if(i == id){
-                    path = fileInfo.PhysicalPath;
-                    break;
-                }
-                i++;
-            }
-            byte[] fileBytes = System.IO.File.ReadAllBytes(path);
+            path = conts.ElementAt(id).PhysicalPath;
+            byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(path);
             return File(fileBytes, "text/plain", Path.GetFileName(path));
         }
     }
