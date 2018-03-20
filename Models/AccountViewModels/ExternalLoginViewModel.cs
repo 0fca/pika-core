@@ -11,5 +11,7 @@ namespace FMS2.Models.AccountViewModels
         [Required]
         [EmailAddress]
         public string Email { get; set; }
+
+        public bool wasRegistered {get; set;}
     }
 }

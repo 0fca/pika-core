@@ -12,6 +12,7 @@ using FMS2.Data;
 using FMS2.Models;
 using FMS2.Services;
 using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace FMS2
 {
@@ -79,7 +80,7 @@ namespace FMS2
             //adding custom roles
             var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var UserManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            string[] roleNames = { "Admin", "User" };
+            string[] roleNames = { "Admin", "FileManagerUser", "User" };
             IdentityResult roleResult;
             
             foreach (var roleName in roleNames)

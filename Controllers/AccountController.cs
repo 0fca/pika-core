@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using FMS2.Models;
 using FMS2.Models.AccountViewModels;
 using FMS2.Services;
+using System.Diagnostics;
 
 namespace FMS2.Controllers
 {
@@ -289,10 +290,11 @@ namespace FMS2.Controllers
             }
             else
             {
-                // If the user does not have an account, then ask the user to create an account.
+                
                 ViewData["ReturnUrl"] = returnUrl;
                 ViewData["LoginProvider"] = info.LoginProvider;
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                
                 return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
             }
         }
@@ -311,6 +313,7 @@ namespace FMS2.Controllers
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                
                 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
@@ -439,6 +442,19 @@ namespace FMS2.Controllers
             return View();
         }
 
+        [HttpGet]
+        [Authorize(Roles="Admin")]
+        private IActionResult AdminUserView(){
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles="Admin")]
+        private async Task<IActionResult> AdminUserViewConfirmation(){
+            return View();
+        }
+
         #region Helpers
 
         private void AddErrors(IdentityResult result)
@@ -460,7 +476,6 @@ namespace FMS2.Controllers
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }
-
         #endregion
     }
 }

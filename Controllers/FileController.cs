@@ -16,6 +16,7 @@ namespace FMS2.Controllers
     {
         private readonly IFileProvider _fileProvider;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly static FileResultModel lrmv = new FileResultModel();
         public FileController(IFileProvider fileProvider, SignInManager<ApplicationUser> signInManager)
         {
             _signInManager = signInManager;
@@ -31,10 +32,27 @@ namespace FMS2.Controllers
                 path = Constants.RootPath;
             }
             var contents = _fileProvider.GetDirectoryContents(path);
-            FileResultModel lrmv = new FileResultModel();
+            
             lrmv.Contents = contents;
             return View(lrmv);
            
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public FileResult Download(int id){
+            var conts = lrmv.Contents.ToList();
+            string path = "";
+            int i = 0;
+            foreach(var fileInfo in conts){
+                if(i == id){
+                    path = fileInfo.PhysicalPath;
+                    break;
+                }
+                i++;
+            }
+            byte[] fileBytes = System.IO.File.ReadAllBytes(path);
+            return File(fileBytes, "text/plain", Path.GetFileName(path));
         }
     }
 }

@@ -1,0 +1,45 @@
+@model FMS2.Models.FileResultModel
+@using System.IO;
+@using Microsoft.Extensions.FileProviders
+@{
+    ViewData["Title"] = "Browse - Admin";
+    object lastPath = TempData["LastPath"]; 
+}
+
+<label hidden id="pathLbl">@lastPath</label>
+<h2>Index</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Type
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (IFileInfo item in Model.Contents)
+        {
+            <tr>
+                <td>
+                    @if (item.IsDirectory)
+                    {
+                        <a asp-controller="File" asp-action="Index" asp-route-path=@item.PhysicalPath>@item.Name</a>
+                    }
+                    else
+                    {
+                        <a href="" download=@item.Name>@item.Name</a>
+                    }
+                </td>
+                <td>
+                    @(@File.Exists(@item.PhysicalPath) ? "File" : "Directory")
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
