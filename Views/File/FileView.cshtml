@@ -3,11 +3,10 @@
 @using Microsoft.Extensions.FileProviders
 @{
     ViewData["Title"] = "Browse - Anon";
-    object lastPath = TempData["LastPath"]; 
-    int id = 0;
+    //object lastPath = TempData["LastPath"]; 
+    int id = -1;
 }
 
-<label hidden id="pathLbl">@lastPath</label>
 <h2>Index</h2>
 
 <table class="table">
@@ -26,10 +25,13 @@
     </thead>
 
     <tbody>
-
+        <tr>
+            <td>
+                <a asp-controller="File" asp-action="Index" asp-route-path="../">Back</a>
+            </td>
+        </tr>
         @foreach (IFileInfo item in Model.Contents)
         {
-            
             <tr>
                 <td>
                     @if (item.IsDirectory)
@@ -51,7 +53,13 @@
                     }
                 </td>
             </tr>
+            
             id++;
         }
+        <tr>
+            <td>
+                <a asp-controller="File" asp-action="Index" asp-route-path="../">Back</a>
+            </td>
+        </tr>
     </tbody>
 </table>

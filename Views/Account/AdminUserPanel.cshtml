@@ -14,16 +14,22 @@
             <th>
                 Permission level
             </th>
+            <th>
+                Options
+            </th>
         </tr>
     </thead>
     <tbody>
         @foreach(var item in Model){
         <tr>
             <td>
-                Html.DisplayFor(modelItem => item.Email)
+                @Html.DisplayFor(modelItem => item.Email)
             </td>
             <td>
-                Html.DisplayFor(modelItem => item.Email)
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", null) | @Html.ActionLink("Delete", "Delete", null)
             </td>
         </tr>
         }

@@ -26,8 +26,12 @@
             </th>
         </tr>
     </thead>
-
     <tbody>
+        <tr>
+            <td>
+                <a asp-controller="File" asp-action="Index" asp-route-path="../">Back</a>
+            </td>
+        </tr>
          @foreach (IFileInfo item in Model.Contents)
         {
             <tr>
@@ -51,10 +55,17 @@
                     }
                 </td>
                 <td>
-                    Some options...
+                    @Html.ActionLink("Delete","Delete", new {@name=@item.PhysicalPath}) |
+                    @Html.ActionLink("Rename","Rename", new {@name=@item.PhysicalPath})
                 </td>
             </tr>
             id++;
         }
+        </tr>
+         <tr>
+            <td>
+                <a asp-controller="File" asp-action="Index" asp-route-path="../">Back</a>
+            </td>
+        </tr>
     </tbody>
 </table>
