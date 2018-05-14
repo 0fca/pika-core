@@ -28,7 +28,7 @@ namespace FMS2.Controllers
         [AllowAnonymous]
         public IActionResult Index(string path)
         {
-            lrmv.Contents = getContents(path);
+            FileResultModel.Contents = getContents(path);
             
             if(_signInManager.Context.User.IsInRole("Admin")){
                 return RedirectToAction(nameof(AdminFileView));
@@ -61,37 +61,39 @@ namespace FMS2.Controllers
         [HttpGet]
         [AllowAnonymous]
         public async Task<FileResult> Download(int id){
-            var conts = lrmv.Contents.ToList();
+            var conts = FileResultModel.Contents.ToList();
             string path = "";
             path = conts.ElementAt(id).PhysicalPath;
             byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(path);
             return File(fileBytes, "text/plain", Path.GetFileName(path));
         }
 
-        [Authorize(Roles="Admin")]
-        public IActionResult Delete(String name){
-            string name1 = GetName(name);
-            Debug.WriteLine("Name: "+System.IO.Path.GetDirectoryName(name)+" : "+name);
-            ViewData["path"] = name;
-            ViewData["name1"] = name;
-            ViewData["type"] = IsDirectory(name) ? "File" : "Directory";
-            return View();
+        public IActionResult Delete(string path){
+            ViewData["type"] = Directory.Exists(path) ? "directory" : "file";
+            ViewData["name1"] = path;
+            return View(path);
         }
 
         [HttpPost]
         [Authorize(Roles="Admin")]
         public IActionResult DeleteConfirmation(string path){
+            Debug.WriteLine(path);
+            if(!String.IsNullOrEmpty(path)){
             string parent =  System.IO.Directory.GetParent(path).FullName;
             try{
                 if(System.IO.File.Exists(path)) { 
                     System.IO.File.Delete(path);
                     return RedirectToAction(nameof(Index), new {path = parent});
                 }else{ 
+                    Debug.WriteLine(path);
                     System.IO.Directory.Delete(path);
                     return RedirectToAction(nameof(Index), new {path = parent});
                 }
             }catch(Exception e){
                 Debug.WriteLine(e.StackTrace);
+                return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            }
+            }else{
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
             }
         }

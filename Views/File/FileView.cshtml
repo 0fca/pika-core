@@ -1,13 +1,16 @@
 ﻿@model FMS2.Models.FileResultModel
 @using System.IO;
 @using Microsoft.Extensions.FileProviders
+
+
 @{
     ViewData["Title"] = "Browse - Anon";
     //object lastPath = TempData["LastPath"]; 
-    int id = -1;
+    int id = 0;
 }
 
 <h2>Index</h2>
+ 	
 
 <table class="table">
     <thead>
@@ -30,7 +33,7 @@
                 <a asp-controller="File" asp-action="Index" asp-route-path="../">Back</a>
             </td>
         </tr>
-        @foreach (IFileInfo item in Model.Contents)
+        @foreach (IFileInfo item in FileResultModel.Contents)
         {
             <tr>
                 <td>

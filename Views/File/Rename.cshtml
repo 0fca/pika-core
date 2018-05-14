@@ -11,7 +11,7 @@
 <h2>@ViewData["Title"]</h2>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-3">
     <form asp-action="Rename" method="POST" class="form-horizontal">
         <div>
             <input hidden asp-for="AbsolutePath"/>
@@ -22,9 +22,9 @@
             <span asp-validation-for="IsDirectory" class="text-danger"></span>
         </div>
 
-        <h4>Changing name of @type: </h4>
-        <label asp-for="OldName">@Model.OldName</label><br/>
         <div class="form-group">
+            <h4>Changing name of @type: </h4>
+            <label asp-for="OldName">@Model.OldName</label><br/>
             <label>Enter new name: </label>
             <input asp-for="NewName" class="form-control" />
             <span asp-validation-for="NewName" class="text-danger"></span>

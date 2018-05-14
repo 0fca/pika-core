@@ -1,6 +1,10 @@
 ﻿body {
     padding-top: 50px;
+    font-family: 'Roboto','Oxygen', sans-serif; 
+    font-size: 12px; 
     padding-bottom: 20px;
+    background-color: #eeeeee;
+    color: rgb(17,17,17);
 }
 
 /* Wrapping element */
@@ -17,7 +21,7 @@
 }
 
 /* Make .svg files in the carousel display properly in older browsers */
-.carousel-inner .item img[src$=".svg"] {
+.carousel-inner .item img[src$=".png"] {
     width: 100%;
 }
 
@@ -32,4 +36,57 @@
     .carousel-caption {
         display: none;
     }
+}
+
+.navbar{
+    background-color: #095C9E;
+    border-bottom-color: #222;
+    color: #eeeeee;
+}
+
+.navlink{
+    color: #fff;
+}
+
+
+a{
+    color: #222;
+}
+
+a:hover{
+    color:#095C9E;
+    text-decoration: none !important;
+}
+
+.hr{
+    border-color:#cccccc;
+}
+
+  tr:nth-child(even){
+    background-color: #9dc3e0;
+  }
+
+.btn-default{
+    color: #eeeeee !important;
+    border-color: #222 !important;
+    background-color: #095C9E !important;
+}
+.btn-default:hover, .btn-default:focus{
+    background-color: #095C9E !important;
+}
+.btn-primary{
+    background-color: #095C9E !important;
+    border-color: #222 !important;
+}
+.btn-primary:hover{
+    background-color: #095C9E!important;
+    border-color:#222222 !important ;
+    color:#222222 !important;
+}
+input{
+    color: #eeeeee;
+}
+
+.row:nth-child(even){
+    background-color: #9dc3e0 !important;
 }

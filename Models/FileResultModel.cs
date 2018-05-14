@@ -8,6 +8,6 @@ namespace FMS2.Models
 {
     public class FileResultModel
     {
-        public IDirectoryContents Contents { get; set; }
+        public static IDirectoryContents Contents { get; set; }
     }
 }

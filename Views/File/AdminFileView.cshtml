@@ -1,71 +1,103 @@
 @model FMS2.Models.FileResultModel
 @using System.IO;
 @using Microsoft.Extensions.FileProviders
+
 @{
     ViewData["Title"] = "Browse - Admin";
     object lastPath = TempData["LastPath"]; 
     int id = 0;
 }
-
 <h2>Index</h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
+<a type="button" 
+   href="#file-input-editor" 
+   onclick="setModalType('new','title-input');"
+   data-toggle="modal">New</a>
+
+<label id="tmp" hidden>TMP</label>
+
+        <div class ="row" style="font-size:14px;">
+            <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
+        </div>
+        <div class="row">
+            <div class ="col-md-3">
                 Name
-            </th>
-            <th>
+            </div>
+            <div class ="col-md-3">
                 Type
-            </th>
-            <th>
+            </div>
+            <div class ="col-md-3">
                 Size
-            </th>
-            <th>
+            </div>
+            <div class ="col-md-3">
                 Options
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-                <a asp-controller="File" asp-action="Index" asp-route-path="../">Back</a>
-            </td>
-        </tr>
-         @foreach (IFileInfo item in Model.Contents)
+            </div>
+        </div>
+         @foreach (IFileInfo item in FileResultModel.Contents)
         {
-            <tr>
-                <td>
+            <div class="row" id="table-div">
+                <div class ="col-md-3">
                     @if (item.IsDirectory)
-                    {
+                    {     
                         <a asp-controller="File" asp-action="Index" asp-route-path=@item.PhysicalPath>@item.Name</a>
                     }
                     else
                     {
                         <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
                     }
-                </td>
-                <td>
+                </div>
+                <div class ="col-md-3">
                     @(@File.Exists(@item.PhysicalPath) ? "File" : "Directory")
-                </td>
-                <td>
+                </div>
+                <div class ="col-md-3">
                     @if(!item.IsDirectory){
                         long i = @item.Length/(1000*1000);
                         <p>@i MB</p>
+                    }else{
+                        <p>---</p>
                     }
-                </td>
-                <td>
-                    @Html.ActionLink("Delete","Delete", new {@name=@item.PhysicalPath}) |
-                    @Html.ActionLink("Rename","Rename", new {@name=@item.PhysicalPath})
-                </td>
-            </tr>
+                </div>
+                <div class ="col-md-2">
+                    @Html.ActionLink("Delete","Delete",new {@name=item.PhysicalPath}) |
+                    @Html.ActionLink("Rename","Rename", new {@path=item.PhysicalPath})
+                </div>
+            </div>
             id++;
         }
-        </tr>
-         <tr>
-            <td>
-                <a asp-controller="File" asp-action="Index" asp-route-path="../">Back</a>
-            </td>
-        </tr>
-    </tbody>
-</table>
+        <div class ="row" style="font-size:14px;">
+            <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
+        </div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="file-editor">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="title"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="body">
+          <label id="text-content"></label>
+      </div>
+      <div id="file-editor-panel" class="modal-footer">
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    function setModalType(mode, header, content){
+        switch(mode){
+            case "new":
+                document.getElementById(header).innerText = "New directory";
+                break;    
+        }
+    }
+
+    function getPath(){
+        return document.getElementById("tmp").innerText;
+    }
+</script>
+
