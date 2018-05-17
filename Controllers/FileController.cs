@@ -10,19 +10,25 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Identity;
 using FMS2.Models.File;
+using System.Text;
+using System.IO.Compression;
+using FMS2.Services;
 
 namespace FMS2.Controllers
 {
+    [Route("[controller]/[action]")]
     public class FileController : Controller
     {
         private readonly IFileProvider _fileProvider;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ArchiveService _archiveService;
         private readonly static FileResultModel lrmv = new FileResultModel();
         private static string last = "/";
-        public FileController(IFileProvider fileProvider, SignInManager<ApplicationUser> signInManager)
+        public FileController(IFileProvider fileProvider, SignInManager<ApplicationUser> signInManager, ArchiveService archiveService)
         {
             _signInManager = signInManager;
             _fileProvider = fileProvider;
+            _archiveService = archiveService;
         }
 
         [AllowAnonymous]
@@ -30,7 +36,7 @@ namespace FMS2.Controllers
         {
             FileResultModel.Contents = getContents(path);
             
-            if(_signInManager.Context.User.IsInRole("Admin")){
+            if(_signInManager.Context.User.IsInRole("Admin") || _signInManager.Context.User.IsInRole("FileManagerUser")){
                 return RedirectToAction(nameof(AdminFileView));
             }
 
@@ -53,7 +59,8 @@ namespace FMS2.Controllers
             return _fileProvider.GetDirectoryContents(path);
         }
 
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles="Admin, FileManagerUser")]
+        [ValidateAntiForgeryToken]
         public IActionResult AdminFileView(){
             return View(lrmv);
         }
@@ -61,23 +68,37 @@ namespace FMS2.Controllers
         [HttpGet]
         [AllowAnonymous]
         public async Task<FileResult> Download(int id){
-            var conts = FileResultModel.Contents.ToList();
+            byte[] fileBytes = new byte[0];
             string path = "";
+            var conts = FileResultModel.Contents.ToList();
             path = conts.ElementAt(id).PhysicalPath;
-            byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(path);
+            fileBytes = await System.IO.File.ReadAllBytesAsync(path);
             return File(fileBytes, "text/plain", Path.GetFileName(path));
         }
 
-        public IActionResult Delete(string path){
-            ViewData["type"] = Directory.Exists(path) ? "directory" : "file";
-            ViewData["name1"] = path;
-            return View(path);
+        [HttpGet]
+        [Authorize(Roles="Admin,FileManagerUser")]
+        [ValidateAntiForgeryToken]
+        public async Task<FileResult> DownloadDirectory(string name){
+            string absolutePath = String.Concat(last,"/",name);
+            string output = String.Concat(Constants.Tmp,"/",name+".zip");
+            await _archiveService.ZipDirectoryAsync(absolutePath, output);
+            byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(output);
+            return File(fileBytes, "archive/zip" , Path.GetFileName(output));
+        }
+
+        [HttpGet]
+        [Authorize(Roles="Admin, FileManagerUser")]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(){
+            return View(lrmv);
         }
 
         [HttpPost]
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles="Admin, FileManagerUser")]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmation(string path){
-            Debug.WriteLine(path);
+            //Debug.WriteLine(path);
             if(!String.IsNullOrEmpty(path)){
             string parent =  System.IO.Directory.GetParent(path).FullName;
             try{
@@ -98,8 +119,20 @@ namespace FMS2.Controllers
             }
         }
 
+        [HttpPost]
+        [Authorize(Roles="Admin, FileManagerUser")]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(string name){
+            Debug.WriteLine(String.Concat(last,"/",name));
+            if(!Directory.Exists(String.Concat(last,"/",name))){
+                Directory.CreateDirectory(String.Concat(last,"/",name));
+            }
+            return RedirectToAction(nameof(AdminFileView));
+        }
+
         [HttpGet]
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles="Admin, FileManagerUser")]
+        [ValidateAntiForgeryToken]
         public IActionResult Rename(string name){
             ViewData["path"] = name;
             RenameFileModel rfm = new RenameFileModel();
@@ -112,8 +145,8 @@ namespace FMS2.Controllers
         }
 
         [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles="Admin, FileManagerUser")]
+        [ValidateAntiForgeryToken]
         public IActionResult Rename(RenameFileModel rfm){
             if(!String.IsNullOrEmpty(rfm.NewName)){
                 //ViewData["type"] = rfm.IsDirectory ? "Directory" : "File";

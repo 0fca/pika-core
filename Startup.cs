@@ -13,6 +13,9 @@ using FMS2.Models;
 using FMS2.Services;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace FMS2
 {
@@ -28,6 +31,7 @@ namespace FMS2
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -43,6 +47,7 @@ namespace FMS2
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IFilesystemInterface, ArchiveService>();
             IFileProvider physicalProvider = new PhysicalFileProvider("/");
             services.AddSingleton<IFileProvider>(physicalProvider);
             services.AddMvc();
@@ -64,6 +69,10 @@ namespace FMS2
             }
 
             app.UseStaticFiles();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
             app.UseAuthentication();
 

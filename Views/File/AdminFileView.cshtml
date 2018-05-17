@@ -1,5 +1,5 @@
 @model FMS2.Models.FileResultModel
-@using System.IO;
+@using System.IO
 @using Microsoft.Extensions.FileProviders
 
 @{
@@ -8,18 +8,15 @@
     int id = 0;
 }
 <h2>Index</h2>
-
-<a type="button" 
-   href="#file-input-editor" 
-   onclick="setModalType('new','title-input');"
-   data-toggle="modal">New</a>
-
-<label id="tmp" hidden>TMP</label>
-
         <div class ="row" style="font-size:14px;">
             <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
         </div>
-        <div class="row">
+        <span>
+            <a type="button" href="#file-editor" data-toggle="modal">New</a>
+            @Html.ActionLink("Delete","Delete") 
+        </span>
+        <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
+            <strong>
             <div class ="col-md-3">
                 Name
             </div>
@@ -32,10 +29,12 @@
             <div class ="col-md-3">
                 Options
             </div>
+            </strong>
         </div>
+        <div class="table-div">
          @foreach (IFileInfo item in FileResultModel.Contents)
         {
-            <div class="row" id="table-div">
+            <div class="row">
                 <div class ="col-md-3">
                     @if (item.IsDirectory)
                     {     
@@ -43,7 +42,7 @@
                     }
                     else
                     {
-                        <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
+                        <a asp-controller="File" asp-action="Download" asp-route-id=@id asp-route-type="file">@item.Name</a>
                     }
                 </div>
                 <div class ="col-md-3">
@@ -58,12 +57,16 @@
                     }
                 </div>
                 <div class ="col-md-2">
-                    @Html.ActionLink("Delete","Delete",new {@name=item.PhysicalPath}) |
+                    @if(item.IsDirectory){
+                        @Html.ActionLink("Download as 7z","DownloadDirectory", new {@name=item.Name})
+                    }
                     @Html.ActionLink("Rename","Rename", new {@path=item.PhysicalPath})
+                    
                 </div>
             </div>
             id++;
         }
+        </div>
         <div class ="row" style="font-size:14px;">
             <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
         </div>
@@ -72,32 +75,24 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="title"></h5>
+        <h5 class="modal-title" id="title">Create new directory</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body" id="body">
-          <label id="text-content"></label>
+          <label id="text-content">Enter the name:</label>
       </div>
       <div id="file-editor-panel" class="modal-footer">
-        
+          <form asp-action="Create" asp-controller="File" method="post">
+              <div class="form-group">
+                <input type="text" class="form-control" name="name"/>
+                <button type="submit" class="btn btn-default">Create</button>
+                <button type="cancel" class="btn btn-default" data-dismiss="modal">Cancel</button>
+              </div>
+          </form>
       </div>
     </div>
   </div>
 </div>
-
-<script>
-    function setModalType(mode, header, content){
-        switch(mode){
-            case "new":
-                document.getElementById(header).innerText = "New directory";
-                break;    
-        }
-    }
-
-    function getPath(){
-        return document.getElementById("tmp").innerText;
-    }
-</script>
 

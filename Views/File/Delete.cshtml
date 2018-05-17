@@ -1,18 +1,25 @@
+@model FMS2.Models.FileResultModel
+@using System.IO;
+@using Microsoft.Extensions.FileProviders
 @{
     ViewData["Title"] = "Delete - Admin";
-    object type = ViewData["type"];
-    object name = ViewData["name1"];
 }
 
 
 <h2>@ViewData["Title"]</h2>
-    <form asp-action="DeleteConfirmation" asp-route-path="@ViewData["path"]" method="post" class="form-horizontal">
-        <div class="row">
-            <div class="col-md-4">
-                 <p class="text">
-                    You are going to delete the @type of name: @name. Are you sure?
-                </p>    
+<div style="height: 100%; content-align:center;">
+        <p class="text">Choose files or folders to be deleted:</p>
+        <form asp-action="DeleteConfirmation" asp-route-path="@ViewData["path"]" method="post" class="form-horizontal">
+                @{var items = new List<SelectListItem>();}
+                @foreach (IFileInfo item in FileResultModel.Contents)
+                {
+                    items.Add(new SelectListItem{Value=item.PhysicalPath, Text=item.Name});
+                }
+
+                @Html.ListBox("filesystemObjects", items,new {@style="height: 250px;"})
+            <span>
                 <button type="submit" class="btn btn-default">Delete</button>
-            </div>
-        </div>
-    </form>
+                <button type="cancel" class="btn btn-default" formaction="AdminFileView">Cancel</button>
+            </span>
+        </form>
+</div>
