@@ -11,15 +11,14 @@
         <div class ="row" style="font-size:14px;">
             <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
         </div>
-        <span>
-            <a type="button" href="#file-editor" data-toggle="modal">New</a>
-            @Html.ActionLink("Delete","Delete") 
-            <input id="searchBox" type="text"/>
-            <button onclick="searchFileList();">Search</button>
-            <button id="resetButton" onclick="resetFileList();" disabled>Reset</button>
-        </span>
-        <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
-            <strong>
+        <div class="row">
+                <a type="button" href="#file-editor" data-toggle="modal">New</a>
+                @Html.ActionLink("Delete","Delete") 
+                <input id="searchBox" type="text"/>
+                <button id="searchButton" onclick="searchFileList();" class="btn btn-default">Search</button>
+                <button id="resetButton" onclick="resetFileList();" class="btn btn-default" disabled>Reset</button>
+        </div>
+        <div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
             <div class ="col-md-3">
                 Name
             </div>
@@ -32,7 +31,6 @@
             <div class ="col-md-3">
                 Options
             </div>
-            </strong>
         </div>
         <div id="file-list" class="table-div">
          @foreach (IFileInfo item in Model.Contents)
@@ -63,7 +61,11 @@
                     @if(item.IsDirectory){
                         @Html.ActionLink("Download as Zip","DownloadDirectory", new {@name=item.Name})
                     }
-                    @Html.ActionLink("Rename","Rename", new {@path=item.PhysicalPath})
+                    @Html.ActionLink("Rename","Rename", new {@rid=id})
+                    @if(item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4")){
+                        TempData["src"] = item.PhysicalPath;
+                        @Html.ActionLink("View", "Video", "Video")
+                    }
                     
                 </div>
             </div>

@@ -12,7 +12,6 @@
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
-    width: 100% !important;
 }
 
 /* Carousel */
@@ -22,7 +21,7 @@
 }
 
 /* Make .svg files in the carousel display properly in older browsers */
-.carousel-inner .item img[src$=".png"] {
+.carousel-inner {
     width: 100%;
 }
 
@@ -89,6 +88,11 @@ select{
     border-style: none;
 }
 
+.row{
+    align-content: center !important;
+    align-items: center !important;
+}
+
 .row-content{
     width: 100%;
     padding-top: 20px;
@@ -109,10 +113,6 @@ select{
     list-style: none;
 }
 
-.carousel, .carousel-inner{
-    width: 100%;
-}
-
 .form-control{
-    color: rgb(17,17,17);
+    color: rgb(17,17,17) !important;
 }

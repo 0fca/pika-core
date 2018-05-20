@@ -1,0 +1,9 @@
+@{
+    ViewData["Title"] = "Video - Admin";
+    string srcvid = ViewData["srcvid"].ToString();
+    srcvid = "https://me.lukas-bownik.net:8081/storage/"+srcvid;
+}
+
+<div align="center" class="embed-responsive embed-responsive-16by9">
+        <video width="620" controls src=@srcvid />
+</div>

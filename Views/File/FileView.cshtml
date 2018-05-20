@@ -14,14 +14,11 @@
             <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
         </div>
         <span>
-            @if(Constants.IsDevelopment){
-                <input id="searchBox" type="text"/>
-                <button onclick="searchFileList();">Search</button>
-                <button id="resetButton" onclick="resetFileList();" disabled>Reset</button>
-            }
+            <input id="searchBox" type="text"/>
+            <button id="searchButton"  onclick="searchFileList();" class="btn btn-default">Search</button>
+            <button id="resetButton" onclick="resetFileList();" class="btn btn-default" disabled>Reset</button>
         </span>
-        <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
-            <strong>
+        <div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
             <div class ="col-md-3">
                 Name
             </div>
@@ -34,7 +31,6 @@
             <div class ="col-md-3">
                 Options
             </div>
-            </strong>
         </div>
         <div id="file-list" class="table-div">
          @foreach (IFileInfo item in Model.Contents)

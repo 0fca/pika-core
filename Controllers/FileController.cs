@@ -24,7 +24,7 @@ namespace FMS2.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IFilesystemInterface _archiveService;
         private readonly ILogger<FileController> _iLogger;
-        private readonly static FileResultModel lrmv = new FileResultModel();
+        private static FileResultModel lrmv = new FileResultModel();
         private static string last = Constants.RootPath;
         public FileController(IFileProvider fileProvider, SignInManager<ApplicationUser> signInManager, IFilesystemInterface archiveService, ILogger<FileController> iLogger)
         {
@@ -47,12 +47,15 @@ namespace FMS2.Controllers
         }
         
         public IActionResult FileView(){
-            return View(lrmv);
+            if(lrmv.Contents != null){
+                return View(lrmv);
+            }else{
+                return RedirectToAction(nameof(Index), new {path = last});
+            }
         }
 
         private IDirectoryContents getContents(string path)
         {
-            
             if(String.IsNullOrEmpty(path)){
                 path = Constants.RootPath;
             }else if(path.StartsWith("..")){
@@ -66,12 +69,16 @@ namespace FMS2.Controllers
 
         [Authorize(Roles="Admin, FileManagerUser")]
         public IActionResult AdminFileView(){
-            return View(lrmv);
+            if(lrmv.Contents != null){
+                return View(lrmv);
+            }else{
+                return RedirectToAction(nameof(Index), new {path = last});
+            }
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<FileResult> Download(int id){
+        public async Task<FileContentResult> Download(int id){
             byte[] fileBytes = new byte[0];
             string path = "";
             var conts = lrmv.Contents.ToList();
@@ -145,14 +152,16 @@ namespace FMS2.Controllers
         [HttpGet]
         [Authorize(Roles="Admin, FileManagerUser")]
         [AutoValidateAntiforgeryToken]
-        public IActionResult Rename(string name){
+        public IActionResult Rename(int rid){
+            string name = "";
+            var info = lrmv.Contents.ToList().ToArray()[rid];
+            name = info.PhysicalPath;
             ViewData["path"] = name;
+            ViewData["type"] = IsDirectory(name) ? "directory ": "file";
             RenameFileModel rfm = new RenameFileModel();
-            //ViewData["absol"] = name;
             rfm.IsDirectory = IsDirectory(name);
             rfm.OldName = GetName(name);
             rfm.AbsolutePath = name;
-            //ViewData["OldName"] = rfm.OldName;
             return View(rfm);
         }
 

@@ -16,10 +16,12 @@ function searchFileList(){
         i++;
     });
     document.getElementById("file-list").innerHTML = resultArray;
-    document.getElementById("resetButton").setAttribute("disabled",true);
+    document.getElementById("resetButton").removeAttribute("disabled");
+    document.getElementById("searchButton").setAttribute("disabled",true);
 }
 
 function resetFileList(){
     document.getElementById("file-list").innerHTML = globalList;
-    document.getElementById("resetButton").removeAttribute("disabled");
+    document.getElementById("resetButton").setAttribute("disabled",true);
+    document.getElementById("searchButton").removeAttribute("disabled");
 }
