@@ -14,12 +14,16 @@ namespace FMS2
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
-        }
+            var configuration = new ConfigurationBuilder()
+            .AddCommandLine(args)
+            .Build();
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+            var host = WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                .UseConfiguration(configuration)
                 .Build();
+
+            host.Run();
+        }
     }
 }

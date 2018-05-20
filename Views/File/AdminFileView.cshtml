@@ -14,6 +14,9 @@
         <span>
             <a type="button" href="#file-editor" data-toggle="modal">New</a>
             @Html.ActionLink("Delete","Delete") 
+            <input id="searchBox" type="text"/>
+            <button onclick="searchFileList();">Search</button>
+            <button id="resetButton" onclick="resetFileList();" disabled>Reset</button>
         </span>
         <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
             <strong>
@@ -31,8 +34,8 @@
             </div>
             </strong>
         </div>
-        <div class="table-div">
-         @foreach (IFileInfo item in FileResultModel.Contents)
+        <div id="file-list" class="table-div">
+         @foreach (IFileInfo item in Model.Contents)
         {
             <div class="row">
                 <div class ="col-md-3">
@@ -56,15 +59,16 @@
                         <p>---</p>
                     }
                 </div>
-                <div class ="col-md-2">
+                <div class ="col-md-3">
                     @if(item.IsDirectory){
-                        @Html.ActionLink("Download as 7z","DownloadDirectory", new {@name=item.Name})
+                        @Html.ActionLink("Download as Zip","DownloadDirectory", new {@name=item.Name})
                     }
                     @Html.ActionLink("Rename","Rename", new {@path=item.PhysicalPath})
                     
                 </div>
             </div>
             id++;
+            <hr/>
         }
         </div>
         <div class ="row" style="font-size:14px;">

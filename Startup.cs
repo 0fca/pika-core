@@ -60,12 +60,12 @@ namespace FMS2
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
-                FMS2.Controllers.Constants.RootPath = "/";
+                FMS2.Controllers.Constants.RootPath = "/mnt";
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                FMS2.Controllers.Constants.RootPath = "/mnt/sdb5/";
+                FMS2.Controllers.Constants.RootPath = "/mnt/sdb5";
             }
 
             app.UseStaticFiles();
@@ -73,6 +73,8 @@ namespace FMS2
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
+
+            app.UseStatusCodePages();
 
             app.UseAuthentication();
 
@@ -119,7 +121,6 @@ namespace FMS2
                 {
                     //here we tie the new user to the "Admin" role 
                     await UserManager.AddToRoleAsync(poweruser, "Admin");
-                    
                 }
             }
         }

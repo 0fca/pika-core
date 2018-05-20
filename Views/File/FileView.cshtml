@@ -1,7 +1,7 @@
 ﻿@model FMS2.Models.FileResultModel
 @using System.IO;
 @using Microsoft.Extensions.FileProviders
-
+@using FMS2.Controllers
 
 @{
     ViewData["Title"] = "Browse - Anon";
@@ -10,59 +10,62 @@
 }
 
 <h2>Index</h2>
- 	
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>
+<div class ="row" style="font-size:14px;">
+            <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
+        </div>
+        <span>
+            @if(Constants.IsDevelopment){
+                <input id="searchBox" type="text"/>
+                <button onclick="searchFileList();">Search</button>
+                <button id="resetButton" onclick="resetFileList();" disabled>Reset</button>
+            }
+        </span>
+        <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
+            <strong>
+            <div class ="col-md-3">
                 Name
-            </th>
-            <th>
+            </div>
+            <div class ="col-md-3">
                 Type
-            </th>
-            <th>
+            </div>
+            <div class ="col-md-3">
                 Size
-            </th>
-        </tr>
-    </thead>
-
-    <tbody>
-        <tr>
-            <td>
-                <a asp-controller="File" asp-action="Index" asp-route-path="../">Back</a>
-            </td>
-        </tr>
-        @foreach (IFileInfo item in FileResultModel.Contents)
+            </div>
+            <div class ="col-md-3">
+                Options
+            </div>
+            </strong>
+        </div>
+        <div id="file-list" class="table-div">
+         @foreach (IFileInfo item in Model.Contents)
         {
-            <tr>
-                <td>
+            <div class="row">
+                <div class ="col-md-3">
                     @if (item.IsDirectory)
-                    {
+                    {     
                         <a asp-controller="File" asp-action="Index" asp-route-path=@item.PhysicalPath>@item.Name</a>
                     }
                     else
                     {
-                        <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
+                        <a asp-controller="File" asp-action="Download" asp-route-id=@id asp-route-type="file">@item.Name</a>
                     }
-                </td>
-                <td>
+                </div>
+                <div class ="col-md-3">
                     @(@File.Exists(@item.PhysicalPath) ? "File" : "Directory")
-                </td>
-                <td>
+                </div>
+                <div class ="col-md-3">
                     @if(!item.IsDirectory){
                         long i = @item.Length/(1000*1000);
                         <p>@i MB</p>
+                    }else{
+                        <p>---</p>
                     }
-                </td>
-            </tr>
-            
+                </div>
+            </div>
             id++;
+            <hr/>
         }
-        <tr>
-            <td>
-                <a asp-controller="File" asp-action="Index" asp-route-path="../">Back</a>
-            </td>
-        </tr>
-    </tbody>
-</table>
+        </div>
+        <div class ="row" style="font-size:14px;">
+            <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
+        </div>
