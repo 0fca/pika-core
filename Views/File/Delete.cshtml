@@ -15,7 +15,7 @@
                 {
                     items.Add(new SelectListItem{Value=item.PhysicalPath, Text=item.Name});
                 }
-                <select asp-for="@Model.Contents" asp-items="@items">
+                <select asp-for="Contents" asp-items="@items">
                 </select>
                 <!--@Html.ListBox("filesystemObjects", items ,new {@id = "deleteList",@style="height: 250px;"})-->
             <span>

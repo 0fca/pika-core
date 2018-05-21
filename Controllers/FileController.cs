@@ -78,25 +78,42 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<FileContentResult> Download(int id){
+        public async Task<FileStreamResult> Download(int id){
             byte[] fileBytes = new byte[0];
             string path = "";
             var conts = lrmv.Contents.ToList();
             path = conts.ElementAt(id).PhysicalPath;
             fileBytes = await System.IO.File.ReadAllBytesAsync(path);
-            return File(fileBytes, "text/plain", Path.GetFileName(path));
+            var memStream = new MemoryStream(fileBytes);
+            
+            return new FileStreamResult(memStream, GetMimeAsync(Path.GetFileName(path)))
+            {
+                FileDownloadName = Path.GetFileName(path)
+            };
         }
 
         [HttpGet]
         [Authorize(Roles="Admin,FileManagerUser")]
         [AutoValidateAntiforgeryToken]
-        public async Task<FileResult> DownloadDirectory(string name){
+        public async Task<FileStreamResult> DownloadDirectory(string name){
             string absolutePath = String.Concat(last,"/",name);
             string output = String.Concat(Constants.Tmp,"/",name+".zip");
             await _archiveService.ZipDirectoryAsync(absolutePath, output);
             Debug.WriteLine(absolutePath);
             byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(output);
-            return File(fileBytes, "archive/zip" , Path.GetFileName(output));
+            var memStream = new MemoryStream(fileBytes);
+            return new FileStreamResult(memStream, GetMimeAsync(name))
+            {
+                FileDownloadName = name
+            };
+        }
+
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        public IActionResult CancelDownloadAsync(){
+            _archiveService.Cancel();
+            TempData["message"] = "Successfully cancled downloading the resource.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -188,6 +205,12 @@ namespace FMS2.Controllers
 
         private string GetName(string absolutePath){
             return IsDirectory(absolutePath) ? System.IO.Path.GetDirectoryName(absolutePath) : System.IO.Path.GetFileName(absolutePath);
+        }
+
+        private string GetMimeAsync(string fileName){
+            return Task<string>.Factory.StartNew(() =>{
+                return MIMEAssistant.GetMIMEType(fileName);
+            }).Result;
         }
     }
 }

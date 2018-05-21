@@ -1,7 +1,7 @@
 @{
     ViewData["Title"] = "Video - Admin";
     string srcvid = ViewData["srcvid"].ToString();
-    srcvid = "https://me.lukas-bownik.net:8081/storage/"+srcvid;
+    srcvid = String.Concat("https://devel.lukas-bownik.net:50001/File/Download?id=",srcvid,"&type=file");
 }
 
 <div align="center" class="embed-responsive embed-responsive-16by9">

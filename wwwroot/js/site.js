@@ -1,27 +1,39 @@
-﻿// Write your JavaScript code.
-var globalList ="";
+﻿//var fileList = [];
 
 function searchFileList(){
     let searchParam = document.getElementById("searchBox").value;
-    globalList = document.getElementById("file-list").innerHTML;
-    let fileList = document.getElementById("file-list").innerHTML.split("<hr>");
-    let resultArray = "";
-    let i = 0;
+    //globalList = document.getElementById("file-list").innerHTML;
+    let fileList = document.getElementById("file-list").children;
 
-    fileList.forEach(item =>{
-        if(item.includes(searchParam)){
-            console.log(item);
-            resultArray += item+"\n"; 
+    let result = [];
+
+    for(let i = 0; i < fileList.length; i+=2){
+        //console.log(fileList[i].children[0].textContent);
+        if(!fileList[i].children[0].textContent.includes(searchParam)){
+            //console.log(fileList[i]);
+            fileList[i].setAttribute("hidden", true);
+            fileList[i].nextElementSibling.setAttribute("hidden", true);
+
         }
-        i++;
-    });
-    document.getElementById("file-list").innerHTML = resultArray;
+    }
+
     document.getElementById("resetButton").removeAttribute("disabled");
     document.getElementById("searchButton").setAttribute("disabled",true);
 }
 
 function resetFileList(){
-    document.getElementById("file-list").innerHTML = globalList;
+    //wipeList();
+    //console.log(fileList);
+    var fileList = document.getElementById("file-list").children;
+    for(let i = 0; i < fileList.length; i++){
+        fileList[i].removeAttribute("hidden", false);  
+    }
     document.getElementById("resetButton").setAttribute("disabled",true);
     document.getElementById("searchButton").removeAttribute("disabled");
 }
+
+function showDownloadBox(){
+    document.getElementById("download-panel").removeAttribute("hidden");
+}
+
+

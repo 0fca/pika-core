@@ -60,7 +60,7 @@ namespace FMS2
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
-                FMS2.Controllers.Constants.RootPath = "/mnt/sdb5";
+                FMS2.Controllers.Constants.RootPath = "/mnt";
             }
             else
             {

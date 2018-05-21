@@ -10,9 +10,9 @@ namespace FMS.Controllers
     {
         [HttpGet]
         public IActionResult Video(){
-            string absol = TempData["src"].ToString();
+            //string absol = TempData["src"].ToString();
             
-            ViewData["srcvid"] = absol.Substring(Constants.RootPath.Length+1);
+            ViewData["srcvid"] = TempData["src"];
             return View();
         }
     }

@@ -6,8 +6,27 @@
     ViewData["Title"] = "Browse - Admin";
     object lastPath = TempData["LastPath"]; 
     int id = 0;
+    object msg = TempData["message"];
 }
 <h2>Index</h2>
+        @if(msg != null){
+            <div class="input-group">
+                <p>msg.ToString()</p>
+                <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
+            </div>
+        }
+
+        <div id="download-panel" class="row" hidden>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+            </div>
+            <form asp-action="CancelDownloadAsync" asp-controller="File" method="post">
+              <div class="form-group">
+                <button type="cancel" class="btn btn-default" data-dismiss="modal">Cancel</button>
+              </div>
+            </form>
+        </div>
+
         <div class ="row" style="font-size:14px;">
             <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
         </div>
@@ -59,18 +78,18 @@
                 </div>
                 <div class ="col-md-3">
                     @if(item.IsDirectory){
-                        @Html.ActionLink("Download as Zip","DownloadDirectory", new {@name=item.Name})
+                        <a data-toggle="modal" asp-action="DownloadDirectory" asp-controller="File" onclick="showDownloadBox();" asp-route-name=@item.Name>Download as zip</a>
                     }
                     @Html.ActionLink("Rename","Rename", new {@rid=id})
                     @if(item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4")){
-                        TempData["src"] = item.PhysicalPath;
-                        @Html.ActionLink("View", "Video", "Video")
+                        TempData["src"] = id;
+                        @Html.ActionLink("Play", "Video", "Video")
                     }
                     
                 </div>
             </div>
             id++;
-            <hr/>
+            <hr>
         }
         </div>
         <div class ="row" style="font-size:14px;">
