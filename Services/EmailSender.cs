@@ -23,7 +23,7 @@ namespace FMS2.Services
                     client.DeliveryMethod = SmtpDeliveryMethod.Network;
                     client.EnableSsl = true;
                     client.UseDefaultCredentials = false;
-                    client.Credentials = new NetworkCredential("sadsoldier502@wp.pl","AltairIbnLaAhad");
+                    client.Credentials = new NetworkCredential("mail@gmail.com","pass");
                     client.Host = "smtp.gmail.com";
                     mail.Subject = "this is a test email.";
                     mail.Body = "this is my test email body";
