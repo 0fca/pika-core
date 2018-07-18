@@ -1,6 +1,6 @@
-# FMS - File Management System aka Lilly
+# FMS - File Management System aka Veronica
 
-__Lilly__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem(but only for download purposes) to all registered users.
+__Veronica__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem(but only for download purposes) to all registered users.
 
 *Features*
 
