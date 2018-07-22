@@ -1,23 +1,40 @@
 ﻿@model FMS2.Models.FileResultModel
-@using System.IO;
+@using System.IO
 @using Microsoft.Extensions.FileProviders
-@using FMS2.Controllers
 
 @{
-    ViewData["Title"] = "Browse - Anon";
-    //object lastPath = TempData["LastPath"]; 
+    ViewData["Title"] = "Browse - Admin";
+    object lastPath = TempData["LastPath"]; 
     int id = 0;
+    object msg = TempData["message"];
 }
-
 <h2>Index</h2>
-<div class ="row" style="font-size:14px;">
+        @if(msg != null)
+        {
+            <div class="input-group">
+                <p>msg.ToString()</p>
+                <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
+            </div>
+        }
+
+        <div id="download-panel" class="row" hidden>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+            </div>
+            <form asp-action="CancelDownloadAsync" asp-controller="File" method="post">
+              <div class="form-group">
+                <button type="cancel" class="btn btn-default" data-dismiss="modal">Cancel</button>
+              </div>
+            </form>
+        </div>
+
+        <div class ="row" style="font-size:14px;">
             <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
         </div>
-        <span>
-            <input id="searchBox" type="text"/>
-            <button id="searchButton"  onclick="searchFileList();" class="btn btn-default">Search</button>
-            <button id="resetButton" onclick="resetFileList();" class="btn btn-default" disabled>Reset</button>
-        </span>
+        <div class="row">
+            <label label-for="searchBox">Search list:</label>
+            <input id="searchBox" type="text" oninput="searchFileList();"/>
+        </div>
         <div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
             <div class ="col-md-3">
                 Name
@@ -43,7 +60,7 @@
                     }
                     else
                     {
-                        <a asp-controller="File" asp-action="Download" asp-route-id=@id asp-route-type="file">@item.Name</a>
+                        <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
                     }
                 </div>
                 <div class ="col-md-3">
@@ -57,11 +74,29 @@
                         <p>---</p>
                     }
                 </div>
+                <div class ="col-md-3">
+                    @if(!item.IsDirectory)
+                    {
+                        @Html.ActionLink("Generate download url", "GenerateUrlView", new {@entryName=item.Name})
+                    }
+                    @if(item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4")){
+                        TempData["src"] = id;
+                        @Html.ActionLink("Play", "Video", "Video")
+                    }
+                    
+                </div>
             </div>
             id++;
-            <hr/>
+            <hr>
         }
         </div>
         <div class ="row" style="font-size:14px;">
             <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
         </div>
+<script>
+    document.getElementById("searchBox").addEventListener("keydown", function(e){
+        if(e.keyCode == 8){
+            searchFileList();
+        }
+    });
+</script>

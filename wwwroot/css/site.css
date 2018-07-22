@@ -41,6 +41,7 @@
 .navbar{
     background-color: #095C9E !important;
     border-bottom-color: #9dc3e0 !important;
+    box-shadow:1px 1px 2px 0 rgba(0,0,0,0.75) !important;
 }
 
 .navlink{
@@ -53,7 +54,7 @@
 }
 
 
-a:hover{
+a:hover, a:focus{
     color:#095C9E;
     text-decoration: none !important;
 }
@@ -73,6 +74,9 @@ a:hover{
 .btn-primary{
     background-color: #095C9E !important;
     border-color: #9dc3e0 !important;
+    margin-top:20px;
+    display: block;
+    width: 150px;
 }
 .btn-primary:hover{
     background-color: #095C9E!important;
@@ -94,7 +98,11 @@ select{
 
 .row-content{
     width: 100%;
-    padding-top: 20px;
+    border: 1px solid #eee;
+    padding: 20px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    box-shadow:1px 1px 1px 1px rgb(12,12,12) !important;
 }
 
 .navbar-brand{
@@ -115,3 +123,8 @@ select{
 .form-control{
     color: rgb(17,17,17) !important;
 }
+
+select{
+    height: 400px !important;
+}
+

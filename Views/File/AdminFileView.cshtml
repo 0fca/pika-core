@@ -9,7 +9,8 @@
     object msg = TempData["message"];
 }
 <h2>Index</h2>
-        @if(msg != null){
+        @if(msg != null)
+        {
             <div class="input-group">
                 <p>msg.ToString()</p>
                 <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
@@ -33,9 +34,8 @@
         <div class="row">
                 <a type="button" href="#file-editor" data-toggle="modal">New</a>
                 @Html.ActionLink("Delete","Delete") 
-                <input id="searchBox" type="text"/>
-                <button id="searchButton" onclick="searchFileList();" class="btn btn-default">Search</button>
-                <button id="resetButton" onclick="resetFileList();" class="btn btn-default" disabled>Reset</button>
+                <label label-for="searchBox">Search list:</label>
+                <input id="searchBox" type="text" oninput="searchFileList();"/>
         </div>
         <div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
             <div class ="col-md-3">
@@ -62,7 +62,7 @@
                     }
                     else
                     {
-                        <a asp-controller="File" asp-action="Download" asp-route-id=@id asp-route-type="file">@item.Name</a>
+                        <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
                     }
                 </div>
                 <div class ="col-md-3">
@@ -78,9 +78,13 @@
                 </div>
                 <div class ="col-md-3">
                     @if(item.IsDirectory){
-                        <a data-toggle="modal" asp-action="DownloadDirectory" asp-controller="File" onclick="showDownloadBox();" asp-route-name=@item.Name>Download as zip</a>
+                        <a data-toggle="modal" asp-action="Download" asp-controller="File" onclick="showDownloadBox();" asp-route-id=@id>Download</a>
                     }
                     @Html.ActionLink("Rename","Rename", new {@rid=id})
+                    @if(!item.IsDirectory)
+                    {
+                        @Html.ActionLink("Generate download url", "GenerateUrlView", new {@entryName=item.Name})
+                    }
                     @if(item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4")){
                         TempData["src"] = id;
                         @Html.ActionLink("Play", "Video", "Video")
@@ -120,4 +124,10 @@
     </div>
   </div>
 </div>
-
+<script>
+    document.getElementById("searchBox").addEventListener("keydown", function(e){
+        if(e.keyCode == 8){
+            searchFileList();
+        }
+    });
+</script>

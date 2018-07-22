@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Generate url - Admin";
+    object hash = ViewData["urlhash"];
+    string url = ViewData["protocol"]+"://"+ViewData["host"]+ "/File/PermanentDownload?id=" + hash;
+    object returnUrl = ViewData["returnUrl"];
+}
+
+<h2>Download url</h2>
+<div class="form-group">
+    <input class="form-control" id="urlOut" name="urlOut" value=@url type="text" readonly/>
+    <button id="copyButton" class="btn btn-primary" onclick="copyToClipboard();">Copy</button>
+</div>
+<a href=@returnUrl>Back</a>

@@ -1,10 +1,7 @@
 @model RenameFileModel
 @{
     ViewData["Title"] = "Rename - Admin";
-    //object oldName = ViewData["OldName"];
-    object type = ViewData["type"];
-    //string absol = ViewData["absol"].ToString();
-
+    object type = Model.IsDirectory ? "folder" : "file";
 }
 
 
@@ -23,7 +20,7 @@
         </div>
 
         <div class="form-group">
-            <h4>Changing name of @type: </h4>
+            <h4>Changing name of a @type: </h4>
             <label asp-for="OldName">@Model.OldName</label><br/>
             <label>Enter new name: </label>
             <input asp-for="NewName" class="form-control" />

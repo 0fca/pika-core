@@ -2,28 +2,26 @@
 
 function searchFileList(){
     let searchParam = document.getElementById("searchBox").value;
-    //globalList = document.getElementById("file-list").innerHTML;
     let fileList = document.getElementById("file-list").children;
 
-    let result = [];
-
-    for(let i = 0; i < fileList.length; i+=2){
-        //console.log(fileList[i].children[0].textContent);
-        if(!fileList[i].children[0].textContent.includes(searchParam)){
-            //console.log(fileList[i]);
-            fileList[i].setAttribute("hidden", true);
-            fileList[i].nextElementSibling.setAttribute("hidden", true);
-
+    if(searchParam != ""){
+        for(let i = 0; i < fileList.length; i+=2){
+            console.log(fileList[i].children[0]);
+            if(!fileList[i].children[0].textContent.includes(searchParam)){
+                fileList[i].setAttribute("hidden", true);
+                fileList[i].nextElementSibling.setAttribute("hidden", true);
+            }else if(fileList[i].hasAttribute("hidden")){
+                fileList[i].removeAttribute("hidden");
+                fileList[i].nextElementSibling.removeAttribute("hidden");
+            }
         }
+    }else{
+        resetFileList();
     }
-
-    document.getElementById("resetButton").removeAttribute("disabled");
-    document.getElementById("searchButton").setAttribute("disabled",true);
 }
 
+
 function resetFileList(){
-    //wipeList();
-    //console.log(fileList);
     var fileList = document.getElementById("file-list").children;
     for(let i = 0; i < fileList.length; i++){
         fileList[i].removeAttribute("hidden", false);  
@@ -34,6 +32,24 @@ function resetFileList(){
 
 function showDownloadBox(){
     document.getElementById("download-panel").removeAttribute("hidden");
+}
+
+function downloadResource(downloadPath) { 
+    showDownloadBox();
+    var w = window.open(downloadPath, '_blank', '', true);  
+    console.log(w);
+    w.onclose = function(){
+        document.getElementById("download-panel").setAttribute("hidden",true);
+        console.log("Reaches here.");
+    }
+    //document.getElementById("download-panel").setAttribute("hidden", true);
+}
+
+
+function copyToClipboard(){
+    const el = document.getElementById('urlOut');
+    el.select();
+    document.execCommand('copy');
 }
 
 

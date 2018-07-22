@@ -17,17 +17,16 @@ namespace FMS2.Services
             return Task.Factory.StartNew(() =>{
                 Debug.WriteLine("Task started!");
                 try{
-                    MailMessage mail = new MailMessage("sadsoldier502@wp.pl", "lukasbownik99@gmail.com");
-                    SmtpClient client = new SmtpClient();
-                    client.Port = 587;
-                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                    client.EnableSsl = true;
-                    client.UseDefaultCredentials = false;
-                    client.Credentials = new NetworkCredential("sadsoldier502@wp.pl","AltairIbnLaAhad");
-                    client.Host = "smtp.gmail.com";
-                    mail.Subject = "this is a test email.";
-                    mail.Body = "this is my test email body";
-                    client.Send(mail);
+                    SmtpClient smtp = new SmtpClient   
+                    {  
+                        Host = "me.lukas-bownik.net",  
+                        Port = 25,  
+                        DeliveryMethod = SmtpDeliveryMethod.Network,  
+                        Credentials = new System.Net.NetworkCredential("obsidiam@me.lukas-bownik.net", "@lt41r!bnL4h4d"),  
+                        Timeout = 30000,  
+                    };  
+            MailMessage msg = new MailMessage("obsidiam@me.lukas-bownik.net", email, subject, message);  
+            smtp.Send(msg);  
                 }
                 catch(Exception ex){ 
                     Debug.WriteLine(ex.GetBaseException().Message);

@@ -16,6 +16,8 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Http;
+using System.Diagnostics;
 
 namespace FMS2
 {
@@ -35,6 +37,8 @@ namespace FMS2
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddDbContext<StorageIndexContext>(options => options.UseMySql(Configuration.GetConnectionString("StorageConnection")));
+
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -45,15 +49,15 @@ namespace FMS2
                 googleOptions.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
             });
 
-            // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
-            services.AddTransient<IFilesystemInterface, ArchiveService>();
+            services.AddTransient<IZipper, ArchiveService>();
+            services.AddTransient<IFileDownloader, FileService>();
+            services.AddTransient<IGenerator, UrlGeneratorService>();
             IFileProvider physicalProvider = new PhysicalFileProvider("/");
             services.AddSingleton<IFileProvider>(physicalProvider);
             services.AddMvc();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
@@ -67,14 +71,25 @@ namespace FMS2
                 app.UseExceptionHandler("/Home/Error");
                 FMS2.Controllers.Constants.RootPath = "/mnt/sdb5";
             }
-
+            app.UseStatusCodePagesWithReExecute("/error/{0}");
             app.UseStaticFiles();
+            app.Use(async (context, next) =>
+	        {
+		        await next.Invoke();
+                string fileName = "wwwroot/errorPages/"+context.Response.StatusCode+".html";
+
+                if(context.Response.StatusCode >= 400){
+                    if(File.Exists(fileName)){
+			            await context.Response.SendFileAsync(fileName);
+                    }
+                }
+	        });
+
+            
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
-
-            app.UseStatusCodePages();
 
             app.UseAuthentication();
 
@@ -82,7 +97,7 @@ namespace FMS2
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=home}/{action=index}/{id?}");
             });
             CreateRoles(serviceProvider).Wait();
         }

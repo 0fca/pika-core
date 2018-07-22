@@ -16,17 +16,17 @@ namespace FMS2.Controllers
             return View();
         }
 
-        public IActionResult About()
+        public IActionResult About(int ID = 0, int day = 0)
         {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
+            if(ID != 16 + 11 || day != 25){
+                return View();
+            }else{
+                return View("Dedication");
+            }
         }
 
         public IActionResult Contact()
         {
-            ViewData["Message"] = "Your contact page.";
-
             return View();
         }
 

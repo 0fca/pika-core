@@ -106,6 +106,12 @@ namespace FMS2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        [Authorize(Roles="Admin")]
+        public IActionResult AdminUserPanel(){
+            return View(_userManager.Users);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SendVerificationEmail(IndexViewModel model)

@@ -310,7 +310,6 @@ namespace FMS2.Controllers
                 }
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 
-                
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -435,19 +434,6 @@ namespace FMS2.Controllers
         [HttpGet]
         public IActionResult AccessDenied()
         {
-            return View();
-        }
-
-        [HttpGet]
-        [Authorize(Roles="Admin")]
-        public IActionResult AdminUserPanel(){
-            return View(_userManager.Users);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles="Admin")]
-        public async Task<IActionResult> AdminUserViewConfirmation(){
             return View();
         }
 

@@ -13,7 +13,11 @@ namespace FMS.Controllers
             //string absol = TempData["src"].ToString();
             
             ViewData["srcvid"] = TempData["src"];
-            return View();
+            if(ViewData["srcvid"] != null){
+                return View();
+            }else{
+                return NoContent();
+            }
         }
     }
 }
