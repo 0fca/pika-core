@@ -14,6 +14,7 @@ using FMS2.Models;
 using FMS2.Models.AccountViewModels;
 using FMS2.Services;
 using System.Diagnostics;
+using FMS.Models;
 
 namespace FMS2.Controllers
 {
@@ -208,6 +209,30 @@ namespace FMS2.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<LoginResultModel> AmeliaLogin(){
+           byte[] buffer = new byte[HttpContext.Request.Body.Length];
+           int readCount = await HttpContext.Request.Body.ReadAsync(buffer, 0, buffer.Length);
+           LoginResultModel l = new LoginResultModel();
+           if(readCount > 0){
+               return Task<LoginResultModel>.Factory.StartNew(() =>{
+                   l.Success = true;
+                   l.Code = 0;;
+                   l.Message = "You've been successfully logged in.";
+                   return l;
+               }).Result;
+           }else{
+               return Task<LoginResultModel>.Factory.StartNew(() =>{
+                   l.Success = false;
+                   l.Code = 100;
+                   l.Message = "Something went wrong while logging in.";
+                   return l;
+               }).Result;
+           }
+        }
+
 
         [HttpPost]
         [AllowAnonymous]

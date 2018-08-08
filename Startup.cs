@@ -78,7 +78,7 @@ namespace FMS2
 		        await next.Invoke();
                 string fileName = "wwwroot/errorPages/"+context.Response.StatusCode+".html";
 
-                if(context.Response.StatusCode >= 400){
+                if(context.Response.StatusCode >= 400 && context.Response.StatusCode != 500){
                     if(File.Exists(fileName)){
 			            await context.Response.SendFileAsync(fileName);
                     }
