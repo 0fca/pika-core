@@ -26,6 +26,7 @@ namespace FMS2.Services{
         public Task<byte[]> DownloadAsync(string absolutPath)
         {
             return Task<byte[]>.Factory.StartNew(() =>{
+                Debug.WriteLine(absolutPath);
                 return File.Exists(absolutPath) ? System.IO.File.ReadAllBytes(absolutPath) : null;
             }, tokenSource.Token); 
         }

@@ -43,8 +43,7 @@ namespace FMS2.Controllers
             _urlEncoder = urlEncoder;
         }
 
-        [TempData]
-        public string StatusMessage { get; set; }
+        [TempData] private string StatusMessage { get; set; }
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -116,11 +115,6 @@ namespace FMS2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SendVerificationEmail(IndexViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {

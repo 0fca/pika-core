@@ -18,6 +18,7 @@ namespace FMS2.Controllers
 
         public IActionResult About(int ID = 0, int day = 0)
         {
+            ViewData["os.name"] = System.Runtime.InteropServices.RuntimeInformation.OSDescription;
             if(ID != 16 + 11 || day != 25){
                 return View();
             }else{
@@ -32,7 +33,7 @@ namespace FMS2.Controllers
 
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
     }
 }

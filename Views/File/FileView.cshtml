@@ -3,17 +3,34 @@
 @using Microsoft.Extensions.FileProviders
 
 @{
-    ViewData["Title"] = "Browse - Admin";
-    object lastPath = TempData["LastPath"]; 
-    int id = 0;
-    object msg = TempData["message"];
+    ViewData["Title"] = "Browse";
+    object lastPath = ViewData["path"];
+    var id = 0;
+    var msg = TempData["returnMessage"];
+    var parent = ViewData["parent"]; 
 }
-<h2>Index</h2>
+<h3>
+    Directory listing for:<a href="/File?path=/">Index</a>
+    @{
+        string[] splitted = lastPath.ToString().Split("/");
+        string last = "";
+        foreach (string part in splitted)
+        {
+            if (!part.Equals("/") && !String.IsNullOrEmpty(part))
+            {
+                last = String.Concat(last, "/", part);
+                <label>/</label>
+            }
+
+            <a href="/File?path=@last" class="path-button">@part</a>
+        }
+    }
+</h3>
         @if(msg != null)
         {
             <div class="input-group">
-                <p>msg.ToString()</p>
-                <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
+                <p>@msg.ToString()</p>
+                <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-warning-sign text-danger"></span></span>
             </div>
         }
 
@@ -29,7 +46,7 @@
         </div>
 
         <div class ="row" style="font-size:14px;">
-            <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
+            <a asp-controller="File" asp-action="Index" asp-route-path=@parent><strong>Back</strong></a>
         </div>
         <div class="row">
             <label label-for="searchBox">Search list:</label>
@@ -49,49 +66,63 @@
                 Options
             </div>
         </div>
-        <div id="file-list" class="table-div">
-         @foreach (IFileInfo item in Model.Contents)
+<div id="file-list" class="table-div">
+    @if (Model.Contents != null)
+    {
+        foreach (var item in Model.Contents)
         {
-            <div class="row">
-                <div class ="col-md-3">
-                    @if (item.IsDirectory)
-                    {     
-                        <a asp-controller="File" asp-action="Index" asp-route-path=@item.PhysicalPath>@item.Name</a>
-                    }
-                    else
-                    {
-                        <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
-                    }
-                </div>
-                <div class ="col-md-3">
-                    @(@File.Exists(@item.PhysicalPath) ? "File" : "Directory")
-                </div>
-                <div class ="col-md-3">
-                    @if(!item.IsDirectory){
-                        long i = @item.Length/(1000*1000);
-                        <p>@i MB</p>
-                    }else{
-                        <p>---</p>
-                    }
-                </div>
-                <div class ="col-md-3">
-                    @if(!item.IsDirectory)
-                    {
-                        @Html.ActionLink("Generate download url", "GenerateUrlView", new {@entryName=item.Name})
-                    }
-                    @if(item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4")){
-                        TempData["src"] = id;
-                        @Html.ActionLink("Play", "Video", "Video")
-                    }
-                    
-                </div>
-            </div>
+             <div class="row">
+                 <div class="col-md-3 truncate">
+                     @if (item.IsDirectory)
+                     {
+                         <a asp-controller="File" asp-action="Index" asp-route-path=@item.Name>@item.Name</a>
+                     }
+                     else
+                     {
+                         <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
+                     }
+                 </div>
+                 <div class="col-md-3">
+                     @(@File.Exists(@item.PhysicalPath) ? "File" : "Directory")
+                 </div>
+                 <div class="col-md-3">
+                     @if (!item.IsDirectory)
+                     {
+                         long i = @item.Length / (1000 * 1000);
+                         <p>@i MB</p>
+                     }
+                     else
+                     {
+                         <p>---</p>
+                     }
+                 </div>
+                 <div class="col-md-3">
+                     @if (!item.IsDirectory)
+                     {
+                         @Html.ActionLink("Generate download url", "GenerateUrlView", new { @entryName = item.PhysicalPath })
+                     }
+                     @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4"))
+                     {
+                         TempData["src"] = id;
+                         @Html.ActionLink("Play", "Video", "Video")
+                     }
+
+                 </div>
+             </div>
             id++;
-            <hr>
+             <hr>
         }
-        </div>
+    }
+    else
+    {
+       <div class="input-group">
+           <p>@msg.ToString()</p>
+           <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-warning-sign text-danger"></span></span>
+       </div>
+    }
+</div>
         <div class ="row" style="font-size:14px;">
-            <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
+            <a asp-controller="File" asp-action="Index" asp-route-path=@parent><strong>Back</strong></a>
         </div>
 <script>
     document.getElementById("searchBox").addEventListener("keydown", function(e){

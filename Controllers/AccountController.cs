@@ -15,6 +15,7 @@ using FMS2.Models.AccountViewModels;
 using FMS2.Services;
 using System.Diagnostics;
 using FMS.Models;
+using Newtonsoft.Json;
 
 namespace FMS2.Controllers
 {
@@ -210,29 +211,6 @@ namespace FMS2.Controllers
             return View();
         }
 
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<LoginResultModel> AmeliaLogin(){
-           byte[] buffer = new byte[HttpContext.Request.Body.Length];
-           int readCount = await HttpContext.Request.Body.ReadAsync(buffer, 0, buffer.Length);
-           LoginResultModel l = new LoginResultModel();
-           if(readCount > 0){
-               return Task<LoginResultModel>.Factory.StartNew(() =>{
-                   l.Success = true;
-                   l.Code = 0;;
-                   l.Message = "You've been successfully logged in.";
-                   return l;
-               }).Result;
-           }else{
-               return Task<LoginResultModel>.Factory.StartNew(() =>{
-                   l.Success = false;
-                   l.Code = 100;
-                   l.Message = "Something went wrong while logging in.";
-                   return l;
-               }).Result;
-           }
-        }
-
 
         [HttpPost]
         [AllowAnonymous]
@@ -297,12 +275,11 @@ namespace FMS2.Controllers
             {
                 return RedirectToAction(nameof(Login));
             }
-
-            // Sign in the user with this external login provider if the user already has a login.
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
             if (result.Succeeded)
             {
-                _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
+                _logger.LogInformation($"User logged in with {info.ProviderDisplayName} provider.", info.LoginProvider);
                 return RedirectToLocal(returnUrl);
             }
             if (result.IsLockedOut)
@@ -311,7 +288,6 @@ namespace FMS2.Controllers
             }
             else
             {
-                
                 ViewData["ReturnUrl"] = returnUrl;
                 ViewData["LoginProvider"] = info.LoginProvider;
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);

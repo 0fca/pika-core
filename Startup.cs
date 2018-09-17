@@ -13,24 +13,22 @@ using FMS2.Models;
 using FMS2.Services;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http;
-using System.Diagnostics;
 
 namespace FMS2
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private static readonly string _osName = Controllers.Constants.OsName;
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
+
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             
@@ -49,12 +47,12 @@ namespace FMS2
                 googleOptions.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
             });
 
-            services.AddTransient<IEmailSender, EmailSender>();
-            services.AddTransient<IZipper, ArchiveService>();
+            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<IZipper, ArchiveService>();
             services.AddTransient<IFileDownloader, FileService>();
             services.AddTransient<IGenerator, UrlGeneratorService>();
-            IFileProvider physicalProvider = new PhysicalFileProvider("/");
-            services.AddSingleton<IFileProvider>(physicalProvider);
+            IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[_osName+"-root"]);
+            services.AddSingleton(physicalProvider);
             services.AddMvc();
         }
 
@@ -64,28 +62,26 @@ namespace FMS2
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
-                FMS2.Controllers.Constants.RootPath = "/mnt";
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                FMS2.Controllers.Constants.RootPath = "/mnt/sdb5";
             }
-            app.UseStatusCodePagesWithReExecute("/error/{0}");
+            Controllers.Constants.RootPath = Configuration.GetSection("Paths")["storage"];
+            Controllers.Constants.Tmp = Configuration.GetSection("Paths")[_osName+"-tmp"];
+
             app.UseStaticFiles();
+ 
+            
             app.Use(async (context, next) =>
 	        {
 		        await next.Invoke();
-                string fileName = "wwwroot/errorPages/"+context.Response.StatusCode+".html";
 
-                if(context.Response.StatusCode >= 400 && context.Response.StatusCode != 500){
-                    if(File.Exists(fileName)){
-			            await context.Response.SendFileAsync(fileName);
-                    }
+                if((context.Response.StatusCode >= 400 || context.Response.StatusCode == 204) && context.Response.StatusCode != 500){
+                    context.Response.Redirect("/Home/Error");  
                 }
 	        });
 
-            
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -104,18 +100,17 @@ namespace FMS2
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {
             //adding custom roles
-            var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var UserManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             string[] roleNames = { "Admin", "FileManagerUser", "User" };
-            IdentityResult roleResult;
-            
+
             foreach (var roleName in roleNames)
             {
                 //creating the roles and seeding them to the database
-                var roleExist = await RoleManager.RoleExistsAsync(roleName);
+                var roleExist = await roleManager.RoleExistsAsync(roleName);
                 if (!roleExist)
                 {
-                    roleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
                 }
             }
             
@@ -126,16 +121,17 @@ namespace FMS2
                 Email = Configuration.GetSection("UserSettings")["UserEmail"]
             };
             
-            string UserPassword = Configuration.GetSection("UserSettings")["UserPassword"];
-            var _user = await UserManager.FindByEmailAsync(Configuration.GetSection("UserSettings")["UserEmail"]);
+            var userPassword = Configuration.GetSection("UserSettings")["UserPassword"];
+            var user = await userManager.FindByEmailAsync(Configuration.GetSection("UserSettings")["UserEmail"]);
+            
             //Debug.WriteLine(_user.Email);
-            if (_user == null)
+            if (user == null)
             {
-                var createPowerUser = await UserManager.CreateAsync(poweruser, UserPassword);
+                var createPowerUser = await userManager.CreateAsync(poweruser, userPassword);
                 if (createPowerUser.Succeeded)
                 {
                     //here we tie the new user to the "Admin" role 
-                    await UserManager.AddToRoleAsync(poweruser, "Admin");
+                    await userManager.AddToRoleAsync(poweruser, "Admin");
                 }
             }
         }

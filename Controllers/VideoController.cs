@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FMS.Controllers
 {
-    [Authorize]
-    [Route("[controller]/[action]")]
     public class VideoController : Controller
     {
         [HttpGet]
+        [Authorize(Roles="Admin,User")] 
+        [ValidateAntiForgeryToken] 
         public IActionResult Video(){
             //string absol = TempData["src"].ToString();
             

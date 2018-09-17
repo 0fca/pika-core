@@ -16,6 +16,7 @@ namespace FMS2
         {
             var configuration = new ConfigurationBuilder()
             .AddCommandLine(args)
+            .AddEnvironmentVariables()
             .Build();
 
             var host = WebHost.CreateDefaultBuilder(args)

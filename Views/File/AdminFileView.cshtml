@@ -4,16 +4,33 @@
 
 @{
     ViewData["Title"] = "Browse - Admin";
-    object lastPath = TempData["LastPath"]; 
+    object lastPath = ViewData["path"];
     int id = 0;
-    object msg = TempData["message"];
+    object msg = TempData["returnMessage"];
+    var parent = ViewData["parent"];
 }
-<h2>Index</h2>
+<h3>
+    Directory listing for:<a href="/File?path=/">Index</a>
+    @{
+        string[] splitted = lastPath.ToString().Split("/");
+        string last = "";
+        foreach (string part in splitted)
+        {
+            if (!part.Equals("/") && !String.IsNullOrEmpty(part))
+            {
+                last = String.Concat(last, "/", part);
+                <label>/</label>
+            }
+            
+            <a href="/File?path=@last" class="path-button">@part</a>
+        }
+    }
+</h3>
         @if(msg != null)
         {
             <div class="input-group">
-                <p>msg.ToString()</p>
-                <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
+                <p>@msg.ToString()</p>
+                <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-warning-sign text-danger"></span></span>
             </div>
         }
 
@@ -23,13 +40,13 @@
             </div>
             <form asp-action="CancelDownloadAsync" asp-controller="File" method="post">
               <div class="form-group">
-                <button type="cancel" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-default" data-dismiss="modal">Cancel</button>
               </div>
             </form>
         </div>
 
         <div class ="row" style="font-size:14px;">
-            <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
+            <a asp-controller="File" asp-action="Index" asp-route-path=@parent><strong>Back</strong></a>
         </div>
         <div class="row">
                 <a type="button" href="#file-editor" data-toggle="modal">New</a>
@@ -55,14 +72,18 @@
          @foreach (IFileInfo item in Model.Contents)
         {
             <div class="row">
-                <div class ="col-md-3">
+                <div class ="col-md-3 truncate">
                     @if (item.IsDirectory)
-                    {     
-                        <a asp-controller="File" asp-action="Index" asp-route-path=@item.PhysicalPath>@item.Name</a>
+                    {
+                        var folder = "/images/browse-icons/folder.svg";
+                        <img src=@folder />
+                        <a asp-controller="File" asp-action="Index" asp-route-path=@item.Name class="browse-list-a">@item.Name</a>
                     }
                     else
                     {
-                        <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
+                        //var imgName = "/images/browse-icons/" + MIMEAssistant.GetMIMEType(item.Name).Replace("/","-") + ".svg";
+                        //<img src=@imgName />
+                        <a asp-controller="File" asp-action="Download" asp-route-id=@id class="browse-list-a">@item.Name</a>
                     }
                 </div>
                 <div class ="col-md-3">
@@ -83,7 +104,7 @@
                     @Html.ActionLink("Rename","Rename", new {@rid=id})
                     @if(!item.IsDirectory)
                     {
-                        @Html.ActionLink("Generate download url", "GenerateUrlView", new {@entryName=item.Name})
+                        @Html.ActionLink("Generate download url", "GenerateUrlView", new {@entryName=item.PhysicalPath})
                     }
                     @if(item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4")){
                         TempData["src"] = id;
@@ -97,7 +118,7 @@
         }
         </div>
         <div class ="row" style="font-size:14px;">
-            <a asp-controller="File" asp-action="Index" asp-route-path="../"><strong>Back</strong></a>
+            <a asp-controller="File" asp-action="Index" asp-route-path=@parent><strong>Back</strong></a>
         </div>
 
 <div class="modal fade" tabindex="-1" role="dialog" id="file-editor">
@@ -113,11 +134,11 @@
           <label id="text-content">Enter the name:</label>
       </div>
       <div id="file-editor-panel" class="modal-footer">
-          <form asp-action="Create" asp-controller="File" method="post">
+          <form asp-action="Create" asp-controller="File" asp-route-parent="@parent" method="post">
               <div class="form-group">
                 <input type="text" class="form-control" name="name"/>
                 <button type="submit" class="btn btn-default">Create</button>
-                <button type="cancel" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-default" data-dismiss="modal">Cancel</button>
               </div>
           </form>
       </div>
