@@ -2,6 +2,8 @@
 
 __Veronica__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem(but only for download purposes) to all registered users.
 
+It is also my portfolio page.
+
 Production: https://me.lukas-bownik.net/
 
 *Done features*
@@ -16,7 +18,8 @@ Production: https://me.lukas-bownik.net/
 * Other registration forms,
 * Online video watching,
 * Other archive formats(possibly 7-zip, tar.gz),
-* Sorting and icons for file view.
+* Sorting and icons for file view,
+* Uploading files to public part of the filesystem.
 
 ### Technical information ###
 *Technology stack*
