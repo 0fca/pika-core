@@ -9,12 +9,14 @@ Production: https://me.lukas-bownik.net/
 * Registration via local built-in auth or via Google,
 * Authorization using Roles: Admin, FileManagerUser and User,
 * Permanent download links,
-* Downloading folder as zip files(in progress).
+* Downloading folder as zip files(in progress),
+* Easy to use file view with on-write searching and interactive navigation path on the top.
 
 *Planned features*
 * Other registration forms,
 * Online video watching,
-* Other archive formats(possibly 7-zip, tar.gz).
+* Other archive formats(possibly 7-zip, tar.gz),
+* Sorting and icons for file view.
 
 ### Technical information ###
 *Technology stack*
@@ -34,8 +36,6 @@ Server OS: Debian 9
 WWW: Apache 2.4 as a Proxy
 
 Core is deployed on localhost.
-
-
 
 
 __Docs__ 
