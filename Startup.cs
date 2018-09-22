@@ -13,6 +13,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace FMS2
@@ -89,8 +90,8 @@ namespace FMS2
             app.Use(async (context, next) =>
 	        {
 		        await next.Invoke();
-
-                if((context.Response.StatusCode >= 400 || context.Response.StatusCode == 204) && context.Response.StatusCode != 500){
+                Debug.WriteLine(context.Response.StatusCode);
+                if(context.Response.StatusCode >= 400 && context.Response.StatusCode != 500){
                     context.Response.Headers.Add("code", context.Response.StatusCode.ToString());
                     context.Response.Redirect("/Home/Error", true);  
                 }

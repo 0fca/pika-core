@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FMS.Models;
 using FMS2.Models;
 using FMS2.Services;
@@ -16,9 +17,9 @@ namespace FMS2.Controllers.Api
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _loginManager;
-        private readonly FileLoggerService _loggerService;
+        private readonly IFileLoggerService _loggerService;
 
-        public ApiController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> loginManager, FileLoggerService loggerService)
+        public ApiController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> loginManager, IFileLoggerService loggerService)
         {
             _userManager = userManager;
             _loginManager = loginManager;
@@ -82,10 +83,27 @@ namespace FMS2.Controllers.Api
         [AllowAnonymous]
         public async Task<LoginResultModel> AmeliaLogout()
         {
-            LoginResultModel l = new LoginResultModel();
-            l.Success = true;
-            l.Message = "Logged out successfully.";
-            l.Code = 0;
+            LoginResultModel l = null;
+            try
+            {
+                await _loginManager.SignOutAsync();
+                l = new LoginResultModel
+                {
+                    Success = true,
+                    Message = "Logged out successfully.",
+                    Code = 0
+                };
+            }
+            catch (Exception e)
+            {
+                l = new LoginResultModel
+                {
+                    Success = false,
+                    Message = "Couldn't log out because "+e.Message,
+                    Code = 100
+                };
+            }
+            
             return Task<LoginResultModel>.Factory.StartNew(() =>
             {
                 _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Answering the request with: " + l.Code + " : " + l.Message);

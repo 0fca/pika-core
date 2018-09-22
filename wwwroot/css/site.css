@@ -50,6 +50,9 @@ a:hover, a:focus {
     display: block;
     width: 150px;
     transition-duration: 0.5s;
+    position: relative;
+    transform: translate(-50%,0);
+    margin-left: 90%;
 }
 
     .btn-default:hover, .btn-default:focus {
@@ -68,7 +71,7 @@ a:hover, a:focus {
     background-color: #337ab7;
     width: 150px;
     position: relative;
-    margin-left: 85%;
+    margin-left: 90%;
     transition-duration: 0.5s;
 }
 

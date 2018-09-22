@@ -1,28 +1,26 @@
 @model FMS2.Models.FileResultModel
-@using System.IO;
 @using Microsoft.Extensions.FileProviders
 @{
     ViewData["Title"] = "Delete - Admin";
 }
-
-
 <h2>@ViewData["Title"]</h2>
 <div style="height: 100%;">
-        <p class="text">Choose files or folders to be deleted:</p>
-        <form asp-action="DeleteConfirmation" method="post" class="form-horizontal">
-                @{
-                    var items = new List<SelectListItem>();
-                    foreach(IFileInfo i in Model.Contents){
-                        items.Add(new SelectListItem {Text = i.Name, Value = i.PhysicalPath});
-                    }
-                }
-                
-                <select class="custom-select" asp-for="Contents" asp-items="@items" multiple>
-                </select>
-                <!--@Html.ListBox("filesystemObjects", items ,new {@id = "deleteList",@style="height: 250px;"})-->
-            <span>
-                <button type="submit" class="btn btn-default">Delete</button>
-                <button type="cancel" class="btn btn-default" formaction="AdminFileView">Cancel</button>
-            </span>
-        </form>
+    <p class="text">Choose files or folders to be deleted:</p>
+    <form asp-controller="File" asp-action="DeleteConfirmation" method="post" class="form-horizontal">
+        @{
+            var items = new List<SelectListItem>();
+            foreach (IFileInfo i in Model.Contents)
+            {
+                items.Add(new SelectListItem { Text = i.Name, Value = i.PhysicalPath });
+            }
+
+        }
+
+        <select class="custom-select" asp-for="Contents" asp-items="@items" required multiple></select>
+
+        <span>
+            <button type="submit" class="btn btn-default">Delete</button>
+            <button type="submit" class="btn btn-default" formaction="AdminFileView">Cancel</button>
+        </span>
+    </form>
 </div>

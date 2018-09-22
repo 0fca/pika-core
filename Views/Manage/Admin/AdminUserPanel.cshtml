@@ -1,8 +1,7 @@
-@model IEnumerable<FMS2.Models.ApplicationUser>
+@model FMS2.Models.ManageViewModels.AdminPanelViewModel
 
 @{
     ViewData["Title"] = "Register - Admin";
-    var logsModel = ViewData["logsModel"];
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -22,13 +21,19 @@
         </tr>
     </thead>
     <tbody>
-        @foreach(var item in Model){
+        @foreach (var item in Model.UsersWithRoles) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Email)
+                @Html.DisplayFor(modelItem => item.Key.UserName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Email)
+                @{
+                    var roleString = "";
+                    await item.Value.ToAsyncEnumerable().ForEachAsync(role => {
+                        roleString = string.Concat(roleString, " ", role);
+                    });
+                }
+                @Html.DisplayFor(modelItem => roleString)
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", null) | @Html.ActionLink("Delete", "Delete", null)
@@ -37,7 +42,7 @@
         }
     </tbody>
 </table>
-@await Html.PartialAsync("/Views/Manage/Admin/_LogsViewPartial.cshtml", logsModel)
+@await Html.PartialAsync("/Views/Manage/Admin/_LogsViewPartial.cshtml", Model.LogsListViewModel)
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")

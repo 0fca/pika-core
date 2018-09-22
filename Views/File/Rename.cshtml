@@ -4,7 +4,6 @@
     object type = Model.IsDirectory ? "folder" : "file";
 }
 
-
 <h2>@ViewData["Title"]</h2>
 <hr />
 <div class="row">
@@ -28,6 +27,7 @@
         </div>
         <div class="form-group">
             <button type="submit" class="btn btn-default">Rename</button>
+            <button type="submit" class="btn btn-default" formaction="AdminFileView">Cancel</button>
         </div>
     </form> 
     </div>

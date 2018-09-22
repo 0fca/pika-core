@@ -108,11 +108,25 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [Authorize(Roles="Admin")]
-        public IActionResult AdminUserPanel(){
-            var logListViewModel = new LogsListViewModel();
-            logListViewModel.Lines = _loggerService.GetLogs();
-            ViewData["logsModel"] = logListViewModel;
-            return View("/Views/Manage/Admin/AdminUserPanel.cshtml", _userManager.Users);
+        [ResponseCache(Duration = 60)]
+        public async Task<IActionResult> AdminUserPanel(){
+            var logListViewModel = new LogsListViewModel
+            {
+                Lines = _loggerService.GetLogs()
+            };
+            AdminPanelViewModel adminPanelViewModel = new AdminPanelViewModel
+            {
+                LogsListViewModel = logListViewModel
+            };
+            Dictionary<ApplicationUser, IList<string>> usersWithRoles = new Dictionary<ApplicationUser, IList<string>>();
+
+            await _userManager.Users.ToAsyncEnumerable().ForEachAsync(async user => {
+                var roles = await _userManager.GetRolesAsync(user);
+                usersWithRoles.Add(user, roles);
+            });
+            adminPanelViewModel.UsersWithRoles = usersWithRoles;
+   
+            return View("/Views/Manage/Admin/AdminUserPanel.cshtml", adminPanelViewModel);
         }
 
         [HttpPost]
