@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FMS.Models;
 using FMS2.Models;
+using FMS2.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace FMS2.Controllers.Api
@@ -15,17 +14,22 @@ namespace FMS2.Controllers.Api
     [Produces("application/json")]
     public class ApiController : Controller
     {
-        private UserManager<ApplicationUser> _userManager;
-        private SignInManager<ApplicationUser> _loginManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _loginManager;
+        private readonly FileLoggerService _loggerService;
 
-        public ApiController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> loginManager) {
+        public ApiController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> loginManager, FileLoggerService loggerService)
+        {
             _userManager = userManager;
             _loginManager = loginManager;
+            _loggerService = loggerService;
         }
 
         [Route("v1/api")]
         [AllowAnonymous]
-        public IActionResult ApiIndex() {
+        public IActionResult ApiIndex()
+        {
+            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Viewing ApiIndex.");
             return View("/Views/Shared/ApiIndex.cshtml");
         }
 
@@ -43,18 +47,20 @@ namespace FMS2.Controllers.Api
             if (readCount > 0)
             {
                 mdl = JsonConvert.DeserializeObject<LoginRequestModel>(content);
+
                 return Task<LoginResultModel>.Factory.StartNew(() => {
                     var user = _userManager.FindByEmailAsync(mdl.Mail).Result;
                     bool isOk = false;
                     if (user != null)
                     {
-                           var signInResult = _loginManager.PasswordSignInAsync(user, mdl.Password, false, false);
-                           isOk = signInResult.Result.Succeeded;
+                        var signInResult = _loginManager.PasswordSignInAsync(user, mdl.Password, false, false);
+                        isOk = signInResult.Result.Succeeded;
                     }
-                    
+
                     l.Success = isOk;
                     l.Code = isOk ? 0 : ((user != null && user.PasswordHash != null) ? 100 : 101);
                     l.Message = isOk ? "You've been successfully logged in." : "Bad credentials.";
+                    _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Answering the request with: " + l.Code + " : " + l.Message);
                     return l;
                 }).Result;
             }
@@ -64,6 +70,7 @@ namespace FMS2.Controllers.Api
                     l.Success = false;
                     l.Code = -1;
                     l.Message = "Something went wrong while logging in.";
+                    _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Answering the request with: " + l.Code + " : " + l.Message);
                     return l;
                 }).Result;
 
@@ -81,6 +88,7 @@ namespace FMS2.Controllers.Api
             l.Code = 0;
             return Task<LoginResultModel>.Factory.StartNew(() =>
             {
+                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Answering the request with: " + l.Code + " : " + l.Message);
                 return l;
             }).Result;
         }

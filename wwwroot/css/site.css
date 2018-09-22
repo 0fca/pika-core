@@ -64,6 +64,8 @@ a:hover, a:focus {
     border-color: #9dc3e0 !important;
     margin-top: 20px;
     display: block;
+    transform: translate(-50%,0);
+    background-color: #337ab7;
     width: 150px;
     position: relative;
     margin-left: 85%;
@@ -74,7 +76,9 @@ a:hover, a:focus {
         background-color: #eee !important;
         border-color: #095C9E !important;
         color: #095C9E !important;
-        transition-duration: 0.5s;
+        display: block;
+        width: 150px;
+        transition: background-color linear .5s;
     }
 
 select {
@@ -137,5 +141,13 @@ select{
 .browse-list-a {
    width: 100% !important;
    height: 100% !important;
+}
+
+.logarea {
+    width: 100% !important;
+    height: 200px !important;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    resize: none;
 }
 

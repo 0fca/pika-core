@@ -1,0 +1,10 @@
+﻿@model FMS2.Models.ManageViewModels.LogsListViewModel
+@{ var content = "";}
+@foreach (var item in Model.Lines)
+{
+    content += item + "\n";
+}
+
+<textarea class="logarea" wrap="hard" readonly>
+    @content
+</textarea>

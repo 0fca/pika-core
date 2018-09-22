@@ -34,12 +34,14 @@
             }
             else
             {
-                //byte[] code;
-                //Context.Session.TryGetValue("StatusCode", out code);
-                <strong>Code: </strong><code>unknown</code>
+                Microsoft.Extensions.Primitives.StringValues code = "";
+
+                Context.Request.Headers.TryGetValue("code", out code);
+                var statCode = !String.IsNullOrEmpty(code) ? code.ToString() : "unknown";
+                <strong>Code: </strong><code>@statCode</code>
             }
             <br/>
-            <strong>URL: </strong><code>@Context.Request.Path</code>
+            <strong>URL: </strong><code>@Context.Request.</code>
         </div>
       </div>
     </div>

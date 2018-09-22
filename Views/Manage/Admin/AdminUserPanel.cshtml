@@ -1,6 +1,8 @@
 @model IEnumerable<FMS2.Models.ApplicationUser>
+
 @{
     ViewData["Title"] = "Register - Admin";
+    var logsModel = ViewData["logsModel"];
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -35,6 +37,7 @@
         }
     </tbody>
 </table>
+@await Html.PartialAsync("/Views/Manage/Admin/_LogsViewPartial.cshtml", logsModel)
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")

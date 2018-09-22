@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FMS2.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
@@ -18,6 +19,7 @@ namespace FMS2.Views.Manage
         public static string ExternalLogins => "ExternalLogins";
 
         public static string TwoFactorAuthentication => "TwoFactorAuthentication";
+
         public static string AdminPanel => "Admin panel";
 
         public static string IndexNavClass(ViewContext viewContext) => PageNavClass(viewContext, Index);

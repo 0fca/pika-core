@@ -205,6 +205,6 @@ public sealed class MIMEAssistant
     {
       return MIMETypesDictionary[extension.Remove(0, 1)];
     }
-    return "unknown";
+    return "unknown/unknown";
   }
 }

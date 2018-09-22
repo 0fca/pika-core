@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using FMS2.Data;
+using FMS2.Models;
+using FMS2.Providers;
+using FMS2.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using FMS2.Data;
-using FMS2.Models;
-using FMS2.Services;
 using Microsoft.Extensions.FileProviders;
-using System.IO;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System;
+using System.Threading.Tasks;
 
 namespace FMS2
 {
@@ -51,6 +50,19 @@ namespace FMS2
             services.AddSingleton<IZipper, ArchiveService>();
             services.AddTransient<IFileDownloader, FileService>();
             services.AddTransient<IGenerator, UrlGeneratorService>();
+            var option = new FileLoggerOptions
+            {
+                FileName = "fms-",
+                FileSizeLimit = 100 * 1024 * 1024,
+                LogDirectory = Configuration.GetSection("Logging").GetSection("LogDirs")[_osName + "-log"],
+                ShouldBackupLogs = Boolean.Parse(Configuration.GetSection("Logging")["ShouldBackupLogs"]),
+                BackupLogDir = Configuration.GetSection("Logging")["LogBackupDir-"+_osName]
+            };
+
+            var opts = Options.Create(option);
+            services.AddSingleton<ILoggerProvider>(loggerProvider => new FileLoggerProvider(opts));
+            
+            services.AddSingleton<IFileLoggerService, FileLoggerService>();
             IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[_osName+"-root"]);
             services.AddSingleton(physicalProvider);
             services.AddMvc();
@@ -67,6 +79,7 @@ namespace FMS2
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
             Controllers.Constants.RootPath = Configuration.GetSection("Paths")["storage"];
             Controllers.Constants.Tmp = Configuration.GetSection("Paths")[_osName+"-tmp"];
 
@@ -78,7 +91,8 @@ namespace FMS2
 		        await next.Invoke();
 
                 if((context.Response.StatusCode >= 400 || context.Response.StatusCode == 204) && context.Response.StatusCode != 500){
-                    context.Response.Redirect("/Home/Error");  
+                    context.Response.Headers.Add("code", context.Response.StatusCode.ToString());
+                    context.Response.Redirect("/Home/Error", true);  
                 }
 	        });
 

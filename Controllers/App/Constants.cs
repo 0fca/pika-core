@@ -19,5 +19,7 @@ namespace FMS2.Controllers{
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) OsName = OSPlatform.Windows.ToString();
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) OsName = OSPlatform.Linux.ToString();
         }
+
+        
     }
 }
