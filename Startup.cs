@@ -41,11 +41,34 @@ namespace FMS2
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddAuthentication().AddGoogle(googleOptions =>
+            services.AddAuthentication()
+            .AddGoogle(googleOptions =>
             {
                 googleOptions.ClientId = Configuration["Authentication:Google:ClientId"];
                 googleOptions.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
+            })
+            .AddMicrosoftAccount(microsoftOptions =>
+            {
+                microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ApplicationId"];
+                microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:Password"];
+            })
+            .AddGitHub(githubOptions => {
+                githubOptions.ClientId = Configuration["Authentication:GitHub:ClientId"];
+                githubOptions.ClientSecret = Configuration["Authentication:GitHub:ClientSecret"];
+                githubOptions.CallbackPath = "/signin-github";
+            })
+            .AddDiscord(discordOptions => {
+                discordOptions.ClientId = Configuration["Authentication:Discord:ClientId"];
+                discordOptions.ClientSecret = Configuration["Authentication:Discord:ClientSecret"];
+            })
+            .AddOAuth("Reddit", "Reddit",redditOpts => {
+                redditOpts.ClientId = Configuration["Authentication:Reddit:ClientId"];
+                redditOpts.ClientSecret = Configuration["Authentication:Reddit:ClientSecret"];
+                redditOpts.CallbackPath = "/signin-reddit";
+                redditOpts.TokenEndpoint = "https://www.reddit.com/api/v1/access_token";
+                redditOpts.AuthorizationEndpoint = "https://www.reddit.com/api/v1/authorize";
             });
+           
 
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IZipper, ArchiveService>();

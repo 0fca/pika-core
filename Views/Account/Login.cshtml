@@ -71,7 +71,8 @@
                             <p>
                                 @foreach (var provider in loginProviders)
                                 {
-                                    var img = "/images/"+@provider.DisplayName.ToLower()+"-icon.png";
+                                    var ext = System.IO.File.Exists(System.IO.Directory.GetCurrentDirectory()+"/wwwroot/images/" + @provider.DisplayName.ToLower() + "-icon.png") ? "png" : "svg";
+                                    var img = "/images/"+@provider.DisplayName.ToLower()+"-icon."+ext;
                                     <button type="submit" class="btn external-login-btn" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><img src=@img alt=@provider.Name></img></button>
                                 }
                             </p>

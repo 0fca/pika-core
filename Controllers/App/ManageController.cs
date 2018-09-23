@@ -108,7 +108,6 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [Authorize(Roles="Admin")]
-        [ResponseCache(Duration = 60)]
         public async Task<IActionResult> AdminUserPanel(){
             var logListViewModel = new LogsListViewModel
             {

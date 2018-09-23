@@ -14,6 +14,8 @@ namespace FMS2.Controllers{
 
         public static string OsName {get; set;}
 
+        public const int MaxLogFileSize = 100 * 1024 * 1024;
+
         private static void RecognizeOs()
         {
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) OsName = OSPlatform.Windows.ToString();
