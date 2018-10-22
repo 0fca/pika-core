@@ -5,6 +5,9 @@
     content += item + "\n";
 }
 
-<textarea class="logarea" wrap="hard" readonly>
+<textarea class="log-area" wrap="hard" id="log-area" readonly>
     @content
 </textarea>
+<script src="~/js/site.js">
+    scrollLogAreaToEnd();
+</script>

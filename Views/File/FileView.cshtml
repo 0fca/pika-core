@@ -1,16 +1,20 @@
 ﻿@model FMS2.Models.FileResultModel
 @using System.IO
+
 @using Microsoft.Extensions.FileProviders
 
 @{
     ViewData["Title"] = "Browse";
     object lastPath = ViewData["path"];
-    var id = 0;
-    var msg = TempData["returnMessage"];
-    var parent = ViewData["parent"]; 
+    int id = 0;
+    object msg = TempData["returnMessage"];
+    var returnUrl = ViewData["returnUrl"];
 }
 <h3>
-    Directory listing for:<a href="/File?path=/">Index</a>
+    Directory listing for:
+</h3>
+<span onmouseover="onPathSpanHover();" onmouseout="onPathSpanOut()";>
+    <a href="/File?path=/">Index</a>
     @{
         string[] splitted = lastPath.ToString().Split("/");
         string last = "";
@@ -25,108 +29,104 @@
             <a href="/File?path=@last" class="path-button">@part</a>
         }
     }
-</h3>
-        @if(msg != null)
-        {
-            <div class="input-group">
-                <p>@msg.ToString()</p>
-                <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-warning-sign text-danger"></span></span>
-            </div>
-        }
+</span>
 
-        <div id="download-panel" class="row" hidden>
-            <div class="progress">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
-            </div>
-            <form asp-action="CancelDownloadAsync" asp-controller="File" method="post">
-              <div class="form-group">
-                <button type="cancel" class="btn btn-default" data-dismiss="modal">Cancel</button>
-              </div>
-            </form>
-        </div>
+@await Html.PartialAsync("_StatusMessage", msg)
 
-        <div class ="row" style="font-size:14px;">
-            <a asp-controller="File" asp-action="Index" asp-route-path=@parent><strong>Back</strong></a>
-        </div>
+
+<div id="download-panel" class="row" hidden>
+    @await Html.PartialAsync("_DownloadPartial")
+</div>
+   
+<div class="row">
+    <span class="manage-span">
+        <input id="searchBox" type="text" oninput="searchFileList();" placeholder="Search list..." class="form-control" />
+        <a asp-controller="File" asp-action="Index" asp-route-path=@returnUrl><i class="fas fa-arrow-left"></i></a>
+    </span>
+</div>
+<div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
+    <div class="col-md-3">
+        Name
+    </div>
+    <div class="col-md-3">
+        Type
+    </div>
+    <div class="col-md-3">
+        Size
+    </div>
+    <div class="col-md-3">
+        Options
+    </div>
+</div>
+<div id="file-list" class="div-table">
+    @foreach (IFileInfo item in Model.Contents)
+    {
         <div class="row">
-            <label label-for="searchBox">Search list:</label>
-            <input id="searchBox" type="text" oninput="searchFileList();"/>
-        </div>
-        <div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
-            <div class ="col-md-3">
-                Name
+            <div class="col-md-3 truncate">
+                @if (item.IsDirectory)
+                {
+                    <i class="fas fa-folder"></i>
+                    <a asp-controller="File" asp-action="Index" asp-route-path=@item.Name>@item.Name</a>
+                }
+                else
+                {
+                    var type = MIMEAssistant.RecognizeIconByMime(MIMEAssistant.GetMIMEType(item.Name));
+                    <a asp-controller="File" asp-action="Download" asp-route-id=@id><i class="fas fa-@type"></i>@item.Name</a>
+                }
             </div>
-            <div class ="col-md-3">
-                Type
+            <div class="col-md-3">
+                @(@File.Exists(@item.PhysicalPath) ? "File" : "Directory")
             </div>
-            <div class ="col-md-3">
-                Size
+            <div class="col-md-3">
+                @if (!item.IsDirectory)
+                {
+                    var unitStrPart = "";
+                    long i = item.Length;
+                    string[] units = { "B", "kB", "MB", "GB", "TB" };
+                    int unitIndex = 0;
+                    for (int ptr = 0; ptr <= units.Length; ptr++)
+                    {
+                        if (i < Math.Pow(1024, ptr) && i > 1024)
+                        {
+                            unitIndex = ptr - 1;
+                            break;
+                        }
+                    }
+                    unitStrPart = Math.Round(i / Math.Pow(1024, unitIndex), 2) + " " + units[unitIndex];
+                    <p>@unitStrPart</p>
+                }
+                else
+                {
+                    <p>---</p>
+                }
             </div>
-            <div class ="col-md-3">
-                Options
-            </div>
-        </div>
-<div id="file-list" class="table-div">
-    @if (Model.Contents != null)
-    {
-        foreach (var item in Model.Contents)
-        {
-             <div class="row">
-                 <div class="col-md-3 truncate">
-                     @if (item.IsDirectory)
-                     {
-                         <a asp-controller="File" asp-action="Index" asp-route-path=@item.Name>@item.Name</a>
-                     }
-                     else
-                     {
-                         <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
-                     }
-                 </div>
-                 <div class="col-md-3">
-                     @(@File.Exists(@item.PhysicalPath) ? "File" : "Directory")
-                 </div>
-                 <div class="col-md-3">
-                     @if (!item.IsDirectory)
-                     {
-                         long i = @item.Length / (1000 * 1000);
-                         <p>@i MB</p>
-                     }
-                     else
-                     {
-                         <p>---</p>
-                     }
-                 </div>
-                 <div class="col-md-3">
-                     @if (!item.IsDirectory)
-                     {
-                         @Html.ActionLink("Generate download url", "GenerateUrlView", new { @entryName = item.PhysicalPath })
-                     }
-                     @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4"))
-                     {
-                         TempData["src"] = id;
-                         @Html.ActionLink("Play", "Video", "Video")
-                     }
+            <div class="col-md-3">
+                @if (item.IsDirectory)
+                {
+                    <a data-toggle="modal" asp-action="Download" asp-controller="File" onclick="showDownloadBox();" asp-route-id=@id><i class="fas fa-arrow-down"></i></a>
+                }
+                @if (!item.IsDirectory)
+                {
+                    @Html.ActionLink("Generate download url", "GenerateUrlView", new { @entryName = item.PhysicalPath, @returnUrl = Context.Request.Path})
+                }
+                @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4"))
+                {
+                    TempData["src"] = id;
+                    @Html.ActionLink("Play", "Video", "Video")
+                }
 
-                 </div>
-             </div>
-            id++;
-             <hr>
-        }
-    }
-    else
-    {
-       <div class="input-group">
-           <p>@msg.ToString()</p>
-           <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-warning-sign text-danger"></span></span>
-       </div>
+            </div>
+        </div>
+        id++;
+        <hr>
     }
 </div>
-        <div class ="row" style="font-size:14px;">
-            <a asp-controller="File" asp-action="Index" asp-route-path=@parent><strong>Back</strong></a>
-        </div>
+<div class="row">
+    <a asp-controller="File" asp-action="Index" asp-route-path=@returnUrl><i class="fas fa-arrow-left"></i></a>
+</div>
 <script>
-    document.getElementById("searchBox").addEventListener("keydown", function(e){
-        if(e.keyCode == 8){
+    document.getElementById("searchBox").addEventListener("keydown", function (e) {
+        if (e.keyCode == 8) {
             searchFileList();
         }
     });

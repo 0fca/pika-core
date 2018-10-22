@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using FMS2.Models;
 using FMS2.Models.ManageViewModels;
 using FMS2.Services;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace FMS2.Controllers
 {
@@ -25,6 +26,7 @@ namespace FMS2.Controllers
         private readonly IEmailSender _emailSender;
         private readonly UrlEncoder _urlEncoder;
         private readonly IFileLoggerService _loggerService;
+        private readonly IGenerator _urlGeneratorService;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -35,13 +37,15 @@ namespace FMS2.Controllers
           IEmailSender emailSender,
           ILogger<ManageController> logger,
           UrlEncoder urlEncoder,
-          IFileLoggerService loggerService)
+          IFileLoggerService loggerService,
+          IGenerator generator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _urlEncoder = urlEncoder;
             _loggerService = loggerService;
+            _urlGeneratorService = generator;
         }
 
         [TempData] private string StatusMessage { get; set; }
@@ -108,6 +112,7 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [Authorize(Roles="Admin")]
+        [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> AdminUserPanel(){
             var logListViewModel = new LogsListViewModel
             {
@@ -124,8 +129,68 @@ namespace FMS2.Controllers
                 usersWithRoles.Add(user, roles);
             });
             adminPanelViewModel.UsersWithRoles = usersWithRoles;
-   
+            ViewData["returnMessage"] = TempData["returnMessage"];
             return View("/Views/Manage/Admin/AdminUserPanel.cshtml", adminPanelViewModel);
+        }
+
+        [HttpGet]
+        [AutoValidateAntiforgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GeneratePassword(string Id) {
+            var userModel = await _userManager.FindByIdAsync(Id);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
+            var guid = Guid.NewGuid().ToString();
+            _urlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA1);
+            var hash = _urlGeneratorService.GenerateId(guid);
+            var result = await _userManager.ResetPasswordAsync(userModel, token, hash);
+            TempData["newPassword"] = hash;
+            return RedirectToAction(nameof(Edit), new { Id });
+        }
+
+        [HttpGet]
+        [AutoValidateAntiforgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(string Id) {
+            var userModel = await _userManager.FindByIdAsync(Id);
+            var editUserModel = new EditUserModel
+            {
+                Id = userModel.Id,
+                Phone = userModel.PhoneNumber,
+                Email = userModel.Email,
+                UserName = userModel.UserName
+            };
+            ViewData["newPassword"] = TempData["newPassword"];
+            return View("/Views/Manage/Admin/Edit.cshtml", editUserModel);
+        }
+
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditConfirmation(EditUserModel editModel) {
+            var userModel = await _userManager.FindByIdAsync(editModel.Id);
+            userModel.Email = editModel.Email;
+            userModel.UserName = editModel.UserName;
+            userModel.PhoneNumber = editModel.Phone;
+            var result = await _userManager.UpdateAsync(userModel);
+            TempData["returnMessage"] = result.Succeeded ? "Successfully edited user's information." : "Could not edit user's information.";
+            return RedirectToAction(nameof(AdminUserPanel));
+        }
+
+        [HttpGet]
+        [AutoValidateAntiforgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(string Id) {
+            var email = await _userManager.FindByIdAsync(Id);
+            return View("/Views/Manage/Admin/Delete.cshtml", email);
+        }
+
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteConfirmation(string Id) {
+            var result = await _userManager.DeleteAsync(await _userManager.FindByIdAsync(Id));
+            ViewData["returnMessage"] = result.Succeeded ? "Successfully deleted user of id "+Id : "Could not delete user of id "+Id;
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]

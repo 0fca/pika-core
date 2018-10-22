@@ -4,33 +4,40 @@
     
     var version = ViewData["ver"];
 }
-<h2>@ViewData["Title"]</h2>
 
-<section class="section" id="aboutme">
-            <h3 class="section__heading">Who am I?</h3>
-            <p class="section_paragraph">
-                Hi! I’m Obsidiam, I’m Polish Java&amp;C# developer.
-                I'm desktop, mobile and web developer. My target is to be a cloud system engineer working with Cloud Native development.
-                I am a freelancer and a student of technical college at ITC too. 
-            </p>
-            <p>I am a typical "nerd". I love coding especially in C# and Java/Kotlin. I am a hobbyst sysadmin(I have my own homelab server). Next to IT I like learning history, listen to music and learn about how to analyze it in digital manner. I like long walks, riding a bike and skiing. </p>
-</section>
-<section class="section" id="aboutthis">
-            <h3 class="section__heading">What is this?</h3>
-            <p class="section_paragraph">
-                FMS states for File Management System and it is a web application built especially to make an access to my server's filesystem easier. It is also my portfolio page.
-                It is my first web app I've ever build. I used C# with ASP.NET Core 2.1 SDK to do it. 
-                The source can be found under this <a href="https://www.github.com/Obsidiam/fms">url</a>.
-            </p>
-            <h3 class="section__heading">Technical information</h3>
-            <p class="section_paragraph">
-                <ul class="content-list">
-                    <li>This software is licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3.0</a>. </li>
-                    <li>System is actually running on <a href="https://www.debian.org/">@os.</a></li>
-                    <li>DNS service provided by <a href="https://freedns.afraid.org/">FreeDNS</a>.</li>
-                    <li>Development branch of project: <a href="https://github.com/Obsidiam/fms/tree/development">here</a></li>
-                </ul>
-            <p class="section_paragraph">
-                This is Veronica(FMS), version: @version BETA.
-            </p>
-</section>
+<header class="subpage-title">
+    <h1>@ViewData["Title"]</h1>
+</header>
+<div class="row">
+    <section class="section col-md-3 col-margins" id="aboutme">
+        <h3 class="section__heading">Who am I?</h3>
+        <p class="section_paragraph">
+            Hi! I’m Obsidiam, I’m Polish Java&amp;C# developer.
+            I'm desktop, mobile and web developer. My target is to be a cloud system engineer working with Cloud Native development.
+            I am a freelancer and a student of technical college at ITC too.
+        </p>
+        <p>I am a typical "nerd". I love coding especially in C# and Java/Kotlin. I am a hobbyst sysadmin(I have my own homelab server). Next to IT I like learning history, listen to music and learn about how to analyze it in digital manner. I like long walks, riding a bike and skiing. </p>
+    </section>
+    <section class="section col-md-3 col-margins" id="aboutthis">
+        <h3 class="section__heading">What is this?</h3>
+        <p class="section_paragraph">
+            FMS states for File Management System and it is a web application built especially to make an access to my server's filesystem easier. It is also my portfolio page.
+            It is my first web app I've ever build. I used C# with ASP.NET Core 2.1 SDK to do it.
+            The source can be found under this <a href="https://www.github.com/Obsidiam/fms">url</a>.
+        </p>
+
+        <p class="section_paragraph">
+            This is Veronica(FMS), version: @version BETA.
+        </p>
+    </section>
+    <section class="section col-md-3 col-margins" id="technicalinformation">
+        <h3 class="section__heading">Technical information</h3>
+        <p class="section_paragraph">
+            <ul class="content-list">
+                <li>This software is licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3.0</a>. </li>
+                <li>System is actually running on <a href="https://www.debian.org/">@os.</a></li>
+                <li>DNS service provided by <a href="https://freedns.afraid.org/">FreeDNS</a>.</li>
+                <li>Development branch of project: <a href="https://github.com/Obsidiam/fms/tree/development">here</a></li>
+            </ul>
+    </section>
+</div>

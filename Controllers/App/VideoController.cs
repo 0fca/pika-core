@@ -9,10 +9,10 @@ namespace FMS.Controllers
         [HttpGet]
         [Authorize(Roles="Admin,User")] 
         [ValidateAntiForgeryToken] 
-        public IActionResult Video(){
+        public IActionResult Video(int id){
             //string absol = TempData["src"].ToString();
             
-            ViewData["srcvid"] = TempData["src"];
+            ViewData["srcvid"] = id;
             if(ViewData["srcvid"] != null){
                 return View();
             }else{

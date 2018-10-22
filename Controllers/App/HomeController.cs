@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using FMS2.Models;
-using Microsoft.AspNetCore.Authorization;
-using System.Runtime.InteropServices;
 using System.Reflection;
+using FMS2.Models;
 
 namespace FMS2.Controllers
 {
@@ -35,16 +30,24 @@ namespace FMS2.Controllers
             return View();
         }
 
-        public IActionResult Error()
+        public IActionResult Projects() {
+            return View();
+        }
+
+        public IActionResult Error(ErrorViewModel errorViewModel)
         {
-            if (String.IsNullOrEmpty(HttpContext.Request.QueryString.Value))
+            if (errorViewModel != null)
             {
-                return View();
+                return View(errorViewModel);
             }
             else
             {
                 return View(nameof(Index));
             }
+        }
+
+        public IActionResult ErrorByCode(int ID) {
+            return RedirectToAction("Error",new ErrorViewModel { ErrorCode = ID, Message = "HTTP/1.1 "+ID, RequestId = HttpContext.TraceIdentifier, Url = HttpContext.Request.Path });
         }
     }
 }

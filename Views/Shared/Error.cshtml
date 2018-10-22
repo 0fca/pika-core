@@ -2,49 +2,42 @@
 @{
     ViewData["Title"] = "Error";
 }
-  <head>
+<head>
     <title>Oops! Something went wrong!</title>
-  </head>
-    <div class="main_page">
-      <div class="page_header floating_element">
-        <span class="floating_element">
-          <img src="/images/logooftheyear2018.png" alt="pika"/>
-        </span>
-        <div style="width: 100%; text-align: center; font-size: 25px;">
-          <strong>FMS Critical Error</strong>
-        </div>
-      </div>
-      <div class="content_section floating_element">
-        <div class="section_header section_header_red">
-          <div id="about"></div>
-          If you can read this it means that something went wrong.
-        </div>
-        <div class="content_section_text">
-            This page handles errors which are not because of internal error of the FMS. Details are below, please copy them and pass to the administrator. Thanks and sorry for the inconvenience.<br />
-            @if (Model != null)
-            {
-                @if (Model.ShowRequestId)
-                {
-                    <p>
-                        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-                        <strong>Message: </strong><code>@Model.Message</code>
-                        <strong>Code: </strong><code>@Model.ErrorCode</code>
-                    </p>
-                }
-            }
-            else
-            {
-                Microsoft.Extensions.Primitives.StringValues code = "";
+</head>
+<header class="subpage-title">
+    <img src="~/images/logooftheyear2018-128x128.png" alt="pika" />
+    <h1>FMS Critical Error</h1>
+</header>
 
-                Context.Request.Headers.TryGetValue("code", out code);
-                var statCode = !String.IsNullOrEmpty(code) ? code.ToString() : "unknown";
-                <strong>Code: </strong><code>@statCode</code>
+<div class="row">
+    <section class="section">
+        If you can read this it means that something went wrong.
+        This page handles errors which are not because of internal error of the FMS. Details are below, please copy them and pass to the administrator. Thanks and sorry for the inconvenience.<br />
+        <br/>
+        @if (Model != null)
+        {
+            @if (Model.ShowRequestId)
+            {
+                <p>
+                    <strong>Request ID:</strong> <code>@Model.RequestId</code>
+                    <br />
+                    <strong>Message: </strong><code>@Model.Message</code>
+                    <br />
+                    <strong>Code: </strong><code>@Model.ErrorCode</code>
+                    <br />
+                    <strong>URL: </strong>
+                    <code>
+                        @{
+                            var url = !(String.IsNullOrEmpty(Model.Url)) ? Model.Url : "unknown";
+                        }
+                    </code>
+                </p>
             }
-            <br/>
-            <strong>URL: </strong><code>unknown</code>
-        </div>
-      </div>
-    </div>
-    <div class="validator">
-    </div>
+        }
+        <br />
+    </section>
+
+</div>
+
 

@@ -4,12 +4,13 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <UserSecretsId>aspnet-FMS2-AED98D39-38E1-4CD5-9332-EEB8291FDE88</UserSecretsId>
     <ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
-    <Version>1.2.3</Version>
+    <Version>1.2.5</Version>
     <Authors>Obsidiam</Authors>
     <Product>File Management System</Product>
-    <PackageProjectUrl>https://www.github.com/Obsidiam</PackageProjectUrl>
+    <PackageProjectUrl>https://www.github.com/Obsidiam/fms</PackageProjectUrl>
     <NeutralLanguage>English</NeutralLanguage>
     <SignAssembly>false</SignAssembly>
+    <AssemblyVersion>1.2.4.1</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -20,6 +21,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="Views\Shared\_ScriptHelpers.cshtml" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="2.0.0" />

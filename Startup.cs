@@ -1,4 +1,5 @@
-﻿using FMS2.Data;
+﻿using FMS2.Controllers;
+using FMS2.Data;
 using FMS2.Models;
 using FMS2.Providers;
 using FMS2.Services;
@@ -73,11 +74,11 @@ namespace FMS2
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IZipper, ArchiveService>();
             services.AddTransient<IFileDownloader, FileService>();
-            services.AddTransient<IGenerator, UrlGeneratorService>();
+            services.AddTransient<IGenerator, HashGeneratorService>();
             var option = new FileLoggerOptions
             {
                 FileName = "fms-",
-                FileSizeLimit = 100 * 1024 * 1024,
+                FileSizeLimit = Constants.MaxLogFileSize,
                 LogDirectory = Configuration.GetSection("Logging").GetSection("LogDirs")[_osName + "-log"],
                 ShouldBackupLogs = Boolean.Parse(Configuration.GetSection("Logging")["ShouldBackupLogs"]),
                 BackupLogDir = Configuration.GetSection("Logging")["LogBackupDir-"+_osName]
@@ -85,7 +86,14 @@ namespace FMS2
 
             var opts = Options.Create(option);
             services.AddSingleton<ILoggerProvider>(loggerProvider => new FileLoggerProvider(opts));
-            
+            services.AddDistributedMemoryCache();
+
+            services.AddSession(options =>
+            {
+                // Set a short timeout for easy testing.
+                options.IdleTimeout = TimeSpan.MaxValue;
+                options.Cookie.HttpOnly = true;
+            });
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
             IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[_osName+"-root"]);
             services.AddSingleton(physicalProvider);
@@ -108,17 +116,9 @@ namespace FMS2
             Controllers.Constants.Tmp = Configuration.GetSection("Paths")[_osName+"-tmp"];
 
             app.UseStaticFiles();
- 
-            
-            app.Use(async (context, next) =>
-	        {
-		        await next.Invoke();
-                Debug.WriteLine(context.Response.StatusCode);
-                if(context.Response.StatusCode >= 400 && context.Response.StatusCode != 500){
-                    context.Response.Headers.Add("code", context.Response.StatusCode.ToString());
-                    context.Response.Redirect("/Home/Error", true);  
-                }
-	        });
+            app.UseFileServer();
+            app.UseStatusCodePagesWithRedirects("/Home/ErrorByCode/{0}");
+            app.UseSession();
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {

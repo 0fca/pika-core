@@ -5,6 +5,7 @@ public sealed class MIMEAssistant
 {
   private static readonly Dictionary<string, string> MIMETypesDictionary = new Dictionary<string, string>
   {
+    { "7z", "application/7zip" },
     {"ai", "application/postscript"},
     {"aif", "audio/x-aiff"},
     {"aifc", "audio/x-aiff"},
@@ -129,6 +130,7 @@ public sealed class MIMEAssistant
     {"rdf", "application/rdf+xml"},
     {"rgb", "image/x-rgb"},
     {"rm", "application/vnd.rn-realmedia"},
+    {"rmvb","video/rmvb" },
     {"roff", "application/x-troff"},
     {"rtf", "text/rtf"},
     {"rtx", "text/richtext"},
@@ -205,6 +207,32 @@ public sealed class MIMEAssistant
     {
       return MIMETypesDictionary[extension.Remove(0, 1)];
     }
-    return "unknown/unknown";
+    return "unknown/file";
   }
+
+    public static string RecognizeIconByMime(string mime)
+    {
+        List<string> mimeParts = new List<string>();
+        mimeParts.AddRange(new string[]{ "video" , "audio" , "image" });
+        Dictionary<string, string> translationParts = new Dictionary<string, string>();
+        translationParts.Add("zip","archive");
+        translationParts.Add("7zip","archive");
+        translationParts.Add("tar","archive");
+        translationParts.Add("pptx","powerpoint");
+        translationParts.Add("xlsx","spreadsheet");
+        translationParts.Add("docx","word");
+        translationParts.Add("text", "alt");
+        translationParts.Add("application","file");
+        var parts = mime.Split('/');
+
+        if (mimeParts.Contains(parts[0]))
+        {
+            return parts[0];
+        }
+        else
+        {
+            translationParts.TryGetValue(parts[1], out string value);
+            return translationParts.ContainsKey(parts[1]) ? value : parts[1];
+        }
+    }
 }

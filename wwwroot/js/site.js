@@ -1,4 +1,5 @@
 ﻿//var fileList = [];
+var isCtrlDown = false;
 
 function searchFileList(){
     let searchParam = document.getElementById("searchBox").value;
@@ -7,7 +8,7 @@ function searchFileList(){
     if(searchParam != ""){
         for(let i = 0; i < fileList.length; i+=2){
             console.log(fileList[i].children[0]);
-            if(!fileList[i].children[0].textContent.includes(searchParam)){
+            if (!fileList[i].children[0].textContent.toLowerCase().includes(searchParam.toLowerCase())) {
                 fileList[i].setAttribute("hidden", true);
                 fileList[i].nextElementSibling.setAttribute("hidden", true);
             }else if(fileList[i].hasAttribute("hidden")){
@@ -40,16 +41,45 @@ function downloadResource(downloadPath) {
     console.log(w);
     w.onclose = function(){
         document.getElementById("download-panel").setAttribute("hidden",true);
-        console.log("Reaches here.");
     }
     //document.getElementById("download-panel").setAttribute("hidden", true);
 }
 
 
-function copyToClipboard(){
-    const el = document.getElementById('urlOut');
+function copyToClipboard(id) {
+    let el = document.getElementById(id);
     el.select();
     document.execCommand('copy');
+}
+
+function onPathSpanHover() {
+    let spanElement = document.getElementById("hoverSpan");
+    let outputInput = document.getElementById("pathOutput");
+    //console.log(isCtrlDown);
+
+    if (isCtrlDown) {
+        if (spanElement != null) {
+            let childrenArr = spanElement.children;
+            let resultPath = "";
+
+            for (let i = 0; i < childrenArr.length; i++) {
+                resultPath += childrenArr.item(i).textContent
+            }
+            outputInput.setAttribute("value", window.location.href + "?path=" + resultPath);
+            outputInput.focus();
+            outputInput.removeAttribute("hidden");
+        }
+    }
+}
+
+function onPathSpanOut() {
+    let promptLbl = document.getElementById("pathOutput");
+    promptLbl.setAttribute("hidden", true);
+}
+
+function scrollLogAreaToEnd() {
+    var textarea = document.getElementById('log-area');
+    textarea.scrollTop = textarea.scrollHeight;
 }
 
 

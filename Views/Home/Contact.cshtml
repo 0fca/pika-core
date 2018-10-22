@@ -1,20 +1,23 @@
 ﻿@{
     ViewData["Title"] = "Contact";
 }
-<h2>@ViewData["Title"]</h2>
-<section class="section">
-    <p class="section__paragraph">
-        If you want to keep in touch with me, you can choose one of these ways:
-    </p>
-<ul>
-    <li><a href="https://www.facebook.com/obsidiam">Facebook</a></li>
-    <li>Telegram: obsidiam</li>
-    <li>Discord: Obsidiam#661</li>
-</ul>
-    <p class="section__paragraph">
-        Feel free to write there any errors related to an app, suggestions or if you have software to be done.
-    </p>
-<address>
-    <strong>Support:</strong> <a href="mailto:lukasbownik99@gmail.com">lukasbownik99@gmail.com</a><br />
-</address>
-</section>
+    <header class="subpage-title">
+        <h1>@ViewData["Title"]</h1>
+    </header>
+    <section class="row row-content">
+        <p class="section__paragraph">
+            If you want to keep in touch with me, you can choose one of these ways:
+        </p>
+
+        <ul class="list-inline">
+            <li><a href="https://www.facebook.com/obsidiam"><img src="https://www.facebook.com/images/fb_icon_325x325.png" height="48" width="48" /></a></li>
+            <li><img src="https://telegram.org/img/t_logo.png" width="48" height="48" />obsidiam</li>
+            <li><img src="~/images/discord-icon.svg" />Obsidiam#0661</li>
+        </ul>
+        <p class="section__paragraph">
+            Feel free to write there any errors related to an app, suggestions or if you have software to be done.
+        </p>
+        <address>
+            <strong>Support:</strong> <a href="mailto:lukasbownik99@gmail.com">lukasbownik99@gmail.com</a><br />
+        </address>
+    </section>

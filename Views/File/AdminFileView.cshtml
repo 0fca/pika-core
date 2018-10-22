@@ -1,17 +1,25 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
 @model FMS2.Models.FileResultModel
 @using System.IO
-
 @using Microsoft.Extensions.FileProviders
 
 @{
     ViewData["Title"] = "Browse - Admin";
     object lastPath = ViewData["path"];
-    int id = 0;
-    object msg = TempData["returnMessage"];
+    var id = 0;
+    var msg = TempData["returnMessage"];
     var parent = ViewData["parent"];
 }
+
 <h3>
-    Directory listing for:<a href="/File?path=/">Index</a>
+    Directory listing for:
+</h3>
+<span onmouseover="onPathSpanHover();" onmouseout="onPathSpanOut()" ;>
+    <a href="/File?path=/">Index</a>
     @{
         string[] splitted = lastPath.ToString().Split("/");
         string last = "";
@@ -26,64 +34,77 @@
             <a href="/File?path=@last" class="path-button">@part</a>
         }
     }
-</h3>
+</span>
 
-    @await Html.PartialAsync("_StatusMessage", msg)
+@await Html.PartialAsync("_StatusMessage", msg)
 
 
 <div id="download-panel" class="row" hidden>
     @await Html.PartialAsync("_DownloadPartial")
 </div>
 
-    <div class="row" style="font-size:14px;">
-        <a asp-controller="File" asp-action="Index" asp-route-path=@parent><strong>Back</strong></a>
+<div class="row">
+    <span class="manage-span">
+        <input id="searchBox" type="text" oninput="searchFileList();" placeholder="Search list..." class="form-control" />
+        <a asp-controller="File" asp-action="Index" asp-route-path=@parent><i class="fas fa-arrow-left"></i></a>
+
+        <a type="button" href="#file-editor" data-toggle="modal"><i class="fas fa-folder-plus"></i></a>
+        <a asp-controller="File" asp-action="Delete" asp-route-path=@parent><i class="fas fa-trash-alt"></i>  </a>
+
+    </span>
+</div>
+<div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
+    <div class="col-md-3">
+        Name
     </div>
-    <div class="row">
-        <a type="button" href="#file-editor" data-toggle="modal">New</a>
-        @Html.ActionLink("Delete", "Delete", "File")
-        <label label-for="searchBox">Search list:</label>
-        <input id="searchBox" type="text" oninput="searchFileList();" />
+    <div class="col-md-3">
+        Type
     </div>
-    <div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
-        <div class="col-md-3">
-            Name
-        </div>
-        <div class="col-md-3">
-            Type
-        </div>
-        <div class="col-md-3">
-            Size
-        </div>
-        <div class="col-md-3">
-            Options
-        </div>
+    <div class="col-md-3">
+        Size
     </div>
-    <div id="file-list" class="table-div">
-        @foreach (IFileInfo item in Model.Contents)
+    <div class="col-md-3">
+        Options
+    </div>
+</div>
+<div id="file-list" class="div-table">
+    @if (Model.Contents != null)
+    {
+        foreach (var item in Model.Contents)
         {
             <div class="row">
                 <div class="col-md-3 truncate">
                     @if (item.IsDirectory)
                     {
-                        var folder = "/images/browse-icons/folder.svg";
-                        <img src=@folder />
+                        <i class="fas fa-folder"></i>
                         <a asp-controller="File" asp-action="Index" asp-route-path=@item.Name class="browse-list-a">@item.Name</a>
                     }
                     else
                     {
-                        //var imgName = "/images/browse-icons/" + MIMEAssistant.GetMIMEType(item.Name).Replace("/","-") + ".svg";
-                        //<img src=@imgName />
-                        <a asp-controller="File" asp-action="Download" asp-route-id=@id class="browse-list-a">@item.Name</a>
+                        var type = MIMEAssistant.RecognizeIconByMime(MIMEAssistant.GetMIMEType(item.Name));
+                        <a asp-controller="File" asp-action="Download" asp-route-id=@id class="browse-list-a"><i class="fas fa-@type"></i>@item.Name</a>
                     }
                 </div>
                 <div class="col-md-3">
-                    @(@File.Exists(@item.PhysicalPath) ? "File" : "Directory")
+                    @(!item.IsDirectory ? "File" : "Directory")
                 </div>
                 <div class="col-md-3">
                     @if (!item.IsDirectory)
                     {
-                        long i = @item.Length / (1000 * 1000);
-                        <p>@i MB</p>
+                        var unitStrPart = "";
+                        long i = item.Length;
+                        string[] units = { "B", "kB", "MB", "GB", "TB" };
+                        int unitIndex = 0;
+                        for (int ptr = 0; ptr <= units.Length; ptr++)
+                        {
+                            if (i < Math.Pow(1024, ptr) && i > 1024)
+                            {
+                                unitIndex = ptr - 1;
+                                break;
+                            }
+                        }
+                        unitStrPart = Math.Round(i / Math.Pow(1024, unitIndex), 2) + " " + units[unitIndex];
+                        <p>@unitStrPart</p>
                     }
                     else
                     {
@@ -91,11 +112,6 @@
                     }
                 </div>
                 <div class="col-md-3">
-                    @if (item.IsDirectory)
-                    {
-                        <a data-toggle="modal" asp-action="Download" asp-controller="File" onclick="showDownloadBox();" asp-route-id=@id>Download</a>
-                    }
-                    @Html.ActionLink("Rename", "Rename", new { @rid = id })
                     @if (!item.IsDirectory)
                     {
                         @Html.ActionLink("Generate download url", "GenerateUrlView", new { @entryName = item.PhysicalPath })
@@ -111,39 +127,50 @@
             id++;
             <hr>
         }
-    </div>
-    <div class="row" style="font-size:14px;">
-        <a asp-controller="File" asp-action="Index" asp-route-path=@parent><strong>Back</strong></a>
-    </div>
+    }
+    else
+    {
+        <div class="input-group">
+            <p>@msg.ToString()</p>
+            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-warning-sign text-danger"></span></span>
+        </div>
+    }
+</div>
+<div class="row" style="font-size:14px;">
+    <a asp-controller="File" asp-action="Index" asp-route-path=@parent><i class="fas fa-arrow-left"></i></a>
+</div>
 
-    <div class="modal fade" tabindex="-1" role="dialog" id="file-editor">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="title">Create new directory</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="body">
-                    <label id="text-content">Enter the name:</label>
-                </div>
-                <div id="file-editor-panel" class="modal-footer">
-                    <form asp-action="Create" asp-controller="File" asp-route-parent="@parent" method="post">
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="name" />
-                            <button type="submit" class="btn btn-default">Create</button>
-                            <button type="submit" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        </div>
-                    </form>
-                </div>
+<div class="modal fade" tabindex="-1" role="dialog" id="file-editor">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title">Create new directory</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="body">
+                <label id="text-content">Enter the name:</label>
+            </div>
+            <div id="file-editor-panel" class="modal-footer">
+                <form asp-action="Create" asp-controller="File" asp-route-parent="@parent" method="post">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="name" />
+                        <button type="submit" class="btn btn-default">Create</button>
+                        <button type="submit" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <script>
-        document.getElementById("searchBox").addEventListener("keydown", function (e) {
-            if (e.keyCode == 8) {
-                searchFileList();
-            }
-        });
-    </script>
+</div>
+
+<script>
+    document.getElementById("searchBox").addEventListener("keydown", function (e) {
+        if (e.keyCode == 8) {
+            searchFileList();
+        }
+    });
+</script>
+
+
