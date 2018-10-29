@@ -1,0 +1,17 @@
+@{
+    ViewData["Title"] = "Generate url";
+    object hash = ViewData["urlhash"];
+    string url = ViewData["protocol"]+"://"+ViewData["host"]+ "/File/PermanentDownload?id=" + hash;
+    object returnUrl = ViewData["returnUrl"];
+}
+
+<div class="d-flex align-items-center text-center align-content-center flex-wrap row row-margins">
+    <h1>@ViewData["Title"]</h1>
+    <div class="input-group">
+        <input type="text" class="form-control" id="urlOut" value=@url readonly>
+        <span class="input-group-btn">
+            <button class="btn btn-primary-outline" id="copyButton" onclick="copyToClipboard('urlOut');" type="button"><i class="fas fa-copy"></i></button>
+        </span>
+    </div>
+    <a href=@returnUrl><i class="fas fa-arrow-left"></i></a>
+</div>

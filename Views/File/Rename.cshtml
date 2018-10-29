@@ -1,37 +1,34 @@
 @model RenameFileModel
 @{
     ViewData["Title"] = "Rename - Admin";
-    //object oldName = ViewData["OldName"];
-    object type = ViewData["type"];
-    //string absol = ViewData["absol"].ToString();
-
+    object type = Model.IsDirectory ? "folder" : "file";
 }
 
 
-<h2>@ViewData["Title"]</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-    <form asp-action="Rename" method="POST" class="form-horizontal">
-        <div>
-            <input hidden asp-for="AbsolutePath"/>
-            <span asp-validation-for="AbsolutePath" class="text-danger"></span>
-        </div>
-        <div>
-            <input hidden asp-for="IsDirectory"/>
-            <span asp-validation-for="IsDirectory" class="text-danger"></span>
-        </div>
+<div class="d-flex align-items-center text-center align-content-center flex-wrap row-margins">
+    <h2>@ViewData["Title"]</h2>
+    <div class="col-md-3">
+        <form asp-action="Rename" method="POST" class="form-horizontal">
+            <div>
+                <input hidden asp-for="AbsolutePath" />
+                <span asp-validation-for="AbsolutePath" class="text-danger"></span>
+            </div>
+            <div>
+                <input hidden asp-for="IsDirectory" />
+                <span asp-validation-for="IsDirectory" class="text-danger"></span>
+            </div>
 
-        <h4>Changing name of @type: </h4>
-        <label asp-for="OldName">@Model.OldName</label><br/>
-        <div class="form-group">
-            <label>Enter new name: </label>
-            <input asp-for="NewName" class="form-control" />
-            <span asp-validation-for="NewName" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-default">Rename</button>
-        </div>
-    </form> 
+            <div class="form-group">
+                <h4>Changing name of a @type: </h4>
+                <label asp-for="OldName">@Model.OldName</label><br />
+                <label>Enter new name: </label>
+                <input asp-for="NewName" class="form-control" />
+                <span asp-validation-for="NewName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-default">Rename</button>
+                <button type="submit" class="btn btn-default" formaction="AdminFileView">Cancel</button>
+            </div>
+        </form>
     </div>
 </div>

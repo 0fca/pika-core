@@ -1,92 +1,52 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Caroline</title>
-
+    <title>@ViewData["Title"] - Veronica</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
-        <link rel="stylesheet" href="~/css/site.css" />
     </environment>
     <environment exclude="Development">
-        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
-              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css"
+              asp-fallback-href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.css"
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+
     </environment>
 </head>
-<style>
-    .navbar{
-        background-color: #333333;
-        height: 50px;
-        border-bottom-color: #009688;
-        
-    }
-    a{
-        color: #eeeeee !important;
-    }
-    a:hover{
-        color:#009688 !important;
-    }
-    body{
-        background-color: #222222;
-        color: #999999;
-    }
-    hr{
-        border-color:#009688;
-    }
-    .btn-default{
-        color: #009688 !important;
-        background-color: #222222;
-    }
-    .btn-default:hover{
-        background-color: #333333;
-    }
-    .btn-primary{
-        background-color: #222222;
-        border-color: #009688;
-    }
-    .btn-primary:hover{
-        background-color: #009688;
-        border-color:#222222;
-        color:#222222 !important;
-    }
-</style>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Caroline</a>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="File" asp-action="Index">Browse</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                </ul>
-                @await Html.PartialAsync("_LoginPartial")
-            </div>
+
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Veronica</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            @await Html.PartialAsync("_LoginPartial")
         </div>
     </nav>
-    <div class="container body-content">
+    <div class="container d-flex justify-content-center container-padding">
         @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2018 - Caroline(FMS)</p>
-        </footer>
     </div>
+    <footer class="footer">
+        <p>
+            <a style="text-decoration:none;
+        color: black; margin-left: 15px;" href="/Home/About/27?day=25">&copy;2018</a> - Veronica(FMS)
+        </p>
+       
+    </footer>
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-        
+
     </environment>
     <environment exclude="Development">
         <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
@@ -102,7 +62,7 @@
                 integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
         </script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
-        
+
     </environment>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)

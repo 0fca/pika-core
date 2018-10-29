@@ -1,0 +1,18 @@
+﻿@model ApplicationUser
+@{ 
+    ViewData["Title"] = "Delete user "+Model.UserName;
+}
+<div class="d-flex align-items-center text-center align-content-center flex-wrap row">
+        <h1>Delete user @Model.Email</h1>
+        <form asp-controller="Manage" asp-action="DeleteConfirmation" asp-route-id=@Model.Id method="post">
+            <div class="form-group">
+                <label asp-for="Email" />
+                <span>
+                    <button class="btn btn-primary">Delete</button>
+                    <a asp-controller="Manage" asp-action="AdminUserPanel" class="btn btn-primary">Cancel</a>
+                </span>
+            </div>
+        </form>
+</div>
+
+
