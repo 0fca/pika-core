@@ -9,7 +9,7 @@
 <div class="d-flex align-items-center text-center align-content-center flex-wrap row row-margins">
     <img src="~/images/logooftheyear2018-128x128.png" alt="pika" />
     <h1>FMS Critical Error</h1>
-    <section>
+    <section class="row-content">
         If you can read this it means that something went wrong.
         This page handles errors which are not because of internal error of the FMS. Details are below, please copy them and pass to the administrator. Thanks and sorry for the inconvenience.<br />
         <br />
@@ -17,23 +17,21 @@
         {
             @if (Model.ShowRequestId)
             {
-                <span class="text-info">
-                    <strong>Request ID:</strong> <code>@Model.RequestId</code>
+        <span class="text-info row-margins">
+            <strong>Request ID:</strong> <code>@Model.RequestId</code>
+            <br>
+            <strong>Message: </strong><code>@Model.Message</code>
+            <br>
+            <strong>Code: </strong><code>@Model.ErrorCode</code>
+            <br />
 
-                    <strong>Message: </strong><code>@Model.Message</code>
-
-                    <strong>Code: </strong><code>@Model.ErrorCode</code>
-
-
-
-                </span>
-                <br>
-                <strong>URL: </strong>
-                <code>
-                    @{
-                        var url = !(String.IsNullOrEmpty(Model.Url)) ? Model.Url : "unknown";
-                    }
-                </code>
+            <strong>URL: </strong>
+            <code>
+                @{
+                    var url = !(String.IsNullOrEmpty(Model.Url)) ? Model.Url : "unknown";
+                }
+            </code>
+        </span>
             }
         }
         <br />

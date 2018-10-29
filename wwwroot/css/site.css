@@ -1,4 +1,8 @@
-﻿body {
+﻿html {
+    text-justify: auto;
+}
+
+body {
     padding-top: 50px;
     font-family: 'Segoe UI';
     font-size: 17px !important;
@@ -18,10 +22,10 @@
         background-image: url("../images/datacenter-servers.jpg") !important;
         background-repeat: no-repeat !important;
         background: fixed;
-        -webkit-background-size: cover;
-        -moz-background-size: cover;
-        -o-background-size: cover;
-        background-size: cover;
+        -webkit-background-size: fill;
+        -moz-background-size: fill;
+        -o-background-size: fill;
+        background-size: fill;
         -webkit-filter: blur(5px);
         -moz-filter: blur(5px);
         -o-filter: blur(5px);
@@ -112,6 +116,13 @@ a, a:hover, a:focus {
     border-color: #ccc;
 }
 
+.path-input {
+    background-color: transparent !important;
+    border: none;
+    color: #eee;
+    font-size: 23px;
+}
+
 select {
     background-color: inherit;
     width: 100%;
@@ -125,7 +136,6 @@ select {
     background-color: #403E3E;
     opacity: 0.82;
     padding: 10px;
-    
 }
 
 
@@ -135,6 +145,8 @@ select {
 
 .row-content {
     margin-bottom: 50px;
+    text-align: justify;
+    text-justify: auto;
 }
 
 .navbar-brand {
@@ -160,7 +172,7 @@ select{
     height: 400px !important;
 }
 
-.truncate { width: 100%; height: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.truncate { width: 100%; height: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: justify; }
 
 .external-login-btn{
     background-color: transparent;
@@ -179,18 +191,6 @@ select{
     height: 100% !important;
     color: #fff !important;
     
-}
-
-
-
-.subpage-title {
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    margin-top: 15%;
-    text-decoration-line: underline !important;
-    text-decoration: solid !important;
-    color: #fff;
 }
 
 .col-margins {
@@ -287,4 +287,9 @@ select{
    margin-bottom: 10px;
    margin-right: auto;
    margin-left: auto;
+}
+
+.offscreen {
+    position: absolute;
+    left: -999em;
 }

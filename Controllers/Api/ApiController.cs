@@ -31,7 +31,7 @@ namespace FMS2.Controllers.Api
         public IActionResult ApiIndex()
         {
             _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Viewing ApiIndex.");
-            return View("/Views/Shared/ApiIndex.cshtml");
+            return View("/Views/Api/ApiIndex.cshtml");
         }
 
         [Route("v1/api/login")]

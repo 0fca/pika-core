@@ -49,7 +49,8 @@
                     @Html.DisplayFor(modelItem => roleString)
                 </div>
                 <div class="col-md-3">
-                    @Html.ActionLink("Edit", "Edit", "Manage", new { @id = item.Key.Id }) | @Html.ActionLink("Delete", "Delete", "Manage", new { @id = item.Key.Id })
+                    <a asp-action="Edit" asp-controller="Manage" asp-route-id=@item.Key.Id><i class="fas fa-pen"></i></a>
+                    <a asp-action="Delete" asp-controller="Manage" asp-route-id="@item.Key.Id"><i class="fas fa-trash-alt"></i></a>
                 </div>
                 </div>
                 <hr>

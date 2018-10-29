@@ -5,12 +5,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="subpage-title">
+<div class="d-flex align-items-center text-center align-content-center flex-wrap row row-margins">
     <h1>Edit @Model.Email info</h1>
-</div>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+    <div class="col-md-4 col-centered">
         <form asp-action="EditView" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
@@ -34,11 +31,11 @@
                 <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
             <div class="form-group">
-               <label class="control-label" />
-               <a asp-action="GeneratePassword" asp-route-id=@Model.Id>Reset password</a>
+                <label class="control-label" />
+                <a asp-action="GeneratePassword" asp-route-id=@Model.Id>Reset password</a>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" asp-action="EditConfirmation"/>
+                <input type="submit" value="Save" class="btn btn-primary" asp-action="EditConfirmation" />
             </div>
         </form>
     </div>
@@ -49,6 +46,6 @@
 </div>
 
 <div>
-    <a asp-action="AdminUserPanel" asp-controller="Manage">Back to List</a>
+    <a asp-action="AdminUserPanel" asp-controller="Manage"><i class="fas fa-arrow-left"></i></a>
 </div>
 

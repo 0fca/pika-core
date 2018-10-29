@@ -45,31 +45,10 @@ function downloadResource(downloadPath) {
     //document.getElementById("download-panel").setAttribute("hidden", true);
 }
 
-
 function copyToClipboard(id) {
     let el = document.getElementById(id);
     el.select();
     document.execCommand('copy');
-}
-
-function onPathSpanHover() {
-    let spanElement = document.getElementById("hoverSpan");
-    let outputInput = document.getElementById("pathOutput");
-    //console.log(isCtrlDown);
-
-    if (isCtrlDown) {
-        if (spanElement != null) {
-            let childrenArr = spanElement.children;
-            let resultPath = "";
-
-            for (let i = 0; i < childrenArr.length; i++) {
-                resultPath += childrenArr.item(i).textContent
-            }
-            outputInput.setAttribute("value", window.location.href + "?path=" + resultPath);
-            outputInput.focus();
-            outputInput.removeAttribute("hidden");
-        }
-    }
 }
 
 function onPathSpanOut() {

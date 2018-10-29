@@ -42,15 +42,16 @@ namespace FMS2.Services{
                 { '+', '_' },
                 { '=', '-' },
                 { '\\', '$' },
-                { '/', '%' }
+                { '/', '.' }
             };
 
             foreach (char c in hash.ToCharArray()) {
                 if (dictionary.ContainsKey(c)) {
                     dictionary.TryGetValue(c, out char replaceChar);
-                    hash.Replace(c, replaceChar);
+                    hash = hash.Replace(c, replaceChar);
                 }
             }
+
         }
 
         public void SetDerivationPrf(KeyDerivationPrf prf)

@@ -8,6 +8,7 @@ namespace FMS2.Models
 {
     public class FileResultModel
     {
-        public IDirectoryContents Contents { get; set; }
+        public bool HasFound { get; set; } = false;
+        public List<IFileInfo> Contents { get; set; }
     }
 }

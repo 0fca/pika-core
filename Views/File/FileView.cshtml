@@ -6,15 +6,13 @@
 @{
     ViewData["Title"] = "Browse";
     object lastPath = ViewData["path"];
-    int id = 0;
     object msg = TempData["returnMessage"];
     var returnUrl = ViewData["returnUrl"];
 }
 <h3>
     Directory listing for:
 </h3>
-<span onmouseover="onPathSpanHover();" onmouseout="onPathSpanOut()";>
-    <a href="/File?path=/">Index</a>
+<span id="nav-span">
     @{
         string[] splitted = lastPath.ToString().Split("/");
         string last = "";
@@ -23,12 +21,16 @@
             if (!part.Equals("/") && !String.IsNullOrEmpty(part))
             {
                 last = String.Concat(last, "/", part);
-                <label>/</label>
+
             }
 
-            <a href="/File?path=@last" class="path-button">@part</a>
         }
+        var tmp = Context.Request.Host + "/File?path=" + last;
     }
+
+    <input id="pathInput" class="path-input" readonly value=@last />
+    <input id="helperInput" value=@tmp class="offscreen" aria-hidden="true" />
+    <button class="btn btn-primary-outline" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
 </span>
 
 @await Html.PartialAsync("_StatusMessage", msg)
@@ -44,83 +46,85 @@
         <a asp-controller="File" asp-action="Index" asp-route-path=@returnUrl><i class="fas fa-arrow-left"></i></a>
     </span>
 </div>
-<div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
-    <div class="col-md-3">
+<div class="d-flex align-items-center text-center align-content-center row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
+    <div class="col-md-4">
         Name
     </div>
-    <div class="col-md-3">
-        Type
-    </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
         Size
     </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
         Options
     </div>
 </div>
-<div id="file-list" class="div-table">
-    @foreach (IFileInfo item in Model.Contents)
-    {
-        <div class="row">
-            <div class="col-md-3 truncate">
-                @if (item.IsDirectory)
-                {
-                    <i class="fas fa-folder"></i>
-                    <a asp-controller="File" asp-action="Index" asp-route-path=@item.Name>@item.Name</a>
-                }
-                else
-                {
-                    var type = MIMEAssistant.RecognizeIconByMime(MIMEAssistant.GetMIMEType(item.Name));
-                    <i class="fas fa-@type"></i>
-                    <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
-                }
-            </div>
-            <div class="col-md-3">
-                @(@File.Exists(@item.PhysicalPath) ? "File" : "Directory")
-            </div>
-            <div class="col-md-3">
-                @if (!item.IsDirectory)
-                {
-                    var unitStrPart = "";
-                    long i = item.Length;
-                    string[] units = { "B", "kB", "MB", "GB", "TB" };
-                    int unitIndex = 0;
-                    for (int ptr = 0; ptr <= units.Length; ptr++)
-                    {
-                        if (i < Math.Pow(1024, ptr) && i > 1024)
+<div id="file-list" class="d-flex align-items-center text-center align-content-center div-table">
+    @{
+        if (Model.Contents != null && Model.Contents.Count > 0)
+        {
+            foreach (IFileInfo item in Model.Contents)
+            {
+                <div class="row">
+                    <div class="col-md-4 truncate">
+                        @if (item.IsDirectory)
                         {
-                            unitIndex = ptr - 1;
-                            break;
+                            <i class="fas fa-folder"></i>
+                            <a asp-controller="File" asp-action="Index" asp-route-path=@item.Name>@item.Name</a>
                         }
-                    }
-                    unitStrPart = Math.Round(i / Math.Pow(1024, unitIndex), 2) + " " + units[unitIndex];
-                    <p>@unitStrPart</p>
-                }
-                else
-                {
-                    <p>---</p>
-                }
-            </div>
-            <div class="col-md-3">
-                @if (item.IsDirectory)
-                {
-                    <a data-toggle="modal" asp-action="Download" asp-controller="File" onclick="showDownloadBox();" asp-route-id=@id><i class="fas fa-arrow-down" title="Download directory as zip"></i></a>
-                }
-                @if (!item.IsDirectory)
-                {
-   
-                    <a href="File/GenerateUrlView?entryName=@item.PhysicalPath&returnUrl=@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
-                }
-                @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4"))
-                {
-                    TempData["src"] = id;
-                    @Html.ActionLink("Play", "Video", "Video")
-                }
+                        else
+                        {
+                            var type = MIMEAssistant.RecognizeIconByMime(MIMEAssistant.GetMIMEType(item.Name));
+                            <i class="fas fa-@type"></i>
+                            <a asp-controller="File" asp-action="Download" asp-route-name=@item.Name>@item.Name</a>
+                        }
+                    </div>
+                    <div class="col-md-4">
+                        @if (!item.IsDirectory)
+                        {
+                            var unitStrPart = "";
+                            long i = item.Length;
+                            string[] units = { "B", "kB", "MB", "GB", "TB" };
+                            int unitIndex = 0;
+                            for (int ptr = 0; ptr <= units.Length; ptr++)
+                            {
+                                if (i < Math.Pow(1024, ptr) && i > 1024)
+                                {
+                                    unitIndex = ptr - 1;
+                                    break;
+                                }
+                            }
+                            unitStrPart = Math.Round(i / Math.Pow(1024, unitIndex), 2) + " " + units[unitIndex];
+                            <p>@unitStrPart</p>
+                        }
+                        else
+                        {
+                            <p>---</p>
+                        }
+                    </div>
+                    <div class="col-md-4">
 
+                        @if (!item.IsDirectory)
+                        {
+
+                            TempData["physicalPath"] = item.PhysicalPath;
+                            <a href="GenerateUrlView?returnUrl=@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
+                        }
+                        @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4"))
+                        {
+                            TempData["src"] = item.PhysicalPath;
+                            @Html.ActionLink("Play", "Video", "Video")
+                        }
+
+                    </div>
+                </div>
+                <hr>
+            }
+        }
+        else
+        {
+            <div class="row">
+                <h1>It is empty in here...</h1>
             </div>
-        </div>
-        id++;
-        <hr>
+        }
     }
 </div>
 <div class="row">
