@@ -1,9 +1,6 @@
-﻿using FMS2.Loggers;
-using FMS2.Providers;
+﻿using FMS2.Providers;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FMS2.Services
@@ -18,18 +15,10 @@ namespace FMS2.Services
             _logger = fileLoggerProvider.CreateLogger("Production");
         }
 
-        public void Cleanup()
-        {
-            ((FileLoggerProvider)fileLoggerProvider).IdleForCleanup();
-        }
+        public void Cleanup() => ((FileLoggerProvider)fileLoggerProvider).IdleForCleanup();
 
-        public void LogToFileAsync(LogLevel logLevel, string address, string message) {
-            _logger.Log(logLevel, address + " : " + message);
-        }
+        public void LogToFileAsync(LogLevel logLevel, string address, string message) => _logger.Log(logLevel, address + " : " + message);
 
-        public IEnumerable<string> GetLogs()
-        {
-           return ((FileLoggerProvider)fileLoggerProvider).GetLogs();
-        }
+        public async Task<List<string>> GetLogs() => await ((FileLoggerProvider)fileLoggerProvider).GetLogs();
     }
 }

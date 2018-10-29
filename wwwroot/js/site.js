@@ -82,4 +82,21 @@ function scrollLogAreaToEnd() {
     textarea.scrollTop = textarea.scrollHeight;
 }
 
+function changeVisibleTab(controlName) {
+    let contentId = controlName.textContent.toLowerCase().replace(" ", "-");
+    //controlName.getAttribute("class").concat(" active");
+    let targetDiv = document.getElementById("container");
+    if (targetDiv.children.length > 0) {
+        for (let childIndex = 0; childIndex < targetDiv.children.length; childIndex++) {
+            if (targetDiv.children[childIndex].getAttribute("id") != contentId) {
+                targetDiv.children[childIndex].setAttribute("hidden", true);
+            } else {
+                targetDiv.children[childIndex].removeAttribute("hidden");
+            }
+        }
+    }
+    if (contentId == "logs") {
+        scrollLogAreaToEnd();
+    }
+}
 

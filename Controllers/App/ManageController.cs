@@ -114,20 +114,24 @@ namespace FMS2.Controllers
         [Authorize(Roles="Admin")]
         [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> AdminUserPanel(){
-            var logListViewModel = new LogsListViewModel
+            LogsListViewModel logListViewModel = new LogsListViewModel
             {
-                Lines = _loggerService.GetLogs()
+                Lines = await _loggerService.GetLogs()
             };
+            Dictionary<ApplicationUser, IList<string>> usersWithRoles = new Dictionary<ApplicationUser, IList<string>>();
+
+            if (usersWithRoles.Count == 0) {
+                await _userManager.Users.ToAsyncEnumerable().ForEachAsync(async user =>
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    usersWithRoles.Add(user, roles);
+                });
+            }
+
             AdminPanelViewModel adminPanelViewModel = new AdminPanelViewModel
             {
                 LogsListViewModel = logListViewModel
             };
-            Dictionary<ApplicationUser, IList<string>> usersWithRoles = new Dictionary<ApplicationUser, IList<string>>();
-
-            await _userManager.Users.ToAsyncEnumerable().ForEachAsync(async user => {
-                var roles = await _userManager.GetRolesAsync(user);
-                usersWithRoles.Add(user, roles);
-            });
             adminPanelViewModel.UsersWithRoles = usersWithRoles;
             ViewData["returnMessage"] = TempData["returnMessage"];
             return View("/Views/Manage/Admin/AdminUserPanel.cshtml", adminPanelViewModel);
@@ -189,8 +193,8 @@ namespace FMS2.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmation(string Id) {
             var result = await _userManager.DeleteAsync(await _userManager.FindByIdAsync(Id));
-            ViewData["returnMessage"] = result.Succeeded ? "Successfully deleted user of id "+Id : "Could not delete user of id "+Id;
-            return RedirectToAction(nameof(Index));
+            TempData["returnMessage"] = result.Succeeded ? "Successfully deleted user of id "+Id : "Could not delete user of id "+Id;
+            return RedirectToAction(nameof(AdminUserPanel));
         }
 
         [HttpPost]

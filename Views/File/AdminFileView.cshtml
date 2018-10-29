@@ -114,7 +114,7 @@
                 <div class="col-md-3">
                     @if (!item.IsDirectory)
                     {
-                        @Html.ActionLink("Generate download url", "GenerateUrlView", new { @entryName = item.PhysicalPath })
+                    <a href="File/GenerateUrlView?entryName=@item.PhysicalPath&returnUrl=@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
                     }
                     @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4"))
                     {

@@ -34,6 +34,10 @@ namespace FMS2.Controllers
             return View();
         }
 
+        public IActionResult Download() {
+            return RedirectToAction("Error", new ErrorViewModel{ ErrorCode = 501, Message="This page is under construction at the moment, sorry." , RequestId = HttpContext.TraceIdentifier, Url = HttpContext.Request.Path });
+        }
+
         public IActionResult Error(ErrorViewModel errorViewModel)
         {
             if (errorViewModel != null)

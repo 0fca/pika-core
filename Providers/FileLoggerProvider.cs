@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.AzureAppServices.Internal;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,6 +20,9 @@ namespace FMS2.Providers
         private readonly bool _shouldBackup = true;
         private readonly string _backupDir = "";
         private string fullName = "";
+        
+        private volatile List<string> _logs = new List<string>();
+        private static long LastSize = 0L;
 
         public FileLoggerProvider(IOptions<FileLoggerOptions> options) : base(options)
         {
@@ -103,14 +107,66 @@ namespace FMS2.Providers
             }
         }
 
-        public void IdleForCleanup()
+        public void IdleForCleanup() => DoCleanup();
+
+        public async Task<List<string>> GetLogs()
         {
-            DoCleanup();
+           
+            var fileInfo = new FileInfo(fullName);
+
+                var fs = fileInfo.OpenRead();
+                
+                //var buffer = new byte[fileInfo.Length - LastSize];
+                //List<string> lines = new List<string>();
+                if (fs.CanSeek && fs.CanRead)
+                {
+
+                    long newPos = fs.Seek(fs.Length - 8192, SeekOrigin.Begin);
+                    string nextLine = "";
+                    var buffer = new byte[8192];
+                    
+                    await fs.ReadAsync(buffer, 0, buffer.Length);
+
+                    foreach (byte b in buffer)
+                    {
+                        char newChar = (char)b;
+                        nextLine = string.Concat(nextLine,newChar);
+                        if (newChar == '\n')
+                        {
+                            _logs.Add(nextLine);
+                            nextLine = "";
+                            continue;
+                        }
+                    }
+                }
+                LastSize = fileInfo.Length;
+                fs.Dispose();     
+                return _logs;
         }
 
-        public IEnumerable<string> GetLogs()
-        {
-            return File.ReadAllLines(fullName).AsEnumerable<string>();
+        public void IdleMemoryCleanup(bool IsHardClean) {
+            if (IsHardClean)
+            {
+                DoHardMemCleanup();
+            }
+            else
+            {
+                _logs.Clear();
+            }
         }
+
+        #region HelperMethods
+
+        private void DoHardMemCleanup()
+        {
+            _logs.Clear();
+            GC.Collect();
+        }
+
+        /*private async Task<List<string>> ReadLogs() {
+            return (await File.ReadAllLinesAsync(fullName)).ToList();
+        }*/
+
+        #endregion
     }
 }

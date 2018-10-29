@@ -10,6 +10,6 @@ namespace FMS2.Services
     {
         void LogToFileAsync(LogLevel logLevel, string address, string message);
         void Cleanup();
-        IEnumerable<string> GetLogs();
+        Task<List<string>> GetLogs();
     }
 }

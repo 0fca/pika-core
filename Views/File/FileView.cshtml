@@ -71,7 +71,8 @@
                 else
                 {
                     var type = MIMEAssistant.RecognizeIconByMime(MIMEAssistant.GetMIMEType(item.Name));
-                    <a asp-controller="File" asp-action="Download" asp-route-id=@id><i class="fas fa-@type"></i>@item.Name</a>
+                    <i class="fas fa-@type"></i>
+                    <a asp-controller="File" asp-action="Download" asp-route-id=@id>@item.Name</a>
                 }
             </div>
             <div class="col-md-3">
@@ -103,11 +104,12 @@
             <div class="col-md-3">
                 @if (item.IsDirectory)
                 {
-                    <a data-toggle="modal" asp-action="Download" asp-controller="File" onclick="showDownloadBox();" asp-route-id=@id><i class="fas fa-arrow-down"></i></a>
+                    <a data-toggle="modal" asp-action="Download" asp-controller="File" onclick="showDownloadBox();" asp-route-id=@id><i class="fas fa-arrow-down" title="Download directory as zip"></i></a>
                 }
                 @if (!item.IsDirectory)
                 {
-                    @Html.ActionLink("Generate download url", "GenerateUrlView", new { @entryName = item.PhysicalPath, @returnUrl = Context.Request.Path})
+   
+                    <a href="File/GenerateUrlView?entryName=@item.PhysicalPath&returnUrl=@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
                 }
                 @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4"))
                 {

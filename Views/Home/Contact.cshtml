@@ -1,18 +1,17 @@
 ﻿@{
     ViewData["Title"] = "Contact";
 }
-    <header class="subpage-title">
+
+    <section class="d-flex align-items-center text-center align-content-center row row-margins">
         <h1>@ViewData["Title"]</h1>
-    </header>
-    <section class="row row-content">
         <p class="section__paragraph">
             If you want to keep in touch with me, you can choose one of these ways:
         </p>
 
-        <ul class="list-inline">
-            <li><a href="https://www.facebook.com/obsidiam"><img src="https://www.facebook.com/images/fb_icon_325x325.png" height="48" width="48" /></a></li>
-            <li><img src="https://telegram.org/img/t_logo.png" width="48" height="48" />obsidiam</li>
-            <li><img src="~/images/discord-icon.svg" />Obsidiam#0661</li>
+        <ul class="list-group">
+            <li><a class="element-margins" href="https://www.facebook.com/obsidiam"><img src="https://www.facebook.com/images/fb_icon_325x325.png" height="48" width="48" /></a></li>
+            <li><a href="https://web.telegram.org"><img class="element-margins" src="https://telegram.org/img/t_logo.png" width="48" height="48" /></a><p>obsidiam</p></li>
+            <li><a href="https://discordapp.com/"><img class="element-margins" src="~/images/discord-icon.svg" /></a><p>Obsidiam#0661</p></li>
         </ul>
         <p class="section__paragraph">
             Feel free to write there any errors related to an app, suggestions or if you have software to be done.

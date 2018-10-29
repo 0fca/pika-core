@@ -9,28 +9,36 @@
 
 @await Html.PartialAsync("_StatusMessage", msg)
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Email
-            </th>
-            <th>
+<ul class="nav nav-tabs item-border">
+    <li class="nav-item item-border active">
+        <a class="nav-link" href="#" onclick="changeVisibleTab(document.activeElement);">Users table</a>
+    </li>
+    <li class="nav-item item-border">
+        <a class="nav-link" href="#" onclick="changeVisibleTab(document.activeElement);">Logs</a>
+    </li>
+</ul>
+
+<div id="container">
+    <div id="users-table">
+        <div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
+            <div class="col-md-5">
+                Username
+            </div>
+            <div class="col-md-3">
                 Permission level
-            </th>
-            <th>
+            </div>
+            <div class="col-md-3">
                 Options
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.UsersWithRoles)
-        {
-            <tr>
-                <td>
+            </div>
+        </div>
+        <div class="div-table">
+            @foreach (var item in Model.UsersWithRoles)
+            {
+                <div class="row">
+                <div class="col-md-5 truncate">
                     @Html.DisplayFor(modelItem => item.Key.UserName)
-                </td>
-                <td>
+                </div>
+                <div class="col-md-3">
                     @{
                         var roleString = "";
                         await item.Value.ToAsyncEnumerable().ForEachAsync(role =>
@@ -39,15 +47,21 @@
                         });
                     }
                     @Html.DisplayFor(modelItem => roleString)
-                </td>
-                <td>
+                </div>
+                <div class="col-md-3">
                     @Html.ActionLink("Edit", "Edit", "Manage", new { @id = item.Key.Id }) | @Html.ActionLink("Delete", "Delete", "Manage", new { @id = item.Key.Id })
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-@await Html.PartialAsync("/Views/Manage/Admin/_LogsViewPartial.cshtml", Model.LogsListViewModel)
+                </div>
+                </div>
+                <hr>
+            }
+
+        </div>
+        </div>
+        <div id="logs" hidden>
+            @await Html.PartialAsync("/Views/Manage/Admin/_LogsViewPartial.cshtml", Model.LogsListViewModel)
+        </div>
+    </div>
+
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")

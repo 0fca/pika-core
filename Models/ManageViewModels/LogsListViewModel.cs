@@ -7,6 +7,6 @@ namespace FMS2.Models.ManageViewModels
 {
     public class LogsListViewModel
     {
-        public IEnumerable<string> Lines { get; set; }
+        public List<string> Lines { get; set; }
     }
 }

@@ -9,6 +9,7 @@
 
     body::before {
         background: url(/scnet/includes/images/bg.jpg) no-repeat center center fixed;
+        background-size: 100% auto;
         content: '';
         z-index: -1;
         width: 100%;
@@ -37,11 +38,6 @@
     background-color: #403E3E;
 }
 
-.body-content-centered {
-    text-align:center;
-    padding-top: 5%;
-    height: 100% !important;
-}
 
 #qrCode {
     margin: 15px;
@@ -52,6 +48,7 @@
     border-bottom-color: #403E3E !important;
     opacity: 0.82;
 }
+
 
 .navbar-right {
     margin-right: 20px !important;
@@ -128,15 +125,16 @@ select {
     background-color: #403E3E;
     opacity: 0.82;
     padding: 10px;
+    
+}
+
+
+.row-margins {
+    margin-top: 15% !important;
 }
 
 .row-content {
-    width: 100%;
-    padding: 20px;
-    margin-top: 10px;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    text-align: center !important;
+    margin-bottom: 50px;
 }
 
 .navbar-brand {
@@ -180,6 +178,7 @@ select{
     width: 100% !important;
     height: 100% !important;
     color: #fff !important;
+    
 }
 
 
@@ -214,6 +213,14 @@ select{
     padding-bottom: 20px !important;
 }
 
+.main-page-content {
+    background-color: #403E3E;
+    margin-top: 25%;
+    opacity: 0.85;
+    padding-top: 5px;
+    padding-bottom: 10px;
+}
+
 .main-page.path-button {
     margin-bottom: 80% !important;
 }
@@ -238,17 +245,46 @@ select{
 }
 
 .log-area {
-    background-color: #000 !important;
+    background-color: #eee !important;
     border: 1px solid #000 !important;
-    color: #00ff00 !important;
+    color: #095C9E !important;
     padding: 8px !important;
     font-family: courier new !important;
     width: 100% !important;
-    height: 200px !important;
+    height: 500px !important;
     box-sizing: border-box;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     resize: none;
     font-size: small;
+}
+
+.col-centered {
+    float: none !important;
+    margin: 0 auto;
+}
+
+
+#sliding-content {
+    overflow: hidden;
+    position: absolute !important;
+    height: 200px;
+    width: inherit !important;
+    height: inherit !important;
+    -webkit-animation: slide 0.5s forwards;
+    -webkit-animation-delay: 2s;
+    animation: slide 0.5s forwards;
+    animation-delay: 2s;
+}
+
+.border-item {
+    border-color: #095C9E !important;
+}
+
+.element-margins {
+   margin-top: 10px;
+   margin-bottom: 10px;
+   margin-right: auto;
+   margin-left: auto;
 }

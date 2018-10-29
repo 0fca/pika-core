@@ -5,11 +5,9 @@
     var version = ViewData["ver"];
 }
 
-<header class="subpage-title">
+<div class="d-flex align-items-center text-center align-content-center flex-wrap row row-margins">
     <h1>@ViewData["Title"]</h1>
-</header>
-<div class="row">
-    <section class="section col-md-3 col-margins" id="aboutme">
+    <section class="col-md-3 col-margins" id="aboutme">
         <h3 class="section__heading">Who am I?</h3>
         <p class="section_paragraph">
             Hi! I’m Obsidiam, I’m Polish Java&amp;C# developer.
@@ -18,7 +16,7 @@
         </p>
         <p>I am a typical "nerd". I love coding especially in C# and Java/Kotlin. I am a hobbyst sysadmin(I have my own homelab server). Next to IT I like learning history, listen to music and learn about how to analyze it in digital manner. I like long walks, riding a bike and skiing. </p>
     </section>
-    <section class="section col-md-3 col-margins" id="aboutthis">
+    <section class="col-md-3 col-margins" id="aboutthis">
         <h3 class="section__heading">What is this?</h3>
         <p class="section_paragraph">
             FMS states for File Management System and it is a web application built especially to make an access to my server's filesystem easier. It is also my portfolio page.
@@ -30,7 +28,7 @@
             This is Veronica(FMS), version: @version BETA.
         </p>
     </section>
-    <section class="section col-md-3 col-margins" id="technicalinformation">
+    <section class="col-md-3 col-margins" id="technicalinformation">
         <h3 class="section__heading">Technical information</h3>
         <p class="section_paragraph">
             <ul class="content-list">

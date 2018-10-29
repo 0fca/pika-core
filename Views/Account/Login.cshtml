@@ -6,8 +6,9 @@
     ViewData["Title"] = "Log in";
 }
 
-<h2>@ViewData["Title"]</h2>
-<div class="row">
+
+<div class="d-flex align-items-center text-center align-content-center row row-margins">
+    <h2>@ViewData["Title"]</h2>
     <div class="col-md-4">
         <section>
             <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
@@ -68,9 +69,9 @@
                             <p>
                                 @foreach (var provider in loginProviders)
                                 {
-                                    var ext = System.IO.File.Exists(System.IO.Directory.GetCurrentDirectory()+"/wwwroot/images/" + @provider.DisplayName.ToLower() + "-icon.png") ? "png" : "svg";
-                                    var img = "/images/"+@provider.DisplayName.ToLower()+"-icon."+ext;
-                                    <button type="submit" class="btn external-login-btn" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><img src=@img alt=@provider.Name/></button>
+                                    var ext = System.IO.File.Exists(System.IO.Directory.GetCurrentDirectory() + "/wwwroot/images/" + @provider.DisplayName.ToLower() + "-icon.png") ? "png" : "svg";
+                                    var img = "/images/" + @provider.DisplayName.ToLower() + "-icon." + ext;
+                                    <button type="submit" class="btn external-login-btn" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account"><img src=@img alt=@provider.Name /></button>
                                 }
                             </p>
                         </div>
