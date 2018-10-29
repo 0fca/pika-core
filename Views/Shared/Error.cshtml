@@ -2,15 +2,41 @@
 @{
     ViewData["Title"] = "Error";
 }
+<head>
+    <title>Oops! Something went wrong!</title>
+</head>
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="d-flex align-items-center text-center align-content-center flex-wrap row row-margins">
+    <img src="~/images/logooftheyear2018-128x128.png" alt="pika" />
+    <h1>FMS Critical Error</h1>
+    <section class="row-content">
+        If you can read this it means that something went wrong.
+        This page handles errors which are not because of internal error of the FMS. Details are below, please copy them and pass to the administrator. Thanks and sorry for the inconvenience.<br />
+        <br />
+        @if (Model != null)
+        {
+            @if (Model.ShowRequestId)
+            {
+        <span class="text-info row-margins">
+            <strong>Request ID:</strong> <code>@Model.RequestId</code>
+            <br>
+            <strong>Message: </strong><code>@Model.Message</code>
+            <br>
+            <strong>Code: </strong><code>@Model.ErrorCode</code>
+            <br />
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+            <strong>URL: </strong>
+            <code>
+                @{
+                    var url = !(String.IsNullOrEmpty(Model.Url)) ? Model.Url : "unknown";
+                }
+            </code>
+        </span>
+            }
+        }
+        <br />
+    </section>
 
-<p>Please, report it to system administrator as fast as possible. Thank you and sorry for an inconvenience!</p>
+</div>
+
+

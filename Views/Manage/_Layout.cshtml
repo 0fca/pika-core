@@ -2,12 +2,9 @@
     Layout = "/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Manage your account</h2>
-
-<div>
-    <h4>Change your account settings</h4>
-    <hr />
-    <div class="row">
+    <div class="d-flex align-items-center text-center align-content-center row row-margins">
+        <h1>Manage your account</h1>
+        <hr />
         <div class="col-md-3">
             @await Html.PartialAsync("_ManageNav")
         </div>
@@ -15,7 +12,6 @@
             @RenderBody()
         </div>
     </div>
-</div>
 
 @section Scripts {
     @RenderSection("Scripts", required: false)
