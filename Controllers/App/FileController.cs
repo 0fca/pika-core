@@ -69,7 +69,15 @@ namespace FMS2.Controllers
 
         public IActionResult FileView(){
             HttpContext.Session.TryGetValue("lastPath", out byte[] result);
-            if (_last != null && result != null) ViewData["returnUrl"] = UnixHelper.GetParent(System.Text.Encoding.UTF8.GetString(result)); ViewData["path"] = System.Text.Encoding.UTF8.GetString(result);
+            if (result != null) ViewData["returnUrl"] = UnixHelper.GetParent(System.Text.Encoding.UTF8.GetString(result)); ViewData["path"] = System.Text.Encoding.UTF8.GetString(result);
+            return View(lrmv);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult AdminFileView()
+        {
+            HttpContext.Session.TryGetValue("lastPath", out byte[] result);
+            if (result != null) ViewData["returnUrl"] = UnixHelper.GetParent(System.Text.Encoding.UTF8.GetString(result)); ViewData["path"] = System.Text.Encoding.UTF8.GetString(result);
             return View(lrmv);
         }
 
@@ -106,12 +114,6 @@ namespace FMS2.Controllers
             return _fileProvider.GetDirectoryContents(_last);
         }
 
-        [Authorize(Roles="Admin")]
-        public IActionResult AdminFileView(){
-            HttpContext.Session.TryGetValue("lastPath", out byte[] result);
-            if (_last != null && result != null) ViewData["returnUrl"] = UnixHelper.GetParent(System.Text.Encoding.UTF8.GetString(result)); ViewData["path"] =  System.Text.Encoding.UTF8.GetString(result); 
-            return View(lrmv);
-        }
 
         [HttpGet]
         [AllowAnonymous]
@@ -298,27 +300,35 @@ namespace FMS2.Controllers
         public async Task<IActionResult> DeleteConfirmation(FileResultModel fileResultModel){
             //var parent = fileResultModel.ReturnPath;
             var contents = fileResultModel.Contents;
-            try{
-                await contents.ToAsyncEnumerable().ForEachAsync(item => {
-                    if (item.Exists)
-                    {
-                        if (item.IsDirectory)
+            if (contents.Count > 0) {
+                try {
+                    await contents.ToAsyncEnumerable().ForEachAsync(item => {
+                        if (item.Exists)
                         {
-                            Directory.Delete(item.PhysicalPath);
+                            if (item.IsDirectory)
+                            {
+                                Directory.Delete(item.PhysicalPath);
+                            }
+                            else
+                            {
+                                System.IO.File.Delete(item.PhysicalPath);
+                            }
                         }
-                        else
-                        {
-                            System.IO.File.Delete(item.PhysicalPath);
-                        }
-                    }
-                });
+                    });
 
-                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully deleted elements.");
-                TempData["returnMessage"] = "Successfully deleted elements.";
-                return RedirectToAction(nameof(Index),  new { path = _last });
-            }catch(Exception e){
-                _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Couldn't delete resource because of " + e.Message);
-                TempData["returnMessage"] = "Error: Couldn't delete resource.";
+                    _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully deleted elements.");
+                    TempData["returnMessage"] = "Successfully deleted elements.";
+                    return RedirectToAction(nameof(Index), new { path = _last });
+                } catch (Exception e) {
+                    _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Couldn't delete resource because of " + e.Message);
+                    TempData["returnMessage"] = "Error: Couldn't delete resource.";
+                    return RedirectToAction(nameof(Index), new { path = _last });
+                }
+            }
+            else
+            {
+                _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Cannot stat.");
+                TempData["returnMessage"] = "Error: Nothing to be deleted.";
                 return RedirectToAction(nameof(Index), new { path = _last });
             }
         }

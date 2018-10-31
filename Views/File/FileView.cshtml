@@ -1,45 +1,55 @@
 ﻿@model FMS2.Models.FileResultModel
 @using System.IO
-
 @using Microsoft.Extensions.FileProviders
-
 @{
     ViewData["Title"] = "Browse";
     object lastPath = ViewData["path"];
     object msg = TempData["returnMessage"];
     var returnUrl = ViewData["returnUrl"];
 }
+
 <h3>
     Directory listing for:
 </h3>
-<span id="nav-span">
+
+<span>
     @{
         string[] splitted = lastPath.ToString().Split("/");
         string last = "";
+        var tmp = Context.Request.Host + "/File?path=" + last;
+
+        <a href="/File?path">Index</a>
+        <label>/</label>
         foreach (string part in splitted)
         {
-            if (!part.Equals("/") && !String.IsNullOrEmpty(part))
+
+            if (!String.IsNullOrEmpty(part))
             {
+
                 last = String.Concat(last, "/", part);
-
+                tmp = Context.Request.Host + "/File?path=" + last;
+                <a href=@tmp>@part</a>
+                <label>/</label>
             }
-
         }
-        var tmp = Context.Request.Host + "/File?path=" + last;
     }
 
-    <input id="pathInput" class="path-input" readonly value=@last />
     <input id="helperInput" value=@tmp class="offscreen" aria-hidden="true" />
     <button class="btn btn-primary-outline" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
+
 </span>
 
-@await Html.PartialAsync("_StatusMessage", msg)
+<span class="input-group-btn">
 
+    <input id="pathInput" class="path-input" readonly value=@last />
+    <button class="btn btn-primary-outline" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
+</span>
+@await Html.PartialAsync("_StatusMessage", msg)
 
 <div id="download-panel" class="row" hidden>
     @await Html.PartialAsync("_DownloadPartial")
 </div>
-   
+
 <div class="row">
     <span class="manage-span">
         <input id="searchBox" type="text" oninput="searchFileList();" placeholder="Search list..." class="form-control" />
@@ -101,7 +111,6 @@
                         }
                     </div>
                     <div class="col-md-4">
-
                         @if (!item.IsDirectory)
                         {
 
@@ -113,7 +122,6 @@
                             TempData["src"] = item.PhysicalPath;
                             @Html.ActionLink("Play", "Video", "Video")
                         }
-
                     </div>
                 </div>
                 <hr>

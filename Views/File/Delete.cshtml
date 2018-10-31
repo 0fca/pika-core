@@ -4,7 +4,7 @@
     ViewData["Title"] = "Delete - Admin";
 }
 <h2>@ViewData["Title"]</h2>
-<div style="height: 100%;">
+<div class="d-flex align-items-center text-center align-content-center flex-wrap row row-margins">
     <p class="text">Choose files or folders to be deleted:</p>
     <form asp-controller="File" asp-action="DeleteConfirmation" method="post" class="form-horizontal">
         @{
@@ -13,14 +13,13 @@
             {
                 items.Add(new SelectListItem { Text = i.Name, Value = i.PhysicalPath });
             }
-
         }
 
-        <select class="custom-select" asp-for="Contents" asp-items="@items" required multiple></select>
+        <select class="custom-select" asp-for="Contents" asp-items="@items" multiple></select>
 
         <span>
-            <button type="submit" class="btn btn-default">Delete</button>
-            <button type="submit" class="btn btn-default" formaction="AdminFileView">Cancel</button>
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <button type="submit" class="btn btn-primary" formaction="AdminFileView">Cancel</button>
         </span>
     </form>
 </div>

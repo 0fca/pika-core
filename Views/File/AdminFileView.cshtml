@@ -12,31 +12,37 @@
     ViewData["Title"] = "Browse - Admin";
     object lastPath = ViewData["path"];
     var msg = TempData["returnMessage"];
-    var parent = ViewData["parent"];
+    var parent = ViewData["returnUrl"];
 }
 
 <h3>
     Directory listing for:
 </h3>
-<span id="nav-span">
+<span>
     @{
         string[] splitted = lastPath.ToString().Split("/");
         string last = "";
+        var tmp = Context.Request.Host + "/File?path=" + last;
+
+        <a href="/File?path">Index</a>
+        <label>/</label>
         foreach (string part in splitted)
         {
-            if (!part.Equals("/") && !String.IsNullOrEmpty(part))
+
+            if (!String.IsNullOrEmpty(part))
             {
+
                 last = String.Concat(last, "/", part);
-
+                tmp = Context.Request.Host + "/File?path=" + last;
+                <a href=@tmp>@part</a>
+                <label>/</label>
             }
-
         }
-        var tmp = Context.Request.Host + "/File?path=" + last;
     }
 
-    <input id="pathInput" class="path-input" readonly value=@last />
-    <input id="helperInput" value=@tmp class="offscreen" aria-hidden="true"/>
+    <input id="helperInput" value=@tmp class="offscreen" aria-hidden="true" />
     <button class="btn btn-primary-outline" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
+
 </span>
 
 @await Html.PartialAsync("_StatusMessage", msg)
@@ -84,7 +90,8 @@
                     else
                     {
                         var type = MIMEAssistant.RecognizeIconByMime(MIMEAssistant.GetMIMEType(item.Name));
-                        <a asp-controller="File" asp-action="Download" asp-route-id=@item.Name class="browse-list-a"><i class="fas fa-@type"></i>@item.Name</a>
+                        <i class="fas fa-@type"></i>
+                        <a asp-controller="File" asp-action="Download" asp-route-id=@item.Name class="browse-list-a">@item.Name</a>
                     }
                 </div>
                 <div class="col-md-4">

@@ -111,16 +111,18 @@ namespace FMS2.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles = "Admin")]
         [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> AdminUserPanel(){
+        public async Task<IActionResult> AdminUserPanel()
+        {
             LogsListViewModel logListViewModel = new LogsListViewModel
             {
                 Lines = await _loggerService.GetLogs()
             };
             Dictionary<ApplicationUser, IList<string>> usersWithRoles = new Dictionary<ApplicationUser, IList<string>>();
 
-            if (usersWithRoles.Count == 0) {
+            if (usersWithRoles.Count == 0)
+            {
                 await _userManager.Users.ToAsyncEnumerable().ForEachAsync(async user =>
                 {
                     var roles = await _userManager.GetRolesAsync(user);
@@ -140,11 +142,12 @@ namespace FMS2.Controllers
         [HttpGet]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GeneratePassword(string Id) {
+        public async Task<IActionResult> GeneratePassword(string Id)
+        {
             var userModel = await _userManager.FindByIdAsync(Id);
             var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
             var guid = Guid.NewGuid().ToString();
-            _urlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA1);
+            _urlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
             var hash = _urlGeneratorService.GenerateId(guid);
             var result = await _userManager.ResetPasswordAsync(userModel, token, hash);
             TempData["newPassword"] = hash;
@@ -154,7 +157,8 @@ namespace FMS2.Controllers
         [HttpGet]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(string Id) {
+        public async Task<IActionResult> Edit(string Id)
+        {
             var userModel = await _userManager.FindByIdAsync(Id);
             var editUserModel = new EditUserModel
             {
@@ -170,7 +174,8 @@ namespace FMS2.Controllers
         [HttpPost]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> EditConfirmation(EditUserModel editModel) {
+        public async Task<IActionResult> EditConfirmation(EditUserModel editModel)
+        {
             var userModel = await _userManager.FindByIdAsync(editModel.Id);
             userModel.Email = editModel.Email;
             userModel.UserName = editModel.UserName;
@@ -183,7 +188,8 @@ namespace FMS2.Controllers
         [HttpGet]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(string Id) {
+        public async Task<IActionResult> Delete(string Id)
+        {
             var email = await _userManager.FindByIdAsync(Id);
             return View("/Views/Manage/Admin/Delete.cshtml", email);
         }
@@ -191,9 +197,10 @@ namespace FMS2.Controllers
         [HttpPost]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmation(string Id) {
+        public async Task<IActionResult> DeleteConfirmation(string Id)
+        {
             var result = await _userManager.DeleteAsync(await _userManager.FindByIdAsync(Id));
-            TempData["returnMessage"] = result.Succeeded ? "Successfully deleted user of id "+Id : "Could not delete user of id "+Id;
+            TempData["returnMessage"] = result.Succeeded ? "Successfully deleted user of id " + Id : "Could not delete user of id " + Id;
             return RedirectToAction(nameof(AdminUserPanel));
         }
 
@@ -445,7 +452,7 @@ namespace FMS2.Controllers
                 throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
             }
 
-            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with ID "+user.Id+" has disabled 2fa.");
+            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with ID " + user.Id + " has disabled 2fa.");
             return RedirectToAction(nameof(TwoFactorAuthentication));
         }
 
@@ -494,7 +501,7 @@ namespace FMS2.Controllers
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
-            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with ID" + user.Id+" has enabled 2FA with an authenticator app.");
+            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with ID" + user.Id + " has enabled 2FA with an authenticator app.");
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
             TempData[RecoveryCodesKey] = recoveryCodes.ToArray();
 
@@ -532,7 +539,7 @@ namespace FMS2.Controllers
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             await _userManager.ResetAuthenticatorKeyAsync(user);
-            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with id "+user.Id+" has reset their authentication app key.");
+            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with id " + user.Id + " has reset their authentication app key.");
 
             return RedirectToAction(nameof(EnableAuthenticator));
         }
@@ -570,7 +577,7 @@ namespace FMS2.Controllers
             }
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with ID "+user.Id+" has generated new 2FA recovery codes.");
+            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with ID " + user.Id + " has generated new 2FA recovery codes.");
 
             var model = new ShowRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
 
