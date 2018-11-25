@@ -23,6 +23,7 @@ namespace FMS2.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
         private readonly UrlEncoder _urlEncoder;
         private readonly IFileLoggerService _loggerService;
@@ -34,6 +35,7 @@ namespace FMS2.Controllers
         public ManageController(
           UserManager<ApplicationUser> userManager,
           SignInManager<ApplicationUser> signInManager,
+          RoleManager<IdentityRole> roleManager,
           IEmailSender emailSender,
           ILogger<ManageController> logger,
           UrlEncoder urlEncoder,
@@ -42,6 +44,7 @@ namespace FMS2.Controllers
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _emailSender = emailSender;
             _urlEncoder = urlEncoder;
             _loggerService = loggerService;
@@ -142,6 +145,7 @@ namespace FMS2.Controllers
         [HttpGet]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
+        [Route("{id}")]
         public async Task<IActionResult> GeneratePassword(string Id)
         {
             var userModel = await _userManager.FindByIdAsync(Id);
@@ -151,7 +155,7 @@ namespace FMS2.Controllers
             var hash = _urlGeneratorService.GenerateId(guid);
             var result = await _userManager.ResetPasswordAsync(userModel, token, hash);
             TempData["newPassword"] = hash;
-            return RedirectToAction(nameof(Edit), new { Id });
+            return RedirectToAction(nameof(AdminUserPanel));
         }
 
         [HttpGet]
@@ -165,9 +169,9 @@ namespace FMS2.Controllers
                 Id = userModel.Id,
                 Phone = userModel.PhoneNumber,
                 Email = userModel.Email,
-                UserName = userModel.UserName
+                UserName = userModel.UserName,
+                Roles = await _userManager.GetRolesAsync(userModel)
             };
-            ViewData["newPassword"] = TempData["newPassword"];
             return View("/Views/Manage/Admin/Edit.cshtml", editUserModel);
         }
 
@@ -180,9 +184,22 @@ namespace FMS2.Controllers
             userModel.Email = editModel.Email;
             userModel.UserName = editModel.UserName;
             userModel.PhoneNumber = editModel.Phone;
+            await _userManager.AddToRolesAsync(userModel, editModel.Roles);
             var result = await _userManager.UpdateAsync(userModel);
             TempData["returnMessage"] = result.Succeeded ? "Successfully edited user's information." : "Could not edit user's information.";
             return RedirectToAction(nameof(AdminUserPanel));
+        }
+
+        [HttpGet]
+        [AutoValidateAntiforgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RemoveFromRole(string id, string roleName) {
+            var result = await _userManager.RemoveFromRoleAsync(await _userManager.FindByIdAsync(id), roleName);
+            if (!result.Succeeded) {
+                StatusMessage = "User of id "+id+" couldn't be deleted from role: "+roleName;
+                _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), StatusMessage+"\n"+result.Errors);
+            }
+            return RedirectToAction(nameof(Edit), new { @Id = id});
         }
 
         [HttpGet]

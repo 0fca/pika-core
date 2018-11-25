@@ -1,4 +1,3 @@
-using FMS2.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,13 +7,10 @@ namespace FMS.Controllers
     {
         [HttpGet]
         [Authorize(Roles="Admin,User")] 
-        [ValidateAntiForgeryToken] 
-        public IActionResult Video(int id){
-            //string absol = TempData["src"].ToString();
-            
-            ViewData["srcvid"] = id;
+        [AutoValidateAntiforgeryToken] 
+        public IActionResult Watch(string id){
             if(ViewData["srcvid"] != null){
-                return View();
+                return View(id);
             }else{
                 return NoContent();
             }

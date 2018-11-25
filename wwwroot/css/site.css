@@ -311,3 +311,15 @@ select{
     position: absolute;
     left: -99999em;
 }
+
+.mdl-color {
+    background-color: #403E3E !important;
+}
+
+.hdr-color {
+    background-color: #403E3E !important;
+}
+
+.opt-font {
+    font-size: 16px !important;
+}

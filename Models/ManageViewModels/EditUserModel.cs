@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace FMS2.Models.ManageViewModels
 {
@@ -14,5 +15,6 @@ namespace FMS2.Models.ManageViewModels
         [DataType(DataType.Password)]
         public string NewPasswd { get; set; }
         public string UserName { get; set; }
+        public IList<string> Roles { get; set; }
     }
 }

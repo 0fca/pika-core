@@ -1,7 +1,8 @@
+@model string
 @{
     ViewData["Title"] = "Video - Admin";
-    string srcvid = ViewData["srcvid"].ToString();
-    srcvid = String.Concat("https://devel.lukas-bownik.net:50001/File/Download?id=",srcvid,"&type=file");
+    string srcvid = Model;
+    srcvid = String.Concat("https://devel.lukas-bownik.net:50001/File/Download?id=",srcvid);
 }
 
 <div align="center" class="embed-responsive embed-responsive-16by9">

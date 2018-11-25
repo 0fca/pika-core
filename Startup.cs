@@ -1,12 +1,15 @@
-﻿using FMS2.Controllers;
+﻿using Api.Hubs;
+using FMS2.Controllers;
 using FMS2.Data;
 using FMS2.Models;
 using FMS2.Providers;
 using FMS2.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -80,14 +83,20 @@ namespace FMS2
                 FileName = "fms-",
                 FileSizeLimit = Constants.MaxLogFileSize,
                 LogDirectory = Configuration.GetSection("Logging").GetSection("LogDirs")[_osName + "-log"],
-                ShouldBackupLogs = Boolean.Parse(Configuration.GetSection("Logging")["ShouldBackupLogs"]),
+                ShouldBackupLogs = bool.Parse(Configuration.GetSection("Logging")["ShouldBackupLogs"]),
                 BackupLogDir = Configuration.GetSection("Logging")["LogBackupDir-"+_osName]
             };
 
             var opts = Options.Create(option);
             services.AddSingleton<ILoggerProvider>(loggerProvider => new FileLoggerProvider(opts));
-            services.AddDistributedMemoryCache();
 
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.AddSignalR();
             services.AddSession(options =>
             {
                 // Set a short timeout for easy testing.
@@ -97,7 +106,8 @@ namespace FMS2
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
             IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[_osName+"-root"]);
             services.AddSingleton(physicalProvider);
-            services.AddMvc();
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
@@ -113,6 +123,7 @@ namespace FMS2
             }
 
             Controllers.Constants.RootPath = Configuration.GetSection("Paths")["storage"];
+            Constants.FileSystemRoot = Configuration.GetSection("Paths")[_osName+"-root"];
             Controllers.Constants.Tmp = Configuration.GetSection("Paths")[_osName+"-tmp"];
 
             app.UseStaticFiles();
@@ -126,7 +137,11 @@ namespace FMS2
             });
 
             app.UseAuthentication();
-
+            //app.UseCors("CorsPolicy");
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<StatusHub>("/status");
+            });
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

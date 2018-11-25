@@ -51,11 +51,15 @@
                 <div class="col-md-3">
                     <a asp-action="Edit" asp-controller="Manage" asp-route-id=@item.Key.Id><i class="fas fa-pen"></i></a>
                     <a asp-action="Delete" asp-controller="Manage" asp-route-id="@item.Key.Id"><i class="fas fa-trash-alt"></i></a>
+                    <a asp-action="GeneratePassword" asp-controller="Manage" asp-route-id="@item.Key.Id"><i class="fas fa-key"></i></a>
                 </div>
                 </div>
                 <hr>
             }
-
+           
+        </div>
+        <div id="downloadPartialDiv">
+            @await Html.PartialAsync("/Views/Manage/Admin/_GeneratePasswordViewPartial.cshtml")
         </div>
         </div>
         <div id="logs" hidden>

@@ -34,6 +34,7 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+      
         public async Task<IActionResult> Login(string returnUrl = null)
         {
             // Clear the existing external cookie to ensure a clean login process
@@ -256,6 +257,7 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
             if (remoteError != null)

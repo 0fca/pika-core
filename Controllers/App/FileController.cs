@@ -1,19 +1,22 @@
-﻿using System;
+﻿using Api.Hubs;
+using FMS.Controllers.Helpers;
+using FMS2.Data;
+using FMS2.Models;
+using FMS2.Models.File;
+using FMS2.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using FMS2.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.AspNetCore.Identity;
-using FMS2.Models.File;
-using FMS2.Services;
-using Microsoft.Extensions.Logging;
-using FMS2.Data;
-using FMS.Controllers.Helpers;
-using System.Collections.Generic;
 
 namespace FMS2.Controllers
 {
@@ -29,8 +32,17 @@ namespace FMS2.Controllers
         private readonly IFileLoggerService _loggerService;
         private readonly StorageIndexContext _storageIndexContext;
         private string _last = Constants.RootPath;
+        private bool wasArchivingCancelled = true;
+        //private bool wasArchivingDone = false;
+        private readonly IHubContext<StatusHub> _hubContext;
 
-        public FileController(IFileProvider fileProvider, SignInManager<ApplicationUser> signInManager, IZipper archiveService, IFileDownloader fileService, ILogger<FileController> iLogger, IGenerator iGenerator, StorageIndexContext storageIndexContext, IFileLoggerService fileLoggerService)
+        public FileController(IFileProvider fileProvider, 
+        SignInManager<ApplicationUser> signInManager, 
+        IZipper archiveService, IFileDownloader fileService, 
+        ILogger<FileController> iLogger, IGenerator iGenerator, 
+        StorageIndexContext storageIndexContext, 
+        IFileLoggerService fileLoggerService,
+        IHubContext<StatusHub> hubContext)
         {
             _signInManager = signInManager;
             _fileProvider = fileProvider;
@@ -40,6 +52,9 @@ namespace FMS2.Controllers
             _generatorService = iGenerator;
             _storageIndexContext = storageIndexContext;
             _loggerService = fileLoggerService;
+            _hubContext = hubContext;
+
+            ((ArchiveService)_archiveService).PropertyChanged += new PropertyChangedEventHandler(PropertyChangedHandler);
         }
 
         [AllowAnonymous]
@@ -47,13 +62,14 @@ namespace FMS2.Controllers
         {
             var tmp = GetContents(path);
             lrmv.Contents = await SortContents(tmp);
-            if (null != lrmv.Contents) {
+            if (null != lrmv.Contents)
+            {
                 _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Got contents for " + _last);
-                return RedirectToAction(_signInManager.Context.User.IsInRole("Admin") ? nameof(AdminFileView) : nameof(FileView));
+                return RedirectToAction(_signInManager.Context.User.IsInRole("Admin") ? nameof(BrowseAdmin) : nameof(Browse));
             }
             else
             {
-                return RedirectToAction("Error", "Home", new ErrorViewModel { ErrorCode = -1, Message="This directory doesn't exist on the server's filesystem.", RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+                return RedirectToAction("Error", "Home", new ErrorViewModel { ErrorCode = -1, Message = "This directory doesn't exist on the server's filesystem.", RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
             }
         }
 
@@ -67,58 +83,68 @@ namespace FMS2.Controllers
             return resultList;
         }
 
-        public IActionResult FileView(){
-            HttpContext.Session.TryGetValue("lastPath", out byte[] result);
-            if (result != null) ViewData["returnUrl"] = UnixHelper.GetParent(System.Text.Encoding.UTF8.GetString(result)); ViewData["path"] = System.Text.Encoding.UTF8.GetString(result);
+        [AllowAnonymous]
+        public IActionResult Browse()
+        {
+            TempData["showDownloadPartial"] = true;
+            if (_last != null) ViewData["returnUrl"] = UnixHelper.GetParent(GetLastPath()); ViewData["path"] = GetLastPath();
             return View(lrmv);
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult AdminFileView()
+        public IActionResult BrowseAdmin()
         {
-            HttpContext.Session.TryGetValue("lastPath", out byte[] result);
-            if (result != null) ViewData["returnUrl"] = UnixHelper.GetParent(System.Text.Encoding.UTF8.GetString(result)); ViewData["path"] = System.Text.Encoding.UTF8.GetString(result);
+            TempData["showDownloadPartial"] = true;
+            if (_last != null) ViewData["returnUrl"] = UnixHelper.GetParent(GetLastPath()); ViewData["path"] = GetLastPath();
             return View(lrmv);
         }
 
         private IDirectoryContents GetContents(string path)
         {
-            
-            if (HttpContext.Session.TryGetValue("lastPath", out byte[] result)) 
-                _last = System.Text.Encoding.UTF8.GetString(result);
 
-            if (string.IsNullOrEmpty(path)){
+            _last = GetLastPath();
+
+            if (string.IsNullOrEmpty(path))
+            {
                 path = Constants.RootPath;
             }
 
-            if(Path.IsPathRooted(path)){
+            if (Path.IsPathRooted(path))
+            {
                 _last = path;
                 HttpContext.Session.Set("lastPath", System.Text.Encoding.UTF8.GetBytes(_last));
                 return _fileProvider.GetDirectoryContents(_last);
             }
 
-            if(path.Equals("/")){
+            if (path.Equals("/"))
+            {
                 _last = Constants.RootPath;
                 HttpContext.Session.Set("lastPath", System.Text.Encoding.UTF8.GetBytes(_last));
                 return _fileProvider.GetDirectoryContents(_last);
             }
-            if(!_last.Equals("/")){
-                _last = string.Concat(_last,"/",path);
-            }else{
-                _last = string.Concat(_last,path);
+            if (!_last.Equals("/"))
+            {
+                _last = string.Concat(_last, "/", path);
+            }
+            else
+            {
+                _last = string.Concat(_last, path);
             }
 
             UnixHelper.ClearPath(ref _last);
             HttpContext.Session.Set("lastPath", System.Text.Encoding.UTF8.GetBytes(_last));
-            
+
             return _fileProvider.GetDirectoryContents(_last);
         }
 
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GenerateUrlView(string returnUrl){
-            string entryName = TempData["physicalPath"].ToString();
+        [Route("/[controller]/[action]/{name?}")]
+        public async Task<IActionResult> GenerateUrlView(string name, string returnUrl)
+        {
+            string entryName = UnixHelper.MapToPhysical(Constants.FileSystemRoot, GetLastPath()+name);
+
             if (!string.IsNullOrEmpty(entryName))
             {
                 try
@@ -167,7 +193,8 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult> PermanentDownload(string id){
+        public async Task<ActionResult> PermanentDownload(string id)
+        {
             if (!string.IsNullOrEmpty(id))
             {
                 StorageIndexRecord s = null;
@@ -193,14 +220,14 @@ namespace FMS2.Controllers
                                 return File(fileBytes, MIMEAssistant.GetMIMEType(name), name);
                             }
 
-                            TempData["returnMessage"] = "FMS thinks that this url expired today, you need to generate a new one.";
+                            TempData["returnMessage"] = "It seems that this url expired today, you need to generate a new one.";
 
                             return RedirectToAction(nameof(Index), new { path = _last });
                         }
                         else
                         {
                             _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value, "Couldn't read requested resource: " + s.absolute_path);
-                            TempData["returnMessage"] = "Couldn't read requested resource: "+s.absolute_path;
+                            TempData["returnMessage"] = "Couldn't read requested resource: " + s.urlid;
                             //return RedirectToAction("Error", "Home", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier, ErrorCode = HttpContext.Response.StatusCode, Message = "This resource isn't accessible at the moment." });
                             return RedirectToAction(nameof(Index));
                         }
@@ -210,7 +237,7 @@ namespace FMS2.Controllers
                 }
                 catch (InvalidOperationException ex)
                 {
-                    TempData["returnMessage"] = "Couldn't read requested resource: " + s.absolute_path;
+                    TempData["returnMessage"] = "Couldn't read requested resource: " + s.urlid;
                     _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), ex.Message);
                     return RedirectToAction(nameof(Index), new { path = _last });
                 }
@@ -224,39 +251,53 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult> Download(string id){
+        public async Task<ActionResult> Download(string id, bool z = false)
+        {
             var name = id;
             if (!string.IsNullOrEmpty(name))
             {
-                HttpContext.Session.TryGetValue("lastPath", out byte[] result);
-                var systemsAbsolute = System.Text.Encoding.UTF8.GetString(result);
-                var fileInfo = _fileProvider.GetFileInfo(string.Concat(systemsAbsolute,"/",name));
+                var systemsAbsolute = GetLastPath();
+                var fileInfo = _fileProvider.GetFileInfo(string.Concat(systemsAbsolute, "/", name));
                 if (typeof(NotFoundFileInfo) != fileInfo.GetType())
                 {
 
-                    var path = fileInfo.PhysicalPath;
-                    byte[] fileBytes = null;
-                    //var name = fileInfo.Name;
+                    var path = z ? string.Concat(Constants.Tmp, id) : fileInfo.PhysicalPath;
+                    //var output = "";
                     var mime = "archive/zip";
 
                     if (System.IO.File.Exists(path))
                     {
-                        fileBytes = await _fileService.DownloadAsync(path);
                         mime = MIMEAssistant.GetMIMEType(name);
+
+                        if (System.IO.File.Exists(path))
+                        {
+                            FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None, 8192, true);
+                            await _hubContext.Clients.All.SendAsync("DownloadStarted");
+                            _loggerService.LogToFileAsync(LogLevel.Warning, HttpContext.Connection.RemoteIpAddress.ToString(), "Attempting to return file with name: " + name + " as an asynchronous stream.");
+                            return File(fs, mime, name);
+                        }
+                        else
+                        {
+                            return RedirectToAction(nameof(Index), new { @path = GetLastPath() });
+                        }
                     }
                     else
                     {
-                        var output = String.Concat(Constants.Tmp, name, ".zip");
-                        await _archiveService.ZipDirectoryAsync(path, output);
-                        fileBytes = await _fileService.DownloadAsync(output);
-                        name = String.Concat(name, ".zip");
+                        if (Directory.Exists(path))
+                        {
+                            TempData["returnMessage"] = "This is a folder, cannot download it directly.";
+                            return RedirectToAction(nameof(Index), new { @path = GetLastPath() });
+                        }
+                        else
+                        {
+                            TempData["returnMessage"] = "The path " + path + " does not exist on server's filesystem.";
+                            return RedirectToAction(nameof(Index));
+                        }
                     }
-                    _loggerService.LogToFileAsync(LogLevel.Warning, HttpContext.Connection.RemoteIpAddress.ToString(), "Attempting to return file with name: " + name);
-                    return File(fileBytes, mime, name);
                 }
                 else
                 {
-                    _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Couldn't read resuested resource: "+name);
+                    _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Couldn't read resuested resource: " + name);
                     TempData["returnMessage"] = "Couldn't read requested resource: " + name;
                     return RedirectToAction(nameof(Index));
                 }
@@ -264,44 +305,91 @@ namespace FMS2.Controllers
             else
             {
                 _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Path does not exist or the id does not exist or both.");
-                TempData["returnMessage"] = "Path does not exist or the id does not exist or both.";
+                TempData["returnMessage"] = "Path parameter was null.";
                 return RedirectToAction(nameof(Index));
             }
         }
 
+        [HttpGet]
+        [AutoValidateAntiforgeryToken]
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> Archive(string id)
+        {
+            var systemsAbsolute = GetLastPath();
+            var output = string.Concat(Constants.Tmp, id, ".zip");
+
+            var path =_fileProvider.GetFileInfo(string.Concat(systemsAbsolute, "/", id)).PhysicalPath;
+
+            if (!((ArchiveService)_archiveService).WasStartedAlready())
+            {
+                var task = await _archiveService.ZipDirectoryAsync(path, output);
+                await _hubContext.Clients.All.SendAsync("ReceiveArchivingStatus");
+                await Task.WhenAll(task);
+                
+                    if (task.IsCompleted)
+                    {
+                        if (wasArchivingCancelled)
+                        {
+                            TempData["returnMessage"] = "Archiving was cancelled by user.";
+                            return RedirectToAction(nameof(Index));
+                        }
+                        else
+                        {
+                            return RedirectToAction(nameof(Download), new { @id = string.Concat(id, ".zip") , @z = true});
+                        }
+                    }
+                    else
+                    {
+                        TempData["returnMessage"] = "Something unexpected happened.";
+                        return RedirectToAction(nameof(Index));
+                    }
+            }
+            else
+            {
+                TempData["returnMessage"] = "All signs on the Earth and on the sky say that you have already ordered FMS to zip something.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        
         [HttpPost]
         [AutoValidateAntiforgeryToken]
-        [Authorize(Roles ="Admin")]
-        public IActionResult Create(string name) {
+        [Authorize(Roles = "Admin")]
+        [Route("/[controller]/[action]/{name?}")]
+        public IActionResult Create(string name)
+        {
             try
-            { 
+            {
                 var dirInfo = Directory.CreateDirectory(string.Concat(_fileProvider.GetFileInfo(_last).PhysicalPath, Path.DirectorySeparatorChar, name));
                 TempData["returnMessage"] = "Successfully created directory: " + dirInfo.Name;
-                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Created directory: " +dirInfo.FullName);
-                return RedirectToAction(nameof(Index), new { path = _last});
+                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Created directory: " + dirInfo.FullName);
+                return RedirectToAction(nameof(Index), new { path = _last });
             }
             catch (Exception e)
             {
-                _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Couldn't create directory because of " +e.Message);
+                _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Couldn't create directory because of " + e.Message);
                 TempData["returnMessage"] = "Error: Couldn't create directory.";
                 return RedirectToAction(nameof(Index), new { path = _last });
             }
         }
 
         [HttpGet]
-        [Authorize(Roles ="Admin")]
-        public IActionResult Delete() {
+        [Authorize(Roles = "Admin")]
+        public IActionResult Delete()
+        {
             return View(lrmv);
         }
 
         [HttpPost]
-        [Authorize(Roles="Admin")]
-        [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> DeleteConfirmation(FileResultModel fileResultModel){
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteConfirmation(FileResultModel fileResultModel)
+        {
             //var parent = fileResultModel.ReturnPath;
             var contents = fileResultModel.Contents;
-            if (contents.Count > 0) {
-                try {
+            if (contents.Count > 0)
+            {
+                try
+                {
                     await contents.ToAsyncEnumerable().ForEachAsync(item => {
                         if (item.Exists)
                         {
@@ -319,7 +407,9 @@ namespace FMS2.Controllers
                     _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully deleted elements.");
                     TempData["returnMessage"] = "Successfully deleted elements.";
                     return RedirectToAction(nameof(Index), new { path = _last });
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Couldn't delete resource because of " + e.Message);
                     TempData["returnMessage"] = "Error: Couldn't delete resource.";
                     return RedirectToAction(nameof(Index), new { path = _last });
@@ -334,38 +424,50 @@ namespace FMS2.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles="Admin")]
-        public IActionResult Rename(int rid){
-            var name = lrmv.Contents.ElementAt(rid).PhysicalPath;
+        [Authorize(Roles = "Admin")]
+        [AutoValidateAntiforgeryToken]
+        [Route("/[controller]/[action]/{inname?}")]
+        public IActionResult Rename(string inname)
+        {
+            string name = UnixHelper.MapToPhysical(Constants.FileSystemRoot, GetLastPath()+inname);
             ViewData["path"] = name;
             RenameFileModel rfm = new RenameFileModel
             {
-                IsDirectory = IsDirectory(name), OldName = name, AbsolutePath = name
+                IsDirectory = IsDirectory(name),
+                OldName = IsDirectory(name) ? Path.GetDirectoryName(name+"/") : Path.GetFileName(name),
+                AbsolutePath = name
             };
-            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Viewing Rename view for " +name);
-            
+            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Viewing Rename view for " + name);
+
             return View(rfm);
         }
 
         [HttpPost]
         [AutoValidateAntiforgeryToken]
-        [Authorize(Roles="Admin")]
-        public IActionResult Rename(RenameFileModel rfm){
-            if(!string.IsNullOrEmpty(rfm.NewName)){
+        [Authorize(Roles = "Admin")]
+        public IActionResult Rename(RenameFileModel rfm)
+        {
+            if (!string.IsNullOrEmpty(rfm.NewName))
+            {
                 //ViewData["type"] = rfm.IsDirectory ? "Directory" : "File";
-            if(rfm.IsDirectory){
-                System.IO.Directory.Move(rfm.AbsolutePath, System.IO.Directory.GetParent(rfm.AbsolutePath)+"/"+rfm.NewName);
-                    _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully renamed directory " +rfm.OldName+" to "+rfm.NewName);
-                    TempData["returnMessage"] = "Successfully renamed to "+rfm.NewName;
-                    return RedirectToAction(nameof(Index), new {path = _last});
-            }else{
-                System.IO.File.Move(rfm.AbsolutePath, System.IO.Directory.GetParent(rfm.AbsolutePath)+"/"+rfm.NewName);
+                if (rfm.IsDirectory)
+                {
+                    System.IO.Directory.Move(rfm.AbsolutePath, System.IO.Directory.GetParent(rfm.AbsolutePath) + "/" + rfm.NewName);
+                    _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully renamed directory " + rfm.OldName + " to " + rfm.NewName);
+                    TempData["returnMessage"] = "Successfully renamed to " + rfm.NewName;
+                    return RedirectToAction(nameof(Index), new { path = _last });
+                }
+                else
+                {
+                    System.IO.File.Move(rfm.AbsolutePath, System.IO.Directory.GetParent(rfm.AbsolutePath) + "/" + rfm.NewName);
                     _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully renamed file " + rfm.OldName + " to " + rfm.NewName);
-                    TempData["returnMessage"] = "Successfully renamed to "+rfm.NewName;
-                    return RedirectToAction(nameof(Index), new {path = _last});
-            }
+                    TempData["returnMessage"] = "Successfully renamed to " + rfm.NewName;
+                    return RedirectToAction(nameof(Index), new { path = _last });
+                }
 
-            }else{
+            }
+            else
+            {
                 _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Rename action aborted because passed data were inappropiate.");
                 ModelState.AddModelError(HttpContext.TraceIdentifier, "New name cannot be empty!");
                 return View(rfm);
@@ -373,28 +475,44 @@ namespace FMS2.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles = "Admin")]
         [AutoValidateAntiforgeryToken]
-        public IActionResult CancelDownloadAsync(){
+        public IActionResult CancelDownloadAsync()
+        {
             _archiveService.Cancel();
             _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Attempting to cancel download task.");
             return RedirectToAction(nameof(Index));
         }
         #region HelperMethods
 
-        private static bool IsDirectory(string name){
+        public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            wasArchivingCancelled = false;
+        }
+
+        private static bool IsDirectory(string name)
+        {
             return !System.IO.File.Exists(name);
         }
 
-        private static string GetName(string absolutePath){
+        private static string GetName(string absolutePath)
+        {
             return IsDirectory(absolutePath) ? System.IO.Path.GetDirectoryName(absolutePath) : System.IO.Path.GetFileName(absolutePath);
         }
 
-        private static DateTime ComputeDateTime(){
+        private static DateTime ComputeDateTime()
+        {
             var now = DateTime.Now;
             now = now.AddDays(Constants.DayCount);
             return now;
         }
+
+        private string GetLastPath()
+        {
+            HttpContext.Session.TryGetValue("lastPath", out byte[] result);
+            return result != null ? System.Text.Encoding.UTF8.GetString(result) : "/";
+        }
+
         #endregion
     }
 }
