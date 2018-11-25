@@ -111,6 +111,23 @@ a, a:hover, a:focus {
         transition: background-color linear .5s;
     }
 
+.btn-danger {
+    background-color: #aa1919 !important;
+    border-color: #d80f0f !important;
+    display: block;
+    width: 150px;
+    transition-duration: 0.5s;
+    color: #fff;
+}
+
+    .btn-danger:hover {
+        background-color: #eee !important;
+        border-color: #aa1919 !important;
+        color: #aa1919 !important;
+        width: 150px;
+        transition: background-color linear .5s;
+    }
+
 .btn-primary-outline {
     background-color: transparent !important;
     border-color: #ccc;
@@ -121,6 +138,7 @@ a, a:hover, a:focus {
     border: none;
     color: #eee;
     font-size: 23px;
+    width: 95%;
 }
 
 select {
@@ -291,5 +309,17 @@ select{
 
 .offscreen {
     position: absolute;
-    left: -999em;
+    left: -99999em;
+}
+
+.mdl-color {
+    background-color: #403E3E !important;
+}
+
+.hdr-color {
+    background-color: #403E3E !important;
+}
+
+.opt-font {
+    font-size: 16px !important;
 }

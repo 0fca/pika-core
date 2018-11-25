@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Veronica</title>
+    <title>@ViewData["Title"] - Constance</title>
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <environment include="Development">
@@ -18,7 +18,6 @@
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
-
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>
@@ -26,7 +25,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Veronica</a>
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Constance</a>
         </div>
         <div class="navbar-collapse collapse">
             @await Html.PartialAsync("_LoginPartial")
@@ -38,15 +37,13 @@
     <footer class="footer">
         <p>
             <a style="text-decoration:none;
-        color: black; margin-left: 15px;" href="/Home/About/27?day=25">&copy;2018</a> - Veronica(FMS)
+        color: black; margin-left: 15px;">&copy;2018</a> - Constance(FMS)
         </p>
-       
-    </footer>
 
+    </footer>
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-
     </environment>
     <environment exclude="Development">
         <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
@@ -62,9 +59,25 @@
                 integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
         </script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
-
     </environment>
+
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <environment include="Development">
+        <script>
+            var connection = new signalR.HubConnectionBuilder().withUrl("/status").configureLogging(signalR.LogLevel.Debug).build();
+        </script>
+    </environment>
+
+    <environment include="Production">
+        <script>
+            var connection = new signalR.HubConnectionBuilder().withUrl("/status").build();
+        </script>
+    </environment>
+
+    <script src="~/js/archiveStatus.js" asp-append-version="true"></script>
+    <script src="~/js/site.js"></script>
+
     @RenderSection("Scripts", required: false)
 </body>
 </html>

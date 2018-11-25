@@ -1,95 +1,169 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Api.Hubs;
+using FMS2.Controllers;
 using FMS2.Data;
 using FMS2.Models;
+using FMS2.Providers;
 using FMS2.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using System.IO;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace FMS2
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private static readonly string _osName = Controllers.Constants.OsName;
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
+
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddDbContext<StorageIndexContext>(options => options.UseMySql(Configuration.GetConnectionString("StorageConnection")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddAuthentication().AddGoogle(googleOptions =>
+            services.AddAuthentication()
+            .AddGoogle(googleOptions =>
             {
                 googleOptions.ClientId = Configuration["Authentication:Google:ClientId"];
                 googleOptions.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
+            })
+            .AddMicrosoftAccount(microsoftOptions =>
+            {
+                microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ApplicationId"];
+                microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:Password"];
+            })
+            .AddGitHub(githubOptions => {
+                githubOptions.ClientId = Configuration["Authentication:GitHub:ClientId"];
+                githubOptions.ClientSecret = Configuration["Authentication:GitHub:ClientSecret"];
+                githubOptions.CallbackPath = "/signin-github";
+            })
+            .AddDiscord(discordOptions => {
+                discordOptions.ClientId = Configuration["Authentication:Discord:ClientId"];
+                discordOptions.ClientSecret = Configuration["Authentication:Discord:ClientSecret"];
+            })
+            .AddOAuth("Reddit", "Reddit",redditOpts => {
+                redditOpts.ClientId = Configuration["Authentication:Reddit:ClientId"];
+                redditOpts.ClientSecret = Configuration["Authentication:Reddit:ClientSecret"];
+                redditOpts.CallbackPath = "/signin-reddit";
+                redditOpts.TokenEndpoint = "https://www.reddit.com/api/v1/access_token";
+                redditOpts.AuthorizationEndpoint = "https://www.reddit.com/api/v1/authorize";
+            });
+           
+
+            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<IZipper, ArchiveService>();
+            services.AddTransient<IFileDownloader, FileService>();
+            services.AddTransient<IGenerator, HashGeneratorService>();
+            var option = new FileLoggerOptions
+            {
+                FileName = "fms-",
+                FileSizeLimit = Constants.MaxLogFileSize,
+                LogDirectory = Configuration.GetSection("Logging").GetSection("LogDirs")[_osName + "-log"],
+                ShouldBackupLogs = bool.Parse(Configuration.GetSection("Logging")["ShouldBackupLogs"]),
+                BackupLogDir = Configuration.GetSection("Logging")["LogBackupDir-"+_osName]
+            };
+
+            var opts = Options.Create(option);
+            services.AddSingleton<ILoggerProvider>(loggerProvider => new FileLoggerProvider(opts));
+
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            // Add application services.
-            services.AddTransient<IEmailSender, EmailSender>();
-            IFileProvider physicalProvider = new PhysicalFileProvider("/");
-            services.AddSingleton<IFileProvider>(physicalProvider);
-            services.AddMvc();
+            services.AddSignalR();
+            services.AddSession(options =>
+            {
+                // Set a short timeout for easy testing.
+                options.IdleTimeout = TimeSpan.MaxValue;
+                options.Cookie.HttpOnly = true;
+            });
+            services.AddSingleton<IFileLoggerService, FileLoggerService>();
+            IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[_osName+"-root"]);
+            services.AddSingleton(physicalProvider);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
-                FMS2.Controllers.Constants.RootPath = "/";
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                FMS2.Controllers.Constants.RootPath = "/mnt/sdb5/";
             }
 
+            Controllers.Constants.RootPath = Configuration.GetSection("Paths")["storage"];
+            Constants.FileSystemRoot = Configuration.GetSection("Paths")[_osName+"-root"];
+            Controllers.Constants.Tmp = Configuration.GetSection("Paths")[_osName+"-tmp"];
+
             app.UseStaticFiles();
+            app.UseFileServer();
+            app.UseStatusCodePagesWithRedirects("/Home/ErrorByCode/{0}");
+            app.UseSession();
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
             app.UseAuthentication();
-
+            //app.UseCors("CorsPolicy");
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<StatusHub>("/status");
+            });
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=home}/{action=index}/{id?}");
             });
             CreateRoles(serviceProvider).Wait();
         }
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {
             //adding custom roles
-            var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var UserManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             string[] roleNames = { "Admin", "FileManagerUser", "User" };
-            IdentityResult roleResult;
-            
+
             foreach (var roleName in roleNames)
             {
                 //creating the roles and seeding them to the database
-                var roleExist = await RoleManager.RoleExistsAsync(roleName);
+                var roleExist = await roleManager.RoleExistsAsync(roleName);
                 if (!roleExist)
                 {
-                    roleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
                 }
             }
             
@@ -100,17 +174,17 @@ namespace FMS2
                 Email = Configuration.GetSection("UserSettings")["UserEmail"]
             };
             
-            string UserPassword = Configuration.GetSection("UserSettings")["UserPassword"];
-            var _user = await UserManager.FindByEmailAsync(Configuration.GetSection("UserSettings")["UserEmail"]);
+            var userPassword = Configuration.GetSection("UserSettings")["UserPassword"];
+            var user = await userManager.FindByEmailAsync(Configuration.GetSection("UserSettings")["UserEmail"]);
+            
             //Debug.WriteLine(_user.Email);
-            if (_user == null)
+            if (user == null)
             {
-                var createPowerUser = await UserManager.CreateAsync(poweruser, UserPassword);
+                var createPowerUser = await userManager.CreateAsync(poweruser, userPassword);
                 if (createPowerUser.Succeeded)
                 {
                     //here we tie the new user to the "Admin" role 
-                    await UserManager.AddToRoleAsync(poweruser, "Admin");
-                    
+                    await userManager.AddToRoleAsync(poweruser, "Admin");
                 }
             }
         }

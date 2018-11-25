@@ -1,4 +1,6 @@
 ﻿@model FMS2.Models.ManageViewModels.EditUserModel
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
 
 @{
     ViewData["Title"] = "Edit data of user " + Model.Email;
@@ -21,27 +23,39 @@
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Phone" class="control-label"></label>
-                <input asp-for="Phone" class="form-control" />
-                <span asp-validation-for="Phone" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="UserName" class="control-label"></label>
                 <input asp-for="UserName" class="form-control" />
                 <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label class="control-label" />
-                <a asp-action="GeneratePassword" asp-route-id=@Model.Id>Reset password</a>
+                <label asp-for="Roles" class="control-label"></label>
+                <ul class="list-unstyled" id="roleList">
+                    @foreach (var role in Model.Roles) {
+                        <li><a class="fas fa-trash-alt" asp-controller="Manage" asp-action="RemoveFromRole" asp-route-id="@Model.Id" asp-route-roleName="@role"> @role</a></li>
+                    }
+                </ul>
+                <select asp-for="Roles" id="roleSelect" class="form-control" multiple>
+                    @{ 
+                        var roles = RoleManager.Roles;
+                        foreach (var role in roles) {
+                            if (!(await UserManager.GetRolesAsync(await UserManager.FindByIdAsync(Model.Id))).Contains(role.Name)) { 
+                                <option value="@role.Name">@role.Name</option>
+                            }
+                        }
+                    }
+                </select>
+                <span asp-validation-for="Roles" class="text-danger"></span>
             </div>
+            <div class="form-group">
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" asp-action="EditConfirmation" />
             </div>
         </form>
-    </div>
-    <div class="col-md-4">
-        @{var guid = ViewData["newPassword"] != null ? ViewData["newPassword"].ToString() : ""; }
-        @await Html.PartialAsync("~/Views/Manage/Admin/_GeneratePasswordViewPartial.cshtml", guid)
     </div>
 </div>
 

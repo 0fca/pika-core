@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using FMS2.Providers;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,12 +15,22 @@ namespace FMS2
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
-        }
+            var configuration = new ConfigurationBuilder()
+            .AddCommandLine(args)
+            .AddEnvironmentVariables()
+            .Build();
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+            var host = WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                .UseConfiguration(configuration)
+                .ConfigureLogging((hostingContext, logging) =>
+                {
+                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"))
+                    .AddDebug();
+                })
                 .Build();
+
+            host.Run();
+        }
     }
 }

@@ -33,16 +33,29 @@ function resetFileList(){
 
 function showDownloadBox(){
     document.getElementById("download-panel").removeAttribute("hidden");
+} 
+
+function hideDownloadBox() {
+    let downloadPartial = document.getElementById("downloadPartial");
+    downloadPartial.setAttribute("hidden", true);
 }
 
-function downloadResource(downloadPath) { 
-    showDownloadBox();
-    var w = window.open(downloadPath, '_blank', '', true);  
-    console.log(w);
-    w.onclose = function(){
-        document.getElementById("download-panel").setAttribute("hidden",true);
-    }
-    //document.getElementById("download-panel").setAttribute("hidden", true);
+function reloadDownloadPartial() {
+    let cancelArchivingButton = document.getElementById("cancelArchivingButton");
+    cancelArchivingButton.setAttribute("disabled", true);
+    let info = document.getElementById("info");
+    info.innerText = "Wait while your file is being prepared...";
+    document.getElementById("progress-bar").removeAttribute("hidden");
+}
+
+function showMessagePartial(message, isError) {
+    console.log(message);
+    let ariaclass = " alert-" + (isError ? "danger" : "success");
+    let alertText = document.getElementById("msg");
+    let alertDiv = document.getElementById("alert");
+    alertDiv.removeAttribute("hidden");
+    alertDiv.getAttribute("class").concat(ariaclass);
+    alertText.innerText = message;
 }
 
 function copyToClipboard(id) {
@@ -78,4 +91,10 @@ function changeVisibleTab(controlName) {
         scrollLogAreaToEnd();
     }
 }
+
+function hideDownloadPartial() {
+    let downloadPartial = document.getElementById("downloadPartialDiv");
+    downloadPartial.setAttribute("hidden",true);
+}
+
 

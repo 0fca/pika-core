@@ -8,6 +8,8 @@ namespace FMS2.Controllers{
         }
         public static string RootPath {get; set;}
 
+        public static string FileSystemRoot { get; set; }
+
         public const int DayCount = 10;
 
         public static string Tmp {get; set;}
