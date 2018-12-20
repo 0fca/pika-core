@@ -214,15 +214,17 @@ public sealed class MIMEAssistant
     {
         List<string> mimeParts = new List<string>();
         mimeParts.AddRange(new string[]{ "video" , "audio" , "image" });
-        Dictionary<string, string> translationParts = new Dictionary<string, string>();
-        translationParts.Add("zip","archive");
-        translationParts.Add("7zip","archive");
-        translationParts.Add("tar","archive");
-        translationParts.Add("pptx","powerpoint");
-        translationParts.Add("xlsx","spreadsheet");
-        translationParts.Add("docx","word");
-        translationParts.Add("text", "alt");
-        translationParts.Add("application","file");
+        Dictionary<string, string> translationParts = new Dictionary<string, string>
+        {
+            { "zip", "archive" },
+            { "7zip", "archive" },
+            { "tar", "archive" },
+            { "pptx", "powerpoint" },
+            { "xlsx", "spreadsheet" },
+            { "docx", "word" },
+            { "text", "alt" },
+            { "application", "file" }
+        };
         var parts = mime.Split('/');
 
         if (mimeParts.Contains(parts[0]))
@@ -231,8 +233,15 @@ public sealed class MIMEAssistant
         }
         else
         {
-            translationParts.TryGetValue(parts[1], out string value);
-            return translationParts.ContainsKey(parts[1]) ? value : parts[1];
+            translationParts.TryGetValue(parts[0], out string value);
+            if (string.IsNullOrEmpty(value))
+            {
+                return translationParts.ContainsKey(parts[0]) ? value : parts[1];
+            }
+            else
+            {
+                return "file";
+            }
         }
     }
 }

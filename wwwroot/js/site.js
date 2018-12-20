@@ -33,18 +33,19 @@ function resetFileList(){
 
 function showDownloadBox(){
     document.getElementById("download-panel").removeAttribute("hidden");
+    document.getElementById("cancelArchivingButton").removeAttribute("disabled");
 } 
 
 function hideDownloadBox() {
-    let downloadPartial = document.getElementById("downloadPartial");
+    let downloadPartial = document.getElementById("download-panel");
     downloadPartial.setAttribute("hidden", true);
 }
 
-function reloadDownloadPartial() {
+function reloadDownloadPartial(message) {
     let cancelArchivingButton = document.getElementById("cancelArchivingButton");
     cancelArchivingButton.setAttribute("disabled", true);
     let info = document.getElementById("info");
-    info.innerText = "Wait while your file is being prepared...";
+    info.innerText = message;
     document.getElementById("progress-bar").removeAttribute("hidden");
 }
 
@@ -97,4 +98,18 @@ function hideDownloadPartial() {
     downloadPartial.setAttribute("hidden",true);
 }
 
+function resetListOnView() {
+    let uploadButton = document.getElementById("upload-submit");
+    let filesList = document.getElementById("filesList");
+    for (let listItem in fileList) {
+        filesList.removeChild(listItem);
+    }
+    uploadButton.setAttribute("disabled", true);
+}
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    var elems = document.querySelectorAll('.sidenav');
+    M.AutoInit();
+});
 

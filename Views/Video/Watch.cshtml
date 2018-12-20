@@ -2,9 +2,9 @@
 @{
     ViewData["Title"] = "Video - Admin";
     string srcvid = Model;
-    srcvid = String.Concat("https://devel.lukas-bownik.net:50001/File/Download?id=",srcvid);
+    srcvid = String.Concat("https://me.lukas-bownik.net/Video/Convert?path=",srcvid);
 }
 
-<div align="center" class="embed-responsive embed-responsive-16by9">
-        <video width="620" controls src=@srcvid />
+<div class="embed-responsive embed-responsive-16by9 row-margins">
+        <video width="620" src=@srcvid autoplay controls/>
 </div>

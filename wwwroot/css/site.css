@@ -3,83 +3,53 @@
 }
 
 body {
-    padding-top: 50px;
-    font-family: 'Segoe UI';
     font-size: 17px !important;
     padding-bottom: 20px;
-    background-color: #fefefe; 
-    color: #fff !important;
+    background-color: #eee !important;
+    color: #202020 !important;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
 }
 
-    body::before {
-        background: url(/scnet/includes/images/bg.jpg) no-repeat center center fixed;
-        background-size: 100% auto;
-        content: '';
-        z-index: -1;
-        width: 100%;
-        height: 100%;
-        position: fixed;
-        background-image: url("../images/datacenter-servers.jpg") !important;
-        background-repeat: no-repeat !important;
-        background: fixed;
-        -webkit-background-size: fill;
-        -moz-background-size: fill;
-        -o-background-size: fill;
-        background-size: fill;
-        -webkit-filter: blur(5px);
-        -moz-filter: blur(5px);
-        -o-filter: blur(5px);
-        -ms-filter: blur(5px);
-        filter: blur(5px);
-    }
+main {
+    flex: 1 0 auto;
+}
+
 
 .footer {
     position: fixed;
     bottom: 0;
     width: 100%;
-    height: 30px;
-    line-height: 30px;
-    background-color: #403E3E;
+    background-color: #303F9F !important;
+    color: #212121 !important;
 }
 
 
-#qrCode {
-    margin: 15px;
+.navbar-color {
+    background-color: #eee !important;
+    border-bottom-color: #eee !important;
 }
 
-.navbar {
-    background-color: #403E3E !important;
-    border-bottom-color: #403E3E !important;
-    opacity: 0.82;
-}
-
-
-.navbar-right {
-    margin-right: 20px !important;
-}
 
 .navlink {
-    color: #eee !important;
+    color: #212121 !important;
 }
 
     .navlink:hover, .navlink:focus {
-        color: #337ab7 !important;
+        color: #009688 !important;
     }
 
 
 a, a:hover, a:focus {
-    color: #9dc3e0 !important;
+    color: #757575 !important;
     text-decoration: none !important;
 }
 
-.hr {
-    border-color: #095C9E;
-    border-top: #095C9E;
-}
 
 .btn-default {
-    background-color: #095C9E !important;
-    border-color: #9dc3e0 !important;
+    background-color: #009688 !important;
+    border-color: #095C9E !important;
     display: block;
     width: 150px;
     transition-duration: 0.5s;
@@ -89,24 +59,23 @@ a, a:hover, a:focus {
     .btn-default:hover, .btn-default:focus {
         background-color: #eee !important;
         border-color: #095C9E !important;
-        color: #095C9E !important;
+        color: #212121 !important;
         transition-duration: 0.5s;
     }
 
 .btn-primary {
-    background-color: #095C9E !important;
-    border-color: #9dc3e0 !important;
+    background-color: #009688 !important;
+    border-color: #009688 !important;
     display: block;
-    background-color: #337ab7;
     width: 150px;
     transition-duration: 0.5s;
-    color: #fff;
+    color: #fff !important;
 }
 
     .btn-primary:hover {
         background-color: #eee !important;
         border-color: #095C9E !important;
-        color: #095C9E !important;
+        color: #212121 !important;
         width: 150px;
         transition: background-color linear .5s;
     }
@@ -128,87 +97,32 @@ a, a:hover, a:focus {
         transition: background-color linear .5s;
     }
 
-.btn-primary-outline {
-    background-color: transparent !important;
-    border-color: #ccc;
-}
-
 .path-input {
     background-color: transparent !important;
     border: none;
-    color: #eee;
+    color: #212121;
     font-size: 23px;
     width: 95%;
 }
 
-select {
-    background-color: inherit;
-    width: 100%;
-    height: 100%;
-    border-style: none;
+
+.inside-nav-link:hover {
+    color: #757575;
 }
 
-.row {
-    align-content: center !important;
-    align-items: center !important;
-    background-color: #403E3E;
-    opacity: 0.82;
-    padding: 10px;
+.inside-nav-link {
+    color: #757575;
 }
 
-
-.row-margins {
-    margin-top: 15% !important;
-}
-
-.row-content {
-    margin-bottom: 50px;
-    text-align: justify;
-    text-justify: auto;
-}
-
-.navbar-brand {
-    color: #9dc3e0 !important;
-}
-
-.inside-nav-link:hover{
-    color: #9dc3e0;
-}
-
-.inside-nav-link{
-    color: #095C9E;
-}
-.content-list{
-    list-style: none;
-}
-
-.form-control{
-    color: rgb(17,17,17) !important;
-}
-
-select{
-    height: 400px !important;
-}
 
 .truncate { width: 100%; height: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: justify; }
 
-.external-login-btn{
-    background-color: transparent;
-}
-
 .path-button {
     background-color: transparent;
-    padding:0;
-    color: #095C9E;
+    padding: 0;
+    color: #757575;
     text-decoration: none;
     border: none;
-}
-
-.browse-list-a {
-    width: 100% !important;
-    height: 100% !important;
-    color: #fff !important;
-    
 }
 
 .col-margins {
@@ -216,25 +130,13 @@ select{
     margin-right: 4%;
 }
 
-.fade {
-    opacity: 0;
-    transition: opacity .25s ease-in-out;
-    -moz-transition: opacity .25s ease-in-out;
-    -webkit-transition: opacity .25s ease-in-out;
-}
-
-    .fade:hover {
-        opacity: 1;
-    }
 
 .container-padding {
     padding-bottom: 20px !important;
 }
 
 .main-page-content {
-    background-color: #403E3E;
-    margin-top: 25%;
-    opacity: 0.85;
+    margin-top: 20%;
     padding-top: 5px;
     padding-bottom: 10px;
 }
@@ -252,20 +154,11 @@ select{
     font-size: 22px;
 }
 
-.div-table:nth-child(2n+1) {
-    background-color: #eaeaea;
-}
-
-
-.div-table {
-    background-color: #403E3E !important;
-    opacity: 0.82;
-}
 
 .log-area {
-    background-color: #eee !important;
+    background-color: #fefefe !important;
     border: 1px solid #000 !important;
-    color: #095C9E !important;
+    color: #F44336 !important;
     padding: 8px !important;
     font-family: courier new !important;
     width: 100% !important;
@@ -278,27 +171,6 @@ select{
     font-size: small;
 }
 
-.col-centered {
-    float: none !important;
-    margin: 0 auto;
-}
-
-
-#sliding-content {
-    overflow: hidden;
-    position: absolute !important;
-    height: 200px;
-    width: inherit !important;
-    height: inherit !important;
-    -webkit-animation: slide 0.5s forwards;
-    -webkit-animation-delay: 2s;
-    animation: slide 0.5s forwards;
-    animation-delay: 2s;
-}
-
-.border-item {
-    border-color: #095C9E !important;
-}
 
 .element-margins {
    margin-top: 10px;
@@ -312,14 +184,70 @@ select{
     left: -99999em;
 }
 
-.mdl-color {
-    background-color: #403E3E !important;
+
+#search {
+    float: right;
+    margin-top: 9px;
+    width: 250px;
 }
 
-.hdr-color {
-    background-color: #403E3E !important;
+.pika-img {
+    align-items: center !important;
+    align-content: center !important;
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
-.opt-font {
-    font-size: 16px !important;
+.brand-margin {
+    margin-left: 10px !important;
 }
+
+.tabs .tab a {
+    color: #009688;
+}
+    /*Black color to the text*/
+
+    .tabs .tab a:hover {
+        background-color: #eee;
+        color: #009688;
+    }
+    /*Text color on hover*/
+
+    .tabs .tab a.active {
+        background-color: #888;
+        color: #009688;
+    }
+/*Background and text color when a tab is active*/
+
+.tabs .indicator {
+    background-color: #009688;
+}
+
+.inputfile {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.filelbl, .filelbl:hover {
+    width: auto;
+}
+
+.typewriter {
+    overflow: hidden; /* Ensures the content is not revealed until the animation */
+    border-right: .15em solid orange; /* The typwriter cursor */
+    white-space: nowrap; /* Keeps the content on a single line */
+    margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+    letter-spacing: .15em; /* Adjust as needed */
+    animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+}
+
+.wrap{
+    color: #009688;
+    font-size: 24px;
+}
+

@@ -53,13 +53,16 @@
             </div>
 
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" asp-action="EditConfirmation" />
+                <input type="submit" value="Save" class="btn btn-danger" asp-action="EditConfirmation" />
+                <input type="submit" value="Cancel" class="btn btn-default" asp-action="AdminUserPanel" />
             </div>
         </form>
     </div>
 </div>
-
-<div>
-    <a asp-action="AdminUserPanel" asp-controller="Manage"><i class="fas fa-arrow-left"></i></a>
-</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var elems = document.querySelectorAll('select');
+        var instances = M.FormSelect.init(elems);
+    });
+</script>
 

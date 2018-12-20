@@ -1,0 +1,37 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@using Microsoft.AspNetCore.Identity
+@using FMS2.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var userName = UserManager.GetUserName(User);
+    var email = await UserManager.GetUserAsync(User) != null ? await UserManager.GetEmailAsync(await UserManager.GetUserAsync(User)) : "";
+}
+
+<li>
+    <div class="user-view">
+        <a href="#user"><img class="circle" src="~/images/logooftheyear2018.png" alt="User pic"></a>
+        <a asp-controller="Manage" asp-action="Index"><span class="name">@userName</span></a>
+        <p><span class="email">@email</span></p>
+    </div>
+</li>
+<li><a class="navlink" asp-area="" asp-controller="File" asp-action="Index">Browse</a></li>
+<li><a class="navlink" asp-area="" asp-controller="Home" asp-action="Projects">Projects</a></li>
+<li><a class="navlink" asp-area="" asp-controller="Home" asp-action="Download">Download</a></li>
+<li><a class="navlink" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+<li><a class="navlink" asp-area="" asp-controller="Home" asp-action="About">About</a></li>
+@if (SignInManager.IsSignedIn(User))
+{
+    <li>
+        <button type="submit" class="waves-effect waves-teal btn-flat">Log out</button>
+    </li>
+
+}
+else
+{
+    <li><a asp-area="" class="navlink" asp-controller="Account" asp-action="Register">Register</a></li>
+    <li><a asp-area="" class="navlink" asp-controller="Account" asp-action="Login">Log in</a></li>
+}

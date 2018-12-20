@@ -17,7 +17,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace FMS2
@@ -76,8 +75,9 @@ namespace FMS2
 
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IZipper, ArchiveService>();
-            services.AddTransient<IFileDownloader, FileService>();
+            services.AddTransient<IFileOperator, FileService>();
             services.AddTransient<IGenerator, HashGeneratorService>();
+            services.AddTransient<IStreamingService, StreamingService>();
             var option = new FileLoggerOptions
             {
                 FileName = "fms-",
@@ -106,6 +106,8 @@ namespace FMS2
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
             IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[_osName+"-root"]);
             services.AddSingleton(physicalProvider);
+            Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-"+_osName];
+            Constants.UploadTmp = Configuration.GetSection("Paths")["upload-dir-tmp"];
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
         }
@@ -125,6 +127,7 @@ namespace FMS2
             Controllers.Constants.RootPath = Configuration.GetSection("Paths")["storage"];
             Constants.FileSystemRoot = Configuration.GetSection("Paths")[_osName+"-root"];
             Controllers.Constants.Tmp = Configuration.GetSection("Paths")[_osName+"-tmp"];
+            Constants.MaxUploadSize = Int64.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
 
             app.UseStaticFiles();
             app.UseFileServer();

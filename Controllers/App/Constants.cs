@@ -14,6 +14,12 @@ namespace FMS2.Controllers{
 
         public static string Tmp {get; set;}
 
+        public static string UploadDirectory { get; set; }
+
+        public static string UploadTmp { get; set; }
+
+        public static long MaxUploadSize { get; set; }
+
         public static string OsName {get; set;}
 
         public const int MaxLogFileSize = 100 * 1024 * 1024;

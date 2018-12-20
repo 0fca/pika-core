@@ -1,45 +1,54 @@
-﻿<!DOCTYPE html>
+﻿@inject UserManager<ApplicationUser> UserManager
+@{ 
+    var role = "";
+    if (User.Identity.Name != null)
+    {
+        role = (await UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).ElementAt(0);
+
+        ViewData["Role"] = role;
+    }
+
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Constance</title>
+    <title>@ViewData["Title"] @role Blanca</title>
     <link rel="stylesheet" href="~/css/site.css" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
-    <environment include="Development">
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
-    </environment>
-    <environment exclude="Development">
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css"
-              asp-fallback-href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.css"
-              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
-    </environment>
 </head>
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Constance</a>
+    <form asp-area="" asp-action="Logout" asp-controller="Account" method="post" id="logoutForm">
+        <div class="navbar-fixed">
+
+            <nav>
+                <div class="nav-wrapper navbar-color">
+                    <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="fas fa-bars"></i></a>
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="brand-logo brand-margin">
+                        Blanca
+                    </a>
+                    @await Html.PartialAsync("_LoginPartial")
+                </div>
+            </nav>
         </div>
-        <div class="navbar-collapse collapse">
-            @await Html.PartialAsync("_LoginPartial")
-        </div>
-    </nav>
+        <ul id="slide-out" class="sidenav">
+            @await Html.PartialAsync("_Sidenav")
+        </ul>
+    </form>
     <div class="container d-flex justify-content-center container-padding">
         @RenderBody()
     </div>
-    <footer class="footer">
-        <p>
-            <a style="text-decoration:none;
-        color: black; margin-left: 15px;">&copy;2018</a> - Constance(FMS)
-        </p>
-
+    <footer class="page-footer footer">
+        <div class="footer-copyright">
+            <div class="container">
+                © 2018 Pika Cloud
+            </div>
+        </div>
     </footer>
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
@@ -60,7 +69,6 @@
         </script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
-
     <script src="~/lib/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <environment include="Development">
@@ -68,16 +76,15 @@
             var connection = new signalR.HubConnectionBuilder().withUrl("/status").configureLogging(signalR.LogLevel.Debug).build();
         </script>
     </environment>
-
     <environment include="Production">
         <script>
             var connection = new signalR.HubConnectionBuilder().withUrl("/status").build();
         </script>
     </environment>
-
     <script src="~/js/archiveStatus.js" asp-append-version="true"></script>
-    <script src="~/js/site.js"></script>
-
+    <script src="~/js/requests.js"></script>
+    <script src="~/js/file.js"></script>
+    <script src="~/js/typewriter.js"></script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

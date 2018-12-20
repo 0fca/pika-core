@@ -52,6 +52,7 @@ namespace FMS2.Controllers
         }
 
         [TempData] private string StatusMessage { get; set; }
+        [TempData] private string returnMessage { get; set; }
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -115,7 +116,6 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> AdminUserPanel()
         {
             LogsListViewModel logListViewModel = new LogsListViewModel
@@ -143,23 +143,24 @@ namespace FMS2.Controllers
         }
 
         [HttpGet]
-        [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
         [Route("{id}")]
         public async Task<IActionResult> GeneratePassword(string Id)
         {
             var userModel = await _userManager.FindByIdAsync(Id);
-            var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
-            var guid = Guid.NewGuid().ToString();
-            _urlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
-            var hash = _urlGeneratorService.GenerateId(guid);
-            var result = await _userManager.ResetPasswordAsync(userModel, token, hash);
-            TempData["newPassword"] = hash;
+            if ((await _userManager.GetLoginsAsync(userModel)).Count == 0) {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
+                var guid = Guid.NewGuid().ToString();
+                _urlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
+                var hash = _urlGeneratorService.GenerateId(guid);
+                var result = await _userManager.ResetPasswordAsync(userModel, token, hash);
+                TempData["newPassword"] = hash;
+            }
+            returnMessage = "This user is logged in via 3rd party provider, cannot reset password.";
             return RedirectToAction(nameof(AdminUserPanel));
         }
 
         [HttpGet]
-        [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(string Id)
         {
@@ -184,7 +185,9 @@ namespace FMS2.Controllers
             userModel.Email = editModel.Email;
             userModel.UserName = editModel.UserName;
             userModel.PhoneNumber = editModel.Phone;
-            await _userManager.AddToRolesAsync(userModel, editModel.Roles);
+            if (editModel.Roles != null) {
+                await _userManager.AddToRolesAsync(userModel, editModel.Roles);
+            }
             var result = await _userManager.UpdateAsync(userModel);
             TempData["returnMessage"] = result.Succeeded ? "Successfully edited user's information." : "Could not edit user's information.";
             return RedirectToAction(nameof(AdminUserPanel));
@@ -194,10 +197,19 @@ namespace FMS2.Controllers
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RemoveFromRole(string id, string roleName) {
-            var result = await _userManager.RemoveFromRoleAsync(await _userManager.FindByIdAsync(id), roleName);
-            if (!result.Succeeded) {
-                StatusMessage = "User of id "+id+" couldn't be deleted from role: "+roleName;
-                _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), StatusMessage+"\n"+result.Errors);
+            var user = await _userManager.FindByIdAsync(id);
+            if ((await _userManager.GetRolesAsync(user)).Count > 1)
+            {
+                var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+                if (!result.Succeeded)
+                {
+                    StatusMessage = "User of id " + id + " couldn't be deleted from role: " + roleName;
+                    _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), StatusMessage + "\n" + result.Errors);
+                }
+            }
+            else
+            {
+                StatusMessage = "Couldn't delete user of id "+id+" from role "+roleName+", user has to be in one role at least.";
             }
             return RedirectToAction(nameof(Edit), new { @Id = id});
         }

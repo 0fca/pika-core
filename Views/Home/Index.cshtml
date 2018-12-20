@@ -1,8 +1,12 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-<div class="d-flex align-items-center text-center align-content-center main-page-content">
+<div class="row">
+    <div class="main-page-content col s12">
         <h1>Welcome to my website!</h1>
-        <a asp-controller="Home" asp-action="Projects" class="btn btn-primary main-page-button">See my projects</a>
+            <p class="typewrite" data-period="2000" data-type='[ "Hello stranger!", "I am Łukasz.", "And my nickname is Arkasian.", "I am a developer.","For more info: About and Projects... or dig in my storage entering Browse." ]'>
+                <span class="wrap"></span>
+            </p>
+    </div>
 </div>
    

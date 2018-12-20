@@ -2,20 +2,19 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 @model FMS2.Models.FileResultModel
 @inject PhysicalFileProvider FileProvider;
 @using System.IO
 @using Microsoft.Extensions.FileProviders
 
 @{
-    ViewData["Title"] = "Browse - Admin";
+    ViewData["Title"] = "Browse";
     object lastPath = ViewData["path"];
     var msg = TempData["returnMessage"];
     var parent = ViewData["returnUrl"];
     var showDownloadPart = TempData["showDownloadPartial"];
 }
-
+@await Html.PartialAsync("_StatusMessage", msg)
 <h3>
     Directory listing for:
 </h3>
@@ -23,9 +22,9 @@
     @{
         string[] splitted = lastPath.ToString().Split("/");
         string last = "";
-        var tmp = Context.Request.Host + "/File?path=" + last;
+        var tmp = "/File?path=" + last;
 
-        <a href="/File?path">Index</a>
+        <a href="/File">Index</a>
         <label>/</label>
         foreach (string part in splitted)
         {
@@ -34,110 +33,104 @@
             {
 
                 last = String.Concat(last, "/", part);
-                tmp = Context.Request.Host + "/File?path=" + last;
+                tmp = "/File?path=" + last;
                 <a href=@tmp>@part</a>
                 <label>/</label>
             }
         }
     }
-
-    <input id="helperInput" value=@tmp class="offscreen" aria-hidden="true" />
-    <button class="btn btn-primary-outline" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
-
+    <input id="helperInput" value="@Context.Request.Host@tmp" class="offscreen" aria-hidden="true" />
+    <button class="waves-effect waves-teal btn-flat" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
+    <input type="text" id="pathField" placeholder="Enter the absolute system path..." class="form-control" value="@last" />
 </span>
-
-@await Html.PartialAsync("_StatusMessage", msg)
 
 
 <div id="download-panel" class="row" hidden>
     @await Html.PartialAsync("_DownloadPartial")
 </div>
-
-<div class="row">
+<span class="row">
     <span class="manage-span">
-        <input id="searchBox" type="text" oninput="searchFileList();" placeholder="Search list..." class="form-control" />
-        <a asp-controller="File" asp-action="Index" asp-route-path=@parent><i class="fas fa-arrow-left"></i></a>
-
-        <a type="button" href="#file-editor" data-toggle="modal"><i class="fas fa-folder-plus"></i></a>
-        <a asp-controller="File" asp-action="Delete" asp-route-path=@parent><i class="fas fa-trash-alt"></i>  </a>
-
+        <a class="btn-flat" asp-controller="File" asp-action="Index" asp-route-path=@parent><i class="fas fa-arrow-left"></i></a>
+        <a data-target="file-editor" class="btn-flat modal-trigger"><i class="fas fa-folder-plus"></i></a>
+        <a class="btn-flat" asp-controller="File" asp-action="Delete" asp-route-path=@parent><i class="fas fa-trash-alt"></i>  </a>
+        <a class="btn-flat modal-trigger" data-target="upload-modal"><i class="fas fa-upload"></i></a>
     </span>
-</div>
-<div class="d-flex align-items-center text-center align-content-center row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
-    <div class="col-md-4">
+    <span>
+        <input type="text" id="searchBox" maxlength="64" placeholder="Search" oninput="searchFileList();" />
+    </span>
+</span>
+<div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
+    <div class="col s4">
         Name
     </div>
-    <div class="col-md-4">
+    <div class="col s4">
         Size
     </div>
-    <div class="col-md-4">
+    <div class="col s4">
         Options
     </div>
 </div>
-<div id="file-list" class="d-flex align-items-center text-center align-content-center div-table">
+<div id="file-list" class="collection">
     @if (Model.Contents != null)
     {
         if (Model.Contents.Count > 0)
         {
             foreach (var item in Model.Contents)
             {
-            <div class="row">
-                <div class="col-md-4 truncate">
-                    @if (item.IsDirectory)
-                    {
-                        <i class="fas fa-folder"></i>
-                        <a asp-controller="File" asp-action="Index" asp-route-path=@item.Name class="browse-list-a">@item.Name</a>
-                    }
-                    else
-                    {
-                        var type = MIMEAssistant.RecognizeIconByMime(MIMEAssistant.GetMIMEType(item.Name));
-                        <i class="fas fa-@type"></i>
-                        <a asp-controller="File" asp-action="Download" asp-route-id=@item.Name class="browse-list-a">@item.Name</a>
-                    }
-                </div>
-                <div class="col-md-4">
-                    @if (!item.IsDirectory)
-                    {
-                        var unitStrPart = "";
-                        long i = item.Length;
-                        string[] units = { "B", "kB", "MB", "GB", "TB" };
-                        int unitIndex = 0;
-                        for (int ptr = 0; ptr <= units.Length; ptr++)
+                <div class="row collection-item">
+                    <div class="col s6 truncate">
+                        @if (item.IsDirectory)
                         {
-                            if (i < Math.Pow(1024, ptr) && i > 1024)
+                            <i class="fas fa-folder"></i>
+                            <a asp-controller="File" asp-action="Index" asp-route-path=@item.Name>@item.Name</a>
+                        }
+                        else
+                        {
+                            var type = MIMEAssistant.RecognizeIconByMime(MIMEAssistant.GetMIMEType(item.Name));
+                            <i class="fas fa-@type"></i>
+                            <a asp-controller="File" asp-action="Download" asp-route-id=@item.Name>@item.Name</a>
+                        }
+                    </div>
+                    <div class="col s1">
+                        @if (!item.IsDirectory)
+                        {
+                            var unitStrPart = "";
+                            long i = item.Length;
+                            string[] units = { "B", "kB", "MB", "GB", "TB" };
+                            int unitIndex = 0;
+                            for (int ptr = 0; ptr <= units.Length; ptr++)
                             {
-                                unitIndex = ptr - 1;
-                                break;
+                                if (i < Math.Pow(1024, ptr) && i > 1024)
+                                {
+                                    unitIndex = ptr - 1;
+                                    break;
+                                }
+                            }
+                            unitStrPart = Math.Round(i / Math.Pow(1024, unitIndex), 2) + " " + units[unitIndex];
+                            <p>@unitStrPart</p>
+                        }
+                        else
+                        {
+                            <p>---</p>
+                        }
+                    </div>
+                    <div class="col s4">
+                        @{ var systemPath = lastPath + "/" + item.Name;}
+                        @if (!item.IsDirectory)
+                        {
+                            <a asp-action="GenerateUrlView" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
+                            @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4") || item.Name.EndsWith(".avi"))
+                            {
+                                <a asp-action="Watch" asp-controller="Video" asp-route-path="@last/@item.Name"><i class="fas fa-play" title="Play"></i></a>
                             }
                         }
-                        unitStrPart = Math.Round(i / Math.Pow(1024, unitIndex), 2) + " " + units[unitIndex];
-                        <p>@unitStrPart</p>
-                    }
-                    else
-                    {
-                        <p>---</p>
-                    }
-                </div>
-                <div class="col-md-4 opt-font">
-                    @{ var systemPath = lastPath + "/" + item.Name;}
-
-                    @if (!item.IsDirectory)
-                    {
-                        <a asp-action="GenerateUrlView" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
-                        @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4"))
+                        else
                         {
-                            <a asp-action="Watch" asp-controller="Video" asp-route-id=@item.Name><i class="fas fa-play" title="Play"></i></a>
+                            <a asp-action="Archive" asp-controller="File" onclick="showDownloadBox();" asp-route-id="@item.Name"><i class="fas fa-arrow-down" title="Download directory as zip"></i></a>
                         }
-                    }
-                    else
-                    {
-                        <a asp-action="Archive" asp-controller="File" onclick="showDownloadBox();" asp-route-id="@item.Name"><i class="fas fa-arrow-down" title="Download directory as zip"></i></a>
-                    }
-                    <a asp-action="Rename" asp-route-inname="@item.Name"><i class="fas fa-pen"></i></a>
-
+                        <a asp-action="Rename" asp-route-inname="@item.Name"><i class="fas fa-pen"></i></a>
+                    </div>
                 </div>
-            </div>
-            <hr>
             }
         }
         else
@@ -158,32 +151,22 @@
 <div class="row" style="font-size:14px;">
     <a asp-controller="File" asp-action="Index" asp-route-path=@parent><i class="fas fa-arrow-left"></i></a>
 </div>
+<div id="file-editor" class="modal">
+    <form method="post">
+        <div class="modal-content">
+            <h4>Modal Header</h4>
+            <div class="form-group">
+                <input type="text" class="form-control" name="name" />
 
-<div class="modal fade" tabindex="-1" role="dialog" id="file-editor">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content mdl-color">
-            <div class="modal-header hdr-color">
-                <h5 class="modal-title" id="title">Create new directory</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="body">
-                <label id="text-content">Enter the name:</label>
-            </div>
-            <div id="file-editor-panel" class="modal-footer">
-                <form asp-action="Create" asp-controller="File" asp-route-parent="@parent" method="post">
-                    <div class="form-group">
-                        <input type="text" class="form-control" name="name" />
-                        <br />
-                        <button type="submit" class="btn btn-primary">Create</button>
-                        <button type="submit" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
             </div>
         </div>
-    </div>
+        <div class="modal-footer">
+            <button class="btn-flat" asp-controller="File" asp-action="Create" asp-route-parent=@parent>Create</button>
+            <a class="btn-flat modal-close">Cancel</a>
+        </div>
+    </form>
 </div>
+@await Html.PartialAsync("_UploadPartial", new List<IFormFile>())
 
 <script>
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
@@ -191,6 +174,15 @@
             searchFileList();
         }
     });
-</script>
+    document.getElementById("pathField").addEventListener("keydown", (key) => {
+        if (key.keyCode == 13) {
+            let path = document.getElementById("pathField").value;
+            location = "/File?path=" + path;
+        }
+    });
 
+    document.addEventListener('DOMContentLoaded', function () {
+        M.AutoInit();
+    });
+</script>
 

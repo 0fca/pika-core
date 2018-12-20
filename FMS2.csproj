@@ -1,16 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <UserSecretsId>aspnet-FMS2-AED98D39-38E1-4CD5-9332-EEB8291FDE88</UserSecretsId>
     <ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
-    <Version>1.5.2</Version>
-    <Authors>Obsidiam</Authors>
-    <Product>File Management System</Product>
-    <PackageProjectUrl>https://www.github.com/Obsidiam/fms</PackageProjectUrl>
+    <Version>1.6.2</Version>
+    <Authors>Arkasian</Authors>
+    <Product>Pika Cloud</Product>
+    <PackageProjectUrl>https://www.github.com/Obsidiam/pika-cloud</PackageProjectUrl>
     <NeutralLanguage>English</NeutralLanguage>
     <SignAssembly>false</SignAssembly>
-    <AssemblyVersion>1.2.7.0</AssemblyVersion>
+    <AssemblyVersion>1.3.1.0</AssemblyVersion>
     <Copyright>GPL 3.0</Copyright>
     <PackageLicenseUrl>https://www.gnu.org/licenses/gpl-3.0.en.html</PackageLicenseUrl>
     <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
@@ -19,6 +19,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -30,19 +31,55 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Include="avcodec-58.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Page>
+    <Content Include="avdevice-58.dll" />
+    <Content Include="avfilter-7.dll" />
+    <Page Include="avformat-58.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Page>
+    <Content Include="avutil-56.dll" />
+    <Content Include="postproc-55.dll" />
+    <Content Include="swresample-3.dll" />
+    <Content Include="swscale-5.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="2.0.0" />
     <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="2.0.0" />
     <PackageReference Include="AspNet.Security.OAuth.Reddit" Version="2.0.0" />
     <PackageReference Include="AspNet.Security.OAuth.StackExchange" Version="2.0.0" />
+    <PackageReference Include="FFmpeg.AutoGen" Version="4.1.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Https" Version="2.1.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.3" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.4" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.4" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.6" PrivateAssets="All" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.2" />
+    <PackageReference Include="taglib" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\Attributes\" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

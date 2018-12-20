@@ -25,6 +25,7 @@ namespace FMS2.Services{
                 }
                 catch (OperationCanceledException e)
                 {
+                    CanBeCancelled = true;
                     Debug.WriteLine(e.Message + " Zipping cancelled by user.");
                 }
             }

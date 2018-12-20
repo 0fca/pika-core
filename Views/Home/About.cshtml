@@ -5,9 +5,9 @@
     var version = ViewData["ver"];
 }
 
-<div class="d-flex align-items-center text-center align-content-center flex-wrap row row-margins">
+<div class="row">
     <h1>@ViewData["Title"]</h1>
-    <section class="col-md-3 col-margins" id="aboutthis">
+    <section class="col s8" id="aboutthis">
         <h3 class="section__heading">What is this?</h3>
         <p class="section_paragraph row-content">
             Pika Cloud is a web application built especially to make an access to my server's filesystem easier. It is also my portfolio page.
@@ -16,22 +16,22 @@
         </p>
 
         <p class="section_paragraph">
-            This is Constance(Pika Cloud), version: @version BETA.
+            This is Blanca(Pika Cloud), version: @version BETA.
         </p>
     </section>
-    <section class="col-md-3 col-margins" id="aboutme">
+    <section class="col s8" id="aboutme">
         <h3 class="section__heading">Who am I?</h3>
         <p class="section_paragraph row-content">
-            Hi! I’m Obsidiam, I’m Polish Java&amp;C# developer.
+            Hi! I’m Arkasian, I’m Polish Java&amp;C# developer.
             I'm desktop, mobile and web developer. My target is to be a cloud system engineer working with Cloud Native development.
             I am a freelancer and a student of technical college at ITC too.
             I am a typical "nerd". I love coding especially in C# and Java/Kotlin. I am a hobbyst sysadmin(I have my own homelab server). Next to IT I like learning history, listen to music and learn about how to analyze it in digital manner. I like long walks, riding a bike and skiing.
         </p>
     </section>
-    <section class="col-md-3 col-margins" id="technicalinformation">
+    <section class="col s12" id="technicalinformation">
         <h3 class="section__heading">Technical information</h3>
         <p class="section_paragraph row-content">
-            <ul class="content-list">
+            <ul class="content-list list-unstyled">
                 <li>This software is licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3.0</a>. </li>
                 <li>System is actually running on <a href="https://www.debian.org/">@os.</a></li>
                 <li>DNS service provided by <a href="https://freedns.afraid.org/">FreeDNS</a>.</li>
