@@ -1,6 +1,6 @@
-# Pika Cloud aka Constance
+# Pika Cloud aka Blanca
 
-__Constance__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem(but only for download purposes) to all registered users.
+__Blanca__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem(but only for download purposes) to all registered users.
 
 It is also my portfolio page.
 
@@ -27,7 +27,7 @@ Production: https://me.lukas-bownik.net/
 * Core 2.1,
 * Template Engine,
 * Identity Framework,
-* HTML5 with Bootstrap and JS,
+* HTML5 with Materialize and JS,
 * Entity Framework.
 
 Frameworks&libs:
