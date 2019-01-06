@@ -107,6 +107,22 @@ function resetListOnView() {
     uploadButton.setAttribute("disabled", true);
 }
 
+function validateDirectoryName(text){
+    let isValid = false;
+    for(let i = 0; i < text.toString().length; i++) {
+        let letter = text.toString().charCodeAt(i);
+       
+        if (letter >= 48 && letter <= 57 ||
+            letter >= 65 && letter <= 90 ||
+            letter >= 97 && letter <= 122) {
+            isValid = true;
+        }else{
+            isValid = false;
+        }
+    }
+    return isValid;
+}
+
 
 document.addEventListener('DOMContentLoaded', function () {
     var elems = document.querySelectorAll('.sidenav');

@@ -1,7 +1,7 @@
 ﻿@model FMS2.Models.ManageViewModels.LogsListViewModel
 @{ var content = "";
     if (Model != null && Model.Lines != null) {
-        @foreach (var item in Model.Lines)
+        foreach (var item in Model.Lines)
         {
                 content += item + "\n";
         }   
@@ -10,6 +10,6 @@
 <textarea class="log-area" wrap="hard" id="log-area" readonly>
     @content
 </textarea>
-<script src="~/js/site.js">
+<script>
     scrollLogAreaToEnd();
 </script>

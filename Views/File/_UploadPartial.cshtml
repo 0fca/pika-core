@@ -21,11 +21,11 @@
 <script src="~/js/file.js"></script>
 <script>
     document.getElementById("file_uploads").addEventListener("change", () => {
-        let messageLabel = document.getElementById("preview");
-        let fileList = document.getElementById("filesList");
+        const messageLabel = document.getElementById("preview");
+        const fileList = document.getElementById("filesList");
        
         messageLabel.innerText = returnFileSize(getSummarySize());
-        let uploadButton = document.getElementById("upload-submit");
+        const uploadButton = document.getElementById("upload-submit");
 
         if (getSummarySize() == 0) {
             uploadButton.setAttribute("disabled", true);
@@ -39,9 +39,9 @@
         } else if (uploadButton.hasAttribute("disabled")) {
             uploadButton.removeAttribute("disabled");
         }
-        let list = getFileList();
+        const list = getFileList();
         list.forEach(entry => {
-            let li = document.createElement("li");
+            const li = document.createElement("li");
             li.innerText = entry;
             li.setAttribute("class","collection-item");
             fileList.appendChild(li);

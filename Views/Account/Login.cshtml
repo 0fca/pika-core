@@ -64,6 +64,7 @@
                 }
                 else
                 {
+                    <div class="g-signin2" data-onsuccess="onSignIn"></div>
                     <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
                         <div>
                             <p>
@@ -79,7 +80,7 @@
         </section>
     </div>
 </div>
-
+<script src="https://apis.google.com/js/platform.js" async defer></script>
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 }

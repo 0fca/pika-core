@@ -5,8 +5,8 @@
 @using Microsoft.Extensions.FileProviders
 @{
     ViewData["Title"] = "Browse";
-    object lastPath = ViewData["path"];
-    object msg = TempData["returnMessage"];
+    var lastPath = ViewData["path"];
+    var msg = TempData["returnMessage"];
     var returnUrl = ViewData["returnUrl"];
 
 }
@@ -16,19 +16,19 @@
 </h4>
 <span>
     @{
-        string[] splitted = lastPath.ToString().Split("/");
-        string last = "";
+        var splitted = lastPath.ToString().Split("/");
+        var last = "";
         var tmp = "/File?path=" + last;
 
         <a href="/File?path">Index</a>
         <label>/</label>
-        foreach (string part in splitted)
+        foreach (var part in splitted)
         {
 
-            if (!String.IsNullOrEmpty(part))
+            if (!string.IsNullOrEmpty(part))
             {
 
-                last = String.Concat(last, "/", part);
+                last = string.Concat(last, "/", part);
                 tmp = "/File?path=" + last;
                 <a href=@tmp>@part</a>
                 <label>/</label>
@@ -70,7 +70,7 @@
         {
             if (Model.Contents.Count > 0)
             {
-                foreach (IFileInfo item in Model.Contents)
+                foreach (var item in Model.Contents)
                 {
                     <div class="row collection-item">
                         <div class="col s6 truncate">
@@ -90,10 +90,10 @@
                             @if (!item.IsDirectory)
                             {
                                 var unitStrPart = "";
-                                long i = item.Length;
+                                var i = item.Length;
                                 string[] units = { "B", "kB", "MB", "GB", "TB" };
-                                int unitIndex = 0;
-                                for (int ptr = 0; ptr <= units.Length; ptr++)
+                                var unitIndex = 0;
+                                for (var ptr = 0; ptr <= units.Length; ptr++)
                                 {
                                     if (i < Math.Pow(1024, ptr) && i > 1024)
                                     {
@@ -113,12 +113,10 @@
                             @{var user = await UserManager.GetUserAsync(Context.User); }
                             @if (user != null && await UserManager.IsInRoleAsync(user, "FileManagerUser"))
                             {
-                                var systemPath = lastPath + "/" + item.Name;
-
                                 if (!item.IsDirectory)
                                 {
                                     <a asp-action="GenerateUrlView" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
-                                    @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4") || item.Name.EndsWith(".avi"))
+                                    if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4") || item.Name.EndsWith(".avi"))
                                     {
                                         <a asp-action="Watch" asp-controller="Video" asp-route-path=@item.Name><i class="fas fa-play" title="Play"></i></a>
                                     }
@@ -133,9 +131,7 @@
                             {
                                 if (!item.IsDirectory)
                                 {
-
-                                    var systemPath = lastPath + "/" + item.Name;
-                                    <a href="GenerateUrlView?name=@systemPath&returnUrl=@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
+                                    <a asp-action="GenerateUrlView" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
                                 }
                             }
                         </div>

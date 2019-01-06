@@ -19,54 +19,49 @@
 </ul>
 
 <div id="container">
-    <div id="users-table">
-        <div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
-            <div class="col s5">
-                Username
-            </div>
-            <div class="col s3">
-                Permission level
-            </div>
-            <div class="col s4">
-                Options
-            </div>
+    <div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
+        <div class="col s5">
+            Username
         </div>
-        <div class="div-table">
-            @foreach (var item in Model.UsersWithRoles)
+        <div class="col s3">
+            Permission level
+        </div>
+        <div class="col s4">
+            Options
+        </div>
+    </div>
+    <div class="div-table">
+        @foreach (var item in Model.UsersWithRoles)
+        {
+            var roleString = "";
+            item.Value.ToAsyncEnumerable().ForEachAsync(role =>
             {
-                <div class="row">
+                roleString = string.Concat(roleString, " ", role);
+            });
+                
+            <div class="row">
                 <div class="col s5 truncate">
                     @Html.DisplayFor(modelItem => item.Key.UserName)
                 </div>
                 <div class="col s3">
-                    @{
-                        var roleString = "";
-                        await item.Value.ToAsyncEnumerable().ForEachAsync(role =>
-                        {
-                            roleString = string.Concat(roleString, " ", role);
-                        });
-                    }
-                    @Html.DisplayFor(modelItem => roleString)
+                
+                @Html.DisplayFor(modelItem => roleString)
                 </div>
-                <div class="col s4">
-                    <a asp-action="Edit" asp-controller="Manage" asp-route-id=@item.Key.Id><i class="fas fa-pen"></i></a>
-                    <a asp-action="Delete" asp-controller="Manage" asp-route-id="@item.Key.Id"><i class="fas fa-trash-alt"></i></a>
-                    <a asp-action="GeneratePassword" asp-controller="Manage" asp-route-id="@item.Key.Id"><i class="fas fa-key"></i></a>
-                </div>
-                </div>
-                <hr>
-            }
-           
-        </div>
-        <div id="downloadPartialDiv">
-            @await Html.PartialAsync("/Views/Manage/Admin/_GeneratePasswordViewPartial.cshtml")
-        </div>
-        </div>
-        <div id="logs" hidden>
-            @await Html.PartialAsync("/Views/Manage/Admin/_LogsViewPartial.cshtml", Model.LogsListViewModel)
-        </div>
+                    <div class="col s4">
+                        <a asp-action="Edit" asp-controller="Manage" asp-route-id=@item.Key.Id><i class="fas fa-pen"></i></a>
+                        <a asp-action="Delete" asp-controller="Manage" asp-route-id="@item.Key.Id"><i class="fas fa-trash-alt"></i></a>
+                        <a asp-action="GeneratePassword" asp-controller="Manage" asp-route-id="@item.Key.Id"><i class="fas fa-key"></i></a>
+                    </div>
+            </div>
+        }     
     </div>
-
+    <div id="downloadPartialDiv">
+        @await Html.PartialAsync("/Views/Manage/Admin/_GeneratePasswordViewPartial.cshtml")
+    </div>
+    <div id="logs" hidden>
+        @await Html.PartialAsync("/Views/Manage/Admin/_LogsViewPartial.cshtml", Model.LogsListViewModel)
+    </div>
+</div>
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")

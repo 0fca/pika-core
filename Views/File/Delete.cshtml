@@ -7,7 +7,7 @@
 <div class="d-flex align-items-center text-center align-content-center flex-wrap row row-margins">
     <p class="text">Choose files or folders to be deleted:</p>
     <div class="input-field col s12">
-        <form asp-controller="File" asp-action="DeleteView" method="post" class="form-horizontal">
+        <form asp-controller="File" asp-action="Delete" method="post" class="form-horizontal">
 
             <select asp-for="ToBeDeleted" multiple>
                 @{

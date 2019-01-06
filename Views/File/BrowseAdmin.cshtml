@@ -115,11 +115,10 @@
                         }
                     </div>
                     <div class="col s4">
-                        @{ var systemPath = lastPath + "/" + item.Name;}
                         @if (!item.IsDirectory)
                         {
                             <a asp-action="GenerateUrlView" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
-                            @if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4") || item.Name.EndsWith(".avi"))
+                            if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4") || item.Name.EndsWith(".avi"))
                             {
                                 <a asp-action="Watch" asp-controller="Video" asp-route-path="@last/@item.Name"><i class="fas fa-play" title="Play"></i></a>
                             }
@@ -129,6 +128,7 @@
                             <a asp-action="Archive" asp-controller="File" onclick="showDownloadBox();" asp-route-id="@item.Name"><i class="fas fa-arrow-down" title="Download directory as zip"></i></a>
                         }
                         <a asp-action="Rename" asp-route-inname="@item.Name"><i class="fas fa-pen"></i></a>
+                        
                     </div>
                 </div>
             }
@@ -154,14 +154,15 @@
 <div id="file-editor" class="modal">
     <form method="post">
         <div class="modal-content">
-            <h4>Modal Header</h4>
+            <h4>Create new folder</h4>
             <div class="form-group">
-                <input type="text" class="form-control" name="name" />
+                <label for="createDirInput" id="inputDirLabel"></label>
+                <input id="createDirInput" type="text" class="form-control" name="name"/>
 
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn-flat" asp-controller="File" asp-action="Create" asp-route-parent=@parent>Create</button>
+            <button id="createDirBtn" class="btn-flat" asp-controller="File" asp-action="Create" asp-route-parent=@parent>Create</button>
             <a class="btn-flat modal-close">Cancel</a>
         </div>
     </form>
@@ -183,6 +184,19 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         M.AutoInit();
+    });
+    
+    document.addEventListener("input", function(e) {
+        let text = e.target.value;
+        const isValid = validateDirectoryName(text);
+        console.log(isValid);
+        if (isValid) {
+            document.getElementById("inputDirLabel").innerText = "";
+            document.getElementById("createDirBtn").removeAttribute("disabled");
+        } else {
+            document.getElementById("inputDirLabel").innerText = "You can use only alphabetic characters.";
+            document.getElementById("createDirBtn").setAttribute("disabled", true);
+        }
     });
 </script>
 

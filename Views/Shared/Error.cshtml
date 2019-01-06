@@ -14,7 +14,7 @@
         <br />
         @if (Model != null)
         {
-            @if (Model.ShowRequestId)
+            if (Model.ShowRequestId)
             {
         <span class="text-info">
             <strong>Request ID:</strong> <code>@Model.RequestId</code>

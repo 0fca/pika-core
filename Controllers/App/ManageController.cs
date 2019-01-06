@@ -52,7 +52,7 @@ namespace FMS2.Controllers
         }
 
         [TempData] private string StatusMessage { get; set; }
-        [TempData] private string returnMessage { get; set; }
+        [TempData] private string ReturnMessage { get; set; }
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -145,9 +145,9 @@ namespace FMS2.Controllers
         [HttpGet]
         [Authorize(Roles = "Admin")]
         [Route("{id}")]
-        public async Task<IActionResult> GeneratePassword(string Id)
+        public async Task<IActionResult> GeneratePassword(string id)
         {
-            var userModel = await _userManager.FindByIdAsync(Id);
+            var userModel = await _userManager.FindByIdAsync(id);
             if ((await _userManager.GetLoginsAsync(userModel)).Count == 0) {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
                 var guid = Guid.NewGuid().ToString();
@@ -156,15 +156,15 @@ namespace FMS2.Controllers
                 var result = await _userManager.ResetPasswordAsync(userModel, token, hash);
                 TempData["newPassword"] = hash;
             }
-            returnMessage = "This user is logged in via 3rd party provider, cannot reset password.";
+            ReturnMessage = "This user is logged in via 3rd party provider, cannot reset password.";
             return RedirectToAction(nameof(AdminUserPanel));
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(string Id)
+        public async Task<IActionResult> Edit(string id)
         {
-            var userModel = await _userManager.FindByIdAsync(Id);
+            var userModel = await _userManager.FindByIdAsync(id);
             var editUserModel = new EditUserModel
             {
                 Id = userModel.Id,
@@ -217,19 +217,19 @@ namespace FMS2.Controllers
         [HttpGet]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(string Id)
+        public async Task<IActionResult> Delete(string id)
         {
-            var email = await _userManager.FindByIdAsync(Id);
+            var email = await _userManager.FindByIdAsync(id);
             return View("/Views/Manage/Admin/Delete.cshtml", email);
         }
 
         [HttpPost]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmation(string Id)
+        public async Task<IActionResult> DeleteConfirmation(string id)
         {
-            var result = await _userManager.DeleteAsync(await _userManager.FindByIdAsync(Id));
-            TempData["returnMessage"] = result.Succeeded ? "Successfully deleted user of id " + Id : "Could not delete user of id " + Id;
+            var result = await _userManager.DeleteAsync(await _userManager.FindByIdAsync(id));
+            TempData["returnMessage"] = result.Succeeded ? "Successfully deleted user of id " + id : "Could not delete user of id " + id;
             return RedirectToAction(nameof(AdminUserPanel));
         }
 
@@ -449,7 +449,7 @@ namespace FMS2.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Disable2faWarning()
+        public async Task<IActionResult> Disable2FaWarning()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -462,12 +462,12 @@ namespace FMS2.Controllers
                 throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
             }
 
-            return View(nameof(Disable2fa));
+            return View(nameof(Disable2Fa));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Disable2fa()
+        public async Task<IActionResult> Disable2Fa()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -475,8 +475,8 @@ namespace FMS2.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var disable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
-            if (!disable2faResult.Succeeded)
+            var disable2FaResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
+            if (!disable2FaResult.Succeeded)
             {
                 throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
             }
@@ -519,10 +519,10 @@ namespace FMS2.Controllers
             // Strip spaces and hypens
             var verificationCode = model.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
+            var is2FaTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
                 user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
 
-            if (!is2faTokenValid)
+            if (!is2FaTokenValid)
             {
                 ModelState.AddModelError("Code", "Verification code is invalid.");
                 await LoadSharedKeyAndQrCodeUriAsync(user, model);

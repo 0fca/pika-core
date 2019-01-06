@@ -2,11 +2,14 @@ using System;
 using System.IO;
 using FMS.Exceptions;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using FMS2.Controllers;
+using FMS2.Controllers.Helpers;
+using Mono.Unix;
 
 namespace FMS.Controllers.Helpers
 {
-    sealed public class UnixHelper
+    public static class UnixHelper
     {
         public static string GetParent(string path){
             string resultPath = "/";
@@ -60,18 +63,11 @@ namespace FMS.Controllers.Helpers
             return string.Concat(currentPhysical, inPath);
         }
 
-        public static string DetectUnitBySize(long i) {
-            string[] units = { "B", "kB", "MB", "GB", "TB" };
-            int unitIndex = 0;
-            for (int ptr = 0; ptr <= units.Length; ptr++)
-            {
-                if (i < Math.Pow(1024, ptr) && i > 1024)
-                {
-                    unitIndex = ptr - 1;
-                    break;
-                }
-            }
-            return units[unitIndex];
+        internal static bool HasAccess(string username, string absolutePath)
+        {
+            var userInfo = new UnixUserInfo(username);
+            var oid = FileSystemAccessor.owner(absolutePath);
+            return userInfo.UserId != oid;
         }
     }
 }
