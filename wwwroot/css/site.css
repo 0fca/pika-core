@@ -246,3 +246,17 @@ a, a:hover, a:focus {
     font-size: 24px;
 }
 
+.toast{
+    background-color: #eee !important;
+    color: #009688 !important;
+}
+
+.toast-input{
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+}
+
+.toast-button-color{
+    color: #009688 !important;
+}

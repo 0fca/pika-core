@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <UserSecretsId>aspnet-FMS2-AED98D39-38E1-4CD5-9332-EEB8291FDE88</UserSecretsId>
     <ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
-    <Version>1.7.1</Version>
+    <Version>1.7.2</Version>
     <Authors>Arkasian</Authors>
     <Product>Pika Cloud</Product>
     <PackageProjectUrl>https://www.github.com/Obsidiam/pika-cloud</PackageProjectUrl>

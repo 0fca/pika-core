@@ -54,15 +54,15 @@
 
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-danger" asp-action="EditConfirmation" />
-                <input type="submit" value="Cancel" class="btn btn-default" asp-action="AdminUserPanel" />
+                <input type="submit" value="Cancel" class="btn btn-default" formmethod="get" asp-action="AdminUserPanel" />
             </div>
         </form>
     </div>
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var elems = document.querySelectorAll('select');
-        var instances = M.FormSelect.init(elems);
+        const elems = document.querySelectorAll('select');
+        const instances = M.FormSelect.init(elems);
     });
 </script>
 

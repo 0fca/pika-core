@@ -8,7 +8,7 @@
     var lastPath = ViewData["path"];
     var msg = TempData["returnMessage"];
     var returnUrl = ViewData["returnUrl"];
-
+    var urlhash = TempData["urlhash"];
 }
 
 <h4>
@@ -53,13 +53,13 @@
     </span>
 </div>
 <div class="row">
-    <div class="col s3">
+    <div class="col s6">
         <strong>Name</strong>
     </div>
     <div class="col s1">
         <strong>Size</strong>
     </div>
-    <div class="col s5">
+    <div class="col s4">
         <strong>Options</strong>
     </div>
     <input type="text" id="searchBox" maxlength="32" placeholder="Search" oninput="searchFileList();" />
@@ -109,13 +109,13 @@
                                 <p>---</p>
                             }
                         </div>
-                        <div class="col s4 opt-font">
+                        <div class="col s5 opt-font">
                             @{var user = await UserManager.GetUserAsync(Context.User); }
                             @if (user != null && await UserManager.IsInRoleAsync(user, "FileManagerUser"))
                             {
                                 if (!item.IsDirectory)
                                 {
-                                    <a asp-action="GenerateUrlView" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
+                                    <a asp-action="GenerateUrl" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
                                     if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4") || item.Name.EndsWith(".avi"))
                                     {
                                         <a asp-action="Watch" asp-controller="Video" asp-route-path=@item.Name><i class="fas fa-play" title="Play"></i></a>
@@ -131,8 +131,13 @@
                             {
                                 if (!item.IsDirectory)
                                 {
-                                    <a asp-action="GenerateUrlView" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
+                                    <a asp-action="GenerateUrl" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
                                 }
+                            }
+                            
+                            @if (urlhash != null && item.Name.Equals(TempData["url_name"].ToString()))
+                            {
+                                @await Html.PartialAsync("_GenerateUrlPartial")
                             }
                         </div>
                     </div>
@@ -157,6 +162,7 @@
     <a asp-controller="File" asp-action="Index" asp-route-path=@returnUrl><i class="fas fa-arrow-left"></i></a>
 </div>
 @await Html.PartialAsync("_UploadPartial", new List<IFormFile>())
+
 <script>
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
         if (e.keyCode == 8) {

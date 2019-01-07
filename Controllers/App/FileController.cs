@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Api.Hubs;
 using FMS.Controllers.Helpers;
+using FMS2.Controllers.Api.Hubs;
 using FMS2.Controllers.Helpers;
 using FMS2.Data;
 using FMS2.Models;
@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -34,14 +33,12 @@ namespace FMS2.Controllers.App
         private readonly IZipper _archiveService;
         private readonly IFileOperator _fileService;
         private readonly IGenerator _generatorService;
-        private readonly ILogger<FileController> _iLogger;
         private readonly IFileLoggerService _loggerService;
         private readonly IConfiguration _configuration;
         private readonly StorageIndexContext _storageIndexContext;
         private string _last = Constants.RootPath;
         private bool _wasArchivingCancelled = true;
         private readonly IHubContext<StatusHub> _hubContext;
-
 
         public FileController(IFileProvider fileProvider, 
         SignInManager<ApplicationUser> signInManager, 
@@ -56,7 +53,6 @@ namespace FMS2.Controllers.App
             _fileProvider = fileProvider;
             _archiveService = archiveService;
             _fileService = fileService;
-            _iLogger = iLogger;
             _generatorService = iGenerator;
             _storageIndexContext = storageIndexContext;
             _loggerService = fileLoggerService;
@@ -168,7 +164,7 @@ namespace FMS2.Controllers.App
         [HttpGet]
         [AllowAnonymous]
         [Route("/[controller]/[action]/{name?}")]
-        public async Task<IActionResult> GenerateUrlView(string name, string returnUrl)
+        public async Task<IActionResult> GenerateUrl(string name, string returnUrl)
         {
             var systemPart = GetLastPath().Equals("/")? GetLastPath()+name : (GetLastPath() + Path.DirectorySeparatorChar + name) ;
             string entryName = UnixHelper.MapToPhysical(Constants.FileSystemRoot, systemPart);
@@ -216,11 +212,14 @@ namespace FMS2.Controllers.App
                             _loggerService.LogToFileAsync(LogLevel.Warning, HttpContext.Connection.RemoteIpAddress.ToString(), "Record for the file: " + entryName + " exists in the database, no need of updating it.");
                         }
                     }
-                    ViewData["urlhash"] = s.urlhash;
-                    ViewData["host"] = HttpContext.Request.Host;
-                    ViewData["protocol"] = "https";
-                    ViewData["returnUrl"] = returnUrl;
-                    return View();
+
+                    if (s != null) TempData["urlhash"] = s.urlhash;
+                    TempData["url_name"] = name;
+                    TempData["host"] = HttpContext.Request.Host.Host;
+                    TempData["port"] = HttpContext.Request.Host.Port;
+                    TempData["protocol"] = "https";
+                    //Data["returnUrl"] = returnUrl;
+                    return RedirectToAction(nameof(Index), new {@path = GetLastPath()});
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -229,6 +228,7 @@ namespace FMS2.Controllers.App
                 }
             }
 
+            TempData["returnMessage"] = "Something went wrong.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -278,7 +278,7 @@ namespace FMS2.Controllers.App
                 }
                 catch (InvalidOperationException ex)
                 {
-                    TempData["returnMessage"] = "Couldn't read requested resource: " + s.urlid;
+                    TempData["returnMessage"] = s != null ? "Couldn't read requested resource: " + s.urlid : "Database error occured.";
                     _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), ex.Message);
                     return RedirectToAction(nameof(Index), new { path = _last });
                 }
@@ -305,7 +305,7 @@ namespace FMS2.Controllers.App
                     {
                         ViewData["returnMessage"] = "File doesn't exist on server's filesystem.";
                         if (z)
-                            path = string.Concat(Constants.Tmp + name);
+                            path = string.Concat(Constants.Tmp,name);
                         else
                             return RedirectToAction(nameof(Index), new { @path = GetLastPath()});
                     }
@@ -413,8 +413,8 @@ namespace FMS2.Controllers.App
         [Route("/[controller]/[action]/{name?}")]
         public IActionResult Create(string name)
         {
-            Regex r = new Regex("[^a-zA-Z0-9]");
-            if (r.Match(name).Success)
+            var pattern = new Regex(@"\W|_");
+            if (!pattern.Match(name).Success)
             {
                 try
                 {
@@ -556,11 +556,6 @@ namespace FMS2.Controllers.App
             return !System.IO.File.Exists(name);
         }
 
-        private static string GetName(string absolutePath)
-        {
-            return IsDirectory(absolutePath) ? System.IO.Path.GetDirectoryName(absolutePath) : System.IO.Path.GetFileName(absolutePath);
-        }
-
         private static DateTime ComputeDateTime()
         {
             var now = DateTime.Now;
@@ -570,20 +565,8 @@ namespace FMS2.Controllers.App
 
         private string GetLastPath()
         {
-            HttpContext.Session.TryGetValue("lastPath", out byte[] result);
-            return result != null ? System.Text.Encoding.UTF8.GetString(result) : "/";
-        }
-
-        private static Encoding GetEncoding(MultipartSection section)
-        {
-            var hasMediaTypeHeader = Microsoft.Net.Http.Headers.MediaTypeHeaderValue.TryParse(section.ContentType, out Microsoft.Net.Http.Headers.MediaTypeHeaderValue mediaType);
-            // UTF-7 is insecure and should not be honored. UTF-8 will succeed in 
-            // most cases.
-            if (!hasMediaTypeHeader || Encoding.UTF7.Equals(mediaType.Encoding))
-            {
-                return Encoding.UTF8;
-            }
-            return mediaType.Encoding;
+            HttpContext.Session.TryGetValue("lastPath", out var result);
+            return result != null ? Encoding.UTF8.GetString(result) : "/";
         }
         #endregion
     }

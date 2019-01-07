@@ -1,5 +1,4 @@
-﻿using Api.Hubs;
-using FMS2.Controllers;
+﻿using FMS2.Controllers;
 using FMS2.Data;
 using FMS2.Models;
 using FMS2.Providers;
@@ -18,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
+using FMS2.Controllers.Api.Hubs;
 
 namespace FMS2
 {

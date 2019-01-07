@@ -9,10 +9,11 @@
 
 @{
     ViewData["Title"] = "Browse";
-    object lastPath = ViewData["path"];
+    var lastPath = ViewData["path"];
     var msg = TempData["returnMessage"];
     var parent = ViewData["returnUrl"];
-    var showDownloadPart = TempData["showDownloadPartial"];
+    var urlhash = TempData["urlhash"];
+
 }
 @await Html.PartialAsync("_StatusMessage", msg)
 <h3>
@@ -117,7 +118,7 @@
                     <div class="col s4">
                         @if (!item.IsDirectory)
                         {
-                            <a asp-action="GenerateUrlView" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
+                            <a asp-action="GenerateUrl" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
                             if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4") || item.Name.EndsWith(".avi"))
                             {
                                 <a asp-action="Watch" asp-controller="Video" asp-route-path="@last/@item.Name"><i class="fas fa-play" title="Play"></i></a>
@@ -128,7 +129,10 @@
                             <a asp-action="Archive" asp-controller="File" onclick="showDownloadBox();" asp-route-id="@item.Name"><i class="fas fa-arrow-down" title="Download directory as zip"></i></a>
                         }
                         <a asp-action="Rename" asp-route-inname="@item.Name"><i class="fas fa-pen"></i></a>
-                        
+                        @if (urlhash != null && item.Name.Equals(TempData["url_name"].ToString()))
+                        {
+                            @await Html.PartialAsync("_GenerateUrlPartial")
+                        }
                     </div>
                 </div>
             }
