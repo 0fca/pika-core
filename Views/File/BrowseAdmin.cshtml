@@ -129,6 +129,8 @@
                             <a asp-action="Archive" asp-controller="File" onclick="showDownloadBox();" asp-route-id="@item.Name"><i class="fas fa-arrow-down" title="Download directory as zip"></i></a>
                         }
                         <a asp-action="Rename" asp-route-inname="@item.Name"><i class="fas fa-pen"></i></a>
+                        <a class="btn-flat modal-trigger" data-target="file-operation-modal"><i class="fas fa-copy"></i></a>
+                        <a class="btn-flat modal-trigger" data-target="file-operation-modal"></a>
                         @if (urlhash != null && item.Name.Equals(TempData["url_name"].ToString()))
                         {
                             @await Html.PartialAsync("_GenerateUrlPartial")
@@ -171,16 +173,28 @@
         </div>
     </form>
 </div>
+
+<div id="file-operation-modal" class="modal">
+        <div class="modal-content">
+            <h4>Move or copy resource</h4>
+            @await Html.PartialAsync("_FileOperationPartialView");
+        </div>
+        <div class="modal-footer">
+            <button id="createDirBtn" class="btn-flat" asp-controller="File" asp-action="Create" asp-route-parent=@parent>Create</button>
+            <a class="btn-flat modal-close">Cancel</a>
+        </div>
+</div>
+
 @await Html.PartialAsync("_UploadPartial", new List<IFormFile>())
 
 <script>
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
-        if (e.keyCode == 8) {
+        if (e.keyCode === 8) {
             searchFileList();
         }
     });
     document.getElementById("pathField").addEventListener("keydown", (key) => {
-        if (key.keyCode == 13) {
+        if (key.keyCode === 13) {
             let path = document.getElementById("pathField").value;
             location = "/File?path=" + path;
         }

@@ -39,6 +39,7 @@ namespace FMS2.Controllers.App
         private string _last = Constants.RootPath;
         private bool _wasArchivingCancelled = true;
         private readonly IHubContext<StatusHub> _hubContext;
+        private readonly IHubContext<FileOperationHub> _fileOperationHub;
 
         public FileController(IFileProvider fileProvider, 
         SignInManager<ApplicationUser> signInManager, 
@@ -47,6 +48,7 @@ namespace FMS2.Controllers.App
         StorageIndexContext storageIndexContext, 
         IFileLoggerService fileLoggerService,
         IHubContext<StatusHub> hubContext,
+        IHubContext<FileOperationHub> fileOperationHub,
         IConfiguration configuration)
         {
             _signInManager = signInManager;
@@ -57,6 +59,7 @@ namespace FMS2.Controllers.App
             _storageIndexContext = storageIndexContext;
             _loggerService = fileLoggerService;
             _hubContext = hubContext;
+            _fileOperationHub = fileOperationHub;
             _configuration = configuration;
 
             ((ArchiveService)_archiveService).PropertyChanged += PropertyChangedHandler;
@@ -98,7 +101,7 @@ namespace FMS2.Controllers.App
             return RedirectToAction(_signInManager.Context.User.IsInRole("Admin") ? nameof(BrowseAdmin) : nameof(Browse));
         }
 
-        private async Task<List<IFileInfo>> SortContents(IDirectoryContents tmp)
+        private static async Task<List<IFileInfo>> SortContents(IDirectoryContents tmp)
         {
             var asyncFileEnum = await Task.Factory.StartNew(() => tmp.Where(entry => !entry.IsDirectory).OrderBy(predicate => predicate.Name));
             var asyncDirEnum = await Task.Factory.StartNew(() => tmp.Where(entry => entry.IsDirectory).OrderBy(predicate => predicate.Name));
@@ -215,8 +218,8 @@ namespace FMS2.Controllers.App
 
                     if (s != null) TempData["urlhash"] = s.urlhash;
                     TempData["url_name"] = name;
-                    TempData["host"] = HttpContext.Request.Host.Host;
-                    TempData["port"] = HttpContext.Request.Host.Port;
+                    var port = HttpContext.Request.Host.Port;
+                    TempData["host"] = HttpContext.Request.Host.Host + (port != null ? ":"+HttpContext.Request.Host.Port : "");
                     TempData["protocol"] = "https";
                     //Data["returnUrl"] = returnUrl;
                     return RedirectToAction(nameof(Index), new {@path = GetLastPath()});
@@ -383,27 +386,19 @@ namespace FMS2.Controllers.App
                 
                     if (task.IsCompleted)
                     {
-                        if (_wasArchivingCancelled)
-                        {
-                            TempData["returnMessage"] = "Archiving was cancelled by user.";
-                            return RedirectToAction(nameof(Index));
-                        }
-                        else
-                        {
-                            return RedirectToAction(nameof(Download), new { @id = string.Concat(id, ".zip") , @z = true});
-                        }
-                    }
-                    else
-                    {
-                        TempData["returnMessage"] = "Something unexpected happened.";
+                        if (!_wasArchivingCancelled)
+                            return RedirectToAction(nameof(Download), new {@id = string.Concat(id, ".zip"), @z = true});
+                        TempData["returnMessage"] = "Archiving was cancelled by user.";
                         return RedirectToAction(nameof(Index));
+
                     }
-            }
-            else
-            {
-                TempData["returnMessage"] = "All signs on the Earth and on the sky say that you have already ordered Pika Cloud to zip something.";
+
+                TempData["returnMessage"] = "Something unexpected happened.";
                 return RedirectToAction(nameof(Index));
             }
+
+            TempData["returnMessage"] = "All signs on the Earth and on the sky say that you have already ordered Pika Cloud to zip something.";
+            return RedirectToAction(nameof(Index));
         }
 
         
@@ -488,12 +483,12 @@ namespace FMS2.Controllers.App
         [HttpGet]
         [Authorize(Roles = "Admin, FileManagerUser")]
         [AutoValidateAntiforgeryToken]
-        [Route("/[controller]/[action]/{inname?}")]
+        [Route("/[controller]/[action]/{inname}")]
         public IActionResult Rename(string inname)
         {
-            string name = UnixHelper.MapToPhysical(Constants.FileSystemRoot, GetLastPath()+inname);
+            var name = UnixHelper.MapToPhysical(Constants.FileSystemRoot, GetLastPath()+inname);
             ViewData["path"] = name;
-            RenameFileModel rfm = new RenameFileModel
+            var rfm = new RenameFileModel
             {
                 IsDirectory = IsDirectory(name),
                 OldName = IsDirectory(name) ? Path.GetDirectoryName(name+"/") : Path.GetFileName(name),
@@ -526,12 +521,10 @@ namespace FMS2.Controllers.App
                 return RedirectToAction(nameof(Index), new { path = _last });
 
             }
-            else
-            {
-                _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Rename action aborted because passed data were inappropiate.");
-                ModelState.AddModelError(HttpContext.TraceIdentifier, "New name cannot be empty!");
-                return View(rfm);
-            }
+
+            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Rename action aborted because passed data were inappropiate.");
+            ModelState.AddModelError(HttpContext.TraceIdentifier, "New name cannot be empty!");
+            return View(rfm);
         }
 
         [HttpPost]
@@ -566,7 +559,7 @@ namespace FMS2.Controllers.App
         private string GetLastPath()
         {
             HttpContext.Session.TryGetValue("lastPath", out var result);
-            return result != null ? Encoding.UTF8.GetString(result) : "/";
+            return result != null ? string.Concat(Encoding.UTF8.GetString(result),"/") : "/";
         }
         #endregion
     }

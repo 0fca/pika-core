@@ -1,4 +1,6 @@
-﻿connection.start().catch(function (err) {
+﻿const connection = new signalR.HubConnectionBuilder().withUrl("/status").build();
+
+connection.start().catch(function (err) {
     return console.error(err.toString());
 });
 

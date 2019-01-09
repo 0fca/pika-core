@@ -1,31 +1,38 @@
 using FMS2.Controllers;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace FMS2.Services{
     public class FileService : IFileOperator
     {
         private readonly IFileLoggerService _fileLoggerService;
-        public FileService(IFileLoggerService fileLoggerService) {
+        private readonly IConfiguration _configuration;
+        
+        public FileService(IFileLoggerService fileLoggerService, IConfiguration configuration) {
             _fileLoggerService = fileLoggerService;
+            _configuration = configuration;
         }
-        private CancellationTokenSource tokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         //private CancellationToken ct;
         public void Cancel()
         {
-            tokenSource.Cancel();
-            if(tokenSource.IsCancellationRequested){
-                try{
-                    tokenSource.Token.ThrowIfCancellationRequested();
-                }catch(OperationCanceledException e){
-                    Debug.WriteLine(e.Message+": Downloading cancled by user.");
-                }finally{
-                    tokenSource.Dispose();
-                }
+            _tokenSource.Cancel();
+            if (!_tokenSource.IsCancellationRequested) return;
+            
+            try{
+                _tokenSource.Token.ThrowIfCancellationRequested();
+            }catch(OperationCanceledException e){
+                Debug.WriteLine(e.Message+": Downloading cancled by user.");
+            }finally{
+                _tokenSource.Dispose();
             }
         }
 
@@ -34,7 +41,7 @@ namespace FMS2.Services{
             return await Task<Stream>.Factory.StartNew(() => {
                 Debug.WriteLine(absolutPath);
                 return File.Exists(absolutPath) ? System.IO.File.OpenRead(absolutPath) : null;
-            }, tokenSource.Token);
+            }, _tokenSource.Token);
         }
 
         public async Task<byte[]> DownloadAsync(string absolutPath)
@@ -42,7 +49,7 @@ namespace FMS2.Services{
             return await Task<byte[]>.Factory.StartNew(() =>{
                 Debug.WriteLine(absolutPath);
                 return File.Exists(absolutPath) ? System.IO.File.ReadAllBytes(absolutPath) : null;
-            }, tokenSource.Token); 
+            }, _tokenSource.Token); 
         }
 
         public async Task MoveFromTmpAsync(string fileName, string toWhere = null) {
@@ -62,6 +69,54 @@ namespace FMS2.Services{
                 await fileStream.ReadAsync(buffer);
                 await File.WriteAllBytesAsync(toWhere + fileName, buffer);
                 _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File {fileName} moved from tmp to " + toWhere);
+        }
+
+        public async Task Move(string absolutePath, string toWhere)
+        {
+            
+        }
+
+        public async Task Copy(string absolutePath, string toWhere)
+        {
+            
+        }
+
+        public async Task<IEnumerable<string>> WalkFileTree()
+        {
+            var storage = _configuration.GetSection("Paths")["storage"];
+            return await Task<IEnumerable<string>>.Factory.StartNew(() => Traverse(storage));
+        }
+        
+        private static IEnumerable<string> Traverse(string rootDirectory)
+        {
+            var files = Enumerable.Empty<string>();
+            var directories = Enumerable.Empty<string>();
+            try
+            {
+                var permission = new FileIOPermission(FileIOPermissionAccess.PathDiscovery, rootDirectory);
+                permission.Demand();
+
+                files = Directory.GetFiles(rootDirectory);
+                directories = Directory.GetDirectories(rootDirectory);
+            }
+            catch
+            {
+                rootDirectory = null;
+            }
+
+            if (rootDirectory != null)
+                yield return rootDirectory;
+
+            foreach (var file in files)
+            {
+                yield return file;
+            }
+
+            var subdirectoryItems = directories.SelectMany(Traverse);
+            foreach (var result in subdirectoryItems)
+            {
+                yield return result;
+            }
         }
     }
 }

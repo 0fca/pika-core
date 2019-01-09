@@ -139,6 +139,7 @@ namespace FMS2
             app.UseSignalR(routes =>
             {
                 routes.MapHub<StatusHub>("/status");
+                routes.MapHub<FileOperationHub>("/file");
             });
             app.UseMvc(routes =>
             {

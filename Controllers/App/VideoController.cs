@@ -18,13 +18,13 @@ namespace FMS.Controllers
 
         [HttpGet]
         [Authorize(Roles="Admin,FileManagerUser,User")] 
-        public IActionResult Watch(string path){
+        public IActionResult Watch(string path)
+        {
             if(path != null){
                 return View(nameof(Watch),path);
             }
-            else{
-                return NoContent();
-            }
+
+            return NoContent();
         }
 
         [HttpGet]

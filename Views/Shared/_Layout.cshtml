@@ -71,18 +71,8 @@
     </environment>
     <script src="~/lib/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <environment include="Development">
-        <script>
-            var connection = new signalR.HubConnectionBuilder().withUrl("/status").configureLogging(signalR.LogLevel.Debug).build();
-        </script>
-    </environment>
-    <environment include="Production">
-        <script>
-            var connection = new signalR.HubConnectionBuilder().withUrl("/status").build();
-        </script>
-    </environment>
+
     <script src="~/js/archiveStatus.js" asp-append-version="true"></script>
-    <script src="~/js/requests.js"></script>
     <script src="~/js/file.js"></script>
     <script src="~/js/typewriter.js"></script>
     <script src="~/js/google.js"></script>
