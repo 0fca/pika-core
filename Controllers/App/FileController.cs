@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using FMS.Controllers.Helpers;
 using FMS2.Controllers.Api.Hubs;
 using FMS2.Controllers.Helpers;
 using FMS2.Data;
@@ -19,6 +20,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -75,7 +77,7 @@ namespace FMS2.Controllers.App
                 var osUser = _configuration.GetSection("OsUser")["OsUsername"];
                 if (!HttpContext.User.IsInRole("Admin"))
                 {
-                    Lrmv.Contents.RemoveAll(entry => { return UnixHelper.HasAccess(osUser, entry.PhysicalPath); });
+                    Lrmv.Contents.RemoveAll(entry => UnixHelper.HasAccess(osUser, entry.PhysicalPath));
                 }
 
                 if (null == Lrmv.Contents)
@@ -170,16 +172,18 @@ namespace FMS2.Controllers.App
         public async Task<IActionResult> GenerateUrl(string name, string returnUrl)
         {
             var systemPart = GetLastPath().Equals("/")? GetLastPath()+name : (GetLastPath() + Path.DirectorySeparatorChar + name) ;
-            string entryName = UnixHelper.MapToPhysical(Constants.FileSystemRoot, systemPart);
+            var entryName = UnixHelper.MapToPhysical(Constants.FileSystemRoot, systemPart);
 
-            if (!string.IsNullOrEmpty(entryName))
+            var message = "No proper connection to database server.";
+            
+            if (ValidateDbServerState() && !string.IsNullOrEmpty(entryName))
             {
                 try
                 {
                     StorageIndexRecord s = null;
-                    _storageIndexContext.index_storage.ToList().ForEach(record =>
+                    _storageIndexContext.IndexStorage.ToList().ForEach(record =>
                     {
-                        if (record.absolute_path.Equals(entryName))
+                        if (record.AbsolutePath.Equals(entryName))
                         {
                             s = record;
                         }
@@ -187,16 +191,16 @@ namespace FMS2.Controllers.App
 
                     if (s == null)
                     {
-                        s = new StorageIndexRecord { absolute_path = entryName };
+                        s = new StorageIndexRecord { AbsolutePath = entryName };
                         if (s != null)
                         {
-                            s.urlhash = _generatorService.GenerateId(s.absolute_path);
+                            s.Urlhash = _generatorService.GenerateId(s.AbsolutePath);
                             var user = await _signInManager.UserManager.GetUserAsync(HttpContext.User);
-                            s.user_id = user != null
+                            s.UserId = user != null
                                 ? await _signInManager.UserManager.GetEmailAsync(user)
                                 : HttpContext.Connection.RemoteIpAddress.ToString();
-                            s.expires = true;
-                            s.expire_date = ComputeDateTime();
+                            s.Expires = true;
+                            s.ExpireDate = ComputeDateTime();
                             _storageIndexContext.Add(s);
                         }
 
@@ -204,9 +208,9 @@ namespace FMS2.Controllers.App
                     }
                     else
                     {
-                        if (s.expire_date.Date == DateTime.Now.Date || s.expire_date.Date < DateTime.Now.Date)
+                        if (s.ExpireDate.Date == DateTime.Now.Date || s.ExpireDate.Date < DateTime.Now.Date)
                         {
-                            s.expire_date = ComputeDateTime();
+                            s.ExpireDate = ComputeDateTime();
                             _storageIndexContext.Update(s);
                             await _storageIndexContext.SaveChangesAsync();
                         }
@@ -216,7 +220,7 @@ namespace FMS2.Controllers.App
                         }
                     }
 
-                    if (s != null) TempData["urlhash"] = s.urlhash;
+                    if (s != null) TempData["urlhash"] = s.Urlhash;
                     TempData["url_name"] = name;
                     var port = HttpContext.Request.Host.Port;
                     TempData["host"] = HttpContext.Request.Host.Host + (port != null ? ":"+HttpContext.Request.Host.Port : "");
@@ -227,41 +231,47 @@ namespace FMS2.Controllers.App
                 catch (InvalidOperationException ex)
                 {
                     _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), ex.Message);
+                    message = ex.Message;
                     return RedirectToAction(nameof(Index));
                 }
             }
 
-            TempData["returnMessage"] = "Something went wrong.";
+            if (ValidateDbHostState() && !ValidateDbServerState())
+            {
+                _storageIndexContext.Database.OpenConnection();
+            }
+
+            TempData["returnMessage"] = message;
             return RedirectToAction(nameof(Index));
         }
-
+        
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult> PermanentDownload(string id)
         {
-            if (!string.IsNullOrEmpty(id))
+            if (ValidateDbServerState() && !string.IsNullOrEmpty(id))
             {
                 StorageIndexRecord s = null;
                 try
                 {
-                    s = _storageIndexContext.index_storage.SingleOrDefault(record => record.urlhash.Equals(id));
+                    s = _storageIndexContext.IndexStorage.SingleOrDefault(record => record.Urlhash.Equals(id));
 
                     if (s != null)
                     {
-                        var fileBytes = await _fileService.DownloadAsStreamAsync(s.absolute_path);
-                        var name = Path.GetFileName(s.absolute_path);
+                        var fileBytes = await _fileService.DownloadAsStreamAsync(s.AbsolutePath);
+                        var name = Path.GetFileName(s.AbsolutePath);
                         if (fileBytes != null)
                         {
-                            if (!s.expires)
+                            if (!s.Expires)
                             {
-                                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully returned requested resource" + s.absolute_path);
-                                return File(fileBytes, MIMEAssistant.GetMIMEType(name), name);
+                                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully returned requested resource" + s.AbsolutePath);
+                                return File(fileBytes, MimeAssistant.GetMimeType(name), name);
                             }
 
-                            if (s.expire_date != DateTime.Now && s.expire_date > DateTime.Now)
+                            if (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now)
                             {
-                                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully returned requested resource" + s.absolute_path);
-                                return File(fileBytes, MIMEAssistant.GetMIMEType(name), name);
+                                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully returned requested resource" + s.AbsolutePath);
+                                return File(fileBytes, MimeAssistant.GetMimeType(name), name);
                             }
 
                             TempData["returnMessage"] = "It seems that this url expired today, you need to generate a new one.";
@@ -270,8 +280,8 @@ namespace FMS2.Controllers.App
                         }
                         else
                         {
-                            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value, "Couldn't read requested resource: " + s.absolute_path);
-                            TempData["returnMessage"] = "Couldn't read requested resource: " + s.urlid;
+                            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value, "Couldn't read requested resource: " + s.AbsolutePath);
+                            TempData["returnMessage"] = "Couldn't read requested resource: " + s.Urlid;
                             //return RedirectToAction("Error", "Home", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier, ErrorCode = HttpContext.Response.StatusCode, Message = "This resource isn't accessible at the moment." });
                             return RedirectToAction(nameof(Index));
                         }
@@ -281,16 +291,20 @@ namespace FMS2.Controllers.App
                 }
                 catch (InvalidOperationException ex)
                 {
-                    TempData["returnMessage"] = s != null ? "Couldn't read requested resource: " + s.urlid : "Database error occured.";
+                    TempData["returnMessage"] = s != null ? "Couldn't read requested resource: " + s.Urlid : "Database error occured.";
                     _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), ex.Message);
                     return RedirectToAction(nameof(Index), new { path = _last });
                 }
             }
-            else
+            
+            if (ValidateDbHostState() && !ValidateDbServerState())
             {
-                TempData["returnMessage"] = "No id given.";
-                return RedirectToAction(nameof(Index));
+                _storageIndexContext.Database.OpenConnection();
+               
             }
+            
+            TempData["returnMessage"] = "No id given.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -315,8 +329,8 @@ namespace FMS2.Controllers.App
 
                     if (System.IO.File.Exists(path))
                         {
-                            var mime = MIMEAssistant.GetMIMEType(name);
-                            FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None, 8192, true);
+                            var mime = MimeAssistant.GetMimeType(name);
+                            var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None, 8192, true);
                             await _hubContext.Clients.All.SendAsync("DownloadStarted");
                             _loggerService.LogToFileAsync(LogLevel.Warning, HttpContext.Connection.RemoteIpAddress.ToString(), "Attempting to return file with name: " + name + " as an asynchronous stream.");
                             return File(fs, mime, name);
@@ -491,7 +505,7 @@ namespace FMS2.Controllers.App
             var rfm = new RenameFileModel
             {
                 IsDirectory = IsDirectory(name),
-                OldName = IsDirectory(name) ? Path.GetDirectoryName(name+"/") : Path.GetFileName(name),
+                OldName = IsDirectory(name) ? Path.GetDirectoryName(name+"/") : Path.GetFullPath(name),
                 AbsolutePath = name
             };
             _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Viewing Rename view for " + name);
@@ -559,7 +573,37 @@ namespace FMS2.Controllers.App
         private string GetLastPath()
         {
             HttpContext.Session.TryGetValue("lastPath", out var result);
-            return result != null ? string.Concat(Encoding.UTF8.GetString(result),"/") : "/";
+            var outPath = result != null ? System.Text.Encoding.UTF8.GetString(result) : null;
+
+            if (outPath != null && !outPath.EndsWith("/")) outPath += "/";
+            
+            return outPath ?? "/";
+        }
+
+        private bool ValidateDbHostState()
+        {
+            Ping pinger = null;
+            try
+            {
+                pinger = new Ping();
+                var reply = pinger.Send(_configuration.GetSection("Network")["DbServer"]);
+                if (reply != null) return reply.Status == IPStatus.Success;
+            }
+            catch (PingException)
+            {
+                return false;
+            }
+            finally
+            {
+                pinger?.Dispose();
+            }
+            
+            return false;
+        }
+
+        private bool ValidateDbServerState()
+        {
+            return (_storageIndexContext.Database.GetDbConnection() != null);
         }
         #endregion
     }

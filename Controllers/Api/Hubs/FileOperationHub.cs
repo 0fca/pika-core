@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using FMS2.Services;
 using Microsoft.AspNetCore.SignalR;
@@ -7,12 +6,12 @@ namespace FMS2.Controllers.Api.Hubs
 {
     public class FileOperationHub : Hub
     {
-        private object FileServiceInstance;
+        private readonly object _fileServiceInstance;
         private readonly FileService _fileService;
         
         public FileOperationHub()
         {
-            _fileService = (FileService) FileServiceInstance;
+            _fileService = (FileService) _fileServiceInstance;
         }
 
         public void Copy()
@@ -25,9 +24,10 @@ namespace FMS2.Controllers.Api.Hubs
 
         }
 
-        public async Task<IEnumerable<string>> WalkFileTree()
+        public async Task List(string path)
         {
-            return await _fileService.WalkFileTree();
+            var listing = await _fileService.WalkFileTree(path);
+            await this.Clients.All.SendAsync("ReceiveListing", listing);
         }
     }
 }

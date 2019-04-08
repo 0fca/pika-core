@@ -13,7 +13,9 @@
         @if (SignInManager.IsSignedIn(User))
         {
             <li>
-                <a asp-area="" class="navlink" asp-controller="Manage" asp-action="Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+                <a asp-area="" class="navlink" asp-controller="Manage" asp-action="Index" title="Manage"><i class="material-icons">
+                    account_box
+                </i></a>
             </li>
             <li>
                 <button type="submit" class="waves-effect waves-teal btn-flat">Log out</button>

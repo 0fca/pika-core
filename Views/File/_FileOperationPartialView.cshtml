@@ -1,3 +1,12 @@
-@model IEnumerable<string>
+<div id="file-operation-modal" class="modal">
+    <div class="modal-content">
+        <h4>Move or copy resource</h4>
+        <input type="text" id="managePathInput"/>
+    </div>
+    <div class="modal-footer">
+        <button id="list" class="btn-flat" onclick="ReceiveListing(document.getElementById('managePathInput').value);">List</button>
+        <a class="btn-flat modal-close">Cancel</a>
+    </div>
+</div>
 
 

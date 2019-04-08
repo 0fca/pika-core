@@ -4,9 +4,8 @@
 
 body {
     font-size: 17px !important;
-    padding-bottom: 20px;
     background-color: #eee !important;
-    color: #202020 !important;
+    color: rgb(12,12,12) !important;
     display: flex;
     min-height: 100vh;
     flex-direction: column;
@@ -18,9 +17,6 @@ main {
 
 
 .footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
     background-color: #303F9F !important;
     color: #212121 !important;
 }
@@ -196,6 +192,7 @@ a, a:hover, a:focus {
 
 .brand-margin {
     margin-left: 10px !important;
+    color: #303F9F  !important;
 }
 
 .tabs .tab a {
@@ -259,4 +256,30 @@ a, a:hover, a:focus {
 
 .toast-button-color{
     color: #009688 !important;
+}
+
+
+.collection-item{
+    background-color: inherit !important;
+    color: rgb(12,12,12) !important;
+    border-bottom: #000 !important;
+    
+    border-width: 1px !important;
+}
+
+.collection-item:hover{
+    color: #303F9F !important;
+}
+
+.browse-icon-margin{
+    margin-right: 10px;
+}
+
+.section_padding{
+    margin-left: 120px !important;
+}
+
+
+::placeholder { /* Most modern browsers support this now. */
+    color:    #0f0f0f !important;
 }

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace FMS2.Extensions
 {
-    internal static class FFMpegHelper
+    internal static class FfMpegHelper
     {
         public static unsafe string av_strerror(int error)
         {

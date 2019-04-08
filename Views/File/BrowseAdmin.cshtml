@@ -4,9 +4,7 @@
 }
 @model FMS2.Models.FileResultModel
 @inject PhysicalFileProvider FileProvider;
-@using System.IO
 @using Microsoft.Extensions.FileProviders
-
 @{
     ViewData["Title"] = "Browse";
     var lastPath = ViewData["path"];
@@ -20,38 +18,40 @@
     Directory listing for:
 </h3>
 <span>
-    @{
-        string[] splitted = lastPath.ToString().Split("/");
-        string last = "";
-        var tmp = "/File?path=" + last;
+    <ul class="pagination">
+        @{
+            var splitted = lastPath.ToString().Split("/");
+            var last = "";
+            var tmp = "/File?path=" + last;
 
-        <a href="/File">Index</a>
-        <label>/</label>
-        foreach (string part in splitted)
-        {
-
-            if (!String.IsNullOrEmpty(part))
+            <li><a href="/File?path">Index</a></li>
+            <label>/</label>
+            foreach (var part in splitted)
             {
 
-                last = String.Concat(last, "/", part);
-                tmp = "/File?path=" + last;
-                <a href=@tmp>@part</a>
-                <label>/</label>
+                if (!string.IsNullOrEmpty(part))
+                {
+
+                    last = string.Concat(last, "/", part);
+                    tmp = "/File?path=" + last;
+                    <li><a href=@tmp>@part</a></li>
+                    
+                    <label>/</label>
+                }
             }
         }
-    }
+        <li>    <button class="waves-effect waves-teal btn-flat" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
+</li>
+    </ul>
     <input id="helperInput" value="@Context.Request.Host@tmp" class="offscreen" aria-hidden="true" />
-    <button class="waves-effect waves-teal btn-flat" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
     <input type="text" id="pathField" placeholder="Enter the absolute system path..." class="form-control" value="@last" />
 </span>
-
 
 <div id="download-panel" class="row" hidden>
     @await Html.PartialAsync("_DownloadPartial")
 </div>
 <span class="row">
     <span class="manage-span">
-        <a class="btn-flat" asp-controller="File" asp-action="Index" asp-route-path=@parent><i class="fas fa-arrow-left"></i></a>
         <a data-target="file-editor" class="btn-flat modal-trigger"><i class="fas fa-folder-plus"></i></a>
         <a class="btn-flat" asp-controller="File" asp-action="Delete" asp-route-path=@parent><i class="fas fa-trash-alt"></i>  </a>
         <a class="btn-flat modal-trigger" data-target="upload-modal"><i class="fas fa-upload"></i></a>
@@ -61,44 +61,47 @@
     </span>
 </span>
 <div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
-    <div class="col s4">
+    <div class="col s6 m6 l6">
         Name
     </div>
-    <div class="col s4">
+    <div class="col s4 m4 l4">
         Size
     </div>
-    <div class="col s4">
+    <div class="col s2 m2 l2">
         Options
     </div>
 </div>
 <div id="file-list" class="collection">
+    <div class="row">
+        <a class="collection-item" asp-controller="File" asp-action="Index" asp-route-path="@parent">..</a>
+    </div>
     @if (Model.Contents != null)
     {
         if (Model.Contents.Count > 0)
         {
             foreach (var item in Model.Contents)
             {
-                <div class="row collection-item">
-                    <div class="col s6 truncate">
+                <div class="row">
+                    <div class="col s6 m6 l6">
                         @if (item.IsDirectory)
                         {
-                            <i class="fas fa-folder"></i>
-                            <a asp-controller="File" asp-action="Index" asp-route-path=@item.Name>@item.Name</a>
+
+                            <a class="collection-item truncate" asp-controller="File" asp-action="Index" asp-route-path=@item.Name><i class="fas fa-folder browse-icon-margin"></i>@item.Name</a>
                         }
                         else
                         {
-                            var type = MIMEAssistant.RecognizeIconByMime(MIMEAssistant.GetMIMEType(item.Name));
-                            <i class="fas fa-@type"></i>
-                            <a asp-controller="File" asp-action="Download" asp-route-id=@item.Name>@item.Name</a>
+                            var type = MimeAssistant.RecognizeIconByMime(MimeAssistant.GetMimeType(item.Name));
+
+                            <a class="collection-item truncate" asp-controller="File" asp-action="Download" asp-route-id=@item.Name><i class="fas fa-@type browse-icon-margin"></i>@item.Name</a>
                         }
                     </div>
-                    <div class="col s1">
+                    <div class="col s4 m4 l4">
                         @if (!item.IsDirectory)
                         {
                             var unitStrPart = "";
-                            long i = item.Length;
-                            string[] units = { "B", "kB", "MB", "GB", "TB" };
-                            int unitIndex = 0;
+                            var i = item.Length;
+                            string[] units = {"B", "kB", "MB", "GB", "TB"};
+                            var unitIndex = 0;
                             for (int ptr = 0; ptr <= units.Length; ptr++)
                             {
                                 if (i < Math.Pow(1024, ptr) && i > 1024)
@@ -115,27 +118,30 @@
                             <p>---</p>
                         }
                     </div>
-                    <div class="col s4">
-                        @if (!item.IsDirectory)
-                        {
-                            <a asp-action="GenerateUrl" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a>
-                            if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4") || item.Name.EndsWith(".avi"))
+                    <div class="col s2 m2 l2">
+                        <a class='dropdown-trigger' href='#' data-target='options-@item.Name'><i class="material-icons">more_horiz</i></a>
+                        
+                        <ul id='options-@item.Name' class='dropdown-content'>
+                            @if (!item.IsDirectory)
                             {
-                                <a asp-action="Watch" asp-controller="Video" asp-route-path="@last/@item.Name"><i class="fas fa-play" title="Play"></i></a>
+                                <li><a asp-action="GenerateUrl" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a></li>
+                                if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4") || item.Name.EndsWith(".avi"))
+                                {
+                                    <li><a asp-action="Watch" asp-controller="Video" asp-route-path="@last/@item.Name"><i class="fas fa-play" title="Play"></i>Play</a></li>
+                                }
                             }
-                        }
-                        else
-                        {
-                            <a asp-action="Archive" asp-controller="File" onclick="showDownloadBox();" asp-route-id="@item.Name"><i class="fas fa-arrow-down" title="Download directory as zip"></i></a>
-                        }
-                        <a asp-action="Rename" asp-route-inname="@item.Name"><i class="fas fa-pen"></i></a>
-                        <a class="btn-flat modal-trigger" data-target="file-operation-modal"><i class="fas fa-copy"></i></a>
-                        <a class="btn-flat modal-trigger" data-target="file-operation-modal"></a>
-                        @if (urlhash != null && item.Name.Equals(TempData["url_name"].ToString()))
-                        {
-                            @await Html.PartialAsync("_GenerateUrlPartial")
-                        }
+                            else
+                            {
+                                <li><a asp-action="Archive" asp-controller="File" onclick="showDownloadBox();" asp-route-id="@item.Name"><i class="fas fa-arrow-down" title="Download directory as zip"></i></a></li>
+                            }
+                            <li><a asp-action="Rename" asp-route-inname="@item.Name" title="Rename"><i class="fas fa-pen"></i></a></li>
+                            <li><a class="btn-flat modal-trigger" data-target="file-operation-modal"><i class="fas fa-copy"></i></a></li>
+                        </ul>
                     </div>
+                    @if (urlhash != null && item.Name.Equals(TempData["url_name"].ToString()))
+                    {
+                        @await Html.PartialAsync("_GenerateUrlPartial")
+                    }
                 </div>
             }
         }
@@ -153,18 +159,18 @@
             <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-warning-sign text-danger"></span></span>
         </div>
     }
+    <div class="row">
+        <a class="collection-item" asp-controller="File" asp-action="Index" asp-route-path=@parent>..</a>
+    </div>
 </div>
-<div class="row" style="font-size:14px;">
-    <a asp-controller="File" asp-action="Index" asp-route-path=@parent><i class="fas fa-arrow-left"></i></a>
-</div>
+
 <div id="file-editor" class="modal">
     <form method="post">
         <div class="modal-content">
             <h4>Create new folder</h4>
             <div class="form-group">
                 <label for="createDirInput" id="inputDirLabel"></label>
-                <input id="createDirInput" type="text" class="form-control" name="name"/>
-
+                <input id="createDirInput" type="text" class="form-control" name="name" />
             </div>
         </div>
         <div class="modal-footer">
@@ -174,18 +180,8 @@
     </form>
 </div>
 
-<div id="file-operation-modal" class="modal">
-        <div class="modal-content">
-            <h4>Move or copy resource</h4>
-            @await Html.PartialAsync("_FileOperationPartialView");
-        </div>
-        <div class="modal-footer">
-            <button id="createDirBtn" class="btn-flat" asp-controller="File" asp-action="Create" asp-route-parent=@parent>Create</button>
-            <a class="btn-flat modal-close">Cancel</a>
-        </div>
-</div>
-
 @await Html.PartialAsync("_UploadPartial", new List<IFormFile>())
+
 
 <script>
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
@@ -203,8 +199,8 @@
     document.addEventListener('DOMContentLoaded', function () {
         M.AutoInit();
     });
-    
-    document.addEventListener("input", function(e) {
+
+    document.addEventListener("input", function (e) {
         let text = e.target.value;
         const isValid = validateDirectoryName(text);
         console.log(isValid);
@@ -217,4 +213,3 @@
         }
     });
 </script>
-

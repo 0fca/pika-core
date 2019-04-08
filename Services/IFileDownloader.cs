@@ -10,7 +10,7 @@ namespace FMS2.Services{
         Task MoveFromTmpAsync(string fileName, string toWhere);
         Task Copy(string what, string toWhere);
         Task Move(string what, string toWhere);
-        Task<IEnumerable<string>> WalkFileTree();
+        Task<IEnumerable<string>> WalkFileTree(string path);
         void Cancel();
     }
 }

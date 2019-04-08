@@ -71,19 +71,25 @@ namespace FMS2.Services{
                 _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File {fileName} moved from tmp to " + toWhere);
         }
 
-        public async Task Move(string absolutePath, string toWhere)
+        public Task Move(string absolutePath, string toWhere)
         {
-            
+            throw new NotImplementedException();
         }
 
-        public async Task Copy(string absolutePath, string toWhere)
+        public Task Copy(string absolutePath, string toWhere)
         {
-            
+            throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<string>> WalkFileTree()
+        public async Task<IEnumerable<string>> WalkFileTree(string path)
         {
-            var storage = _configuration.GetSection("Paths")["storage"];
+
+            var storage = path;
+
+            if (storage == null) {
+               storage = _configuration.GetSection("Paths")["storage"];
+            }
+            
             return await Task<IEnumerable<string>>.Factory.StartNew(() => Traverse(storage));
         }
         

@@ -1,11 +1,10 @@
-﻿//var fileList = [];
-var isCtrlDown = false;
+﻿const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/file").build();
 
 function searchFileList(){
     let searchParam = document.getElementById("searchBox").value;
     let fileList = document.getElementById("file-list").children;
 
-    if(searchParam != ""){
+    if(searchParam !== ""){
         for(let i = 0; i < fileList.length; i+=2){
             console.log(fileList[i].children[0]);
             if (!fileList[i].children[0].textContent.toLowerCase().includes(searchParam.toLowerCase())) {
@@ -23,7 +22,7 @@ function searchFileList(){
 
 
 function resetFileList(){
-    var fileList = document.getElementById("file-list").children;
+    const fileList = document.getElementById("file-list").children;
     for(let i = 0; i < fileList.length; i++){
         fileList[i].removeAttribute("hidden", false);  
     }
@@ -81,14 +80,14 @@ function changeVisibleTab(controlName) {
     let targetDiv = document.getElementById("container");
     if (targetDiv.children.length > 0) {
         for (let childIndex = 0; childIndex < targetDiv.children.length; childIndex++) {
-            if (targetDiv.children[childIndex].getAttribute("id") != contentId) {
+            if (targetDiv.children[childIndex].getAttribute("id") !== contentId) {
                 targetDiv.children[childIndex].setAttribute("hidden", true);
             } else {
                 targetDiv.children[childIndex].removeAttribute("hidden");
             }
         }
     }
-    if (contentId == "logs") {
+    if (contentId === "logs") {
         scrollLogAreaToEnd();
     }
 }

@@ -11,18 +11,18 @@ namespace FMS2.Models
     {
         [Key]
         [Required]
-        public int urlid {get; set;}
+        public int Urlid {get; set;}
         [Required]
-        public string urlhash {get; set;}
+        public string Urlhash {get; set;}
         [Required]
-        public string absolute_path {get; set;}
+        public string AbsolutePath {get; set;}
         [Required]
-        public string user_id {get;set;}
+        public string UserId {get;set;}
 
         [Required]
-        public bool expires {get; set;}
+        public bool Expires {get; set;}
 
         [Required]
-        public DateTime expire_date {get; set;}
+        public DateTime ExpireDate {get; set;}
     }
 }

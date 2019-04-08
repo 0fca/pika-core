@@ -19,10 +19,10 @@ namespace FMS2.Providers
         private readonly int? _maxRetainedFiles;
         private readonly bool _shouldBackup = true;
         private readonly string _backupDir = "";
-        private string fullName = "";
+        private string _fullName = "";
         
         private volatile List<string> _logs = new List<string>();
-        private static long LastSize = 0L;
+        private static long _lastSize = 0L;
 
         public FileLoggerProvider(IOptions<FileLoggerOptions> options) : base(options)
         {
@@ -44,7 +44,7 @@ namespace FMS2.Providers
             foreach (var group in messages.GroupBy(GetGrouping))
             {
                 var fullName = GetFullName(group.Key);
-                this.fullName = fullName;
+                this._fullName = fullName;
                 var fileInfo = new FileInfo(fullName);
                 // If we've exceeded the max file size, don't write any logs
                 if (_maxFileSize > 0 && fileInfo.Exists && fileInfo.Length > _maxFileSize)
@@ -112,7 +112,7 @@ namespace FMS2.Providers
         public async Task<List<string>> GetLogs()
         {
            
-            var fileInfo = new FileInfo(fullName);
+            var fileInfo = new FileInfo(_fullName);
 
                 var fs = fileInfo.OpenRead();
                 
@@ -139,13 +139,13 @@ namespace FMS2.Providers
                         }
                     }
                 }
-                LastSize = fileInfo.Length;
+                _lastSize = fileInfo.Length;
                 fs.Dispose();     
                 return _logs;
         }
 
-        public void IdleMemoryCleanup(bool IsHardClean) {
-            if (IsHardClean)
+        public void IdleMemoryCleanup(bool isHardClean) {
+            if (isHardClean)
             {
                 DoHardMemCleanup();
             }

@@ -9,10 +9,9 @@ namespace FMS2.Controllers.Helpers
         internal static extern string permission_str(string file);
 
         [DllImport("libposixhlpr.so")]
-        internal static extern perms permission_model(string file);
+        internal static extern Perms permission_model(string file);
         
         [DllImport("libposixhlpr.so")]
-        
         internal static extern int owner(string file);
         
         public static string DetectUnitBySize(long i) {

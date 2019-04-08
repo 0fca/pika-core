@@ -16,14 +16,16 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using FMS2.Controllers.Api.Hubs;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FMS2
 {
     public class Startup
     {
-        private static readonly string _osName = Controllers.Constants.OsName;
+        private static readonly string OsName = Controllers.Constants.OsName;
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
 
@@ -34,7 +36,7 @@ namespace FMS2
 
         public void ConfigureServices(IServiceCollection services)
         {
-            
+            //var key = Encoding.ASCII.GetBytes(Configuration.GetSection("TokenSettings")["Secret"]);
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -45,28 +47,31 @@ namespace FMS2
                 .AddDefaultTokenProviders();
 
             services.AddAuthentication()
-            .AddMicrosoftAccount(microsoftOptions =>
-            {
-                microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ApplicationId"];
-                microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:Password"];
-            })
-            .AddGitHub(githubOptions => {
-                githubOptions.ClientId = Configuration["Authentication:GitHub:ClientId"];
-                githubOptions.ClientSecret = Configuration["Authentication:GitHub:ClientSecret"];
-                githubOptions.CallbackPath = "/signin-github";
-            })
-            .AddDiscord(discordOptions => {
-                discordOptions.ClientId = Configuration["Authentication:Discord:ClientId"];
-                discordOptions.ClientSecret = Configuration["Authentication:Discord:ClientSecret"];
-            })
-            .AddOAuth("Reddit", "Reddit",redditOpts => {
-                redditOpts.ClientId = Configuration["Authentication:Reddit:ClientId"];
-                redditOpts.ClientSecret = Configuration["Authentication:Reddit:ClientSecret"];
-                redditOpts.CallbackPath = "/signin-reddit";
-                redditOpts.TokenEndpoint = "https://www.reddit.com/api/v1/access_token";
-                redditOpts.AuthorizationEndpoint = "https://www.reddit.com/api/v1/authorize";
-            });
-           
+                .AddMicrosoftAccount(microsoftOptions =>
+                {
+                    microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ApplicationId"];
+                    microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:Password"];
+                })
+                .AddGitHub(githubOptions =>
+                {
+                    githubOptions.ClientId = Configuration["Authentication:GitHub:ClientId"];
+                    githubOptions.ClientSecret = Configuration["Authentication:GitHub:ClientSecret"];
+                    githubOptions.CallbackPath = "/signin-github";
+                })
+                .AddDiscord(discordOptions =>
+                {
+                    discordOptions.ClientId = Configuration["Authentication:Discord:ClientId"];
+                    discordOptions.ClientSecret = Configuration["Authentication:Discord:ClientSecret"];
+                })
+                .AddOAuth("Reddit", "Reddit", redditOpts =>
+                {
+                    redditOpts.ClientId = Configuration["Authentication:Reddit:ClientId"];
+                    redditOpts.ClientSecret = Configuration["Authentication:Reddit:ClientSecret"];
+                    redditOpts.CallbackPath = "/signin-reddit";
+                    redditOpts.TokenEndpoint = "https://www.reddit.com/api/v1/access_token";
+                    redditOpts.AuthorizationEndpoint = "https://www.reddit.com/api/v1/authorize";
+                });
+                
 
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IZipper, ArchiveService>();
@@ -77,9 +82,9 @@ namespace FMS2
             {
                 FileName = "fms-",
                 FileSizeLimit = Constants.MaxLogFileSize,
-                LogDirectory = Configuration.GetSection("Logging").GetSection("LogDirs")[_osName + "-log"],
+                LogDirectory = Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
                 ShouldBackupLogs = bool.Parse(Configuration.GetSection("Logging")["ShouldBackupLogs"]),
-                BackupLogDir = Configuration.GetSection("Logging")["LogBackupDir-"+_osName]
+                BackupLogDir = Configuration.GetSection("Logging")["LogBackupDir-"+OsName]
             };
 
             var opts = Options.Create(option);
@@ -90,6 +95,13 @@ namespace FMS2
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+            
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+                options.SlidingExpiration = true;
+            });
 
             services.AddSignalR();
             services.AddSession(options =>
@@ -99,9 +111,9 @@ namespace FMS2
                 options.Cookie.HttpOnly = true;
             });
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
-            IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[_osName+"-root"]);
+            IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[OsName+"-root"]);
             services.AddSingleton(physicalProvider);
-            Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-"+_osName];
+            Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-"+OsName];
             Constants.UploadTmp = Configuration.GetSection("Paths")["upload-dir-tmp"];
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -116,13 +128,13 @@ namespace FMS2
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                //app.UseExceptionHandler("/Home/Error");
             }
 
             Controllers.Constants.RootPath = Configuration.GetSection("Paths")["storage"];
-            Constants.FileSystemRoot = Configuration.GetSection("Paths")[_osName+"-root"];
-            Controllers.Constants.Tmp = Configuration.GetSection("Paths")[_osName+"-tmp"];
-            Constants.MaxUploadSize = Int64.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
+            Constants.FileSystemRoot = Configuration.GetSection("Paths")[OsName+"-root"];
+            Controllers.Constants.Tmp = Configuration.GetSection("Paths")[OsName+"-tmp"];
+            Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
 
             app.UseStaticFiles();
             app.UseFileServer();
@@ -139,8 +151,10 @@ namespace FMS2
             app.UseSignalR(routes =>
             {
                 routes.MapHub<StatusHub>("/status");
-                routes.MapHub<FileOperationHub>("/file");
+                //routes.MapHub<FileOperationHub>("/files");
             });
+            
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

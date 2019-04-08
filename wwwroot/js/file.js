@@ -1,11 +1,12 @@
-﻿var input = document.querySelector('#file_uploads');
-//var preview = document.querySelector('#.preview');
+﻿//var preview = document.querySelector('#.preview');
+const input = document.getElementById("inputfile");
+fileHubconnection.on("ReceiveListing", ReceiveListing(listing));
 
 function removeFromFiles(name) {
     let files = input.files;
 
     for (let i = 0; i < files.length; i++) {
-        if (name == files[i].name) {
+        if (name === files[i].name) {
             files[i] = "";
             break;
         }
@@ -13,6 +14,7 @@ function removeFromFiles(name) {
 }
 
 function getSummarySize() {
+    
     let files = input.files;
     let sum = 0;
 
@@ -36,7 +38,7 @@ function returnFileSize(number) {
 
 function getFileList() {
     let files = input.files;
-    let result = new Array();
+    let result = [];
 
     for (let i = 0; i < files.length; i++) {
         result[i] = files[i].name;
@@ -49,5 +51,9 @@ function deleteAllFiles() {
     let messageLabel = document.getElementById("preview");
     messageLabel.innerText = "No files to be uploaded.";
     resetListOnView();
+}
+
+function ReceiveListing(listing) {
+    console.log(listing);
 }
 
