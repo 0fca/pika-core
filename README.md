@@ -24,7 +24,7 @@ Production: https://me.lukas-bownik.net/
 
 ### Technical information ###
 *Technology stack*
-* Core 2.1,
+* Core 2.1/2.2,
 * Template Engine,
 * Identity Framework,
 * HTML5 with Materialize and JS,
