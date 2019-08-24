@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using FMS2.Controllers.Helpers;
+using System.IO;
 
 namespace FMS.Controllers
 {
@@ -20,24 +21,29 @@ namespace FMS.Controllers
         [Authorize(Roles="Admin,FileManagerUser,User")] 
         public IActionResult Watch(string path)
         {
+            ViewData["Mime"] = MimeAssistant.GetMimeType(System.IO.Path.GetFileName(path));
+            ViewData["VideoTitle"] = Path.GetFileNameWithoutExtension(UnixHelper.MapToPhysical(Constants.FileSystemRoot, path));
+            
             if(path != null){
-                return View(nameof(Watch),path);
+                return View(nameof(Watch), path);
             }
 
             return NoContent();
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,FileManagerUser,User")]
+        [Authorize(Roles = "Admin, FileManagerUser, User")]
         public async Task<ActionResult> Convert(string path) {
             Debug.WriteLine("Converting...");
             var str = await _streamingService.GetVideoByPath(UnixHelper.MapToPhysical(Constants.FileSystemRoot, path));
-            return Ok(str != null);// new FileStreamResult();
+             return Ok(str != null);// new FileStreamResult();
         }
 
         [HttpGet]
-        public IActionResult Test() {
-            return Ok("Test.");
+        [Authorize(Roles = "Admin, FileManagerUser, User")]
+        public async Task<FileStreamResult> Stream(string p) {
+            var absolutePath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, p);
+            return File(await _streamingService.GetVideoByPath(absolutePath), MimeAssistant.GetMimeType(System.IO.Path.GetFileName(p)));
         }
     }
 }

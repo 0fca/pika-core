@@ -1,0 +1,225 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model FMS2.Models.FileResultModel
+@inject PhysicalFileProvider FileProvider;
+@using Microsoft.Extensions.FileProviders
+@{
+    ViewData["Title"] = "Browse";
+    var lastPath = ViewData["path"];
+    var msg = TempData["returnMessage"];
+    var parent = ViewData["returnUrl"];
+    var urlhash = TempData["urlhash"];
+
+}
+@await Html.PartialAsync("_StatusMessage", msg)
+<h3>
+    Directory listing for:
+</h3>
+<div class="row">
+    <ul class="pagination">
+        @{
+            var splitted = lastPath.ToString().Split("/");
+            var last = "";
+            var tmp = "/File?path=" + last;
+
+            <li>
+                <a href="/File?path">Index</a>
+                <label>/</label>
+            </li>
+            foreach (var part in splitted)
+            {
+
+                if (!string.IsNullOrEmpty(part))
+                {
+
+                    last = string.Concat(last, "/", part);
+                    tmp = "/File?path=" + last;
+                    <li>
+                        <a href=@tmp>@part</a>
+                        <label>/</label>
+                    </li>
+
+
+                }
+            }
+        }
+        <li>
+            <button class="waves-effect waves-teal btn-flat" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
+        </li>
+    </ul>
+    <input id="helperInput" value="@Context.Request.Host@tmp" class="offscreen" aria-hidden="true" />
+    <input type="text" id="pathField" placeholder="Enter the absolute system path..." class="autocomplete" value="@last" autofocus/>
+</div>
+
+<div id="download-panel" class="row" hidden>
+    @await Html.PartialAsync("_DownloadPartial")
+</div>
+<span class="row">
+    <span class="manage-span">
+        <a data-target="file-editor" class="btn-flat modal-trigger"><i class="fas fa-folder-plus"></i></a>
+        <a class="btn-flat" asp-controller="File" asp-action="Delete" asp-route-path=@parent><i class="fas fa-trash-alt"></i>  </a>
+        <a class="btn-flat modal-trigger" data-target="upload-modal"><i class="fas fa-upload"></i></a>
+    </span>
+    <span>
+        <input type="text" id="searchBox" maxlength="64" placeholder="Search" oninput="searchFileList();" />
+    </span>
+</span>
+<div class="row" style="padding-top: 10px; padding-bottom: 10px; font-weight: bold;">
+    <div class="col s8 m8 l8">
+        Name
+    </div>
+    <div class="col s2 m2 l2">
+        Size
+    </div>
+    <div class="col s2 m2 l2">
+        Options
+    </div>
+</div>
+<div id="file-list" class="collection">
+    <div class="row">
+        <a class="collection-item" asp-controller="File" asp-action="Index" asp-route-path="@parent">..</a>
+    </div>
+    @if (Model.Contents != null)
+    {
+        if (Model.Contents.Count > 0)
+        {
+            foreach (var item in Model.Contents)
+            {
+                <div class="row">
+                    <div class="col s8 m8 l8">
+                        @if (item.IsDirectory)
+                        {
+
+                            <a class="collection-item truncate" asp-controller="File" asp-action="Index" asp-route-path=@item.Name><i class="fas fa-folder browse-icon-margin"></i>@item.Name</a>
+                        }
+                        else
+                        {
+                            var type = MimeAssistant.RecognizeIconByMime(MimeAssistant.GetMimeType(item.Name));
+
+                            <a class="collection-item truncate" asp-controller="File" asp-action="Download" asp-route-id=@item.Name><i class="fas fa-@type browse-icon-margin"></i>@item.Name</a>
+                        }
+                    </div>
+                    <div class="col s2 m2 l2">
+                        @if (!item.IsDirectory)
+                        {
+                            var unitStrPart = "";
+                            var i = item.Length;
+                            string[] units = {"B", "kB", "MB", "GB", "TB"};
+                            var unitIndex = 0;
+                            for (int ptr = 0; ptr <= units.Length; ptr++)
+                            {
+                                if (i < Math.Pow(1024, ptr) && i > 1024)
+                                {
+                                    unitIndex = ptr - 1;
+                                    break;
+                                }
+                            }
+                            unitStrPart = Math.Round(i / Math.Pow(1024, unitIndex), 2) + " " + units[unitIndex];
+                            <p>@unitStrPart</p>
+                        }
+                        else
+                        {
+                            <p>---</p>
+                        }
+                    </div>
+                    <div class="col s2 m2 l2">
+                        <a class='dropdown-trigger' href='#' data-target='options-@item.Name'><i class="material-icons">more_horiz</i></a>
+                        
+                        <ul id='options-@item.Name' class='dropdown-content'>
+                            @if (!item.IsDirectory)
+                            {
+                                <li><a asp-action="GenerateUrl" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a></li>
+                                if (item.Name.EndsWith(".mp3") || item.Name.EndsWith(".mp4") || item.Name.EndsWith(".mkv"))
+                                {
+                                    <li><a asp-action="Watch" asp-controller="Video" asp-route-path="@last/@item.Name"><i class="fas fa-play" title="Play"></i></a></li>
+                                }
+                            }
+                            else
+                            {
+                                <li><a asp-action="Archive" asp-controller="File" onclick="showDownloadBox();" asp-route-id="@item.Name"><i class="fas fa-arrow-down" title="Download directory as zip"></i></a></li>
+                            }
+                            <li><a asp-action="Rename" asp-route-inname="@item.Name" title="Rename"><i class="fas fa-pen"></i></a></li>
+                            <li><a class="btn-flat modal-trigger" data-target="file-operation-modal"><i class="fas fa-copy"></i></a></li>
+                        </ul>
+                    </div>
+                    @if (urlhash != null && item.Name.Equals(TempData["url_name"].ToString()))
+                    {
+                        @await Html.PartialAsync("_GenerateUrlPartial")
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <div class="row">
+                <h1>It is empty in here...</h1>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="input-group">
+            <p>@msg.ToString()</p>
+            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-warning-sign text-danger"></span></span>
+        </div>
+    }
+    <div class="row">
+        <a class="collection-item" asp-controller="File" asp-action="Index" asp-route-path=@parent>..</a>
+    </div>
+</div>
+
+<div id="file-editor" class="modal">
+    <form method="post">
+        <div class="modal-content">
+            <h4>Create new folder</h4>
+            <div class="form-group">
+                <label for="createDirInput" id="inputDirLabel"></label>
+                <input id="createDirInput" type="text" class="form-control" name="name" />
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="createDirBtn" class="btn-flat" asp-controller="File" asp-action="Create" asp-route-parent=@parent>Create</button>
+            <a class="btn-flat modal-close">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@await Html.PartialAsync("_UploadPartial", new List<IFormFile>())
+
+
+<script>
+    document.getElementById("searchBox").addEventListener("keydown", function (e) {
+        if (e.keyCode === 8) {
+            searchFileList();
+        }
+    });
+    document.getElementById("pathField").addEventListener("keydown", (key) => {
+        if (key.keyCode === 13) {
+            let path = document.getElementById("pathField").value;
+            location = "/File?path=" + path;
+        }
+    });
+
+    document.addEventListener("input", function (e) {
+        let text = e.target.value;
+        const isValid = validateDirectoryName(text);
+        if (isValid) {
+            document.getElementById("inputDirLabel").innerText = "";
+            document.getElementById("createDirBtn").removeAttribute("disabled");
+        } else {
+            document.getElementById("inputDirLabel").innerText = "You can use only alphabetic characters.";
+            document.getElementById("createDirBtn").setAttribute("disabled", true);
+        }
+    });
+
+    document.getElementById("pathField").addEventListener("keyup", (key) => {
+         if (key.code == "Slash") {
+             const currentPath = document.getElementById("pathField").value;
+             requestListing(currentPath);
+        }
+    });
+
+   
+</script>

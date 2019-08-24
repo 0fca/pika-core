@@ -47,6 +47,11 @@ namespace FMS2
                 .AddDefaultTokenProviders();
 
             services.AddAuthentication()
+                .AddGoogle(googleOpts => 
+                {
+                    googleOpts.ClientId = Configuration["Authentication:Google:ClientId"];
+                    googleOpts.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
+                })
                 .AddMicrosoftAccount(microsoftOptions =>
                 {
                     microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ApplicationId"];
@@ -75,7 +80,7 @@ namespace FMS2
 
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IZipper, ArchiveService>();
-            services.AddTransient<IFileOperator, FileService>();
+            services.AddTransient<IFileService, FileService>();
             services.AddTransient<IGenerator, HashGeneratorService>();
             services.AddTransient<IStreamingService, StreamingService>();
             var option = new FileLoggerOptions
@@ -101,21 +106,32 @@ namespace FMS2
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
                 options.SlidingExpiration = true;
+                options.LoginPath = "/Account/Login";
+                
             });
 
             services.AddSignalR();
             services.AddSession(options =>
             {
-                // Set a short timeout for easy testing.
-                options.IdleTimeout = TimeSpan.MaxValue;
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
                 options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
+
             IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[OsName+"-root"]);
             services.AddSingleton(physicalProvider);
+
             Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-"+OsName];
             Constants.UploadTmp = Configuration.GetSection("Paths")["upload-dir-tmp"];
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
+
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
 
         }
 
@@ -128,15 +144,16 @@ namespace FMS2
             }
             else
             {
-                //app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Home/Error");
             }
 
-            Controllers.Constants.RootPath = Configuration.GetSection("Paths")["storage"];
+            Constants.RootPath = Configuration.GetSection("Paths")["storage"];
             Constants.FileSystemRoot = Configuration.GetSection("Paths")[OsName+"-root"];
-            Controllers.Constants.Tmp = Configuration.GetSection("Paths")[OsName+"-tmp"];
+            Constants.Tmp = Configuration.GetSection("Paths")[OsName+"-tmp"];
             Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
 
             app.UseStaticFiles();
+            
             app.UseFileServer();
             app.UseStatusCodePagesWithRedirects("/Home/ErrorByCode/{0}");
             app.UseSession();
@@ -147,14 +164,12 @@ namespace FMS2
             });
 
             app.UseAuthentication();
-            //app.UseCors("CorsPolicy");
             app.UseSignalR(routes =>
             {
                 routes.MapHub<StatusHub>("/status");
-                //routes.MapHub<FileOperationHub>("/files");
+                routes.MapHub<FileOperationHub>("/files");
             });
             
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

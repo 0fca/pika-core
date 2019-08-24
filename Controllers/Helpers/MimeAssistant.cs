@@ -84,6 +84,7 @@ public sealed class MimeAssistant
     {"mid", "audio/midi"},
     {"midi", "audio/midi"},
     {"mif", "application/vnd.mif"},
+    {"mkv", "video/mp4"},
     {"mov", "video/quicktime"},
     {"movie", "video/x-sgi-movie"},
     {"mp2", "audio/mpeg"},

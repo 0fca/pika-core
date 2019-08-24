@@ -17,7 +17,7 @@ namespace FMS2.Controllers.Helpers
         public static string DetectUnitBySize(long i) {
             string[] units = { "B", "kB", "MB", "GB", "TB" };
             int unitIndex = 0;
-            for (int ptr = 0; ptr <= units.Length; ptr++)
+            for (int ptr = 1; ptr <= units.Length; ptr++)
             {
                 if (i < Math.Pow(1024, ptr) && i > 1024)
                 {
@@ -25,7 +25,8 @@ namespace FMS2.Controllers.Helpers
                     break;
                 }
             }
-            return units[unitIndex];
+            double scaledSize = Math.Round(i / Math.Pow(1024, unitIndex), 2);
+            return scaledSize + " " + units[unitIndex];
         }
     }
 }

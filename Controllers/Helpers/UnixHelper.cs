@@ -1,6 +1,9 @@
+using System;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
 using FMS.Exceptions;
+using Microsoft.CodeAnalysis;
 using Mono.Unix;
 
 namespace FMS2.Controllers.Helpers
@@ -40,11 +43,32 @@ namespace FMS2.Controllers.Helpers
             return string.Concat(currentPhysical, inPath);
         }
 
+        public static string MapToSystemPath(string hostPath)
+        {
+            var systemPath = string.Concat("/", hostPath.Split(Constants.FileSystemRoot)[1]);
+            if (systemPath.Contains("\\"))
+            {
+                systemPath = systemPath.Replace('\\', '/');
+            }
+
+            ClearPath(ref systemPath);
+
+            return systemPath;
+        }
+
         internal static bool HasAccess(string username, string absolutePath)
         {
-            var userInfo = new UnixUserInfo(username);
-            var oid = FileSystemAccessor.owner(absolutePath);
-            return userInfo.UserId != oid;
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                var userInfo = new UnixUserInfo(username);
+                var oid = FileSystemAccessor.owner(absolutePath);
+                return userInfo.UserId == oid;
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

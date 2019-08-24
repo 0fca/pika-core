@@ -66,7 +66,9 @@
                             <p>
                                 @foreach (var provider in loginProviders)
                                 {
-                                    <button type="submit" class="waves-effect waves-teal btn-flat" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account">@provider.Name</button>
+                                    var name = System.IO.File.Exists("wwwroot/images/"+@provider.Name.ToLower() + "-icon.png") ? @provider.Name.ToLower()+"-icon.png" : @provider.Name.ToLower()+"-icon.svg";
+
+                                    <button type="submit" class="waves-effect waves-teal btn-flat btn-lg" style="width: 150px; height: 80px;" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account"><img src="~/images/@name" alt="@provider.DisplayName"/></button>
                                 }
                             </p>
                         </div>

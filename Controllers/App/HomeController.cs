@@ -13,27 +13,6 @@ namespace FMS2.Controllers
             return View();
         }
 
-        public IActionResult About(int id = 0, int day = 0)
-        {
-            ViewData["os.name"] = System.Runtime.InteropServices.RuntimeInformation.OSDescription;
-           
-            ViewData["ver"] = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-            if(id != 16 + 11 || day != 25){
-                return View();
-            }else{
-                return View("Dedication");
-            }
-        }
-
-        public IActionResult Contact()
-        {
-            return View();
-        }
-
-        public IActionResult Projects() {
-            return View();
-        }
-
         public IActionResult Download() {
             return RedirectToAction("Error", new ErrorViewModel{ ErrorCode = 501, Message="This page is under construction at the moment, sorry." , RequestId = HttpContext.TraceIdentifier, Url = HttpContext.Request.Path });
         }

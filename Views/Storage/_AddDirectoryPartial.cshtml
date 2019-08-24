@@ -1,0 +1,15 @@
+﻿    <div id="file-editor" class="modal">
+        <form method="post" asp-controller="Storage" asp-action="Create" asp-route-parent=@Model>
+            <div class="modal-content">
+                <h4>Create new folder</h4>
+                <div class="form-group">
+                    <label for="createDirInput" id="inputDirLabel"></label>
+                    <input id="createDirInput" type="text" class="form-control" name="name" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="createDirBtn" class="btn-flat">Create</button>
+                <a class="btn-flat modal-close">Cancel</a>
+            </div>
+        </form>
+    </div>

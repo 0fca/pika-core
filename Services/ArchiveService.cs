@@ -49,7 +49,6 @@ namespace FMS2.Services{
                 {
                     CanBeCancelled = false;
                     OnPropertyChanged("CanBeCancelled");
-                    //tokenSource.Token.ThrowIfCancellationRequested();
                     ZipFile.CreateFromDirectory(absolutePath, output, CompressionLevel.Fastest, false);
                     CanBeCancelled = true;
                 }

@@ -1,6 +1,12 @@
-﻿//var preview = document.querySelector('#.preview');
-const input = document.getElementById("inputfile");
-fileHubconnection.on("ReceiveListing", ReceiveListing(listing));
+﻿const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/files").build();
+
+fileHubconnection.on("ReceiveListing", ReceiveListing);
+
+fileHubconnection.start().then(function () {
+    console.log("FileHub is ready.");
+}).catch(function (err) {
+    return console.error(err.toString());
+});
 
 function removeFromFiles(name) {
     let files = input.files;
@@ -14,7 +20,7 @@ function removeFromFiles(name) {
 }
 
 function getSummarySize() {
-    
+    let input = document.getElementById("files");
     let files = input.files;
     let sum = 0;
 
@@ -24,7 +30,11 @@ function getSummarySize() {
     return sum;
 }
 
-
+function requestListing(path) {
+    fileHubconnection.invoke("List", path).catch(function (err) {
+        return M.toast({ html: "<p class='text-danger'>" + err.toString()+"</p>" });
+    }); 
+}
 
 function returnFileSize(number) {
     if (number < 1024) {
@@ -37,6 +47,7 @@ function returnFileSize(number) {
 }
 
 function getFileList() {
+    let input = document.getElementById("file_uploads");
     let files = input.files;
     let result = [];
 
@@ -47,6 +58,7 @@ function getFileList() {
 }
 
 function deleteAllFiles() {
+    let input = document.getElementById("file_uploads");
     input.value = "";
     let messageLabel = document.getElementById("preview");
     messageLabel.innerText = "No files to be uploaded.";
@@ -54,6 +66,13 @@ function deleteAllFiles() {
 }
 
 function ReceiveListing(listing) {
-    console.log(listing);
+    const elem = document.getElementById("pathField");
+    const instance = M.Autocomplete.getInstance(elem);
+    const pathObject = listing.reduce(function (result, item, index, array) {
+        result[item] = "";
+        return result;
+    }, {})
+    
+    instance.updateData(pathObject);
 }
 
