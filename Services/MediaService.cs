@@ -1,9 +1,12 @@
-﻿using FMS2.Controllers;
+﻿using FFmpeg.NET;
+using FMS2.Controllers;
 using FMS2.Controllers.Helpers;
 using FMS2.Services;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using PikaCore.Services.Helpers;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -41,14 +44,53 @@ namespace PikaCore.Services
             //not used
         }
 
-        public async Task<string> CreateThumb(string path, string guid, MediaType mediaType)
+        public async Task<string> CreateThumb(string path, string guid)
         {
-            if (mediaType == MediaType.Image)
+            var mime = MimeAssistant.GetMimeType(Path.GetFileName(path));
+            var mediaType = DetectType(mime);
+            switch(mediaType)
             {
-                return await CreateThumbFromImageAsync(path, guid);
+                case MediaType.Image:
+                    return await CreateThumbFromImageAsync(path, guid);
+                case MediaType.Video:
+                    return await CreateThumbFromVideoAsync(path, guid);
             }
 
             return string.Empty;
+        }
+
+        private MediaType DetectType(string mime)
+        {
+            var props = Enum.GetValues(typeof(MediaType));
+            var mediaType = MediaType.Image;
+
+            int fieldIndex = 0;
+            foreach (var property in props)
+            {
+                if (property.ToString().ToLower().Contains(mime.Split("/")[0]))
+                {
+                    mediaType = (MediaType)Enum.ToObject(typeof(MediaType), fieldIndex);
+                    return mediaType;
+                }
+                fieldIndex++;
+            }
+            return mediaType;
+        }
+
+        private async Task<string> CreateThumbFromVideoAsync(string path, string guid)
+        {
+            var absoluteHostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
+            var thumbAbsolutePath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
+                                                $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
+            if (!File.Exists(thumbAbsolutePath))
+            {
+                var options = new ConversionOptions()
+                {
+                    Seek = TimeSpan.FromSeconds(60)
+                };
+                await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options);
+            }
+            return guid;
         }
 
         private async Task<string> CreateThumbFromImageAsync(string path, string guid)
@@ -59,12 +101,12 @@ namespace PikaCore.Services
 
             if (!File.Exists(thumbAbsolutePath))
             {
-                return await Scale(absoluteHostPath, guid, int.Parse(_configuration.GetSection("Images")["Width"]), int.Parse(_configuration.GetSection("Images")["Height"]));
+                return await GrabFromImage(absoluteHostPath, guid, int.Parse(_configuration.GetSection("Images")["Width"]), int.Parse(_configuration.GetSection("Images")["Height"]));
             }
             return guid;
         }
 
-        public async Task<string> Scale(string absoluteSystemPath, string id, int height, int width)
+        public async Task<string> GrabFromImage(string absoluteSystemPath, string id, int height, int width)
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -110,6 +152,15 @@ namespace PikaCore.Services
                     return "";
                 }
             });
+        }
+
+        public async Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions)
+        {
+            var inputFile = new MediaFile(absoluteSystemVideoPath);
+            var outputFile = new MediaFile(absoluteSystemOutputPath);
+
+            var ffmpeg = new Engine(_configuration.GetSection("Images")["Ffmpeg"]);
+            await ffmpeg.GetThumbnailAsync(inputFile, outputFile, conversionOptions);
         }
     }
 }

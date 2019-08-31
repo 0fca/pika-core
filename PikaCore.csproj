@@ -6,7 +6,7 @@
     <ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
     <Version>2.0</Version>
     <Authors>Arkasian</Authors>
-    <Product>Pika Cloud</Product>
+    <Product>Pika Core</Product>
     <PackageProjectUrl>https://www.github.com/Obsidiam/pika-cloud</PackageProjectUrl>
     <NeutralLanguage>English</NeutralLanguage>
     <SignAssembly>false</SignAssembly>
@@ -69,10 +69,12 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.2.0" />
     <PackageReference Include="Quartz" Version="3.0.7" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="4.5.0" />
+    <PackageReference Include="xFFmpeg.NET" Version="3.3.3" />
   </ItemGroup>
 
   <ItemGroup>

@@ -287,6 +287,6 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-/appsettings.*
+appsettings.*
 
 *.db

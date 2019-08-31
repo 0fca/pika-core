@@ -142,7 +142,10 @@ namespace FMS2.Controllers.App
             }
 
             TempData["showDownloadPartial"] = true;
-            if (_last != null) ViewData["returnUrl"] = UnixHelper.GetParent(GetLastPath()); ViewData["path"] = GetLastPath();
+            if (_last != null) {
+                ViewData["returnUrl"] = UnixHelper.GetParent(GetLastPath());
+                ViewData["path"] = GetLastPath();
+            }
             return View(Lrmv);
         }
 
@@ -591,7 +594,7 @@ namespace FMS2.Controllers.App
         private string GetLastPath()
         {
             HttpContext.Session.TryGetValue("lastPath", out var result);
-            var outPath = result != null ? System.Text.Encoding.UTF8.GetString(result) : null;
+            var outPath = result != null ? Encoding.UTF8.GetString(result) : null;
 
             if (outPath != null && !outPath.EndsWith("/")) outPath += "/";
 
