@@ -44,4 +44,4 @@ Core is deployed on localhost.
 
 __Docs__ 
 
-There will be simple public auth and filesystem access(this will be built in Spring Web) API.
+There will be simple public auth and filesystem access API.
