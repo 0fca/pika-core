@@ -1,19 +1,22 @@
-﻿//var fileList = [];
-var isCtrlDown = false;
-
+﻿
 function searchFileList(){
     let searchParam = document.getElementById("searchBox").value;
-    let fileList = document.getElementById("file-list").children;
+    let fileList = document.getElementById("file-list").querySelectorAll("a");
 
-    if(searchParam != ""){
-        for(let i = 0; i < fileList.length; i+=2){
-            console.log(fileList[i].children[0]);
-            if (!fileList[i].children[0].textContent.toLowerCase().includes(searchParam.toLowerCase())) {
+    if(searchParam !== ""){
+        for(let i = 1; i < fileList.length - 1; i++){
+            if (!fileList[i].textContent.toLowerCase().includes(searchParam.toLowerCase())) {
                 fileList[i].setAttribute("hidden", true);
-                fileList[i].nextElementSibling.setAttribute("hidden", true);
+                let sibling = fileList[i].nextElementSibling;
+                if (sibling !== null) {
+                    sibling.setAttribute("hidden", true);
+                }
             }else if(fileList[i].hasAttribute("hidden")){
                 fileList[i].removeAttribute("hidden");
-                fileList[i].nextElementSibling.removeAttribute("hidden");
+                let sibling = fileList[i].nextElementSibling;
+                if (sibling !== null) {
+                    sibling.removeAttribute("hidden");
+                }
             }
         }
     }else{
@@ -23,15 +26,14 @@ function searchFileList(){
 
 
 function resetFileList(){
-    var fileList = document.getElementById("file-list").children;
-    for(let i = 0; i < fileList.length; i++){
+    const fileList = document.getElementById("file-list").querySelectorAll("a");
+    for(let i = 1; i < fileList.length - 1; i++){
         fileList[i].removeAttribute("hidden", false);  
     }
-    document.getElementById("resetButton").setAttribute("disabled",true);
-    document.getElementById("searchButton").removeAttribute("disabled");
 }
 
-function showDownloadBox(){
+function showDownloadBox() {
+    document.getElementById("info").innerText = "You have about 10s to cancel archiving process.";
     document.getElementById("download-panel").removeAttribute("hidden");
     document.getElementById("cancelArchivingButton").removeAttribute("disabled");
 } 
@@ -50,7 +52,6 @@ function reloadDownloadPartial(message) {
 }
 
 function showMessagePartial(message, isError) {
-    console.log(message);
     let ariaclass = " alert-" + (isError ? "danger" : "success");
     let alertText = document.getElementById("msg");
     let alertDiv = document.getElementById("alert");
@@ -81,14 +82,14 @@ function changeVisibleTab(controlName) {
     let targetDiv = document.getElementById("container");
     if (targetDiv.children.length > 0) {
         for (let childIndex = 0; childIndex < targetDiv.children.length; childIndex++) {
-            if (targetDiv.children[childIndex].getAttribute("id") != contentId) {
+            if (targetDiv.children[childIndex].getAttribute("id") !== contentId) {
                 targetDiv.children[childIndex].setAttribute("hidden", true);
             } else {
                 targetDiv.children[childIndex].removeAttribute("hidden");
             }
         }
     }
-    if (contentId == "logs") {
+    if (contentId === "logs") {
         scrollLogAreaToEnd();
     }
 }
@@ -107,9 +108,22 @@ function resetListOnView() {
     uploadButton.setAttribute("disabled", true);
 }
 
+function validateDirectoryName(text){
+    let isValid = false;
+    for(let i = 0; i < text.toString().length; i++) {
+        let letter = text.toString().charCodeAt(i);
+       
+        if (letter >= 48 && letter <= 57 ||
+            letter >= 65 && letter <= 90 ||
+            letter >= 97 && letter <= 122) {
+            isValid = true;
+        }
+    }
+    return isValid;
+}
 
 document.addEventListener('DOMContentLoaded', function () {
-    var elems = document.querySelectorAll('.sidenav');
     M.AutoInit();
 });
+
 

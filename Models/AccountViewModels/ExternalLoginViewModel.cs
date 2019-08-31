@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FMS2.Models.AccountViewModels
 {
@@ -12,6 +8,6 @@ namespace FMS2.Models.AccountViewModels
         [EmailAddress]
         public string Email { get; set; }
 
-        public bool wasRegistered {get; set;}
+        public bool WasRegistered { get; set; }
     }
 }

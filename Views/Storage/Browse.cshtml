@@ -1,0 +1,242 @@
+﻿@model FMS2.Models.FileResultModel
+@inject UserManager<ApplicationUser> UserManager
+@inject IFileService FileService
+
+@{
+    ViewData["Title"] = "Browse";
+    var lastPath = ViewData["path"];
+    var msg = TempData["returnMessage"];
+    var returnUrl = ViewData["returnUrl"];
+    var urlhash = TempData["urlhash"];
+    var user = await UserManager.GetUserAsync(Context.User);
+    var pageCount = int.Parse(TempData["PageCount"].ToString());
+    var offset = int.Parse(TempData["Offset"].ToString());
+    var count = int.Parse(TempData["Count"].ToString());
+
+    var paginationData = new Dictionary<string, object>();
+    paginationData.Add("Offset", offset);
+    paginationData.Add("Count", count);
+    paginationData.Add("PageCount", pageCount);
+    paginationData.Add("Last", lastPath);
+}
+
+<h4>
+    Directory listing for:
+</h4>
+<div class="row">
+    <div class="s10 m12 l12 input-field">
+        @{
+            var splitted = lastPath.ToString().Split("/");
+            var last = "";
+            var tmp = "/Storage?path=" + last;
+
+            <a href="/Storage?path">Index</a>
+
+            foreach (var part in splitted)
+            {
+
+                if (!string.IsNullOrEmpty(part))
+                {
+
+                    last = string.Concat(last, "/", part);
+                    tmp = "/Storage?path=" + last;
+            <a class="breadcrumb breadcrumb-icon" href=@tmp>@part</a>
+
+                }
+            }
+        }
+        <button class="waves-effect waves-teal btn-flat" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
+        <input id="helperInput" value="@Context.Request.Host@tmp" class="offscreen" aria-hidden="true" />
+        <input type="text" id="pathField" placeholder="Enter the absolute system path..." class="autocomplete" value="@last" autofocus />
+
+    </div>
+</div>
+
+@await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
+
+<div id="download-panel" class="row" hidden>
+    @await Html.PartialAsync("Partial/_DownloadPartial.cshtml")
+</div>
+<div class="row">
+    <span class="manage-span">
+        @if (user != null
+          && !(await UserManager.IsInRoleAsync(user, "User"))) {
+        <a data-target="file-editor" class="btn-flat modal-trigger"><i class="fas fa-folder-plus"></i></a>
+        <a class="btn-flat" asp-controller="Storage" asp-action="Delete" asp-route-path=@returnUrl><i class="fas fa-trash-alt"></i>  </a>
+        }
+        <a class="btn-flat modal-trigger" data-target="upload-modal"><i class="fas fa-upload"></i></a>
+    </span>
+</div>
+<div class="row">
+    <input type="text" id="searchBox" maxlength="32" placeholder="Search" oninput="searchFileList();" />
+</div>
+<div id="file-list" class="collection">
+    <span>File and directory count: @Model.Contents.Count</span>
+    <div class="row">
+        <a class="collection-item" asp-controller="Storage" asp-action="Index" asp-route-path="@returnUrl">..</a>
+    </div>
+    @{
+        if (Model.Contents != null)
+        {
+            if (Model.Contents.Count > 0)
+            {
+                foreach (var item in Model.Contents)
+                {
+        <div class="row">
+            <div class="col s8 m8 l8 truncate valign-wrapper">
+                @if (item.IsDirectory)
+                    {
+
+                <a class="collection-item" asp-controller="Storage" asp-action="Index" asp-route-path=@item.Name><i class="fas fa-folder browse-icon-margin"></i>@item.Name</a>
+                    }
+                    else
+                    {
+                        var mime = MimeAssistant.GetMimeType(item.Name);
+                        var type = MimeAssistant.RecognizeIconByMime(mime);
+
+                        if (!mime.Contains("image"))
+                        {
+                <a class="collection-item" asp-controller="Storage" asp-action="Download" asp-route-id=@item.Name><i class="fas fa-@type browse-icon-margin"></i>@item.Name</a>
+                        }
+                        else
+                        {
+
+                            var id = last.Replace("/", "-") + $"-{item.Name}";
+                <div class="col s3 m1 l1">
+                    <img class="responsive-img" id="@id" src="~/images/loading_icon.gif" width="52" height="52" alt="@item.Name" />
+                </div>
+                <div class="col s5 m7 l7 center-align">
+                    <a class="collection-item left-align" asp-controller="Storage" asp-action="Download" asp-route-id=@item.Name>
+                        @item.Name
+                    </a>
+                </div>
+                        }
+                    }
+            </div>
+            <div class="col s2 m2 l2">
+                @if (!item.IsDirectory)
+                            {
+                                var unitStrPart = "";
+                                var i = item.Length;
+                                string[] units = { "B", "kB", "MB", "GB", "TB" };
+                                var unitIndex = 0;
+                                for (var ptr = 0; ptr <= units.Length; ptr++)
+                                {
+                                    if (i < Math.Pow(1024, ptr) && i > 1024)
+                                    {
+                                        unitIndex = ptr - 1;
+                                        break;
+                                    }
+                                }
+                                unitStrPart = Math.Round(i / Math.Pow(1024, unitIndex), 2) + " " + units[unitIndex];
+                <p>@unitStrPart</p>
+                            }
+                            else
+                            {
+                <p>---</p>
+                            }
+            </div>
+            <div class="col s2 m2 l2 opt-font">
+                <a class='dropdown-trigger' href='#' data-target='options-@item.Name'><i class="material-icons">more_horiz</i></a>
+
+                <ul id='options-@item.Name' class='dropdown-content'>
+                    @{var ext = System.IO.Path.GetExtension(item.Name);}
+                    @if (ext.Equals(".mp3") || ext.Equals(".mp4") || ext.Equals(".mkv"))
+                    {
+                    <li><a asp-action="Watch" asp-controller="Video" asp-route-path="@last/@item.Name"><i class="fas fa-play" title="Play"></i></a></li>
+                    }
+
+                    @if (user != null
+                     && !(await UserManager.IsInRoleAsync(user, "User"))
+                    )
+                    {
+                        if (!item.IsDirectory)
+                        {
+                    <li><a asp-action="GenerateUrl" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a></li>
+
+                        }
+                        else
+                        {
+                    <li><a asp-action="Archive" asp-controller="Storage" onclick="showDownloadBox();" asp-route-id="@item.Name"><i class="fas fa-arrow-down" title="Download directory as zip"></i></a></li>
+                        }
+                    <li><a asp-action="Rename" asp-route-inname="@item.Name"><i class="fas fa-pen"></i></a></li>
+                    }
+                    else
+                    {
+                        if (!item.IsDirectory)
+                        {
+                    <li><a asp-action="GenerateUrl" asp-route-name="@item.Name" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-bolt" title="Generate download url"></i></a></li>
+                        }
+                    }
+                </ul>
+
+                @if (urlhash != null && item.Name.Equals(TempData["url_name"].ToString()))
+                {
+                @await Html.PartialAsync("Partial/_GenerateUrlPartial.cshtml")
+                }
+            </div>
+        </div>
+                }
+            }
+            else
+            {
+        <div class="row">
+            <div class="s10 m10 l10">
+                <h4 class="center-align">It is empty in here...</h4>
+            </div>
+        </div>
+            }
+        }
+        else
+        {
+        <div class="row">
+            <div class="s10 m10 l10">
+                <h4 class="center-align">This location doesn't exist.</h4>
+            </div>
+        </div>
+        }
+    }
+    <div class="row">
+        <a class="collection-item" asp-controller="Storage" asp-action="Index" asp-route-path="@returnUrl">..</a>
+    </div>
+
+</div>
+@await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
+
+@await Html.PartialAsync("Partial/_AddDirectoryPartial.cshtml", last)
+
+@await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)
+
+@await Html.PartialAsync("Partial/_UploadPartial.cshtml", new List<IFormFile>())
+
+<script src="~/js/media.js" asp-append-version="true"></script>
+<script>
+    document.getElementById("searchBox").addEventListener("keydown", function (e) {
+        if (e.code == "Enter") {
+            searchFileList();
+        }
+    });
+
+    document.getElementById("pathField").addEventListener("keydown", (key) => {
+        if (key.code == "Enter") {
+            const path = document.getElementById("pathField").value;
+            location = `/Storage?path=${path}`;
+        }
+    });
+
+    document.getElementById("pathField").addEventListener("keyup", (key) => {
+        if (key.code == "Slash") {
+            const currentPath = document.getElementById("pathField").value;
+            requestListing(currentPath);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const elems = document.querySelectorAll('.autocomplete');
+        const instances = M.Autocomplete.init(elems, {});
+    });
+
+    const path = "@lastPath";
+
+
+</script>

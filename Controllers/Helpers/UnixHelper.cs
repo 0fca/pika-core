@@ -1,77 +1,78 @@
+using FMS.Exceptions;
+using Mono.Unix;
 using System;
 using System.IO;
-using FMS.Exceptions;
-using System.Diagnostics;
-using FMS2.Controllers;
+using System.Linq;
 
-namespace FMS.Controllers.Helpers
+namespace FMS2.Controllers.Helpers
 {
-    sealed public class UnixHelper
+    public static class UnixHelper
     {
-        public static string GetParent(string path){
-            string resultPath = "/";
-            if(path.StartsWith("/")){
-                if(Path.IsPathRooted(path)){
-                    var pathParts = path.Split("/");
-                    pathParts[pathParts.Length - 1] = null;
-
-                    foreach(var part in pathParts){
-                        if(!string.IsNullOrEmpty(part)){
-                            resultPath = string.Concat(resultPath,"/",part);
-                        }
-                    }
-                    return resultPath;
-                }else{
-                    throw new InvalidPathException("Path must be path rooted!");
-                }
-            }else{
-                throw new InvalidPathException("Path must be a Unix-like path!");
+        public static string GetParent(string path)
+        {
+            if (!path.Equals("/") && path.EndsWith("/"))
+            {
+                path = path.Remove(path.Length - 1, 1);
             }
+
+            const string resultPath = "/";
+            if (!path.StartsWith("/")) throw new InvalidPathException("Path must be a Unix-like path!");
+            if (!Path.IsPathRooted(path)) throw new InvalidPathException("Path must be path rooted!");
+            var pathParts = path.Split("/");
+            pathParts[pathParts.Length - 1] = null;
+
+            return pathParts.Where(part => !string.IsNullOrEmpty(part)).Aggregate(resultPath, (current, part) => string.Concat(current, "/", part));
         }
 
-        public static void ClearPath(ref string path){
+        public static void ClearPath(ref string path)
+        {
             var pathParts = path.Split("/");
-            
-            if(Path.IsPathRooted(path)){
-                path = "/";
-                foreach(var part in pathParts){
-                    if(!string.IsNullOrEmpty(part)){
-                        if (path.Equals("/"))
-                        {
-                            path = string.Concat(path, part.Trim());
-                        }
-                        else
-                        {
-                            path = string.Concat(path, "/" ,part.Trim());
-                        }
-                    }
-                }
-            }else{
+
+            if (Path.IsPathRooted(path))
+            {
+                path = pathParts.Where(part => !string.IsNullOrEmpty(part)).Aggregate("/", (current, part) => (current.Equals("/") ? string.Concat(current, part.Trim()) : string.Concat(current, "/", part.Trim())));
+            }
+            else
+            {
                 throw new InvalidPathException("The path must be rooted!");
             }
         }
 
-        public static string MapToPhysical(string currentPhysical, string inPath) {            
-            if (Constants.OsName.ToLower().Equals("windows")) {
-                inPath = inPath.Substring(1);
-                inPath = inPath.Replace('/', Path.DirectorySeparatorChar);
-            }
-            
+        public static string MapToPhysical(string currentPhysical, string inPath)
+        {
+            if (!Constants.OsName.ToLower().Equals("windows")) return string.Concat(currentPhysical, inPath);
+            inPath = inPath.Substring(1);
+            inPath = inPath.Replace('/', Path.DirectorySeparatorChar);
+
             return string.Concat(currentPhysical, inPath);
         }
 
-        public static string DetectUnitBySize(long i) {
-            string[] units = { "B", "kB", "MB", "GB", "TB" };
-            int unitIndex = 0;
-            for (int ptr = 0; ptr <= units.Length; ptr++)
+        public static string MapToSystemPath(string hostPath)
+        {
+            var systemPath = string.Concat("/", hostPath.Split(Constants.FileSystemRoot)[1]);
+            if (systemPath.Contains("\\"))
             {
-                if (i < Math.Pow(1024, ptr) && i > 1024)
-                {
-                    unitIndex = ptr - 1;
-                    break;
-                }
+                systemPath = systemPath.Replace('\\', '/');
             }
-            return units[unitIndex];
+
+            ClearPath(ref systemPath);
+
+            return systemPath;
+        }
+
+        internal static bool HasAccess(string username, string absolutePath)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                var userInfo = new UnixUserInfo(username);
+                var oid = FileSystemAccessor.owner(absolutePath);
+                return userInfo.UserId == oid;
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

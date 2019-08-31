@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 
-public sealed class MIMEAssistant
+public sealed class MimeAssistant
 {
-  private static readonly Dictionary<string, string> MIMETypesDictionary = new Dictionary<string, string>
+    private static readonly Dictionary<string, string> MimeTypesDictionary = new Dictionary<string, string>
   {
     { "7z", "application/7zip" },
     {"ai", "application/postscript"},
@@ -84,6 +84,7 @@ public sealed class MIMEAssistant
     {"mid", "audio/midi"},
     {"midi", "audio/midi"},
     {"mif", "application/vnd.mif"},
+    {"mkv", "video/mp4"},
     {"mov", "video/quicktime"},
     {"movie", "video/x-sgi-movie"},
     {"mp2", "audio/mpeg"},
@@ -107,7 +108,7 @@ public sealed class MIMEAssistant
     {"pgn", "application/x-chess-pgn"},
     {"pic", "image/pict"},
     {"pict", "image/pict"},
-    {"png", "image/png"}, 
+    {"png", "image/png"},
     {"pnm", "image/x-portable-anymap"},
     {"pnt", "image/x-macpaint"},
     {"pntg", "image/x-macpaint"},
@@ -180,7 +181,7 @@ public sealed class MIMEAssistant
     {"xbm", "image/x-xbitmap"},
     {"xht", "application/xhtml+xml"},
     {"xhtml", "application/xhtml+xml"},
-    {"xls", "application/vnd.ms-excel"},                        
+    {"xls", "application/vnd.ms-excel"},
     {"xml", "application/xml"},
     {"xpm", "image/x-xpixmap"},
     {"xsl", "application/xml"},
@@ -197,23 +198,23 @@ public sealed class MIMEAssistant
     {"zip", "application/zip"}
   };
 
-  public static string GetMIMEType(string fileName)
-  {
-    //get file extension
-    string extension = Path.GetExtension(fileName).ToLowerInvariant();
-
-    if (extension.Length > 0 && 
-        MIMETypesDictionary.ContainsKey(extension.Remove(0, 1)))
+    public static string GetMimeType(string fileName)
     {
-      return MIMETypesDictionary[extension.Remove(0, 1)];
+        //get file extension
+        string extension = Path.GetExtension(fileName).ToLowerInvariant();
+
+        if (extension.Length > 0 &&
+            MimeTypesDictionary.ContainsKey(extension.Remove(0, 1)))
+        {
+            return MimeTypesDictionary[extension.Remove(0, 1)];
+        }
+        return "unknown/file";
     }
-    return "unknown/file";
-  }
 
     public static string RecognizeIconByMime(string mime)
     {
         List<string> mimeParts = new List<string>();
-        mimeParts.AddRange(new string[]{ "video" , "audio" , "image" });
+        mimeParts.AddRange(new string[] { "video", "audio", "image" });
         Dictionary<string, string> translationParts = new Dictionary<string, string>
         {
             { "zip", "archive" },

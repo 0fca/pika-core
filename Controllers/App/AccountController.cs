@@ -1,14 +1,14 @@
-﻿using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using FMS2.Models;
+using FMS2.Models.AccountViewModels;
+using FMS2.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using FMS2.Models;
-using FMS2.Models.AccountViewModels;
-using FMS2.Services;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace FMS2.Controllers
 {
@@ -21,7 +21,7 @@ namespace FMS2.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,IEmailSender emailSender,ILogger<AccountController> logger)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -34,10 +34,9 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-      
+
         public async Task<IActionResult> Login(string returnUrl = null)
         {
-            // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ViewData["ReturnUrl"] = returnUrl;
@@ -62,7 +61,7 @@ namespace FMS2.Controllers
                 }
                 if (result.RequiresTwoFactor)
                 {
-                    return RedirectToAction(nameof(LoginWith2fa), new { returnUrl, model.RememberMe });
+                    return RedirectToAction(nameof(LoginWith2Fa), new { returnUrl, model.RememberMe });
                 }
                 if (result.IsLockedOut)
                 {
@@ -82,7 +81,7 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> LoginWith2fa(bool rememberMe, string returnUrl = null)
+        public async Task<IActionResult> LoginWith2Fa(bool rememberMe, string returnUrl = null)
         {
             // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
@@ -92,7 +91,7 @@ namespace FMS2.Controllers
                 throw new ApplicationException($"Unable to load two-factor authentication user.");
             }
 
-            var model = new LoginWith2faViewModel { RememberMe = rememberMe };
+            var model = new LoginWith2FaViewModel { RememberMe = rememberMe };
             ViewData["ReturnUrl"] = returnUrl;
 
             return View(model);
@@ -101,7 +100,7 @@ namespace FMS2.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWith2fa(LoginWith2faViewModel model, bool rememberMe, string returnUrl = null)
+        public async Task<IActionResult> LoginWith2Fa(LoginWith2FaViewModel model, bool rememberMe, string returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
@@ -257,7 +256,7 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        
+
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
             if (remoteError != null)
@@ -270,7 +269,7 @@ namespace FMS2.Controllers
             {
                 return RedirectToAction(nameof(Login));
             }
-            
+
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
             if (result.Succeeded)
             {
@@ -286,7 +285,7 @@ namespace FMS2.Controllers
                 ViewData["ReturnUrl"] = returnUrl;
                 ViewData["LoginProvider"] = info.LoginProvider;
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                
+
                 return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
             }
         }
@@ -305,7 +304,7 @@ namespace FMS2.Controllers
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                
+
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {

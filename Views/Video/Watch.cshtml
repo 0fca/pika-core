@@ -1,10 +1,23 @@
 @model string
 @{
-    ViewData["Title"] = "Video - Admin";
+    ViewData["Title"] = "Video";
+    var mime = ViewData["Mime"];
+    var title = ViewData["VideoTitle"];
+    var next = ViewData["NextVid"];
+    var prev = ViewData["PrevVid"];
     string srcvid = Model;
-    srcvid = String.Concat("https://me.lukas-bownik.net/Video/Convert?path=",srcvid);
+    srcvid = String.Concat($"https://{Context.Request.Host}/Video/Stream?p=",srcvid);
 }
 
-<div class="embed-responsive embed-responsive-16by9 row-margins">
-        <video width="620" src=@srcvid autoplay controls/>
-</div>
+    
+        <div class="row">
+            <div class="s12 m12 l12 center-align">
+                <h4 class="pt-5 pb-4">
+                    @title
+                </h4>
+                <video class="responsive-video pt-5" controls autoplay>
+                    <source src="@srcvid" type="@mime" />
+                    An error occurred. Sorry for the inconvenience.
+                </video>
+            </div>
+        </div>

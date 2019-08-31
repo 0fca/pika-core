@@ -5,15 +5,12 @@
 @inject UserManager<ApplicationUser> UserManager
 
     <ul class="right hide-on-med-and-down">
-        <li><a class="navlink" asp-area="" asp-controller="File" asp-action="Index">Browse</a></li>
-        <li><a class="navlink" asp-area="" asp-controller="Home" asp-action="Projects">Projects</a></li>
-        <li><a class="navlink" asp-area="" asp-controller="Home" asp-action="Download">Download</a></li>
-        <li><a class="navlink" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
-        <li><a class="navlink" asp-area="" asp-controller="Home" asp-action="About">About</a></li>
         @if (SignInManager.IsSignedIn(User))
         {
             <li>
-                <a asp-area="" class="navlink" asp-controller="Manage" asp-action="Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+                <a asp-area="" class="navlink" asp-controller="Manage" asp-action="Index" title="Manage"><i class="material-icons">
+                    account_box
+                </i></a>
             </li>
             <li>
                 <button type="submit" class="waves-effect waves-teal btn-flat">Log out</button>
@@ -22,7 +19,11 @@
         }
         else
         {
-            <li><a asp-area="" class="navlink" asp-controller="Account" asp-action="Register">Register</a></li>
-            <li><a asp-area="" class="navlink" asp-controller="Account" asp-action="Login">Log in</a></li>
+    <li><a asp-area="" class="navlink" asp-controller="Account" asp-action="Register">Register</a></li>
+    <li><a asp-area="" class="navlink" asp-controller="Account" asp-action="Login">Log in</a></li>
         }
     </ul>
+
+    
+
+

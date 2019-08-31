@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 using FMS2.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FMS2.Data
 {
@@ -20,6 +15,6 @@ namespace FMS2.Data
             base.OnModelCreating(builder);
         }
 
-        public DbSet<StorageIndexRecord> index_storage { get; set; }
+        public DbSet<StorageIndexRecord> IndexStorage { get; set; }
     }
 }

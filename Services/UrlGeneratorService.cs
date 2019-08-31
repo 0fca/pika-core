@@ -1,12 +1,10 @@
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-namespace FMS2.Services{
+namespace FMS2.Services
+{
     public class HashGeneratorService : IGenerator
     {
         private static KeyDerivationPrf Prf { get; set; } = KeyDerivationPrf.HMACSHA256;
@@ -19,12 +17,12 @@ namespace FMS2.Services{
 
         private string Hash(string input)
         {
-             byte[] salt = new byte[128 / 8];
+            byte[] salt = new byte[128 / 8];
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(salt);
             }
-            
+
             string hash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 password: input,
                 salt: salt,
@@ -32,7 +30,7 @@ namespace FMS2.Services{
                 iterationCount: 10000,
                 numBytesRequested: 256 / 8));
             PrepareHashString(ref hash);
-            return  hash;
+            return hash;
         }
 
         private void PrepareHashString(ref string hash)
@@ -45,8 +43,10 @@ namespace FMS2.Services{
                 { '/', '.' }
             };
 
-            foreach (char c in hash.ToCharArray()) {
-                if (dictionary.ContainsKey(c)) {
+            foreach (char c in hash.ToCharArray())
+            {
+                if (dictionary.ContainsKey(c))
+                {
                     dictionary.TryGetValue(c, out char replaceChar);
                     hash = hash.Replace(c, replaceChar);
                 }

@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 namespace FMS2.Services
 {
     public interface IStreamingService
     {
-         Task<Stream> GetVideoByPath(string path);
+        Task<Stream> GetVideoByPath(string path);
     }
 }

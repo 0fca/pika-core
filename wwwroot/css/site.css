@@ -4,9 +4,8 @@
 
 body {
     font-size: 17px !important;
-    padding-bottom: 20px;
     background-color: #eee !important;
-    color: #202020 !important;
+    color: rgb(12,12,12) !important;
     display: flex;
     min-height: 100vh;
     flex-direction: column;
@@ -18,9 +17,6 @@ main {
 
 
 .footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
     background-color: #303F9F !important;
     color: #212121 !important;
 }
@@ -158,12 +154,10 @@ a, a:hover, a:focus {
 .log-area {
     background-color: #fefefe !important;
     border: 1px solid #000 !important;
-    color: #F44336 !important;
+    color: #303F9F  !important;
     padding: 8px !important;
-    font-family: courier new !important;
     width: 100% !important;
     height: 500px !important;
-    box-sizing: border-box;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -173,10 +167,7 @@ a, a:hover, a:focus {
 
 
 .element-margins {
-   margin-top: 10px;
-   margin-bottom: 10px;
-   margin-right: auto;
-   margin-left: auto;
+    margin: 10px auto;
 }
 
 .offscreen {
@@ -201,6 +192,7 @@ a, a:hover, a:focus {
 
 .brand-margin {
     margin-left: 10px !important;
+    color: #303F9F  !important;
 }
 
 .tabs .tab a {
@@ -251,3 +243,43 @@ a, a:hover, a:focus {
     font-size: 24px;
 }
 
+.toast{
+    background-color: #eee !important;
+    color: #009688 !important;
+}
+
+.toast-input{
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+}
+
+.toast-button-color{
+    color: #009688 !important;
+}
+
+
+.collection-item{
+    background-color: inherit !important;
+    color: rgb(12,12,12) !important;
+    border-bottom: #000 !important;
+    
+    border-width: 1px !important;
+}
+
+.collection-item:hover{
+    color: #303F9F !important;
+}
+
+.browse-icon-margin{
+    margin-right: 10px;
+}
+
+.section_padding{
+    margin-left: 120px !important;
+}
+
+
+::placeholder { /* Most modern browsers support this now. */
+    color:    #0f0f0f !important;
+}

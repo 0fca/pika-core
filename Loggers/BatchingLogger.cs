@@ -1,8 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using FMS2.Extensions;
+﻿using FMS2.Extensions;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Text;
 
 namespace FMS2.Loggers
 {
@@ -57,7 +56,7 @@ namespace FMS2.Loggers
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            
+
             Log(DateTimeOffset.Now, logLevel, state, exception, formatter);
         }
     }

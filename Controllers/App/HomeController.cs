@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using FMS2.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
-using FMS2.Models;
 
 namespace FMS2.Controllers
 {
@@ -11,31 +8,6 @@ namespace FMS2.Controllers
         public IActionResult Index()
         {
             return View();
-        }
-
-        public IActionResult About(int ID = 0, int day = 0)
-        {
-            ViewData["os.name"] = System.Runtime.InteropServices.RuntimeInformation.OSDescription;
-           
-            ViewData["ver"] = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-            if(ID != 16 + 11 || day != 25){
-                return View();
-            }else{
-                return View("Dedication");
-            }
-        }
-
-        public IActionResult Contact()
-        {
-            return View();
-        }
-
-        public IActionResult Projects() {
-            return View();
-        }
-
-        public IActionResult Download() {
-            return RedirectToAction("Error", new ErrorViewModel{ ErrorCode = 501, Message="This page is under construction at the moment, sorry." , RequestId = HttpContext.TraceIdentifier, Url = HttpContext.Request.Path });
         }
 
         public IActionResult Error(ErrorViewModel errorViewModel)
@@ -50,8 +22,9 @@ namespace FMS2.Controllers
             }
         }
 
-        public IActionResult ErrorByCode(int ID) {
-            return RedirectToAction("Error",new ErrorViewModel { ErrorCode = ID, Message = "HTTP/1.1 "+ID, RequestId = HttpContext.TraceIdentifier, Url = HttpContext.Request.Path });
+        public IActionResult ErrorByCode(int id)
+        {
+            return RedirectToAction("Error", new ErrorViewModel { ErrorCode = id, Message = "HTTP/1.1 " + id, RequestId = HttpContext.TraceIdentifier, Url = HttpContext.Request.Path });
         }
     }
 }

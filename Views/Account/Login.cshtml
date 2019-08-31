@@ -14,24 +14,20 @@
             <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
                 <h4>Use a local account to log in.</h4>
                 <hr />
-                <div asp-validation-summary="All" class="text-danger"></div>
+                <div asp-validation-summary="All"></div>
                 <div class="form-group">
                     <label asp-for="Email"></label>
                     <input asp-for="Email" class="form-control" />
-                    <span asp-validation-for="Email" class="text-danger"></span>
+                    <span asp-validation-for="Email"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="Password"></label>
                     <input asp-for="Password" class="form-control" />
-                    <span asp-validation-for="Password" class="text-danger"></span>
+                    <span asp-validation-for="Password"></span>
                 </div>
                 <div class="form-group">
-                    <div class="checkbox">
-                        <label asp-for="RememberMe">
-                            <input asp-for="RememberMe" />
-                            @Html.DisplayNameFor(m => m.RememberMe)
-                        </label>
-                    </div>
+                    <label asp-for="RememberMe"></label>
+                    <input asp-for="RememberMe" type="checkbox" />
                 </div>
                 <div class="form-group">
                     <button type="submit" class="btn btn-default">Log in</button>
@@ -64,12 +60,15 @@
                 }
                 else
                 {
+                    <div class="g-signin2" data-onsuccess="onSignIn"></div>
                     <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
                         <div>
                             <p>
                                 @foreach (var provider in loginProviders)
                                 {
-                                    <button type="submit" class="waves-effect waves-teal btn-flat" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account">@provider.Name</button>
+                                    var name = System.IO.File.Exists("wwwroot/images/"+@provider.Name.ToLower() + "-icon.png") ? @provider.Name.ToLower()+"-icon.png" : @provider.Name.ToLower()+"-icon.svg";
+
+                                    <button type="submit" class="waves-effect waves-teal btn-flat btn-lg" style="width: 150px; height: 80px;" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account"><img src="~/images/@name" alt="@provider.DisplayName"/></button>
                                 }
                             </p>
                         </div>
@@ -79,7 +78,7 @@
         </section>
     </div>
 </div>
-
+<script src="https://apis.google.com/js/platform.js" async defer></script>
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 }
