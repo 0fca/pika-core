@@ -6,7 +6,8 @@ using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FMS2.Services{
+namespace FMS2.Services
+{
     public class ArchiveService : IZipper, INotifyPropertyChanged
     {
         private Task _task;
@@ -17,7 +18,8 @@ namespace FMS2.Services{
 
         public void Cancel()
         {
-            if (CanBeCancelled) {
+            if (CanBeCancelled)
+            {
                 _tokenSource.Cancel();
                 try
                 {
@@ -34,17 +36,20 @@ namespace FMS2.Services{
         public async Task<Task> ZipDirectoryAsync(string absolutePath, string output)
         {
             _outputPath = output;
-            if(File.Exists(output)){
+            if (File.Exists(output))
+            {
                 File.Delete(output);
             }
-            if (_tokenSource.IsCancellationRequested) {
+            if (_tokenSource.IsCancellationRequested)
+            {
                 _tokenSource.Dispose();
                 _tokenSource = new CancellationTokenSource();
             }
 
             await Task.Delay(TimeSpan.FromSeconds(10d));
-            _task = Task.Factory.StartNew(() => {
-                
+            _task = Task.Factory.StartNew(() =>
+            {
+
                 if (!_tokenSource.IsCancellationRequested)
                 {
                     CanBeCancelled = false;
@@ -52,7 +57,7 @@ namespace FMS2.Services{
                     ZipFile.CreateFromDirectory(absolutePath, output, CompressionLevel.Fastest, false);
                     CanBeCancelled = true;
                 }
-            },_tokenSource.Token);
+            }, _tokenSource.Token);
             return _task;
         }
 

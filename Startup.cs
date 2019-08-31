@@ -1,4 +1,5 @@
 ﻿using FMS2.Controllers;
+using FMS2.Controllers.Api.Hubs;
 using FMS2.Data;
 using FMS2.Models;
 using FMS2.Providers;
@@ -10,16 +11,17 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PikaCore.Controllers.Api.Hubs;
+using PikaCore.Services;
+using PikaCore.Services.Helpers;
 using System;
-using System.Text;
 using System.Threading.Tasks;
-using FMS2.Controllers.Api.Hubs;
-using Microsoft.IdentityModel.Tokens;
 
 namespace FMS2
 {
@@ -47,7 +49,7 @@ namespace FMS2
                 .AddDefaultTokenProviders();
 
             services.AddAuthentication()
-                .AddGoogle(googleOpts => 
+                .AddGoogle(googleOpts =>
                 {
                     googleOpts.ClientId = Configuration["Authentication:Google:ClientId"];
                     googleOpts.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
@@ -67,29 +69,24 @@ namespace FMS2
                 {
                     discordOptions.ClientId = Configuration["Authentication:Discord:ClientId"];
                     discordOptions.ClientSecret = Configuration["Authentication:Discord:ClientSecret"];
-                })
-                .AddOAuth("Reddit", "Reddit", redditOpts =>
-                {
-                    redditOpts.ClientId = Configuration["Authentication:Reddit:ClientId"];
-                    redditOpts.ClientSecret = Configuration["Authentication:Reddit:ClientSecret"];
-                    redditOpts.CallbackPath = "/signin-reddit";
-                    redditOpts.TokenEndpoint = "https://www.reddit.com/api/v1/access_token";
-                    redditOpts.AuthorizationEndpoint = "https://www.reddit.com/api/v1/authorize";
                 });
-                
 
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IZipper, ArchiveService>();
+            services.AddSingleton<ImageCache>();
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IGenerator, HashGeneratorService>();
             services.AddTransient<IStreamingService, StreamingService>();
+            services.AddScoped<IMediaService, MediaService>();
+            services.AddSingleton<ISchedulerService, SchedulerService>();
+
             var option = new FileLoggerOptions
             {
                 FileName = "fms-",
                 FileSizeLimit = Constants.MaxLogFileSize,
                 LogDirectory = Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
                 ShouldBackupLogs = bool.Parse(Configuration.GetSection("Logging")["ShouldBackupLogs"]),
-                BackupLogDir = Configuration.GetSection("Logging")["LogBackupDir-"+OsName]
+                BackupLogDir = Configuration.GetSection("Logging")["LogBackupDir-" + OsName]
             };
 
             var opts = Options.Create(option);
@@ -100,14 +97,14 @@ namespace FMS2
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-            
+
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
                 options.SlidingExpiration = true;
                 options.LoginPath = "/Account/Login";
-                
+
             });
 
             services.AddSignalR();
@@ -119,10 +116,12 @@ namespace FMS2
             });
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
 
-            IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[OsName+"-root"]);
+            services.AddDistributedMemoryCache();
+
+            IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[OsName + "-root"]);
             services.AddSingleton(physicalProvider);
 
-            Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-"+OsName];
+            Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-" + OsName];
             Constants.UploadTmp = Configuration.GetSection("Paths")["upload-dir-tmp"];
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
@@ -135,7 +134,11 @@ namespace FMS2
 
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app,
+                              IHostingEnvironment env,
+                              IServiceProvider serviceProvider,
+                              IApplicationLifetime lifetime,
+                              IDistributedCache cache)
         {
             if (env.IsDevelopment())
             {
@@ -148,12 +151,12 @@ namespace FMS2
             }
 
             Constants.RootPath = Configuration.GetSection("Paths")["storage"];
-            Constants.FileSystemRoot = Configuration.GetSection("Paths")[OsName+"-root"];
-            Constants.Tmp = Configuration.GetSection("Paths")[OsName+"-tmp"];
+            Constants.FileSystemRoot = Configuration.GetSection("Paths")[OsName + "-root"];
+            Constants.Tmp = Configuration.GetSection("Paths")[OsName + "-tmp"];
             Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
 
             app.UseStaticFiles();
-            
+
             app.UseFileServer();
             app.UseStatusCodePagesWithRedirects("/Home/ErrorByCode/{0}");
             app.UseSession();
@@ -166,10 +169,11 @@ namespace FMS2
             app.UseAuthentication();
             app.UseSignalR(routes =>
             {
-                routes.MapHub<StatusHub>("/status");
-                routes.MapHub<FileOperationHub>("/files");
+                routes.MapHub<StatusHub>("/hubs/status");
+                routes.MapHub<FileOperationHub>("/hubs/files");
+                routes.MapHub<MediaHub>("/hubs/media");
             });
-            
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -178,6 +182,8 @@ namespace FMS2
             });
             CreateRoles(serviceProvider).Wait();
         }
+
+
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {
             //adding custom roles
@@ -194,17 +200,17 @@ namespace FMS2
                     await roleManager.CreateAsync(new IdentityRole(roleName));
                 }
             }
-            
+
             //creating a super user who could maintain the web app
             var poweruser = new ApplicationUser
             {
                 UserName = Configuration.GetSection("UserSettings")["UserEmail"],
                 Email = Configuration.GetSection("UserSettings")["UserEmail"]
             };
-            
+
             var userPassword = Configuration.GetSection("UserSettings")["UserPassword"];
             var user = await userManager.FindByEmailAsync(Configuration.GetSection("UserSettings")["UserEmail"]);
-            
+
             //Debug.WriteLine(_user.Email);
             if (user == null)
             {

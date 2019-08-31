@@ -1,16 +1,15 @@
+using FMS.Exceptions;
+using Mono.Unix;
 using System;
 using System.IO;
 using System.Linq;
-using System.Security.Principal;
-using FMS.Exceptions;
-using Microsoft.CodeAnalysis;
-using Mono.Unix;
 
 namespace FMS2.Controllers.Helpers
 {
     public static class UnixHelper
     {
-        public static string GetParent(string path){
+        public static string GetParent(string path)
+        {
             if (!path.Equals("/") && path.EndsWith("/"))
             {
                 path = path.Remove(path.Length - 1, 1);
@@ -25,17 +24,22 @@ namespace FMS2.Controllers.Helpers
             return pathParts.Where(part => !string.IsNullOrEmpty(part)).Aggregate(resultPath, (current, part) => string.Concat(current, "/", part));
         }
 
-        public static void ClearPath(ref string path){
+        public static void ClearPath(ref string path)
+        {
             var pathParts = path.Split("/");
-            
-            if(Path.IsPathRooted(path)){
+
+            if (Path.IsPathRooted(path))
+            {
                 path = pathParts.Where(part => !string.IsNullOrEmpty(part)).Aggregate("/", (current, part) => (current.Equals("/") ? string.Concat(current, part.Trim()) : string.Concat(current, "/", part.Trim())));
-            }else{
+            }
+            else
+            {
                 throw new InvalidPathException("The path must be rooted!");
             }
         }
 
-        public static string MapToPhysical(string currentPhysical, string inPath) {
+        public static string MapToPhysical(string currentPhysical, string inPath)
+        {
             if (!Constants.OsName.ToLower().Equals("windows")) return string.Concat(currentPhysical, inPath);
             inPath = inPath.Substring(1);
             inPath = inPath.Replace('/', Path.DirectorySeparatorChar);

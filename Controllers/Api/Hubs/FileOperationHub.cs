@@ -1,15 +1,13 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using FMS2.Controllers.Helpers;
 using FMS2.Models;
 using FMS2.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
-using System.Linq;
-using System.Text;
-using FMS2.Controllers.Helpers;
-using System.IO;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace FMS2.Controllers.Api.Hubs
 {
@@ -20,7 +18,7 @@ namespace FMS2.Controllers.Api.Hubs
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IFileLoggerService _fileLoggerService;
         private readonly IConfiguration _configuration;
-        
+
         public FileOperationHub(UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager,
                                 IFileService fileService,
@@ -36,7 +34,7 @@ namespace FMS2.Controllers.Api.Hubs
 
         public void Copy()
         {
-            
+
         }
 
         public void Move()
@@ -47,14 +45,14 @@ namespace FMS2.Controllers.Api.Hubs
         public async Task List(string path)
         {
             var listing = new List<string>();
-            
+
             if (!string.IsNullOrEmpty(path))
             {
                 var tmpListing = (await _fileService.ListPath(path));
                 foreach (var absolutePath in tmpListing)
                 {
                     var mappedPath = UnixHelper.MapToSystemPath(absolutePath);
-                    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", "Checking this directory: "+absolutePath);
+                    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", "Checking this directory: " + absolutePath);
                     if (Directory.Exists(absolutePath))
                     {
                         try

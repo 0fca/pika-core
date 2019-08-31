@@ -10,11 +10,12 @@ namespace FMS2.Controllers.Helpers
 
         [DllImport("libposixhlpr.so")]
         internal static extern Perms permission_model(string file);
-        
+
         [DllImport("libposixhlpr.so")]
         internal static extern int owner(string file);
-        
-        public static string DetectUnitBySize(long i) {
+
+        public static string DetectUnitBySize(long i)
+        {
             string[] units = { "B", "kB", "MB", "GB", "TB" };
             int unitIndex = 0;
             for (int ptr = 1; ptr <= units.Length; ptr++)

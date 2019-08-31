@@ -74,9 +74,11 @@ namespace FMS2.Providers
 
         public bool ShouldBackupLogs { get; set; } = true;
 
-        public string BackupLogDir {
+        public string BackupLogDir
+        {
             get { return _backupLogDir; }
-            set {
+            set
+            {
                 if (!Directory.Exists(value))
                 {
                     throw new FileNotFoundException("No such path " + value);

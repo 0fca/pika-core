@@ -20,7 +20,7 @@ namespace FMS2.Providers
         private readonly bool _shouldBackup = true;
         private readonly string _backupDir = "";
         private string _fullName = "";
-        
+
         private volatile List<string> _logs = new List<string>();
         private static long _lastSize = 0L;
 
@@ -95,13 +95,15 @@ namespace FMS2.Providers
 
         private void DoCleanup()
         {
-            if(_shouldBackup && _maxRetainedFiles > 0){
+            if (_shouldBackup && _maxRetainedFiles > 0)
+            {
                 var files = new DirectoryInfo(_path)
                         .GetFiles(_fileName + "*")
                         .OrderByDescending(f => f.Name)
                         .Skip(_maxRetainedFiles.Value);
-                foreach (var file in files) {
-                    File.Copy(file.FullName, _backupDir+Path.DirectorySeparatorChar+file.Name);
+                foreach (var file in files)
+                {
+                    File.Copy(file.FullName, _backupDir + Path.DirectorySeparatorChar + file.Name);
                 }
                 RollFiles();
             }
@@ -111,40 +113,41 @@ namespace FMS2.Providers
 
         public async Task<List<string>> GetLogs()
         {
-           
+
             var fileInfo = new FileInfo(_fullName);
 
-                var fs = fileInfo.OpenRead();
-                
-                //var buffer = new byte[fileInfo.Length - LastSize];
-                //List<string> lines = new List<string>();
-                if (fs.CanSeek && fs.CanRead)
+            var fs = fileInfo.OpenRead();
+
+            //var buffer = new byte[fileInfo.Length - LastSize];
+            //List<string> lines = new List<string>();
+            if (fs.CanSeek && fs.CanRead)
+            {
+
+                long newPos = fs.Seek(fs.Length - 8192, SeekOrigin.Begin);
+                string nextLine = "";
+                var buffer = new byte[8192];
+
+                await fs.ReadAsync(buffer, 0, buffer.Length);
+
+                foreach (byte b in buffer)
                 {
-
-                    long newPos = fs.Seek(fs.Length - 8192, SeekOrigin.Begin);
-                    string nextLine = "";
-                    var buffer = new byte[8192];
-                    
-                    await fs.ReadAsync(buffer, 0, buffer.Length);
-
-                    foreach (byte b in buffer)
+                    char newChar = (char)b;
+                    nextLine = string.Concat(nextLine, newChar);
+                    if (newChar == '\n')
                     {
-                        char newChar = (char)b;
-                        nextLine = string.Concat(nextLine,newChar);
-                        if (newChar == '\n')
-                        {
-                            _logs.Add(nextLine);
-                            nextLine = "";
-                            continue;
-                        }
+                        _logs.Add(nextLine);
+                        nextLine = "";
+                        continue;
                     }
                 }
-                _lastSize = fileInfo.Length;
-                fs.Dispose();     
-                return _logs;
+            }
+            _lastSize = fileInfo.Length;
+            fs.Dispose();
+            return _logs;
         }
 
-        public void IdleMemoryCleanup(bool isHardClean) {
+        public void IdleMemoryCleanup(bool isHardClean)
+        {
             if (isHardClean)
             {
                 DoHardMemCleanup();

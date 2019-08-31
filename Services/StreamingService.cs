@@ -1,7 +1,4 @@
-﻿using FMS2.Controllers.Api;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 namespace FMS2.Services
@@ -11,7 +8,7 @@ namespace FMS2.Services
         private readonly IFileService _fileDownloader;
 
         public StreamingService(IFileService fileDownloader)
-        { 
+        {
             _fileDownloader = fileDownloader;
         }
 
@@ -19,12 +16,13 @@ namespace FMS2.Services
         {
             var extension = Path.GetExtension(path);
             Stream outStream = null;
-            switch (extension) {
+            switch (extension)
+            {
                 case ".mp4":
                 case ".mp3":
                 case ".mkv":
                     outStream = await _fileDownloader.DownloadAsStreamAsync(path);
-                    
+
                     break;
             }
             return outStream;
@@ -32,7 +30,7 @@ namespace FMS2.Services
 
         ~StreamingService()
         {
-            
+
         }
     }
 }

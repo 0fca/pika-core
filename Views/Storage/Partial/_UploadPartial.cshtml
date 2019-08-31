@@ -34,7 +34,7 @@
             uploadButton.setAttribute("disabled", true);
         }
 
-        if (getSummarySize() >= 5120000) {
+        if (getSummarySize() >= 104857600) {
             messageLabel.innerText = "File or files are too big to upload it at a time.";
             uploadButton.setAttribute("disabled", true);
             deleteAllFiles();

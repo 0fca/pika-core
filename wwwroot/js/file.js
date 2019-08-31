@@ -1,6 +1,7 @@
-﻿const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/files").build();
+﻿const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/hubs/files").build();
 
 fileHubconnection.on("ReceiveListing", ReceiveListing);
+
 
 fileHubconnection.start().then(function () {
     console.log("FileHub is ready.");
@@ -75,4 +76,6 @@ function ReceiveListing(listing) {
     
     instance.updateData(pathObject);
 }
+
+
 

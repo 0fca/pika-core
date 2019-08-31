@@ -1,14 +1,14 @@
-﻿using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using FMS2.Models;
+using FMS2.Models.AccountViewModels;
+using FMS2.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using FMS2.Models;
-using FMS2.Models.AccountViewModels;
-using FMS2.Services;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace FMS2.Controllers
 {
@@ -21,7 +21,7 @@ namespace FMS2.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,IEmailSender emailSender,ILogger<AccountController> logger)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -34,7 +34,7 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-      
+
         public async Task<IActionResult> Login(string returnUrl = null)
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
@@ -256,7 +256,7 @@ namespace FMS2.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        
+
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
             if (remoteError != null)
@@ -269,7 +269,7 @@ namespace FMS2.Controllers
             {
                 return RedirectToAction(nameof(Login));
             }
-            
+
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
             if (result.Succeeded)
             {
@@ -285,7 +285,7 @@ namespace FMS2.Controllers
                 ViewData["ReturnUrl"] = returnUrl;
                 ViewData["LoginProvider"] = info.LoginProvider;
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                
+
                 return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
             }
         }
@@ -304,7 +304,7 @@ namespace FMS2.Controllers
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                
+
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {

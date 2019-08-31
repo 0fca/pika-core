@@ -10,7 +10,8 @@ namespace FMS2.Services
         private readonly ILoggerProvider _fileLoggerProvider;
         private readonly ILogger _logger;
 
-        public FileLoggerService(ILoggerProvider fileLoggerProvider) {
+        public FileLoggerService(ILoggerProvider fileLoggerProvider)
+        {
             this._fileLoggerProvider = fileLoggerProvider;
             _logger = fileLoggerProvider.CreateLogger("Production");
         }

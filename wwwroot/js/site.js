@@ -1,11 +1,11 @@
 ﻿
 function searchFileList(){
     let searchParam = document.getElementById("searchBox").value;
-    let fileList = document.getElementById("file-list").children;
+    let fileList = document.getElementById("file-list").querySelectorAll("a");
 
     if(searchParam !== ""){
-        for(let i = 0; i < fileList.length; i++){
-            if (!fileList[i].children[0].textContent.toLowerCase().includes(searchParam.toLowerCase())) {
+        for(let i = 1; i < fileList.length - 1; i++){
+            if (!fileList[i].textContent.toLowerCase().includes(searchParam.toLowerCase())) {
                 fileList[i].setAttribute("hidden", true);
                 let sibling = fileList[i].nextElementSibling;
                 if (sibling !== null) {
@@ -26,8 +26,8 @@ function searchFileList(){
 
 
 function resetFileList(){
-    const fileList = document.getElementById("file-list").children;
-    for(let i = 0; i < fileList.length; i++){
+    const fileList = document.getElementById("file-list").querySelectorAll("a");
+    for(let i = 1; i < fileList.length - 1; i++){
         fileList[i].removeAttribute("hidden", false);  
     }
 }

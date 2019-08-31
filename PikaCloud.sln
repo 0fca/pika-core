@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PikaCore", "PikaCore.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PikaAPI", "..\..\VisualStudioProjects\PikaAPI\PikaAPI.csproj", "{A8224DA6-87D9-4589-BAFD-54EF646BDB76}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PikaPlayer", "..\..\VisualStudioProjects\PikaPlayer\PikaPlayer\PikaPlayer\PikaPlayer.csproj", "{AD2B58E0-F544-4AF3-B3A1-7DA25CBB9CC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{A8224DA6-87D9-4589-BAFD-54EF646BDB76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8224DA6-87D9-4589-BAFD-54EF646BDB76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8224DA6-87D9-4589-BAFD-54EF646BDB76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD2B58E0-F544-4AF3-B3A1-7DA25CBB9CC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD2B58E0-F544-4AF3-B3A1-7DA25CBB9CC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD2B58E0-F544-4AF3-B3A1-7DA25CBB9CC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD2B58E0-F544-4AF3-B3A1-7DA25CBB9CC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

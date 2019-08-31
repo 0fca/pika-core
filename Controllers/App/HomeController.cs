@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using FMS2.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
-using FMS2.Models;
 
 namespace FMS2.Controllers
 {
@@ -11,10 +8,6 @@ namespace FMS2.Controllers
         public IActionResult Index()
         {
             return View();
-        }
-
-        public IActionResult Download() {
-            return RedirectToAction("Error", new ErrorViewModel{ ErrorCode = 501, Message="This page is under construction at the moment, sorry." , RequestId = HttpContext.TraceIdentifier, Url = HttpContext.Request.Path });
         }
 
         public IActionResult Error(ErrorViewModel errorViewModel)
@@ -29,8 +22,9 @@ namespace FMS2.Controllers
             }
         }
 
-        public IActionResult ErrorByCode(int id) {
-            return RedirectToAction("Error",new ErrorViewModel { ErrorCode = id, Message = "HTTP/1.1 "+id, RequestId = HttpContext.TraceIdentifier, Url = HttpContext.Request.Path });
+        public IActionResult ErrorByCode(int id)
+        {
+            return RedirectToAction("Error", new ErrorViewModel { ErrorCode = id, Message = "HTTP/1.1 " + id, RequestId = HttpContext.TraceIdentifier, Url = HttpContext.Request.Path });
         }
     }
 }

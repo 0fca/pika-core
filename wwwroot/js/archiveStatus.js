@@ -1,4 +1,4 @@
-﻿const connection = new signalR.HubConnectionBuilder().withUrl("/status").build();
+﻿const connection = new signalR.HubConnectionBuilder().withUrl("/hubs/status").build();
 
 
 connection.on("ReceiveArchivingStatus", function (message) {

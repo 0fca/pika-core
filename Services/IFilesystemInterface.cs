@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 
-namespace FMS2.Services{
+namespace FMS2.Services
+{
     public interface IZipper
     {
         Task<Task> ZipDirectoryAsync(string absolutPath, string output);

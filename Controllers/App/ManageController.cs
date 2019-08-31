@@ -1,19 +1,18 @@
-﻿using System;
+﻿using FMS2.Models;
+using FMS2.Models.ManageViewModels;
+using FMS2.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using FMS2.Models;
-using FMS2.Models.ManageViewModels;
-using FMS2.Services;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace FMS2.Controllers
 {
@@ -148,7 +147,8 @@ namespace FMS2.Controllers
         public async Task<IActionResult> GeneratePassword(string id)
         {
             var userModel = await _userManager.FindByIdAsync(id);
-            if ((await _userManager.GetLoginsAsync(userModel)).Count == 0) {
+            if ((await _userManager.GetLoginsAsync(userModel)).Count == 0)
+            {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
                 var guid = Guid.NewGuid().ToString();
                 _urlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
@@ -185,7 +185,8 @@ namespace FMS2.Controllers
             userModel.Email = editModel.Email;
             userModel.UserName = editModel.UserName;
             userModel.PhoneNumber = editModel.Phone;
-            if (editModel.Roles != null) {
+            if (editModel.Roles != null)
+            {
                 await _userManager.AddToRolesAsync(userModel, editModel.Roles);
             }
             var result = await _userManager.UpdateAsync(userModel);
@@ -196,7 +197,8 @@ namespace FMS2.Controllers
         [HttpGet]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> RemoveFromRole(string id, string roleName) {
+        public async Task<IActionResult> RemoveFromRole(string id, string roleName)
+        {
             var user = await _userManager.FindByIdAsync(id);
             if ((await _userManager.GetRolesAsync(user)).Count > 1)
             {
@@ -209,9 +211,9 @@ namespace FMS2.Controllers
             }
             else
             {
-                StatusMessage = "Couldn't delete user of id "+id+" from role "+roleName+", user has to be in one role at least.";
+                StatusMessage = "Couldn't delete user of id " + id + " from role " + roleName + ", user has to be in one role at least.";
             }
-            return RedirectToAction(nameof(Edit), new { @Id = id});
+            return RedirectToAction(nameof(Edit), new { @Id = id });
         }
 
         [HttpGet]
