@@ -1,6 +1,6 @@
-# Pika Cloud
+# Pika Core
 
-__Pika Cloud__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem(but only for download purposes) to all registered users.
+__Pika Core__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem(but only for download purposes) to all registered users.
 
 It is also my portfolio page.
 
@@ -44,4 +44,4 @@ Core is deployed on localhost.
 
 __Docs__ 
 
-There will be simple public auth and filesystem access(this will be built in Spring Web) API.
+There will be simple public auth and filesystem access API.
