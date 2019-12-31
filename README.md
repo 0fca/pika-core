@@ -4,7 +4,7 @@ __Pika Cloud__ is a simple file management system written in C# with ASP.NET Cor
 
 It is also my portfolio page.
 
-Production: https://me.lukas-bownik.net/
+Production: https://core.lukas-bownik.net/
 
 *Done features*
 * Registered and anonymous access to public part of the server's filesystem,
