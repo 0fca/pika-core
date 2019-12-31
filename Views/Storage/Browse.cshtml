@@ -142,7 +142,7 @@
 
                 <ul id='options-@item.Name' class='dropdown-content'>
                     @{var ext = System.IO.Path.GetExtension(item.Name);}
-                    @if (ext.Equals(".mp3") || ext.Equals(".mp4") || ext.Equals(".mkv"))
+                    @if (ext.Equals(".mp3") || ext.Equals(".mp4") || ext.Equals(".m4a"))
                     {
                         <li><a asp-action="Watch" asp-controller="Video" asp-route-path="@last/@item.Name"><i class="fas fa-play" title="Play"></i></a></li>
                     }
@@ -214,6 +214,7 @@
 <script>
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
         if (e.code == "Enter") {
+	    loadThumb(path);
             searchFileList();
         }
     });

@@ -287,6 +287,9 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-*.json
+appsettings.*
 
 *.db
+
+*.csproj
+*.sln

@@ -20,7 +20,7 @@ namespace FMS2.Services
             {
                 case ".mp4":
                 case ".mp3":
-                case ".mkv":
+                case ".m4a":
                     outStream = await _fileDownloader.DownloadAsStreamAsync(path);
 
                     break;

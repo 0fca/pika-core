@@ -101,7 +101,10 @@ namespace PikaCore.Services
 
             if (!File.Exists(thumbAbsolutePath))
             {
-                return await GrabFromImage(absoluteHostPath, guid, int.Parse(_configuration.GetSection("Images")["Width"]), int.Parse(_configuration.GetSection("Images")["Height"]));
+                return await GrabFromImage(absoluteHostPath, 
+					   guid, int.Parse(_configuration.GetSection("Images")["Width"]), 
+					   int.Parse(_configuration.GetSection("Images")["Height"])
+					   );
             }
             return guid;
         }
@@ -141,7 +144,8 @@ namespace PikaCore.Services
                                 resized.Save(name, imageFormat);
 
                                 _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"Saved... {name}");
-                                return id;
+				resized.Dispose();
+				return id;
                             }
                         }
                     }
