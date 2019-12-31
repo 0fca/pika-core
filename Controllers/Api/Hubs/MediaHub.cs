@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using PikaCore.Services;
+using PikaCore.Services.Helpers;
+using System;
 using System.Threading.Tasks;
 
 namespace PikaCore.Controllers.Api.Hubs

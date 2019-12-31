@@ -224,7 +224,8 @@ public sealed class MimeAssistant
             { "xlsx", "spreadsheet" },
             { "docx", "word" },
             { "text", "alt" },
-            { "application", "file" }
+            { "application", "file" },
+	    { "audio-file", "file-audio-o" }
         };
         var parts = mime.Split('/');
 
