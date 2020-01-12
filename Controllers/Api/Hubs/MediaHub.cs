@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using PikaCore.Services;
+using PikaCore.Services.Helpers;
+using System;
 using System.Threading.Tasks;
 
 namespace PikaCore.Controllers.Api.Hubs
@@ -19,11 +21,11 @@ namespace PikaCore.Controllers.Api.Hubs
         }
 
 
-        public async Task CreateThumb(string systemPath, string guid, int s)
+        public async Task CreateThumb(string systemPath, string guid)
         {
-            var thumbId = await _mediaService.CreateThumb(systemPath, guid, s);
+            guid = await _mediaService.CreateThumb(systemPath, guid);
 
-            await Clients.User(_userManager.GetUserId(Context.User)).SendAsync("ReceiveThumb", thumbId);
+            await Clients.User(_userManager.GetUserId(Context.User)).SendAsync("ReceiveThumb", guid);
         }
     }
 }

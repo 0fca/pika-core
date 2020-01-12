@@ -22,9 +22,15 @@ namespace FMS2.Services
                 case ".mp3":
                 case ".m4a":
                     outStream = await _fileDownloader.DownloadAsStreamAsync(path);
+
                     break;
             }
             return outStream;
+        }
+
+        ~StreamingService()
+        {
+
         }
     }
 }

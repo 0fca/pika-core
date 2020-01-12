@@ -62,12 +62,17 @@ namespace FMS2.Controllers.Helpers
 
         internal static bool HasAccess(string username, string absolutePath)
         {
-            if (Environment.OSVersion.Platform != PlatformID.Unix)
-                return Environment.OSVersion.Platform == PlatformID.Win32NT;
-            var userInfo = new UnixUserInfo(username);
-            var oid = FileSystemAccessor.owner(absolutePath);
-            return userInfo.UserId == oid;
-
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                var userInfo = new UnixUserInfo(username);
+                var oid = FileSystemAccessor.owner(absolutePath);
+                return userInfo.UserId == oid;
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
