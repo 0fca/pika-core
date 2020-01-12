@@ -1,5 +1,6 @@
 using FMS2.Controllers;
 using FMS2.Controllers.Helpers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using System;
@@ -16,12 +17,15 @@ namespace FMS2.Services
     public class FileService : IFileService
     {
         private readonly IFileLoggerService _fileLoggerService;
+        private readonly IConfiguration _configuration;
         private readonly IFileProvider _fileProvider;
 
         public FileService(IFileLoggerService fileLoggerService,
+                           IConfiguration configuration,
                            IFileProvider fileProvider)
         {
             _fileLoggerService = fileLoggerService;
+            _configuration = configuration;
             _fileProvider = fileProvider;
         }
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
@@ -47,9 +51,10 @@ namespace FMS2.Services
 
         public async Task<Stream> DownloadAsStreamAsync(string absolutPath)
         {
+            _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"Returning {absolutPath} as stream.");
             return await Task<Stream>.Factory.StartNew(() =>
             {
-	    	_fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutPath}");
+                Debug.WriteLine(absolutPath);
                 return File.Exists(absolutPath) ? System.IO.File.OpenRead(absolutPath) : null;
             }, _tokenSource.Token);
         }
@@ -72,7 +77,7 @@ namespace FMS2.Services
         }
 
         public async Task MoveFromTmpAsync(string fileName, string toWhere = null)
-	{
+        {
             var file = Constants.Tmp + Constants.UploadTmp + Path.DirectorySeparatorChar + fileName;
 
             if (string.IsNullOrEmpty(toWhere))

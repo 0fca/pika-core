@@ -8,17 +8,12 @@
         <h3 class="section__heading">What is this?</h3>
         <p class="section_paragraph row-content">
             Pika Cloud is a web application built especially to make an access to my server's filesystem easier.
-            It is my first web app I've ever build. I started development on .NET Core 2.1 SDK, but now I use .NET Core SDK of version 3.1.100.
+            It is my first web app I've ever build. I started development on .NET Core 2.1 SDK, but now I use .NET Core of version 2.2.
             The source can be found under this <a href="https://www.github.com/Obsidiam/pika-cloud">url</a>.
         </p>
-	@{
-		var dev = "";
-	}
-	<environment include="Development">
-		@{dev = "BETA";}
-        </environment>
+
         <p class="section_paragraph">
-            This is Hannah(Pika Core), version: @Model.Version @dev.
+            This is Hannah(Pika Core), version: @Model.Version.
         </p>
     </section>
     <section class="col s10 m5 l5" id="technicalinformation">

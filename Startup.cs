@@ -4,7 +4,6 @@ using FMS2.Data;
 using FMS2.Models;
 using FMS2.Providers;
 using FMS2.Services;
-using FMS2.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -73,7 +72,7 @@ namespace FMS2
                 });
 
             services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddScoped<IZipper, ArchiveService>();
+            services.AddSingleton<IZipper, ArchiveService>();
             services.AddSingleton<ImageCache>();
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IGenerator, HashGeneratorService>();
@@ -102,27 +101,16 @@ namespace FMS2
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
                 options.SlidingExpiration = true;
                 options.LoginPath = "/Account/Login";
 
             });
-	    
 
-    	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
-			        {
-		                builder
-		                .AllowAnyMethod()
-		                .AllowAnyHeader()
-		                .AllowAnyOrigin()
-		                .AllowCredentials();
-	    }));
-
-	   
             services.AddSignalR();
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(120);
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
@@ -136,20 +124,7 @@ namespace FMS2
             Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-" + OsName];
             Constants.UploadTmp = Configuration.GetSection("Paths")["upload-dir-tmp"];
 
-            services.AddMvc()
-	    .AddRazorPagesOptions(options =>
-            {
-            	options.Conventions
-                .AddPageApplicationModelConvention("/StreamedSingleFileUploadPhysical",
-                    model =>
-                    {
-                        model.Filters.Add(
-                            new GenerateAntiforgeryTokenCookieAttribute());
-                        model.Filters.Add(
-                            new DisableFormValueModelBindingAttribute());
-                    });
-            })
-	    .SetCompatibilityVersion(CompatibilityVersion.Latest);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -161,8 +136,9 @@ namespace FMS2
 
         public void Configure(IApplicationBuilder app,
                               IHostingEnvironment env,
-                              IServiceProvider serviceProvider
-                             )
+                              IServiceProvider serviceProvider,
+                              IApplicationLifetime lifetime,
+                              IDistributedCache cache)
         {
             if (env.IsDevelopment())
             {
@@ -189,9 +165,6 @@ namespace FMS2
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
-
-	    app.UseCors("CorsPolicy");
-	    //app.UseWebSockets();
 
             app.UseAuthentication();
             app.UseSignalR(routes =>

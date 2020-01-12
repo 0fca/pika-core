@@ -4,7 +4,6 @@ using FMS2.Data;
 using FMS2.Models;
 using FMS2.Models.File;
 using FMS2.Services;
-using FMS2.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -80,11 +79,8 @@ namespace FMS2.Controllers.App
             var tmp = GetContents(path);
             if (tmp.Exists)
             {
-                
                 if (HttpContext.User.IsInRole("Admin")
-                 || UnixHelper.HasAccess(osUser, 
-                     UnixHelper.MapToPhysical(Constants.FileSystemRoot, 
-                         _last)))
+                 || UnixHelper.HasAccess(osUser, UnixHelper.MapToPhysical(Constants.FileSystemRoot, _last)))
                 {
 
                     Lrmv.Contents = await _fileService.SortContents(tmp);
@@ -92,14 +88,8 @@ namespace FMS2.Controllers.App
                     {
                         if (Environment.OSVersion.Platform == PlatformID.Unix)
                         {
-                            Lrmv.Contents.RemoveAll(entry => 
-                                !UnixHelper.HasAccess(osUser, entry.PhysicalPath));
+                            Lrmv.Contents.RemoveAll(entry => !UnixHelper.HasAccess(osUser, entry.PhysicalPath));
                         }
-                    }
-                    
-                    if (_fileProvider.GetFileInfo(path).Exists)
-                    {
-                        return RedirectToAction(nameof(Download), new { @id = _fileProvider.GetFileInfo(path).Name });
                     }
 
                     if (null == Lrmv.Contents)
@@ -111,7 +101,7 @@ namespace FMS2.Controllers.App
                                 RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
                             });
 
-                    var pageCount = Lrmv.Contents.Count / count;
+                    int pageCount = Lrmv.Contents.Count / count;
 
                     SetPagingParams(offset, count, pageCount);
 
@@ -124,20 +114,16 @@ namespace FMS2.Controllers.App
                         Lrmv.Contents = Lrmv.Contents.GetRange(offset, count);
                     }
 
-                    _loggerService.LogToFileAsync(LogLevel.Information, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        "Got contents for " + _last);
-                    
+                    _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Got contents for " + _last);
                     return RedirectToAction(nameof(Browse));
                 }
 
-                TempData["returnMessage"] = "Access is forbidden to this application sector.";
-                return RedirectToAction("Index", "Home");
+                if (_fileProvider.GetFileInfo(path).Exists)
+                {
+                    return RedirectToAction(nameof(Download), new { @id = _fileProvider.GetFileInfo(path).Name });
+                }
             }
-            _loggerService.LogToFileAsync(LogLevel.Information, 
-                HttpContext.Connection.RemoteIpAddress.ToString(), 
-                _last + " does not exist on the filesystem.");
-            
+            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), _last + " does not exist on the filesystem.");
             TempData["returnMessage"] = "The resource doesn't exist on the filesystem.";
             return RedirectToAction(nameof(Browse));
         }
@@ -145,30 +131,22 @@ namespace FMS2.Controllers.App
         [AllowAnonymous]
         public IActionResult Browse()
         {
-            try
-            {
-                var offset = Get("Offset");
-                var count = Get("Count");
-                var pageCount = Get("PageCount");
+            var offset = Get("Offset");
+            var count = Get("Count");
+            var pageCount = Get("PageCount");
 
-                if (!string.IsNullOrEmpty(offset) 
-                    && !string.IsNullOrEmpty(count)
-                    && !string.IsNullOrEmpty(pageCount))
-                {
-                    SetPagingParams(int.Parse(offset), int.Parse(count), int.Parse(pageCount));
-                }
-            }
-            catch (Exception e)
+            if (!string.IsNullOrEmpty(offset)
+            || !string.IsNullOrEmpty(count))
             {
-                _loggerService.LogToFileAsync(LogLevel.Warning, "localhost", e.Message);
-                return LocalRedirect("/Storage/Index");
+                SetPagingParams(int.Parse(offset), int.Parse(count), int.Parse(pageCount));
             }
+
             TempData["showDownloadPartial"] = true;
-            if (_last == null) return View(Lrmv);
-            ViewData["returnUrl"] = UnixHelper.GetParent(GetLastPath());
-            ViewData["path"] = GetLastPath();
+            if (_last != null) {
+                ViewData["returnUrl"] = UnixHelper.GetParent(GetLastPath());
+                ViewData["path"] = GetLastPath();
+            }
             return View(Lrmv);
-            
         }
 
         private IDirectoryContents GetContents(string path)
@@ -188,7 +166,14 @@ namespace FMS2.Controllers.App
                 HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
                 return _fileProvider.GetDirectoryContents(_last);
             }
-            _last = !_last.Equals("/") ? string.Concat(_last, "/", path) : string.Concat(_last, path);
+            if (!_last.Equals("/"))
+            {
+                _last = string.Concat(_last, "/", path);
+            }
+            else
+            {
+                _last = string.Concat(_last, path);
+            }
 
             HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
 
@@ -206,7 +191,7 @@ namespace FMS2.Controllers.App
 
             var message = "No proper connection to database server.";
 
-            if (ValidateDbHostState() && !string.IsNullOrEmpty(entryName))
+            if (ValidateDbServerState() && !string.IsNullOrEmpty(entryName))
             {
                 try
                 {
@@ -246,32 +231,29 @@ namespace FMS2.Controllers.App
                         }
                         else
                         {
-                            _loggerService.LogToFileAsync(LogLevel.Warning, 
-                                HttpContext.Connection.RemoteIpAddress.ToString(), 
-                                "Record for the file: " 
-                                + entryName 
-                                + " exists in the database, no need of updating it.");
+                            _loggerService.LogToFileAsync(LogLevel.Warning, HttpContext.Connection.RemoteIpAddress.ToString(), "Record for the file: " + entryName + " exists in the database, no need of updating it.");
                         }
                     }
 
                     if (s != null) TempData["urlhash"] = s.Urlhash;
                     TempData["url_name"] = name;
                     var port = HttpContext.Request.Host.Port;
-                    TempData["host"] = HttpContext.Request.Host.Host + 
-                                       (port != null ? ":" + HttpContext.Request.Host.Port : "");
+                    TempData["host"] = HttpContext.Request.Host.Host + (port != null ? ":" + HttpContext.Request.Host.Port : "");
                     TempData["protocol"] = "https";
                     ViewData["returnUrl"] = returnUrl;
                     return RedirectToAction(nameof(Index), new { @path = GetLastPath() });
                 }
                 catch (InvalidOperationException ex)
                 {
-                    _loggerService.LogToFileAsync(LogLevel.Error, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        ex.Message);
-                    
+                    _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), ex.Message);
                     message = ex.Message;
                     return RedirectToAction(nameof(Index));
                 }
+            }
+
+            if (ValidateDbHostState() && !ValidateDbServerState())
+            {
+                _storageIndexContext.Database.OpenConnection();
             }
 
             TempData["returnMessage"] = message;
@@ -282,7 +264,7 @@ namespace FMS2.Controllers.App
         [AllowAnonymous]
         public async Task<ActionResult> PermanentDownload(string id)
         {
-            if (ValidateDbHostState() && !string.IsNullOrEmpty(id))
+            if (ValidateDbServerState() && !string.IsNullOrEmpty(id))
             {
                 StorageIndexRecord s = null;
                 try
@@ -297,19 +279,13 @@ namespace FMS2.Controllers.App
                         {
                             if (!s.Expires)
                             {
-                                _loggerService.LogToFileAsync(LogLevel.Information, 
-                                    HttpContext.Connection.RemoteIpAddress.ToString(), 
-                                    "Successfully returned requested resource" 
-                                    + s.AbsolutePath);
+                                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully returned requested resource" + s.AbsolutePath);
                                 return File(fileBytes, MimeAssistant.GetMimeType(name), name);
                             }
 
                             if (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now)
                             {
-                                _loggerService.LogToFileAsync(LogLevel.Information, 
-                                    HttpContext.Connection.RemoteIpAddress.ToString(), 
-                                    "Successfully returned requested resource" 
-                                    + s.AbsolutePath);
+                                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully returned requested resource" + s.AbsolutePath);
                                 return File(fileBytes, MimeAssistant.GetMimeType(name), name);
                             }
 
@@ -317,30 +293,31 @@ namespace FMS2.Controllers.App
 
                             return RedirectToAction(nameof(Index), new { path = _last });
                         }
-
-                        _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value, 
-                            "Couldn't read requested resource: " + s.AbsolutePath);
-                        TempData["returnMessage"] = "Couldn't read requested resource: " + s.Urlid;
-                        return RedirectToAction(nameof(Index));
+                        else
+                        {
+                            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value, "Couldn't read requested resource: " + s.AbsolutePath);
+                            TempData["returnMessage"] = "Couldn't read requested resource: " + s.Urlid;
+                            return RedirectToAction(nameof(Index));
+                        }
                     }
                     TempData["returnMessage"] = "It seems that given token doesn't exist in the database.";
                     return RedirectToAction(nameof(Index), new { path = _last });
                 }
                 catch (InvalidOperationException ex)
                 {
-                    TempData["returnMessage"] = s != null 
-                        ? "Couldn't read requested resource: " + s.Urlid 
-                        : "Database error occured.";
-                    
-                    _loggerService.LogToFileAsync(LogLevel.Error, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        ex.Message);
-                    
+                    TempData["returnMessage"] = s != null ? "Couldn't read requested resource: " + s.Urlid : "Database error occured.";
+                    _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), ex.Message);
                     return RedirectToAction(nameof(Index), new { path = _last });
                 }
             }
 
-            TempData["returnMessage"] = "No id given or database is down.";
+            if (ValidateDbHostState() && !ValidateDbServerState())
+            {
+                _storageIndexContext.Database.OpenConnection();
+
+            }
+
+            TempData["returnMessage"] = "No id given.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -349,7 +326,6 @@ namespace FMS2.Controllers.App
         public async Task<ActionResult> Download(string id, bool z = false)
         {
             var name = id;
-	    try{
             if (!string.IsNullOrEmpty(name))
             {
                 var systemsAbsolute = GetLastPath();
@@ -366,14 +342,11 @@ namespace FMS2.Controllers.App
                 }
 
                 if (System.IO.File.Exists(path))
-		        {
-		            var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None, 8192, true);
-                    var mime = MimeAssistant.GetMimeType(path);
-               
+                {
+                    var mime = MimeAssistant.GetMimeType(name);
+                    var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None, 8192, true);
                     await _hubContext.Clients.All.SendAsync("DownloadStarted");
-                    _loggerService.LogToFileAsync(LogLevel.Warning, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        $"Attempting to return file '{path}' of MIME: {mime} as an asynchronous stream.");
+                    _loggerService.LogToFileAsync(LogLevel.Warning, HttpContext.Connection.RemoteIpAddress.ToString(), "Attempting to return file with name: " + name + " as an asynchronous stream.");
                     return File(fs, mime, name);
                 }
 
@@ -386,13 +359,8 @@ namespace FMS2.Controllers.App
                 TempData["returnMessage"] = "The path " + path + " does not exist on server's filesystem.";
                 return RedirectToAction(nameof(Index));
             }
-	    }catch(Exception e){
-		    _loggerService.LogToFileAsync(LogLevel.Warning, "localhost", e.Message);
-	    }
-		
-            _loggerService.LogToFileAsync(LogLevel.Error, 
-                HttpContext.Connection.RemoteIpAddress.ToString(), 
-                "Couldn't read resuested resource: " + name);
+
+            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Couldn't read resuested resource: " + name);
             TempData["returnMessage"] = "Couldn't read requested resource: " + name;
             return RedirectToAction(nameof(Index));
 
@@ -404,31 +372,32 @@ namespace FMS2.Controllers.App
         {
             var format = _configuration.GetSection("Images")["Format"].ToLower();
             var thumbFileName = $"{id}.{format}";
-            var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
-                                                 thumbFileName
-                                    );
-            var thumbFileStream = await _fileService.DownloadAsStreamAsync(absoluteThumbPath);
-            return File(thumbFileStream, "image/jpeg");
+            var thumbFileStream = await _fileService.DownloadAsStreamAsync(Path.Combine(
+                                                                           Constants.FileSystemRoot,
+                                                                            _configuration.GetSection("Images")["ThumbDirectory"],
+                                                                            thumbFileName
+                                                                           )
+            );
+            return File(thumbFileStream, MimeAssistant.GetMimeType(thumbFileName));
         }
 
         [HttpPost]
         [AllowAnonymous]
-	[DisableFormValueModelBinding]
         [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             files.RemoveAll(element => element.Length > Constants.MaxUploadSize);
-            var size = files.Sum(f => f.Length);
+            long size = files.Sum(f => f.Length);
             var filePath = Constants.Tmp + Constants.UploadTmp;
 
-            foreach (var formFile in files.Where(formFile => formFile.Length > 0))
+            foreach (var formFile in files)
             {
-                using (var stream = new FileStream(filePath 
-                                                   + Path.DirectorySeparatorChar 
-                                                   + formFile.FileName, 
-                    FileMode.Create))
+                if (formFile.Length > 0)
                 {
-                    await formFile.CopyToAsync(stream);
+                    using (var stream = new FileStream(filePath + Path.DirectorySeparatorChar + formFile.FileName, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                    }
                 }
             }
 
@@ -438,89 +407,7 @@ namespace FMS2.Controllers.App
                 await _fileService.MoveFromTmpAsync(Path.GetFileName(file), Constants.UploadDirectory);
             }
 
-            TempData["returnMessage"] = files.Count 
-                                        + " files uploaded of summary size " 
-                                        + FileSystemAccessor.DetectUnitBySize(size);
-	    /*if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
-    {
-        ModelState.AddModelError("File", 
-            $"The request couldn't be processed (Error 1).");
-        // Log error
-
-        return BadRequest(ModelState);
-    }
-
-    var boundary = MultipartRequestHelper.GetBoundary(
-        MediaTypeHeaderValue.Parse(Request.ContentType),
-        _defaultFormOptions.MultipartBoundaryLengthLimit);
-    var reader = new MultipartReader(boundary, HttpContext.Request.Body);
-    var section = await reader.ReadNextSectionAsync();
-
-    while (section != null)
-    {
-        var hasContentDispositionHeader = 
-            ContentDispositionHeaderValue.TryParse(
-                section.ContentDisposition, out var contentDisposition);
-
-        if (hasContentDispositionHeader)
-        {
-            // This check assumes that there's a file
-            // present without form data. If form data
-            // is present, this method immediately fails
-            // and returns the model error.
-            if (!MultipartRequestHelper
-                .HasFileContentDisposition(contentDisposition))
-            {
-                ModelState.AddModelError("File", 
-                    $"The request couldn't be processed (Error 2).");
-                // Log error
-
-                return BadRequest(ModelState);
-            }
-            else
-            {
-                // Don't trust the file name sent by the client. To display
-                // the file name, HTML-encode the value.
-                var trustedFileNameForDisplay = WebUtility.HtmlEncode(
-                        contentDisposition.FileName.Value);
-                var trustedFileNameForFileStorage = Path.GetRandomFileName();
-
-                // **WARNING!**
-                // In the following example, the file is saved without
-                // scanning the file's contents. In most production
-                // scenarios, an anti-virus/anti-malware scanner API
-                // is used on the file before making the file available
-                // for download or for use by other systems. 
-                // For more information, see the topic that accompanies 
-                // this sample.
-
-                var streamedFileContent = await FileHelpers.ProcessStreamedFile(
-                    section, contentDisposition, ModelState, 
-                    _permittedExtensions, _fileSizeLimit);
-
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                using (var targetStream = System.IO.File.Create(
-                    Path.Combine(_targetFilePath, trustedFileNameForFileStorage)))
-                {
-                    await targetStream.WriteAsync(streamedFileContent);
-
-                    _logger.LogInformation(
-                        "Uploaded file '{TrustedFileNameForDisplay}' saved to " +
-                        "'{TargetFilePath}' as {TrustedFileNameForFileStorage}", 
-                        trustedFileNameForDisplay, _targetFilePath, 
-                        trustedFileNameForFileStorage);
-                }
-            }
-        }
-
-        // Drain any remaining section body that hasn't been consumed and
-        // read the headers for the next section.
-        	section = await reader.ReadNextSectionAsync();
-    		}*/
+            TempData["returnMessage"] = files.Count + " files uploaded of summary size " + FileSystemAccessor.DetectUnitBySize(size);
             return RedirectToAction(nameof(Index), new { @path = GetLastPath() });
         }
 
@@ -536,22 +423,16 @@ namespace FMS2.Controllers.App
 
             if (!((ArchiveService)_archiveService).WasStartedAlready())
             {
-		        var awaiter = Task.Delay(TimeSpan.FromSeconds(10d));
-		        Task.WhenAll(awaiter).Wait();
                 var task = await _archiveService.ZipDirectoryAsync(path, output);
-               
-                await _hubContext.Clients.User(_signInManager.UserManager.GetUserId(HttpContext.User))
-                    .SendAsync("ReceiveArchivingStatus", "Zipping task started...");
-		        Task.WhenAll(task).Wait();
+                Task.WhenAll(task).Wait();
+                await _hubContext.Clients.User(_signInManager.UserManager.GetUserId(HttpContext.User)).SendAsync("ReceiveArchivingStatus", "Zipping task started...");
 
                 if (task.IsCompleted)
                 {
                     if (!_wasArchivingCancelled)
                     {
-                        return RedirectToAction(nameof(Download), 
-                            new { @id = string.Concat(id, ".zip"), 
-                                @z = true 
-                            });
+                        await _hubContext.Clients.User(_signInManager.UserManager.GetUserId(HttpContext.User)).SendAsync("DownloadStarted");
+                        return RedirectToAction(nameof(Download), new { @id = string.Concat(id, ".zip"), @z = true });
                     }
                     TempData["returnMessage"] = "Archiving was cancelled by user.";
                     return RedirectToAction(nameof(Index));
@@ -574,18 +455,16 @@ namespace FMS2.Controllers.App
         public async Task<IActionResult> Create(string name)
         {
             var pattern = new Regex(@"\W|_");
-            var returnPath = GetLastPath();
             if (!pattern.Match(name).Success)
             {
+                var returnPath = GetLastPath();
                 try
                 {
                     var dirInfo = await _fileService.Create(returnPath, name);
                     TempData["returnMessage"] = "Successfully created directory: " + dirInfo.Name;
                     _loggerService.LogToFileAsync(LogLevel.Information,
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        "Created directory: " 
-                        + dirInfo.FullName);
-                    return RedirectToAction(nameof(Index), new { path = Path.Combine(returnPath, name) });
+                        HttpContext.Connection.RemoteIpAddress.ToString(), "Created directory: " + dirInfo.FullName);
+                    return RedirectToAction(nameof(Index), new { path = returnPath });
                 }
                 catch (Exception e)
                 {
@@ -597,7 +476,7 @@ namespace FMS2.Controllers.App
             }
 
             TempData["returnMessage"] = "You cannot use non-alphabetic characters in directory names.";
-            return RedirectToAction(nameof(Index), new { path = returnPath });
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -612,35 +491,28 @@ namespace FMS2.Controllers.App
         public async Task<IActionResult> DeleteConfirmation(FileResultModel fileResultModel)
         {
             var contents = fileResultModel.ToBeDeleted;
-            var returnPath = Path.GetDirectoryName(fileResultModel.Contents.ElementAt(0).PhysicalPath);
             if (contents.Count > 0)
             {
                 try
                 {
                     await _fileService.Delete(contents.ToAsyncEnumerable());
 
-                    _loggerService.LogToFileAsync(LogLevel.Information, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        "Successfully deleted elements.");
+                    _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully deleted elements.");
                     TempData["returnMessage"] = "Successfully deleted elements.";
-                    return RedirectToAction(nameof(Index), new { path = returnPath });
+                    return RedirectToAction(nameof(Index), new { path = _last });
                 }
                 catch (Exception e)
                 {
-                    _loggerService.LogToFileAsync(LogLevel.Error, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        "Couldn't delete resource because of " + e.Message);
+                    _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Couldn't delete resource because of " + e.Message);
                     TempData["returnMessage"] = "Error: Couldn't delete resource.";
-                    return RedirectToAction(nameof(Index), new { path =  returnPath});
+                    return RedirectToAction(nameof(Index), new { path = _last });
                 }
             }
             else
             {
-                _loggerService.LogToFileAsync(LogLevel.Error, 
-                    HttpContext.Connection.RemoteIpAddress.ToString(), 
-                    "Cannot stat.");
+                _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Cannot stat.");
                 TempData["returnMessage"] = "Error: Nothing to be deleted.";
-                return RedirectToAction(nameof(Index), new { path = returnPath });
+                return RedirectToAction(nameof(Index), new { path = _last });
             }
         }
 
@@ -658,9 +530,7 @@ namespace FMS2.Controllers.App
                 OldName = IsDirectory(name) ? Path.GetDirectoryName(name + "/") : Path.GetFullPath(name),
                 AbsolutePath = name
             };
-            _loggerService.LogToFileAsync(LogLevel.Error, 
-                HttpContext.Connection.RemoteIpAddress.ToString(), 
-                "Viewing Rename view for " + name);
+            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Viewing Rename view for " + name);
 
             return View(rfm);
         }
@@ -675,28 +545,19 @@ namespace FMS2.Controllers.App
                 if (rfm.IsDirectory)
                 {
                     Directory.Move(rfm.AbsolutePath, Directory.GetParent(rfm.AbsolutePath) + "/" + rfm.NewName);
-                    _loggerService.LogToFileAsync(LogLevel.Information, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        "Successfully renamed directory " 
-                        + rfm.OldName 
-                        + " to " + rfm.NewName);
+                    _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully renamed directory " + rfm.OldName + " to " + rfm.NewName);
                     TempData["returnMessage"] = "Successfully renamed to " + rfm.NewName;
-                    return RedirectToAction(nameof(Index), 
-                        new { path = UnixHelper.MapToSystemPath(UnixHelper.GetParent(rfm.AbsolutePath)) });
+                    return RedirectToAction(nameof(Index), new { path = _last });
                 }
 
-                System.IO.File.Move(rfm.AbsolutePath, 
-                    Directory.GetParent(rfm.AbsolutePath) + "/" + rfm.NewName);
-                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), 
-                    "Successfully renamed file " + rfm.OldName + " to " + rfm.NewName);
+                System.IO.File.Move(rfm.AbsolutePath, Directory.GetParent(rfm.AbsolutePath) + "/" + rfm.NewName);
+                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Successfully renamed file " + rfm.OldName + " to " + rfm.NewName);
                 TempData["returnMessage"] = "Successfully renamed to " + rfm.NewName;
-                return RedirectToAction(nameof(Index), 
-                    new { path = UnixHelper.MapToSystemPath(UnixHelper.GetParent(rfm.AbsolutePath)) });
+                return RedirectToAction(nameof(Index), new { path = _last });
 
             }
 
-            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), 
-                "Rename action aborted because passed data were inappropiate.");
+            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), "Rename action aborted because passed data were inappropiate.");
             ModelState.AddModelError(HttpContext.TraceIdentifier, "New name cannot be empty!");
             return View(rfm);
         }
@@ -707,15 +568,9 @@ namespace FMS2.Controllers.App
         public IActionResult CancelDownloadAsync()
         {
             _archiveService.Cancel();
-            _hubContext.Clients.User(_signInManager.UserManager.GetUserId(HttpContext.User))
-                .SendAsync("ArchivingCancelled", "Cancelled by the user.");
-            
-            _loggerService.LogToFileAsync(LogLevel.Information, 
-                HttpContext.Connection.RemoteIpAddress.ToString(), 
-                "Attempting to cancel download task.");
-            
-            return RedirectToAction(nameof(Index), 
-                new { path = GetLastPath() });
+            _hubContext.Clients.User(_signInManager.UserManager.GetUserId(HttpContext.User)).SendAsync("ArchivingCancelled", "Cancelled by the user.");
+            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), "Attempting to cancel download task.");
+            return RedirectToAction(nameof(Index));
         }
 
         #region HelperMethods
@@ -789,13 +644,13 @@ namespace FMS2.Controllers.App
 
         private string Get(string key)
         {
-            if (!HttpContext.Request.Cookies.Keys.Contains(key)) 
-            {
-                throw new ArgumentException("No such cookie stored!");
-            }
             return HttpContext.Request.Cookies[key];
         }
 
+        private void Remove(string key)
+        {
+            Response.Cookies.Delete(key);
+        }
 
         private void SetPagingParams(int offset, int count, int pageCount)
         {

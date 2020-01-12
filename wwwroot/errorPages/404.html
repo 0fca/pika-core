@@ -1,10 +1,10 @@
 ﻿
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Oops! Something went wrong!</title>
-    <style media="screen">
+    <meta charset="UTF-8" />
+    <title>Nothing's here...</title>
+    <style type="text/css" media="screen">
   * {
     margin: 0px 0px 0px 0px;
     padding: 0px 0px 0px 0px;
@@ -43,6 +43,7 @@
   div.page_header {
     height: 99px;
     width: 100%;
+    align-content: left;
     background-color: #095C9E;
   }
 
@@ -141,6 +142,7 @@
   }
 
   .floating_element {
+    position: flex-start;
     float: left;
     text-align: left;
     margin-bottom: 10px;
@@ -182,22 +184,19 @@
     <div class="main_page">
       <div class="page_header floating_element">
         <span class="floating_element">
-          <img src="/wwwroot/images/logooftheyear2018.png" alt="pika"/>
+          <img src="/wwwroot/images/logooftheyear2018.png" alt="pika" img/>
+          <div style="width: 100%; text-align: center;">
+            Not Found
+          </div>
         </span>
-        <div style="width: 100%; text-align: center; font-size: 25px;">
-          <strong>Under construction</strong>
-        </div>
       </div>
       <div class="content_section floating_element">
         <div class="section_header section_header_red">
           <div id="about"></div>
-          It seems the server responded with: HTTP 200 OK, but unfortunately there is no content to display here at the moment.
-        </div>
+            It seems that the server couldn't find the resource you asked for.
+          </div>
         <div class="content_section_text">
-           My website is temporarily unavailable due to the maintanenace. Sorry for the inconvenience.<br> 
-           Check project's GitHub for more detailed information about last commits: <a href="https://www.github.com/Obsidiam/fms">repo</a>.<br>
-           In case you are not interested of what actually is going on technically you can get a coffee or tea and go <a href="https://en.wikipedia.org/wiki/Pika">here</a>
-          to read about those pretty, cute, nice animals. 
+           If you have an occasion to read this, it means that you asked server to return a resource that simply doesn't exist on the server. However, as you can see, you found pika, it is sooooo coooooool animal, you don't know about it, but you need to read about it. I assure you.
         </div>
       </div>
     </div>

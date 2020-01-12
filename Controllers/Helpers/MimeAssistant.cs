@@ -1,9 +1,5 @@
-using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 
 public sealed class MimeAssistant
 {
@@ -204,36 +200,21 @@ public sealed class MimeAssistant
 
     public static string GetMimeType(string fileName)
     {
-        try
+        //get file extension
+        string extension = Path.GetExtension(fileName).ToLowerInvariant();
+
+        if (extension.Length > 0 &&
+            MimeTypesDictionary.ContainsKey(extension.Remove(0, 1)))
         {
-            if (Path.IsPathFullyQualified(fileName))
-            {
-                return ReadMimeUsingFile(fileName).Result.Trim();
-            }
-            else
-            {
-                return "error";
-            }
+            return MimeTypesDictionary[extension.Remove(0, 1)];
         }
-        catch(Exception e) 
-        {
-            Debug.WriteLine(e.Message);
-            return e.Message;
-        }
+        return "unknown/file";
     }
 
     public static string RecognizeIconByMime(string mime)
     {
-        if (string.IsNullOrEmpty(mime)) 
-        {
-            return "exclamation";
-        }
-
-        if (mime.Equals("error")) 
-        {
-            return "times";
-        }
-
+        List<string> mimeParts = new List<string>();
+        mimeParts.AddRange(new string[] { "video", "audio", "image" });
         Dictionary<string, string> translationParts = new Dictionary<string, string>
         {
             { "zip", "archive" },
@@ -242,35 +223,27 @@ public sealed class MimeAssistant
             { "pptx", "powerpoint" },
             { "xlsx", "spreadsheet" },
             { "docx", "word" },
-            { "text", "file-alt" },
-	    { "audio", "file-audio" },
-            { "pdf" , "file-pdf" },
-	    { "x-rar", "archive" }
+            { "text", "alt" },
+            { "application", "file" },
+	    { "audio-file", "file-audio-o" }
         };
-        
-        var parts = mime.Split("/");
+        var parts = mime.Split('/');
 
-        if (translationParts.Keys.Any(x => parts.Contains(x))) {
-            translationParts.TryGetValue(translationParts.Keys.Single(x => parts.Contains(x)), out string value);
-            return value;
+        if (mimeParts.Contains(parts[0]))
+        {
+            return parts[0];
         }
-        return "file";
-    }
-
-    private async static Task<string> ReadMimeUsingFile(string fileName) 
-    {
-        var process = new Process();
-        process.StartInfo.FileName = "file";
-        process.StartInfo.Arguments = $"--mime-type \"{fileName}\"";
-        process.StartInfo.UseShellExecute = false;
-
-        process.StartInfo.RedirectStandardOutput = true;
-        process.Start();
-
-        var output = await process.StandardOutput.ReadToEndAsync();
-        output = output.Split(":")[1];
-        process.WaitForExit();
-        process.Close();
-        return output;
+        else
+        {
+            translationParts.TryGetValue(parts[0], out string value);
+            if (string.IsNullOrEmpty(value))
+            {
+                return translationParts.ContainsKey(parts[0]) ? value : parts[1];
+            }
+            else
+            {
+                return "file";
+            }
+        }
     }
 }

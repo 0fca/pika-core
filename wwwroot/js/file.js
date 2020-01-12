@@ -1,11 +1,4 @@
-﻿const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/hubs/files",
-	                                {
-						transport: 4,
-						skipNegotiation: false
-					})
-                                .configureLogging(signalR.LogLevel.Information)
-                                .build();
-
+﻿const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/hubs/files").build();
 
 fileHubconnection.on("ReceiveListing", ReceiveListing);
 
