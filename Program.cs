@@ -14,6 +14,11 @@ namespace FMS2
             .AddCommandLine(args)
             .AddEnvironmentVariables()
             .Build();
+            var port = 5000;
+            if (args.Length > 0 && args[0] != null)
+            {
+                port = int.Parse(args[0]);
+            }
 
             var host = WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
@@ -23,6 +28,8 @@ namespace FMS2
                     logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"))
                     .AddDebug();
                 })
+	        .UseUrls($"http://localhost:{port}")
+		.UseKestrel()
                 .Build();
 
             host.Run();

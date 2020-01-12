@@ -7,10 +7,10 @@ namespace PikaCore.Services
     public interface IMediaService
     {
         void Init();
-        Task<string> CreateThumb(string absoluteSystemPath, string guid);
+        Task<string> CreateThumb(string absoluteSystemPath, string guid, int size);
         Task<string>  GrabFromImage(string absoluteSystemPath, string id, int height, int width);
 
-        Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions);
+        Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions, int size);
 
         void Dispose();
     }

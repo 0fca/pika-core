@@ -3,10 +3,8 @@ using FMS2.Controllers;
 using FMS2.Controllers.Helpers;
 using FMS2.Services;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using PikaCore.Services.Helpers;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -19,8 +17,6 @@ namespace PikaCore.Services
     public class MediaService : IMediaService
     {
         private readonly IConfiguration _configuration;
-        private readonly IFileService _fileService;
-        private readonly ImageCache _cache;
         private readonly IFileLoggerService _fileLoggerService;
 
         public MediaService(IConfiguration configuration,
@@ -29,8 +25,6 @@ namespace PikaCore.Services
                             IFileLoggerService fileLoggerService)
         {
             _configuration = configuration;
-            _fileService = fileService;
-            _cache = memoryCache;
             _fileLoggerService = fileLoggerService;
         }
 
@@ -44,67 +38,79 @@ namespace PikaCore.Services
             //not used
         }
 
-        public async Task<string> CreateThumb(string path, string guid)
+        public async Task<string> CreateThumb(string path, string guid, int size = 0)
         {
-            var mime = MimeAssistant.GetMimeType(Path.GetFileName(path));
+	    var physicalPath = UnixHelper.MapToPhysical(_configuration.GetSection("Paths")["linux-root"], path);
+            var mime = MimeAssistant.GetMimeType(physicalPath);
+	    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost" ,$"{path} : {mime}");
             var mediaType = DetectType(mime);
             switch(mediaType)
             {
                 case MediaType.Image:
-                    return await CreateThumbFromImageAsync(path, guid);
+                    return await CreateThumbFromImageAsync(path, guid, size);
                 case MediaType.Video:
-                    return await CreateThumbFromVideoAsync(path, guid);
+                    return await CreateThumbFromVideoAsync(path, guid, size);
             }
-
             return string.Empty;
         }
 
         private MediaType DetectType(string mime)
         {
-            var props = Enum.GetValues(typeof(MediaType));
+            var props = (MediaType[])Enum.GetValues(typeof(MediaType));
             var mediaType = MediaType.Image;
 
-            int fieldIndex = 0;
+            /*int fieldIndex = 0;
             foreach (var property in props)
             {
                 if (property.ToString().ToLower().Contains(mime.Split("/")[0]))
                 {
                     mediaType = (MediaType)Enum.ToObject(typeof(MediaType), fieldIndex);
                     return mediaType;
-                }
+                
                 fieldIndex++;
-            }
+            }*/
+	    mediaType = Array.Find<MediaType>(props, x => mime.Split("/").Contains(x.ToString().ToLower()));
+	    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"{mediaType} mediaType detected from MIME: {mime}");	   
             return mediaType;
         }
 
-        private async Task<string> CreateThumbFromVideoAsync(string path, string guid)
+        private async Task<string> CreateThumbFromVideoAsync(string path, string guid, int size)
         {
             var absoluteHostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
             var thumbAbsolutePath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
+            _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", thumbAbsolutePath);
             if (!File.Exists(thumbAbsolutePath))
             {
                 var options = new ConversionOptions()
                 {
                     Seek = TimeSpan.FromSeconds(60)
                 };
-                await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options);
+                await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options, size);
             }
             return guid;
         }
 
-        private async Task<string> CreateThumbFromImageAsync(string path, string guid)
+        private async Task<string> CreateThumbFromImageAsync(string path, string guid, int size)
         {
-            var absoluteHostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
-            var thumbAbsolutePath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
-                                                $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
+            //0 is small, 1 is big as in configuration: Images/Width, Images/Height, Images/BigHeigth, Images/BigWidth
+            var width = int.Parse(_configuration.GetSection("Images")["Width"]);
+            var height = int.Parse(_configuration.GetSection("Images")["Height"]);
 
-            if (!File.Exists(thumbAbsolutePath))
+            var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
+                                                $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
+            _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", absoluteThumbPath);
+            if (size == 1) 
             {
-                return await GrabFromImage(absoluteHostPath, 
-					   guid, int.Parse(_configuration.GetSection("Images")["Width"]), 
-					   int.Parse(_configuration.GetSection("Images")["Height"])
-					   );
+                height = int.Parse(_configuration.GetSection("Images")["HeightBig"]);
+                width = int.Parse(_configuration.GetSection("Images")["WidthBig"]);
+            }
+
+            var absoluteHostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
+
+            if (!File.Exists(absoluteThumbPath))
+            {
+                return await GrabFromImage(absoluteHostPath, guid, height, width);
             }
             return guid;
         }
@@ -117,13 +123,19 @@ namespace PikaCore.Services
                 {
                     using (FileStream pngStream = new FileStream(absoluteSystemPath, FileMode.Open, FileAccess.Read))
                     {
-                        _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"Filestream for {absoluteSystemPath} opened.");
+                        _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, 
+                                                          "localhost", 
+                                                          $"Filestream for {absoluteSystemPath} opened."
+                                                          );
                         using (var image = new Bitmap(pngStream))
                         {
                             var resized = new Bitmap(width, height);
                             using (var graphics = Graphics.FromImage(resized))
                             {
-                                _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"{absoluteSystemPath} loaded as Image.");
+                                _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, 
+                                                                  "localhost", 
+                                                                  $"{absoluteSystemPath} loaded as Image."
+                                                                  );
 
                                 graphics.CompositingQuality = CompositingQuality.HighQuality;
                                 graphics.InterpolationMode = InterpolationMode.Bicubic;
@@ -138,7 +150,7 @@ namespace PikaCore.Services
                                                                    f.Name.Equals(_configuration.GetSection("Images")["Format"]));
                                 var imageFormat = (ImageFormat)field.GetValue(field);
 
-                                var name = $"{Path.Combine(whereToSave, id)}.{imageFormat.ToString().ToLower()}";
+                                var name = $"{Path.Combine(whereToSave,id)}.{imageFormat.ToString().ToLower()}";
                                 _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"Saving... {name}");
 
                                 resized.Save(name, imageFormat);
@@ -158,7 +170,7 @@ namespace PikaCore.Services
             });
         }
 
-        public async Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions)
+        public async Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions, int size)
         {
             var inputFile = new MediaFile(absoluteSystemVideoPath);
             var outputFile = new MediaFile(absoluteSystemOutputPath);
