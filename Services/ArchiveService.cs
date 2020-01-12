@@ -46,7 +46,7 @@ namespace FMS2.Services
                 _tokenSource = new CancellationTokenSource();
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(10d));
+            //_task = Task.Delay(TimeSpan.FromSeconds(10d));
             _task = Task.Factory.StartNew(() =>
             {
 

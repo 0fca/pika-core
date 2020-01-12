@@ -30,12 +30,18 @@ function resetFileList(){
 }
 
 function showDownloadBox() {
-    document.getElementById("info").innerText = "You have about 10s to cancel archiving process.";
-    document.getElementById("download-panel").removeAttribute("hidden");
-    document.getElementById("cancelArchivingButton").removeAttribute("disabled");
+    console.log(getBrowser());
+    if (getBrowser() != "Firefox") {
+        document.getElementById("info").innerText = "You have about 10s to cancel archiving process.";
+        document.getElementById("download-panel").removeAttribute("hidden");
+        document.getElementById("cancelArchivingButton").removeAttribute("disabled");
+    } else {
+        document.getElementById("info").innerText = "Firefox is not supported, you little shit.";
+    }
 } 
 
 function hideDownloadBox() {
+    console.log("Hide download box.");
     let downloadPartial = document.getElementById("download-panel");
     downloadPartial.setAttribute("hidden", true);
 }
@@ -122,5 +128,19 @@ function validateDirectoryName(text){
 document.addEventListener('DOMContentLoaded', function () {
     M.AutoInit();
 });
+
+function getBrowser() {
+    if (navigator.userAgent.indexOf("Chrome") != -1) {
+        return "Chrome";
+    } else if (navigator.userAgent.indexOf("Opera") != -1) {
+        return "Opera";
+    } else if (navigator.userAgent.indexOf("MSIE") != -1) {
+        return "IE";
+    } else if (navigator.userAgent.indexOf("Firefox") != -1) {
+        return "Firefox";
+    } else {
+        return "unknown";
+    }
+}
 
 

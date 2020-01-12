@@ -287,7 +287,8 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-appsettings.*
+appsettings.json
+appsetings.Development.json
 
 *.db
 

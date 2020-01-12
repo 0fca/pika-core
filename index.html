@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home Page  Hannah</title>
+    <link rel="stylesheet" href="/css/site.css" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link rel="icon" type="image/ico" href="/images/logooftheyear2018.png" />   
+    <script src="/lib/signalr/dist/browser/signalr.js?v=UBOzDce-phcmTUpkMIpmhSJj3afwWV7dFphD6v2zx84"></script>
+    <script src="/js/site.js?v=QtiCH9Bfihjpq_thT_WL0p5K2gUrbIQl7zMjjljkkOE"></script>
+
+    <script src="/js/archiveStatus.js?v=0-Kt--5zfAJoDRMyyzBHuBvwv_ge-LPnTDnxK56EoHI"></script>
+    <script src="/js/typewriter.js?v=BxbzcT4VZpzRpLs7qJ2CJOTUrDRs0FyCfGSfL-r4COA"></script>
+    <script src="/js/file.js?v=Kk3I-bGqaXlLwkHFHw8xQWT3f3T7p8pm1trGnhswzRc"></script>
+    
+</head>
+<body>
+<main>
+<form method="post" id="logoutForm" action="/Account/Logout">
+    <div class="navbar-fixed">
+
+        <nav>
+            <div class="nav-wrapper navbar-color">
+                <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="fas fa-bars"></i></a>
+                <a class="brand-logo brand-margin" href="/">
+                    <img class="responsive-img hide-on-med-and-down" src="/images/logooftheyear2018.png" width="96" height="64" />
+                </a>
+
+                
+
+    <ul class="right hide-on-med-and-down">
+    <li><a class="navlink" href="/Account/Register">Register</a></li>
+    <li><a class="navlink" href="/Account/Login">Log in</a></li>
+    </ul>
+
+    
+
+
+
+                    <ul class="right hide-on-med-and-down">
+        <li><a class="dropdown-trigger navlink right-align" data-target="apps" style="width: 300px;">Apps</a>
+        <li><a class="navlink" href="/Home/About">About</a></li>
+    </ul>
+
+    <ul id="apps" class="dropdown-content">
+        <li><a href="/Storage">Pika Core Browser</a></li>
+        <li><a href="https://player.lukas-bownik.net/">Pika Player</a></li>
+    </ul>
+            </div>
+        </nav>
+    </div>
+    <ul id="slide-out" class="sidenav">
+        
+
+<li>
+    <div class="user-view">
+        <a href="#user"><img class="circle" src="/images/logooftheyear2018.png" alt="User pic"></a>
+        <a href="/Manage/Index"><span class="name"></span></a>
+        <p><span class="email"></span></p>
+    </div>
+</li>
+<li><a class="navlink" href="/">Home</a></li>
+<li>
+	<div>
+		<ul class="collapsible">
+			<li>
+                <a class="collapsible-header navlink">
+                    <i class="material-icons">
+                        keyboard_arrow_down
+                    </i>
+                    Apps
+                </a>
+				<div class="collapsible-body">
+				<ul>
+					<li><a href="/Storage">Pika Core Browser</a></li>
+					<li><a href="https://player.lukas-bownik.net">Pika Player</a></li>
+				</ul>
+				</div>
+			</li>
+		</ul>
+	</div>
+</li>
+<li><a class="navlink" href="/Home/About">About</a></li>
+    <li><a class="navlink" href="/Account/Register">Register</a></li>
+    <li><a class="navlink" href="/Account/Login">Log in</a></li>
+
+    </ul>
+<input name="__RequestVerificationToken" type="hidden" value="CfDJ8JOxej16kfRNn0vk69_pAq--I2789z7QlDoIMj0IQHcowgYd1nKZVqb9waEnR0yMSGFZzJMqbW9ch9mrWFx1uCkATr1gQCaZKLOkgLs0bnT8A5FuND_Ym_pINLY6mqQN2kgbNANDpt1tOwyUxZMlTFI" /></form>
+<div class="container d-flex justify-content-center container-padding">
+    <div class="row">
+    <div class="main-page-content col s12">
+        <h1 class="center">Welcome to Pika Cloud!</h1>
+            <p class="typewrite center" data-period="2000" data-type='[ "Hello stranger!", "Welcome to Pika Core.", "Pika Core is a core of Pika Cloud.", "Refer to About page for more information." ]'>
+                <span class="wrap"></span>
+            </p>
+    </div>
+</div>
+   
+
+</div>
+</main>
+<footer class="page-footer footer">
+    <div class="footer-copyright">
+        <div class="container">
+            © 2018 Pika Cloud
+        </div>
+    </div>
+</footer>
+
+
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js" crossorigin="anonymous" integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk">
+    </script>
+<script>(window.jQuery||document.write("\u003Cscript src=\u0022\/lib\/jquery\/dist\/jquery.min.js\u0022 crossorigin=\u0022anonymous\u0022 integrity=\u0022sha384-K\u002BctZQ\u002BLL8q6tP7I94W\u002BqzQsfRV2a\u002BAfHIi9k8z8l9ggpc8X\u002BYtst4yBo\/hH\u002B8Fk\u0022\u003E\u003C\/script\u003E"));</script>
+    <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js" crossorigin="anonymous" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
+    </script>
+<script>(window.jQuery && window.jQuery.fn && window.jQuery.fn.modal||document.write("\u003Cscript src=\u0022\/lib\/bootstrap\/dist\/js\/bootstrap.min.js\u0022 crossorigin=\u0022anonymous\u0022 integrity=\u0022sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa\u0022\u003E\u003C\/script\u003E"));</script>
+    <script src="/js/site.min.js?v=NRyGaPMvO0fZ8evFmObRVcJdIlE29f1PI7k8UpPC5Pg"></script>
+
+
+
+    
+</body>
+</html>

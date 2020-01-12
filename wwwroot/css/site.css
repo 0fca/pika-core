@@ -279,9 +279,6 @@ a, a:hover, a:focus {
     margin-left: 120px !important;
 }
 
-.active {
-    background-color: #212121 !important;
-}
 
 ::placeholder { /* Most modern browsers support this now. */
     color:    #0f0f0f !important;
