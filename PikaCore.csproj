@@ -45,6 +45,10 @@
     <Folder Include="Services\Helpers\Jobs\" />
   </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="app.db" />
+    </ItemGroup>
+
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptTarget>ES2015</TypeScriptTarget>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>

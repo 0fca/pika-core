@@ -291,6 +291,4 @@ appsettings.json
 appsetings.Development.json
 
 *.db
-
-*.csproj
 *.sln
