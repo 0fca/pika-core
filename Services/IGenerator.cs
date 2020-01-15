@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
     public interface IGenerator
     {

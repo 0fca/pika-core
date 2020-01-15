@@ -1,4 +1,4 @@
-using FMS2.Controllers;
+using PikaCore.Controllers;
 
 namespace Microsoft.AspNetCore.Mvc
 {

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FMS2.Models.AccountViewModels
+namespace PikaCore.Models.AccountViewModels
 {
     public class ExternalLoginViewModel
     {

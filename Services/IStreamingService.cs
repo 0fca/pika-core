@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
     public interface IStreamingService
     {

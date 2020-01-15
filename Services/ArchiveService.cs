@@ -6,7 +6,7 @@ using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
     public class ArchiveService : IZipper, INotifyPropertyChanged
     {

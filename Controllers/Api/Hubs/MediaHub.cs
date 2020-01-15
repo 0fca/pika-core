@@ -1,4 +1,4 @@
-﻿using FMS2.Models;
+﻿using PikaCore.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using PikaCore.Services;

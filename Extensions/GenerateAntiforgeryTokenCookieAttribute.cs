@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
 
-namespace FMS2.Extensions
+namespace PikaCore.Extensions
 {
 public class GenerateAntiforgeryTokenCookieAttribute : ResultFilterAttribute
 {

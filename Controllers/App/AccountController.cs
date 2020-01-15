@@ -1,7 +1,4 @@
-﻿using FMS2.Models;
-using FMS2.Models.AccountViewModels;
-using FMS2.Services;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +6,11 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using PikaCore.Models;
+using PikaCore.Models.AccountViewModels;
+using PikaCore.Services;
 
-namespace FMS2.Controllers
+namespace PikaCore.Controllers
 {
     [Authorize]
     [Route("[controller]/[action]")]

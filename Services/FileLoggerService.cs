@@ -1,9 +1,9 @@
-﻿using FMS2.Providers;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PikaCore.Providers;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
     public class FileLoggerService : IFileLoggerService
     {

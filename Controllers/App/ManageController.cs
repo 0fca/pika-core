@@ -1,7 +1,4 @@
-﻿using FMS2.Models;
-using FMS2.Models.ManageViewModels;
-using FMS2.Services;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
@@ -13,8 +10,12 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using PikaCore.Models;
+using PikaCore.Models.ManageViewModels;
+using PikaCore.Services;
 
-namespace FMS2.Controllers
+namespace PikaCore.Controllers
 {
     [Authorize]
     [Route("[controller]/[action]")]
@@ -125,7 +126,7 @@ namespace FMS2.Controllers
 
             if (usersWithRoles.Count == 0)
             {
-                await _userManager.Users.ToAsyncEnumerable().ForEachAsync(async user =>
+                (await _userManager.Users.ToListAsync()).ForEach(async user =>
                 {
                     var roles = await _userManager.GetRolesAsync(user);
                     usersWithRoles.Add(user, roles);

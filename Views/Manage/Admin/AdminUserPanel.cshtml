@@ -1,4 +1,4 @@
-@model FMS2.Models.ManageViewModels.AdminPanelViewModel
+@model PikaCore.Models.ManageViewModels.AdminPanelViewModel
 
 @{
     ViewData["Title"] = "Register - Admin";
@@ -34,7 +34,7 @@
         @foreach (var item in Model.UsersWithRoles)
         {
             var roleString = "";
-            item.Value.ToAsyncEnumerable().ForEachAsync(role =>
+            item.Value.ToList().ForEach(role =>
             {
                 roleString = string.Concat(roleString, " ", role);
             });

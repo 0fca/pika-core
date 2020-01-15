@@ -1,6 +1,3 @@
-using FMS2.Controllers.Helpers;
-using FMS2.Models;
-using FMS2.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
@@ -8,8 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using PikaCore.Controllers.Helpers;
+using PikaCore.Models;
+using PikaCore.Services;
 
-namespace FMS2.Controllers.Api.Hubs
+namespace PikaCore.Controllers.Api.Hubs
 {
     public class FileOperationHub : Hub
     {

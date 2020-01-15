@@ -1,8 +1,7 @@
-using FMS2.Controllers;
-using FMS2.Controllers.Helpers;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Runtime;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,8 +9,10 @@ using System.Linq;
 using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
+using PikaCore.Controllers;
+using PikaCore.Controllers.Helpers;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
     public class FileService : IFileService
     {
@@ -197,9 +198,9 @@ namespace FMS2.Services
             return resultList;
         }
 
-        public async Task Delete(IAsyncEnumerable<string> fileList)
+        public async Task Delete(List<string> fileList)
         {
-            await fileList.ForEachAsync(item =>
+            await Task.Factory.StartNew(() => fileList.ForEach(item =>
             {
                 if (Directory.Exists(item))
                 {
@@ -209,7 +210,7 @@ namespace FMS2.Services
                 {
                     System.IO.File.Delete(item);
                 }
-            });
+            }));
         }
     }
 }

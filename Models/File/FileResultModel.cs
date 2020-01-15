@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using System.Collections.Generic;
 
-namespace FMS2.Models
+namespace PikaCore.Models
 {
     public class FileResultModel
     {

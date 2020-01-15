@@ -1,6 +1,6 @@
-using FMS2.Controllers;
-using FMS2.Controllers.Helpers;
-using FMS2.Services;
+using PikaCore.Controllers;
+using PikaCore.Controllers.Helpers;
+using PikaCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;

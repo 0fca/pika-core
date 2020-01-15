@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
     public class HashGeneratorService : IGenerator
     {

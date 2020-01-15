@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
     public interface IFileService
     {
@@ -13,7 +13,7 @@ namespace FMS2.Services
         Task MoveFromTmpAsync(string fileName, string toWhere);
         Task Copy(string what, string toWhere);
         Task Move(string what, string toWhere);
-        Task Delete(IAsyncEnumerable<string> fileList);
+        Task Delete(List<string> fileList);
         Task<IEnumerable<string>> WalkFileTree(string path, int depth = 1);
         Task<IEnumerable<string>> WalkDirectoryTree(string path);
 

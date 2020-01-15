@@ -1,4 +1,4 @@
-﻿@using FMS2.Views.Manage
+﻿@using PikaCore.Views.Manage
 @inject SignInManager<ApplicationUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();

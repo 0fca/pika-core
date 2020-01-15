@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace FMS2.Models
+namespace PikaCore.Models
 {
     public class StorageIndexRecord
     {

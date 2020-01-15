@@ -1,7 +1,7 @@
-using FMS2.Models;
 using Microsoft.EntityFrameworkCore;
+using PikaCore.Models;
 
-namespace FMS2.Data
+namespace PikaCore.Data
 {
     public class StorageIndexContext : DbContext
     {

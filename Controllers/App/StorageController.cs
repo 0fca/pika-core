@@ -1,11 +1,4 @@
-﻿using FMS2.Controllers.Api.Hubs;
-using FMS2.Controllers.Helpers;
-using FMS2.Data;
-using FMS2.Models;
-using FMS2.Models.File;
-using FMS2.Services;
-using FMS2.Extensions;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -24,8 +17,15 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using PikaCore.Controllers.Api.Hubs;
+using PikaCore.Controllers.Helpers;
+using PikaCore.Data;
+using PikaCore.Extensions;
+using PikaCore.Models;
+using PikaCore.Models.File;
+using PikaCore.Services;
 
-namespace FMS2.Controllers.App
+namespace PikaCore.Controllers.App
 {
     public class StorageController : Controller
     {
@@ -617,7 +617,7 @@ namespace FMS2.Controllers.App
             {
                 try
                 {
-                    await _fileService.Delete(contents.ToAsyncEnumerable());
+                    await _fileService.Delete(contents.ToList());
 
                     _loggerService.LogToFileAsync(LogLevel.Information, 
                         HttpContext.Connection.RemoteIpAddress.ToString(), 

@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace FMS2.Providers
+namespace PikaCore.Providers
 {
     /// <summary>
     /// Options for file logging.
