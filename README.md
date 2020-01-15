@@ -35,9 +35,9 @@ Frameworks&libs:
 * MySQL Pomelo Connector.
 
 *Deployment*
-Server OS: Debian 9
+Server OS: Debian 10
 
-WWW: Apache 2.4 as a Proxy
+WWW: Apache 2
 
 Core is deployed on localhost.
 
