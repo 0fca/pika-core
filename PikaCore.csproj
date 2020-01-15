@@ -11,6 +11,7 @@
         <PackageTags>cms core cloud</PackageTags>
         <AssemblyVersion>2.2.1</AssemblyVersion>
         <FileVersion>2.2.1</FileVersion>
+        <Version>2.2.1</Version>
     </PropertyGroup>
     <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="3.0.0" />
