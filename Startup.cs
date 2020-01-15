@@ -189,7 +189,7 @@ namespace PikaCore
 	        app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseRouting();
-            
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

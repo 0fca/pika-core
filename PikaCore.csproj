@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <RootNamespace>PikaCore31</RootNamespace>
         <PackageVersion>2.2.1</PackageVersion>
         <Authors>Arkasian</Authors>
         <Description>Pika Core Cloud</Description>
