@@ -24,11 +24,11 @@ Production: https://core.lukas-bownik.net/
 
 ### Technical information ###
 *Technology stack*
-* Core 2.1/2.2,
+* .NET Core 3.1,
 * Template Engine,
 * Identity Framework,
 * HTML5 with Materialize and JS,
-* Entity Framework.
+* Entity Framework Core.
 
 Frameworks&libs:
 * Newtonsoft,
