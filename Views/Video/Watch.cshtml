@@ -5,8 +5,9 @@
     var title = ViewData["VideoTitle"];
     var next = ViewData["NextVid"];
     var prev = ViewData["PrevVid"];
+    var protocol = Context.Request.IsHttps ? "https" : "http";
     string srcvid = Model;
-    srcvid = String.Concat($"https://{Context.Request.Host}/Video/Stream?p=",srcvid);
+    srcvid = String.Concat($"{protocol}://{Context.Request.Host}/Video/Stream?p=",srcvid);
 }
 
     
@@ -16,7 +17,7 @@
                     @title
                 </h4>
                 <video class="responsive-video pt-5" controls autoplay>
-                    <source src="@srcvid" type="@mime" />
+                    <source src="@srcvid" type="@mime" srcset="@protocol://@Context.Request.Host/Storage/Thumb?id=1.--@title"/>
                     An error occurred. Sorry for the inconvenience.
                 </video>
             </div>

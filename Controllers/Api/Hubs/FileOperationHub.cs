@@ -9,7 +9,7 @@ using PikaCore.Controllers.Helpers;
 using PikaCore.Models;
 using PikaCore.Services;
 
-namespace PikaCore.Controllers.Api.Hubs
+namespace PikaCore.Controllers.Hubs
 {
     public class FileOperationHub : Hub
     {

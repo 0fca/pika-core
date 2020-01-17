@@ -51,7 +51,7 @@ namespace PikaCore.Services
             return await Task<Stream>.Factory.StartNew(() =>
             {
 	    	_fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutPath}");
-                return File.Exists(absolutPath) ? System.IO.File.OpenRead(absolutPath) : null;
+                return File.Exists(absolutPath) ? System.IO.File.OpenRead(absolutPath) : new FileStream("/home/arkasian/", FileMode.Open);
             }, _tokenSource.Token);
         }
 
@@ -170,7 +170,8 @@ namespace PikaCore.Services
             if (rootDirectory != null)
                 yield return rootDirectory;
 
-            foreach (var file in files)
+            var enumerable = files.ToList();
+            foreach (var file in enumerable)
             {
                 yield return file;
             }
@@ -180,7 +181,7 @@ namespace PikaCore.Services
                 yield return directory;
             }
 
-            var subdirectoryItems = files.SelectMany(TraverseFiles);
+            var subdirectoryItems = enumerable.SelectMany(TraverseFiles);
 
             foreach (var result in subdirectoryItems)
             {

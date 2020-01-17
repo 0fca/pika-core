@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using PikaCore.Controllers.Api.Hubs;
+using PikaCore.Controllers.Hubs;
 using PikaCore.Services;
 using PikaCore.Services.Helpers;
 using System;

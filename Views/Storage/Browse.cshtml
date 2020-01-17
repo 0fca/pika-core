@@ -1,4 +1,5 @@
-﻿@model PikaCore.Models.FileResultModel
+﻿@using PikaCore.Controllers.Helpers
+@model PikaCore.Models.FileResultModel
 @inject UserManager<ApplicationUser> UserManager
 @inject IFileService FileService
 
@@ -92,9 +93,7 @@
                     else
                     {
                         var mime = "";
-
                         mime = MimeAssistant.GetMimeType(item.PhysicalPath);
-
                         var type = MimeAssistant.RecognizeIconByMime(mime);
                         
                         if (!mime.Contains("image")
@@ -125,7 +124,7 @@
                             {
                                 var unitStrPart = "";
                                 var i = item.Length;
-                                string[] units = { "B", "kB", "MB", "GB", "TB" };
+                                string[] units = { "B", "kiB", "MiB", "GiB", "TiB" };
                                 var unitIndex = 0;
                                 for (var ptr = 0; ptr <= units.Length; ptr++)
                                 {
@@ -219,21 +218,21 @@
 <script src="~/js/media.js" asp-append-version="true"></script>
 <script>
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
-        if (e.code == "Enter") {
+        if (e.code === "Enter") {
 	    loadThumb(path);
             searchFileList();
         }
     });
 
     document.getElementById("pathField").addEventListener("keydown", (key) => {
-        if (key.code == "Enter") {
+        if (key.code === "Enter") {
             const path = document.getElementById("pathField").value;
             location = `/Storage?path=${path}`;
         }
     });
 
     document.getElementById("pathField").addEventListener("keyup", (key) => {
-        if (key.code == "Slash") {
+        if (key.code === "Slash") {
             const currentPath = document.getElementById("pathField").value;
             requestListing(currentPath);
         }

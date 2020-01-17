@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using PikaCore.Services;
 using System.Threading.Tasks;
 
-namespace PikaCore.Controllers.Api.Hubs
+namespace PikaCore.Controllers.Hubs
 {
     public class MediaHub : Hub
     {

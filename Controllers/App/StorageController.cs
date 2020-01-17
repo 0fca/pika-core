@@ -17,7 +17,8 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using PikaCore.Controllers.Api.Hubs;
+using PikaCore.Controllers.Hubs;
+using PikaCore.Controllers.Helpers;
 using PikaCore.Controllers.Helpers;
 using PikaCore.Data;
 using PikaCore.Extensions;
@@ -25,7 +26,7 @@ using PikaCore.Models;
 using PikaCore.Models.File;
 using PikaCore.Services;
 
-namespace PikaCore.Controllers.App
+namespace PikaCore.Controllers
 {
     public class StorageController : Controller
     {
@@ -413,7 +414,7 @@ namespace PikaCore.Controllers.App
 
         [HttpPost]
         [AllowAnonymous]
-	[DisableFormValueModelBinding]
+	    [DisableFormValueModelBinding]
         [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {

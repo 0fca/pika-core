@@ -11,6 +11,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using PikaCore.Controllers.Helpers;
 
 namespace PikaCore.Services
 {
@@ -42,7 +43,7 @@ namespace PikaCore.Services
         {
 	    var physicalPath = UnixHelper.MapToPhysical(_configuration.GetSection("Paths")["linux-root"], path);
             var mime = MimeAssistant.GetMimeType(physicalPath);
-	    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost" ,$"{path} : {mime}");
+	        _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost" ,$"{path} : {mime}");
             var mediaType = DetectType(mime);
             switch(mediaType)
             {
@@ -58,19 +59,9 @@ namespace PikaCore.Services
         {
             var props = (MediaType[])Enum.GetValues(typeof(MediaType));
             var mediaType = MediaType.Image;
-
-            /*int fieldIndex = 0;
-            foreach (var property in props)
-            {
-                if (property.ToString().ToLower().Contains(mime.Split("/")[0]))
-                {
-                    mediaType = (MediaType)Enum.ToObject(typeof(MediaType), fieldIndex);
-                    return mediaType;
-                
-                fieldIndex++;
-            }*/
-	    mediaType = Array.Find<MediaType>(props, x => mime.Split("/").Contains(x.ToString().ToLower()));
-	    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"{mediaType} mediaType detected from MIME: {mime}");	   
+            
+	        mediaType = Array.Find<MediaType>(props, x => mime.Split("/").Contains(x.ToString().ToLower()));
+	        _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"{mediaType} mediaType detected from MIME: {mime}");	   
             return mediaType;
         }
 
@@ -84,7 +75,7 @@ namespace PikaCore.Services
             {
                 var options = new ConversionOptions()
                 {
-                    Seek = TimeSpan.FromSeconds(60)
+                    Seek = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("ConversionOptions")["Seek"]))
                 };
                 await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options, size);
             }
@@ -156,8 +147,8 @@ namespace PikaCore.Services
                                 resized.Save(name, imageFormat);
 
                                 _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"Saved... {name}");
-				resized.Dispose();
-				return id;
+				                resized.Dispose();
+				                return id;
                             }
                         }
                     }

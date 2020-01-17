@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using PikaCore.Services;
 
-namespace PikaCore.Controllers.Api.Hubs
+namespace PikaCore.Controllers.Hubs
 {
     public class StatusHub : Hub
     {
