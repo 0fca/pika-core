@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -18,7 +17,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using PikaCore.Controllers.Hubs;
-using PikaCore.Controllers.Helpers;
 using PikaCore.Controllers.Helpers;
 using PikaCore.Data;
 using PikaCore.Extensions;
@@ -42,16 +40,13 @@ namespace PikaCore.Controllers
         private string _last = Constants.RootPath;
         private bool _wasArchivingCancelled = true;
         private readonly IHubContext<StatusHub> _hubContext;
-        private readonly IHubContext<FileOperationHub> _fileOperationHub;
 
         public StorageController(IFileProvider fileProvider,
         SignInManager<ApplicationUser> signInManager,
-        IArchiveService archiveService, IFileService fileService,
-        ILogger<StorageController> iLogger, IUrlGenerator iUrlGenerator,
+        IArchiveService archiveService, IFileService fileService, IUrlGenerator iUrlGenerator,
         StorageIndexContext storageIndexContext,
         IFileLoggerService fileLoggerService,
         IHubContext<StatusHub> hubContext,
-        IHubContext<FileOperationHub> fileOperationHub,
         IConfiguration configuration)
         {
             _signInManager = signInManager;
@@ -62,7 +57,6 @@ namespace PikaCore.Controllers
             _storageIndexContext = storageIndexContext;
             _loggerService = fileLoggerService;
             _hubContext = hubContext;
-            _fileOperationHub = fileOperationHub;
             _configuration = configuration;
 
             ((ArchiveService)_archiveService).PropertyChanged += PropertyChangedHandler;
@@ -271,6 +265,7 @@ namespace PikaCore.Controllers
                         ex.Message);
                     
                     message = ex.Message;
+                    TempData["returnMessage"] = message;
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -292,31 +287,34 @@ namespace PikaCore.Controllers
 
                     if (s != null)
                     {
-                        var fileBytes = await _fileService.DownloadAsStreamAsync(s.AbsolutePath);
-                        var name = Path.GetFileName(s.AbsolutePath);
-                        if (fileBytes != null)
+                        using (var fileBytes = await _fileService.DownloadAsStreamAsync(s.AbsolutePath))
                         {
-                            if (!s.Expires)
+                            var name = Path.GetFileName(s.AbsolutePath);
+                            if (fileBytes != null)
                             {
-                                _loggerService.LogToFileAsync(LogLevel.Information, 
-                                    HttpContext.Connection.RemoteIpAddress.ToString(), 
-                                    "Successfully returned requested resource" 
-                                    + s.AbsolutePath);
-                                return File(fileBytes, MimeAssistant.GetMimeType(name), name);
+                                if (!s.Expires)
+                                {
+                                    _loggerService.LogToFileAsync(LogLevel.Information,
+                                        HttpContext.Connection.RemoteIpAddress.ToString(),
+                                        "Successfully returned requested resource"
+                                        + s.AbsolutePath);
+                                    return File(fileBytes, MimeAssistant.GetMimeType(name), name);
+                                }
+
+                                if (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now)
+                                {
+                                    _loggerService.LogToFileAsync(LogLevel.Information,
+                                        HttpContext.Connection.RemoteIpAddress.ToString(),
+                                        "Successfully returned requested resource"
+                                        + s.AbsolutePath);
+                                    return File(fileBytes, MimeAssistant.GetMimeType(name), name);
+                                }
+
+                                TempData["returnMessage"] =
+                                    "It seems that this url expired today, you need to generate a new one.";
+
+                                return RedirectToAction(nameof(Index), new {path = _last});
                             }
-
-                            if (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now)
-                            {
-                                _loggerService.LogToFileAsync(LogLevel.Information, 
-                                    HttpContext.Connection.RemoteIpAddress.ToString(), 
-                                    "Successfully returned requested resource" 
-                                    + s.AbsolutePath);
-                                return File(fileBytes, MimeAssistant.GetMimeType(name), name);
-                            }
-
-                            TempData["returnMessage"] = "It seems that this url expired today, you need to generate a new one.";
-
-                            return RedirectToAction(nameof(Index), new { path = _last });
                         }
 
                         _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value, 
@@ -407,9 +405,11 @@ namespace PikaCore.Controllers
             var thumbFileName = $"{id}.{format}";
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                  thumbFileName
-                                    );
-            var thumbFileStream = await _fileService.DownloadAsStreamAsync(absoluteThumbPath);
-            return File(thumbFileStream, "image/jpeg");
+                                                 );
+            using (var thumbFileStream = await _fileService.DownloadAsStreamAsync(absoluteThumbPath))
+            {
+                return File(thumbFileStream, "image/jpeg");
+            }
         }
 
         [HttpPost]
@@ -581,6 +581,7 @@ namespace PikaCore.Controllers
                 try
                 {
                     var dirInfo = await _fileService.Create(returnPath, name);
+                    
                     TempData["returnMessage"] = "Successfully created directory: " + dirInfo.Name;
                     _loggerService.LogToFileAsync(LogLevel.Information,
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
@@ -767,24 +768,19 @@ namespace PikaCore.Controllers
 
             return false;
         }
-
-        private bool ValidateDbServerState()
-        {
-            return (_storageIndexContext.Database.GetDbConnection() != null);
-        }
         #endregion
 
         #region CookierHelperMethods
 
         private void Set(string key, string value, int? expireTime)
         {
-            CookieOptions option = new CookieOptions();
-
-            if (expireTime.HasValue)
-                option.Expires = DateTime.Now.AddMinutes(expireTime.Value);
-            else
-                option.Expires = DateTime.Now.AddMilliseconds(10);
-
+            var option = new CookieOptions
+            {
+                Expires = expireTime.HasValue
+                    ? DateTime.Now.AddMinutes(expireTime.Value)
+                    : DateTime.Now.AddMilliseconds(10)
+            };
+            
             Response.Cookies.Append(key, value, option);
         }
 

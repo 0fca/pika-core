@@ -2,7 +2,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Permissions;
@@ -37,7 +36,7 @@ namespace PikaCore.Services
             }
             catch (OperationCanceledException e)
             {
-                Debug.WriteLine(e.Message + ": Downloading cancled by user.");
+                _fileLoggerService.LogToFileAsync(LogLevel.Warning, "localhost", e.Message + " : Downloading canceled by the user.");
             }
             finally
             {
@@ -48,14 +47,13 @@ namespace PikaCore.Services
         public async Task<Stream> DownloadAsStreamAsync(string absolutPath)
         {
             var path = !string.IsNullOrEmpty(absolutPath) && File.Exists(absolutPath) ? absolutPath : "/home/arkasian/";
-            using (var fs = new FileStream(path, FileMode.Open))
+            var fs = new FileStream(path, FileMode.Open);
+            return await Task<Stream>.Factory.StartNew(() =>
             {
-                return await Task<Stream>.Factory.StartNew(() =>
-                {
-                    _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutPath}");
+                _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutPath}");
                     return fs;
-                }, _tokenSource.Token);
-            }
+            }, _tokenSource.Token);
+            
         }
 
         public async Task<DirectoryInfo> Create(string returnPath, string name)

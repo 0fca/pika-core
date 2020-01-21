@@ -19,8 +19,6 @@ namespace PikaCore.Services
         private readonly IFileLoggerService _fileLoggerService;
 
         public MediaService(IConfiguration configuration,
-                            IFileService fileService,
-                            ImageCache memoryCache,
                             IFileLoggerService fileLoggerService)
         {
             _configuration = configuration;
@@ -57,9 +55,8 @@ namespace PikaCore.Services
         private MediaType DetectType(string mime)
         {
             var props = (MediaType[])Enum.GetValues(typeof(MediaType));
-            var mediaType = MediaType.Image;
-            
-	        mediaType = Array.Find<MediaType>(props, x => mime.Split("/").Contains(x.ToString().ToLower()));
+
+            var mediaType = Array.Find(props, x => mime.Split("/").Contains(x.ToString().ToLower()));
 	        _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"{mediaType} mediaType detected from MIME: {mime}");	   
             return mediaType;
         }
@@ -70,14 +67,13 @@ namespace PikaCore.Services
             var thumbAbsolutePath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
             _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", thumbAbsolutePath);
-            if (!File.Exists(thumbAbsolutePath))
+            if (File.Exists(thumbAbsolutePath)) return guid;
+            
+            var options = new ConversionOptions()
             {
-                var options = new ConversionOptions()
-                {
-                    Seek = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("ConversionOptions")["Seek"]))
-                };
-                await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options, size);
-            }
+                Seek = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("ConversionOptions")["Seek"]))
+            };
+            await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options, size);
             return guid;
         }
 
