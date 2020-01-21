@@ -33,9 +33,9 @@ namespace PikaCore.Controllers
         private readonly IFileProvider _fileProvider;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private static readonly FileResultModel Lrmv = new FileResultModel();
-        private readonly IZipper _archiveService;
+        private readonly IArchiveService _archiveService;
         private readonly IFileService _fileService;
-        private readonly IGenerator _generatorService;
+        private readonly IUrlGenerator _urlGeneratorService;
         private readonly IFileLoggerService _loggerService;
         private readonly IConfiguration _configuration;
         private readonly StorageIndexContext _storageIndexContext;
@@ -46,8 +46,8 @@ namespace PikaCore.Controllers
 
         public StorageController(IFileProvider fileProvider,
         SignInManager<ApplicationUser> signInManager,
-        IZipper archiveService, IFileService fileService,
-        ILogger<StorageController> iLogger, IGenerator iGenerator,
+        IArchiveService archiveService, IFileService fileService,
+        ILogger<StorageController> iLogger, IUrlGenerator iUrlGenerator,
         StorageIndexContext storageIndexContext,
         IFileLoggerService fileLoggerService,
         IHubContext<StatusHub> hubContext,
@@ -58,7 +58,7 @@ namespace PikaCore.Controllers
             _fileProvider = fileProvider;
             _archiveService = archiveService;
             _fileService = fileService;
-            _generatorService = iGenerator;
+            _urlGeneratorService = iUrlGenerator;
             _storageIndexContext = storageIndexContext;
             _loggerService = fileLoggerService;
             _hubContext = hubContext;
@@ -225,7 +225,7 @@ namespace PikaCore.Controllers
                         s = new StorageIndexRecord { AbsolutePath = entryName };
                         if (s != null)
                         {
-                            s.Urlhash = _generatorService.GenerateId(s.AbsolutePath);
+                            s.Urlhash = _urlGeneratorService.GenerateId(s.AbsolutePath);
                             var user = await _signInManager.UserManager.GetUserAsync(HttpContext.User);
                             s.UserId = user != null
                                 ? await _signInManager.UserManager.GetEmailAsync(user)

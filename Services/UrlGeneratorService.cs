@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 
 namespace PikaCore.Services
 {
-    public class HashGeneratorService : IGenerator
+    public class HashUrlGeneratorService : IUrlGenerator
     {
         private static KeyDerivationPrf Prf { get; set; } = KeyDerivationPrf.HMACSHA256;
         public string GenerateId(string aboslutPath)

@@ -1,7 +1,6 @@
 ﻿using FFmpeg.NET;
 using PikaCore.Controllers;
 using PikaCore.Controllers.Helpers;
-using PikaCore.Services;
 using Microsoft.Extensions.Configuration;
 using PikaCore.Services.Helpers;
 using System;
@@ -11,7 +10,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using PikaCore.Controllers.Helpers;
 
 namespace PikaCore.Services
 {
@@ -51,8 +49,9 @@ namespace PikaCore.Services
                     return await CreateThumbFromImageAsync(path, guid, size);
                 case MediaType.Video:
                     return await CreateThumbFromVideoAsync(path, guid, size);
+                default:
+                    return string.Empty;
             }
-            return string.Empty;
         }
 
         private MediaType DetectType(string mime)
@@ -112,7 +111,7 @@ namespace PikaCore.Services
             {
                 try
                 {
-                    using (FileStream pngStream = new FileStream(absoluteSystemPath, FileMode.Open, FileAccess.Read))
+                    using (var pngStream = new FileStream(absoluteSystemPath, FileMode.Open, FileAccess.Read))
                     {
                         _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, 
                                                           "localhost", 
@@ -145,7 +144,6 @@ namespace PikaCore.Services
                                 _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"Saving... {name}");
 
                                 resized.Save(name, imageFormat);
-
                                 _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"Saved... {name}");
 				                resized.Dispose();
 				                return id;

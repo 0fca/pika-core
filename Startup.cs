@@ -71,10 +71,10 @@ namespace PikaCore
                 });
 
             services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddScoped<IZipper, ArchiveService>();
+            services.AddScoped<IArchiveService, ArchiveService>();
             services.AddSingleton<ImageCache>();
             services.AddTransient<IFileService, FileService>();
-            services.AddTransient<IGenerator, HashGeneratorService>();
+            services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
             services.AddTransient<IStreamingService, StreamingService>();
             services.AddScoped<IMediaService, MediaService>();
             services.AddSingleton<ISchedulerService, SchedulerService>();

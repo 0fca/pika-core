@@ -27,7 +27,7 @@ namespace PikaCore.Controllers
         private readonly IEmailSender _emailSender;
         private readonly UrlEncoder _urlEncoder;
         private readonly IFileLoggerService _loggerService;
-        private readonly IGenerator _urlGeneratorService;
+        private readonly IUrlGenerator _urlUrlGeneratorService;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -40,7 +40,7 @@ namespace PikaCore.Controllers
           ILogger<ManageController> logger,
           UrlEncoder urlEncoder,
           IFileLoggerService loggerService,
-          IGenerator generator)
+          IUrlGenerator urlGenerator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -48,7 +48,7 @@ namespace PikaCore.Controllers
             _emailSender = emailSender;
             _urlEncoder = urlEncoder;
             _loggerService = loggerService;
-            _urlGeneratorService = generator;
+            _urlUrlGeneratorService = urlGenerator;
         }
 
         [TempData] private string StatusMessage { get; set; }
@@ -152,8 +152,8 @@ namespace PikaCore.Controllers
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
                 var guid = Guid.NewGuid().ToString();
-                _urlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
-                var hash = _urlGeneratorService.GenerateId(guid);
+                _urlUrlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
+                var hash = _urlUrlGeneratorService.GenerateId(guid);
                 var result = await _userManager.ResetPasswordAsync(userModel, token, hash);
                 TempData["newPassword"] = hash;
             }

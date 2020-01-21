@@ -1,7 +1,6 @@
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Runtime;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -48,11 +47,15 @@ namespace PikaCore.Services
 
         public async Task<Stream> DownloadAsStreamAsync(string absolutPath)
         {
-            return await Task<Stream>.Factory.StartNew(() =>
+            var path = !string.IsNullOrEmpty(absolutPath) && File.Exists(absolutPath) ? absolutPath : "/home/arkasian/";
+            using (var fs = new FileStream(path, FileMode.Open))
             {
-	    	_fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutPath}");
-                return File.Exists(absolutPath) ? System.IO.File.OpenRead(absolutPath) : new FileStream("/home/arkasian/", FileMode.Open);
-            }, _tokenSource.Token);
+                return await Task<Stream>.Factory.StartNew(() =>
+                {
+                    _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutPath}");
+                    return fs;
+                }, _tokenSource.Token);
+            }
         }
 
         public async Task<DirectoryInfo> Create(string returnPath, string name)
@@ -66,14 +69,15 @@ namespace PikaCore.Services
 
         public async Task<byte[]> DownloadAsync(string absolutPath)
         {
-            return await Task<byte[]>.Factory.StartNew(() =>
-            {
-                return File.Exists(absolutPath) ? System.IO.File.ReadAllBytes(absolutPath) : null;
-            }, _tokenSource.Token);
+            return await Task<byte[]>.Factory.StartNew(() => 
+                File.Exists(absolutPath) 
+                    ? System.IO.File.ReadAllBytes(absolutPath) 
+                    : null, _tokenSource.Token
+                );
         }
 
         public async Task MoveFromTmpAsync(string fileName, string toWhere = null)
-	{
+	    {
             var file = Constants.Tmp + Constants.UploadTmp + Path.DirectorySeparatorChar + fileName;
 
             if (string.IsNullOrEmpty(toWhere))
@@ -85,14 +89,17 @@ namespace PikaCore.Services
             {
                 Directory.CreateDirectory(toWhere);
             }
-            var fileStream = new FileStream(file, FileMode.Open);
 
-            var buffer = new byte[fileStream.Length];
-            await fileStream.ReadAsync(buffer);
-            await File.WriteAllBytesAsync(toWhere + fileName, buffer);
-            _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File {fileName} moved from tmp to " + toWhere);
-            fileStream.Flush();
-            fileStream.Close();
+            using (var fileStream = new FileStream(file, FileMode.Open))
+            {
+
+                var buffer = new byte[fileStream.Length];
+                await fileStream.ReadAsync(buffer);
+                await File.WriteAllBytesAsync(toWhere + fileName, buffer);
+                _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost",
+                    $"File {fileName} moved from tmp to " + toWhere);
+                fileStream.Flush();
+            }
         }
 
         public Task Move(string absolutePath, string toWhere)

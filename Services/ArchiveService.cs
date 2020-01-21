@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PikaCore.Services
 {
-    public class ArchiveService : IZipper, INotifyPropertyChanged
+    public class ArchiveService : IArchiveService, INotifyPropertyChanged
     {
         private Task _task;
         private CancellationTokenSource _tokenSource = new CancellationTokenSource();
