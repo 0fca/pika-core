@@ -31,7 +31,7 @@
             var last = "";
             var tmp = "/Storage?path=" + last;
 
-            <a href="/Storage?path">Index</a>
+            <a class="teal-text" href="/Storage?path">Index</a>
 
             foreach (var part in splitted)
             {
@@ -41,7 +41,7 @@
 
                     last = string.Concat(last, "/", part);
                     tmp = "/Storage?path=" + last;
-            <a class="breadcrumb breadcrumb-icon" href=@tmp>@part</a>
+                    <a class="breadcrumb breadcrumb-icon teal-text" href=@tmp>@part</a>
 
                 }
             }
