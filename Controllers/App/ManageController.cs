@@ -23,8 +23,6 @@ namespace PikaCore.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IEmailSender _emailSender;
         private readonly UrlEncoder _urlEncoder;
         private readonly IFileLoggerService _loggerService;
         private readonly IUrlGenerator _urlUrlGeneratorService;
@@ -35,24 +33,18 @@ namespace PikaCore.Controllers
         public ManageController(
           UserManager<ApplicationUser> userManager,
           SignInManager<ApplicationUser> signInManager,
-          RoleManager<IdentityRole> roleManager,
-          IEmailSender emailSender,
-          ILogger<ManageController> logger,
           UrlEncoder urlEncoder,
           IFileLoggerService loggerService,
           IUrlGenerator urlGenerator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _roleManager = roleManager;
-            _emailSender = emailSender;
             _urlEncoder = urlEncoder;
             _loggerService = loggerService;
             _urlUrlGeneratorService = urlGenerator;
         }
 
         [TempData] private string StatusMessage { get; set; }
-        [TempData] private string ReturnMessage { get; set; }
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -133,11 +125,10 @@ namespace PikaCore.Controllers
                 });
             }
 
-            AdminPanelViewModel adminPanelViewModel = new AdminPanelViewModel
+            var adminPanelViewModel = new AdminPanelViewModel
             {
-                LogsListViewModel = logListViewModel
+                LogsListViewModel = logListViewModel, UsersWithRoles = usersWithRoles
             };
-            adminPanelViewModel.UsersWithRoles = usersWithRoles;
             ViewData["returnMessage"] = TempData["returnMessage"];
             return View("/Views/Manage/Admin/AdminUserPanel.cshtml", adminPanelViewModel);
         }
@@ -148,16 +139,16 @@ namespace PikaCore.Controllers
         public async Task<IActionResult> GeneratePassword(string id)
         {
             var userModel = await _userManager.FindByIdAsync(id);
-            if ((await _userManager.GetLoginsAsync(userModel)).Count == 0)
-            {
-                var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
-                var guid = Guid.NewGuid().ToString();
-                _urlUrlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
-                var hash = _urlUrlGeneratorService.GenerateId(guid);
-                var result = await _userManager.ResetPasswordAsync(userModel, token, hash);
-                TempData["newPassword"] = hash;
-            }
-            ReturnMessage = "This user is logged in via 3rd party provider, cannot reset password.";
+            if ((await _userManager.GetLoginsAsync(userModel)).Count != 0)
+                return RedirectToAction(nameof(AdminUserPanel));
+            
+            var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
+            var guid = Guid.NewGuid().ToString();
+            _urlUrlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
+            var hash = _urlUrlGeneratorService.GenerateId(guid);
+            await _userManager.ResetPasswordAsync(userModel, token, hash);
+            TempData["newPassword"] = hash;
+
             return RedirectToAction(nameof(AdminUserPanel));
         }
 
@@ -234,25 +225,6 @@ namespace PikaCore.Controllers
             var result = await _userManager.DeleteAsync(await _userManager.FindByIdAsync(id));
             TempData["returnMessage"] = result.Succeeded ? "Successfully deleted user of id " + id : "Could not delete user of id " + id;
             return RedirectToAction(nameof(AdminUserPanel));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendVerificationEmail(IndexViewModel model)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-            var email = user.Email;
-            await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
-
-            StatusMessage = "Verification email sent. Please check your email.";
-            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
