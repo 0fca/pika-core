@@ -2,16 +2,16 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>2.2.1</PackageVersion>
+        <PackageVersion>2.2.2</PackageVersion>
         <Authors>Arkasian</Authors>
         <Description>Pika Core Cloud</Description>
         <PackageProjectUrl>https://core.lukas-bownik.net</PackageProjectUrl>
         <RepositoryUrl>https://www.github.com/Arkasian/pika-core</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>cms core cloud</PackageTags>
-        <AssemblyVersion>2.2.1</AssemblyVersion>
-        <FileVersion>2.2.1</FileVersion>
-        <Version>2.2.1</Version>
+        <AssemblyVersion>2.2.2</AssemblyVersion>
+        <FileVersion>2.2.2</FileVersion>
+        <Version>2.2.2</Version>
     </PropertyGroup>
     <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="3.0.0" />

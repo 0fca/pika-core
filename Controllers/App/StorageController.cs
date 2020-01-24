@@ -373,6 +373,7 @@ namespace PikaCore.Controllers
                     _loggerService.LogToFileAsync(LogLevel.Warning, 
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         $"Attempting to return file '{path}' of MIME: {mime} as an asynchronous stream.");
+                    await fs.FlushAsync();
                     return File(fs, mime, name);
                 }
 
@@ -406,10 +407,9 @@ namespace PikaCore.Controllers
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                  thumbFileName
                                                  );
-            using (var thumbFileStream = await _fileService.DownloadAsStreamAsync(absoluteThumbPath))
-            {
-                return File(thumbFileStream, "image/jpeg");
-            }
+            var thumbFileStream = await _fileService.DownloadAsStreamAsync(absoluteThumbPath);
+            await thumbFileStream.FlushAsync();
+            return File(thumbFileStream, "image/jpeg");
         }
 
         [HttpPost]
@@ -649,10 +649,10 @@ namespace PikaCore.Controllers
         [HttpGet]
         [Authorize(Roles = "Admin, FileManagerUser")]
         [AutoValidateAntiforgeryToken]
-        [Route("/[controller]/[action]/{inname}")]
-        public IActionResult Rename(string inname)
+        [Route("/[controller]/[action]/{n}")]
+        public IActionResult Rename(string n)
         {
-            var name = UnixHelper.MapToPhysical(Constants.FileSystemRoot, GetLastPath() + inname);
+            var name = UnixHelper.MapToPhysical(Constants.FileSystemRoot, GetLastPath() + n);
             ViewData["path"] = name;
             var rfm = new RenameFileModel
             {

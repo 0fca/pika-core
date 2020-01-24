@@ -37,7 +37,7 @@ namespace PikaCore.Services
 
         public async Task<string> CreateThumb(string path, string guid, int size = 0)
         {
-	    var physicalPath = UnixHelper.MapToPhysical(_configuration.GetSection("Paths")["linux-root"], path);
+	        var physicalPath = UnixHelper.MapToPhysical(_configuration.GetSection("Paths")["linux-root"], path);
             var mime = MimeAssistant.GetMimeType(physicalPath);
 	        _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost" ,$"{path} : {mime}");
             var mediaType = DetectType(mime);
@@ -66,42 +66,54 @@ namespace PikaCore.Services
             var absoluteHostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
             var thumbAbsolutePath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
-            _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", thumbAbsolutePath);
-            if (File.Exists(thumbAbsolutePath)) return guid;
+            var wScale = int.Parse(size == 1
+                ? _configuration.GetSection("Images")["WidthBig"]
+                : _configuration.GetSection("Images")["Width"]);
             
-            var options = new ConversionOptions()
-            {
-                Seek = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("ConversionOptions")["Seek"]))
-            };
-            await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options, size);
-            return guid;
+            var hScale = int.Parse(size == 1
+                ? _configuration.GetSection("Images")["HeightBig"]
+                : _configuration.GetSection("Images")["Height"]);
+            
+
+                _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost",
+                    absoluteHostPath);
+                if (File.Exists(thumbAbsolutePath)) return guid;
+
+                var options = new ConversionOptions()
+                {
+                    Seek = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("ConversionOptions")["Seek"])),
+                    CustomWidth = 128,
+                    CustomHeight = 128
+                };
+                await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options);
+                return guid;
         }
 
         private async Task<string> CreateThumbFromImageAsync(string path, string guid, int size)
         {
             //0 is small, 1 is big as in configuration: Images/Width, Images/Height, Images/BigHeigth, Images/BigWidth
-            var width = int.Parse(_configuration.GetSection("Images")["Width"]);
-            var height = int.Parse(_configuration.GetSection("Images")["Height"]);
+            var wScale = int.Parse(_configuration.GetSection("Images")["Width"]);
+            var hScale = int.Parse(_configuration.GetSection("Images")["Height"]);
 
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
             _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", absoluteThumbPath);
             if (size == 1) 
             {
-                height = int.Parse(_configuration.GetSection("Images")["HeightBig"]);
-                width = int.Parse(_configuration.GetSection("Images")["WidthBig"]);
+                hScale = int.Parse(_configuration.GetSection("Images")["HeightBig"]);
+                wScale = int.Parse(_configuration.GetSection("Images")["WidthBig"]);
             }
 
             var absoluteHostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
 
             if (!File.Exists(absoluteThumbPath))
             {
-                return await GrabFromImage(absoluteHostPath, guid, height, width);
+                return await GrabFromImage(absoluteHostPath, guid, hScale, wScale);
             }
             return guid;
         }
 
-        public async Task<string> GrabFromImage(string absoluteSystemPath, string id, int height, int width)
+        public async Task<string> GrabFromImage(string absoluteSystemPath, string id, int hScale, int wScale)
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -115,7 +127,7 @@ namespace PikaCore.Services
                                                           );
                         using (var image = new Bitmap(pngStream))
                         {
-                            var resized = new Bitmap(width, height);
+                            var resized = new Bitmap(image.Width/wScale, image.Height/hScale);
                             using (var graphics = Graphics.FromImage(resized))
                             {
                                 _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, 
@@ -124,9 +136,9 @@ namespace PikaCore.Services
                                                                   );
 
                                 graphics.CompositingQuality = CompositingQuality.HighQuality;
-                                graphics.InterpolationMode = InterpolationMode.Bicubic;
+                                graphics.InterpolationMode = InterpolationMode.High;
                                 graphics.CompositingMode = CompositingMode.SourceCopy;
-                                graphics.DrawImage(image, 0, 0, width, height);
+                                graphics.DrawImage(image, 0, 0, resized.Width, resized.Height);
 
                                 var whereToSave = _configuration.GetSection("Images")["ThumbDirectory"];
 
@@ -155,7 +167,7 @@ namespace PikaCore.Services
             });
         }
 
-        public async Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions, int size)
+        public async Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions)
         {
             var inputFile = new MediaFile(absoluteSystemVideoPath);
             var outputFile = new MediaFile(absoluteSystemOutputPath);

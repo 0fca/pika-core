@@ -46,7 +46,12 @@ namespace PikaCore.Services
 
         public async Task<Stream> DownloadAsStreamAsync(string absolutPath)
         {
-            var path = !string.IsNullOrEmpty(absolutPath) && File.Exists(absolutPath) ? absolutPath : "/home/arkasian/";
+            var path = !string.IsNullOrEmpty(absolutPath) && File.Exists(absolutPath) ? absolutPath : null;
+            if (string.IsNullOrEmpty(path))
+            {
+                return new MemoryStream();
+            }
+
             var fs = new FileStream(path, FileMode.Open);
             return await Task<Stream>.Factory.StartNew(() =>
             {
@@ -69,7 +74,7 @@ namespace PikaCore.Services
         {
             return await Task<byte[]>.Factory.StartNew(() => 
                 File.Exists(absolutPath) 
-                    ? System.IO.File.ReadAllBytes(absolutPath) 
+                    ? File.ReadAllBytes(absolutPath) 
                     : null, _tokenSource.Token
                 );
         }
@@ -128,7 +133,7 @@ namespace PikaCore.Services
             return await Task<IEnumerable<string>>.Factory.StartNew(() => TraverseDirectories(hostPath));
         }
 
-        private IEnumerable<string> TraverseDirectories(string rootDirectory)
+        private static IEnumerable<string> TraverseDirectories(string rootDirectory)
         {
             var directories = Enumerable.Empty<string>();
             try
@@ -154,7 +159,7 @@ namespace PikaCore.Services
             }
         }
 
-        private IEnumerable<string> TraverseFiles(string rootDirectory, int depth)
+        private static IEnumerable<string> TraverseFiles(string rootDirectory, int depth)
         {
             var files = Enumerable.Empty<string>();
             var directories = Enumerable.Empty<string>();
@@ -214,7 +219,7 @@ namespace PikaCore.Services
                 }
                 else
                 {
-                    System.IO.File.Delete(item);
+                    File.Delete(item);
                 }
             }));
         }

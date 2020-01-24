@@ -10,7 +10,7 @@ namespace PikaCore.Services
         Task<string> CreateThumb(string absoluteSystemPath, string guid, int size);
         Task<string>  GrabFromImage(string absoluteSystemPath, string id, int height, int width);
 
-        Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions, int size);
+        Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions);
 
         void Dispose();
     }

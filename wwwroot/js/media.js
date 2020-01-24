@@ -39,22 +39,24 @@ function loadThumb(path, s) {
             const guid = img.getAttribute("id");
             const text = img.getAttribute("alt");
             const systemPath = path.toString() + text;
-            mediaHubconnection.invoke("CreateThumb", systemPath, guid, s).catch(err => {
+            
+            mediaHubconnection.invoke("CreateThumb", systemPath, guid, 1).catch(err => {
                 const img = document.getElementById(guid);
                 const imgParentLink = img.parentElement;
                 const icon = document.createElement("i");
                 icon.setAttribute("class", "material-icons");
+                icon.setAttribute("title", "There was an error loading a thumb...");
                 icon.innerText = "error";
                 imgParentLink.insertBefore(icon, img);
                 imgParentLink.removeChild(img);
-		console.log(err.toString());
+		        console.log(err.toString());
             });
         }
     }
 }
 
 function ReceiveThumb(thumbId) {
-    if (thumbId != "") {
+    if (thumbId !== "") {
         const url = "/Storage/Thumb?id=" + thumbId;
         document.getElementById(thumbId).setAttribute("src", url);
     }
