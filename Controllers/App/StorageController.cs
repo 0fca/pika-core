@@ -163,7 +163,6 @@ namespace PikaCore.Controllers
             ViewData["returnUrl"] = UnixHelper.GetParent(GetLastPath());
             ViewData["path"] = GetLastPath();
             return View(Lrmv);
-            
         }
 
         private IDirectoryContents GetContents(string path)
@@ -338,7 +337,6 @@ namespace PikaCore.Controllers
                     return RedirectToAction(nameof(Index), new { path = _last });
                 }
             }
-
             TempData["returnMessage"] = "No id given or database is down.";
             return RedirectToAction(nameof(Index));
         }

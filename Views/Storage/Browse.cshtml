@@ -94,11 +94,11 @@
                     {
                         var mime = "";
                         mime = MimeAssistant.GetMimeType(item.PhysicalPath);
-                        var type = MimeAssistant.RecognizeIconByMime(mime);
                         
-                        if (!mime.StartsWith("image") 
-                            && !mime.StartsWith("video"))
+                        if (!mime.StartsWith("image/")
+                            && !mime.StartsWith("video/"))
                         {
+                            var type = MimeAssistant.RecognizeIconByMime(mime);
                             <a class="collection-item" asp-controller="Storage" asp-action="Download" asp-route-id=@item.Name title="@item.Name"><i class="fas fa-@type browse-icon-margin"></i>@item.Name</a>
                         }
                         else
