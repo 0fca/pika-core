@@ -1,8 +1,8 @@
-﻿using FMS2.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using PikaCore.Models;
 
-namespace FMS2.Data
+namespace PikaCore.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {

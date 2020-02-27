@@ -1,7 +1,7 @@
-﻿using FMS2.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using PikaCore.Models;
 
-namespace FMS2.Controllers
+namespace PikaCore.Controllers
 {
     public class HomeController : Controller
     {

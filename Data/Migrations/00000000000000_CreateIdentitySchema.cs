@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
-namespace FMS2.Data.Migrations
+namespace PikaCore.Data.Migrations
 {
     public partial class CreateIdentitySchema : Migration
     {

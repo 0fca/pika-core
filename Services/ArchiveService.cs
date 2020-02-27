@@ -6,9 +6,9 @@ using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
-    public class ArchiveService : IZipper, INotifyPropertyChanged
+    public class ArchiveService : IArchiveService, INotifyPropertyChanged
     {
         private Task _task;
         private CancellationTokenSource _tokenSource = new CancellationTokenSource();

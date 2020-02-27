@@ -1,13 +1,12 @@
-using FMS2.Controllers;
-using FMS2.Controllers.Helpers;
-using FMS2.Services;
+using PikaCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using PikaCore.Controllers.Helpers;
 
-namespace FMS.Controllers
+namespace PikaCore.Controllers
 {
     public class VideoController : Controller
     {
@@ -22,8 +21,9 @@ namespace FMS.Controllers
         [Authorize(Roles = "Admin,FileManagerUser,User")]
         public IActionResult Watch(string path)
         {
-            ViewData["Mime"] = MimeAssistant.GetMimeType(System.IO.Path.GetFileName(path));
-            ViewData["VideoTitle"] = Path.GetFileNameWithoutExtension(UnixHelper.MapToPhysical(Constants.FileSystemRoot, path));
+            ViewData["Mime"] = MimeAssistant.GetMimeType(UnixHelper.MapToPhysical(Constants.FileSystemRoot, path));
+            
+            ViewData["VideoTitle"] = Path.GetFileName(UnixHelper.MapToPhysical(Constants.FileSystemRoot, path));
 
             if (path != null)
             {
@@ -47,7 +47,7 @@ namespace FMS.Controllers
         public async Task<FileStreamResult> Stream(string p)
         {
             var absolutePath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, p);
-            return File(await _streamingService.GetVideoByPath(absolutePath), MimeAssistant.GetMimeType(System.IO.Path.GetFileName(p)), true);
+            return File(await _streamingService.GetVideoByPath(absolutePath), MimeAssistant.GetMimeType(absolutePath), true);
         }
     }
 }

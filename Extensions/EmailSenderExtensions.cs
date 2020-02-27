@@ -1,7 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
     public static class EmailSenderExtensions
     {

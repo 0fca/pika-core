@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
-    public interface IZipper
+    public interface IArchiveService
     {
         Task<Task> ZipDirectoryAsync(string absolutPath, string output);
         void Cancel();

@@ -1,7 +1,4 @@
-﻿using FMS2.Models;
-using FMS2.Models.AccountViewModels;
-using FMS2.Services;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +6,11 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using PikaCore.Models;
+using PikaCore.Models.AccountViewModels;
+using PikaCore.Services;
 
-namespace FMS2.Controllers
+namespace PikaCore.Controllers
 {
     [Authorize]
     [Route("[controller]/[action]")]
@@ -39,7 +39,7 @@ namespace FMS2.Controllers
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/Home/Index" : returnUrl;
             return View();
         }
 
@@ -216,11 +216,7 @@ namespace FMS2.Controllers
             if (result.Succeeded)
             {
                 _logger.LogInformation("User created a new account with password.");
-
-                await _userManager.AddToRoleAsync(user, "User");
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                _logger.LogInformation("User created a new account with password.");
-                return RedirectToLocal(returnUrl);
+                
             }
             AddErrors(result);
 
@@ -287,7 +283,8 @@ namespace FMS2.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model,
+            string returnUrl = null)
         {
             if (ModelState.IsValid)
             {
@@ -297,7 +294,8 @@ namespace FMS2.Controllers
                 {
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+
+                var user = new ApplicationUser {UserName = model.Email, Email = model.Email};
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
@@ -311,13 +309,14 @@ namespace FMS2.Controllers
                         return RedirectToLocal(returnUrl);
                     }
                 }
+
                 AddErrors(result);
             }
 
             ViewData["ReturnUrl"] = returnUrl;
             return View(nameof(ExternalLogin), model);
         }
-        
+
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ForgotPassword()

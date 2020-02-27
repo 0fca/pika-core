@@ -1,4 +1,5 @@
-﻿@model FMS2.Models.FileResultModel
+﻿@using PikaCore.Controllers.Helpers
+@model PikaCore.Models.FileResultModel
 @inject UserManager<ApplicationUser> UserManager
 @inject IFileService FileService
 
@@ -30,7 +31,7 @@
             var last = "";
             var tmp = "/Storage?path=" + last;
 
-            <a href="/Storage?path">Index</a>
+            <a class="teal-text" href="/Storage?path">Index</a>
 
             foreach (var part in splitted)
             {
@@ -40,7 +41,7 @@
 
                     last = string.Concat(last, "/", part);
                     tmp = "/Storage?path=" + last;
-            <a class="breadcrumb breadcrumb-icon" href=@tmp>@part</a>
+                    <a class="breadcrumb breadcrumb-icon teal-text" href=@tmp>@part</a>
 
                 }
             }
@@ -92,13 +93,11 @@
                     else
                     {
                         var mime = "";
-
                         mime = MimeAssistant.GetMimeType(item.PhysicalPath);
-
                         var type = MimeAssistant.RecognizeIconByMime(mime);
                         
-                        if (!mime.Contains("image")
-                         && !mime.Contains("video"))
+                        if (!mime.StartsWith("image") 
+                            && !mime.StartsWith("video"))
                         {
                             <a class="collection-item" asp-controller="Storage" asp-action="Download" asp-route-id=@item.Name title="@item.Name"><i class="fas fa-@type browse-icon-margin"></i>@item.Name</a>
                         }
@@ -107,7 +106,7 @@
                            
                             var id = "1."+lastPath.ToString().Replace("/", "-") + $"-{item.Name}";
                             <div class="col s3 m1 l1 material-placeholder">
-                                <img class="materialboxed" id="@id" src="~/images/loading_icon.gif" height="52" alt="@item.Name" />
+                                <img class="materialboxed" id="@id" alt="@item.Name" width="48" src="~/images/loading_icon.gif"/>
                             </div>
                             <div class="col s5 m7 l7 center-align">
                                 <a class="collection-item left-align" asp-controller="Storage" asp-action="Download" asp-route-id=@item.Name title="@item.Name">
@@ -125,7 +124,7 @@
                             {
                                 var unitStrPart = "";
                                 var i = item.Length;
-                                string[] units = { "B", "kB", "MB", "GB", "TB" };
+                                string[] units = { "B", "kiB", "MiB", "GiB", "TiB" };
                                 var unitIndex = 0;
                                 for (var ptr = 0; ptr <= units.Length; ptr++)
                                 {
@@ -144,7 +143,7 @@
                             }
             </div>
             <div class="col m2 l2 opt-font">
-                <a class='dropdown-trigger' href='#' data-target='options-@item.Name'><i class="material-icons">more_horiz</i></a>
+                <a class='dropdown-trigger grey-text text-darken-4' href='#' data-target='options-@item.Name'><i class="material-icons">more_horiz</i></a>
 
                 <ul id='options-@item.Name' class='dropdown-content'>
                     @{var ext = System.IO.Path.GetExtension(item.Name);}
@@ -166,7 +165,7 @@
                         {
                     <li><a asp-action="Archive" asp-controller="Storage" onclick="showDownloadBox();" asp-route-id="@item.Name"><i class="fas fa-arrow-down" title="Download directory as zip"></i></a></li>
                         }
-                    <li><a asp-action="Rename" asp-route-inname="@item.Name"><i class="fas fa-pen"></i></a></li>
+                    <li><a asp-action="Rename" asp-route-n="@item.Name"><i class="fas fa-pen"></i></a></li>
                     }
                     else
                     {
@@ -219,21 +218,21 @@
 <script src="~/js/media.js" asp-append-version="true"></script>
 <script>
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
-        if (e.code == "Enter") {
+        if (e.code === "Enter") {
 	    loadThumb(path);
             searchFileList();
         }
     });
 
     document.getElementById("pathField").addEventListener("keydown", (key) => {
-        if (key.code == "Enter") {
+        if (key.code === "Enter") {
             const path = document.getElementById("pathField").value;
             location = `/Storage?path=${path}`;
         }
     });
 
     document.getElementById("pathField").addEventListener("keyup", (key) => {
-        if (key.code == "Slash") {
+        if (key.code === "Slash") {
             const currentPath = document.getElementById("pathField").value;
             requestListing(currentPath);
         }

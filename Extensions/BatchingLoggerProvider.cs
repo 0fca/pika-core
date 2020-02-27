@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FMS2.Extensions
+namespace PikaCore.Extensions
 {
     public abstract class BatchingLoggerProvider : ILoggerProvider
     {

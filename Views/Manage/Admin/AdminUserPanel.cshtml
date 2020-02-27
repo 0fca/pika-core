@@ -1,4 +1,4 @@
-@model FMS2.Models.ManageViewModels.AdminPanelViewModel
+@model PikaCore.Models.ManageViewModels.AdminPanelViewModel
 
 @{
     ViewData["Title"] = "Register - Admin";
@@ -11,10 +11,10 @@
 
 <ul class="nav nav-tabs item-border">
     <li class="nav-item item-border active">
-        <a class="nav-link" href="#" onclick="changeVisibleTab(document.activeElement);">Users table</a>
+        <a class="nav-link teal-text" href="#" onclick="changeVisibleTab(document.activeElement);">Users table</a>
     </li>
     <li class="nav-item item-border">
-        <a class="nav-link" href="#" onclick="changeVisibleTab(document.activeElement);">Logs</a>
+        <a class="nav-link teal-text" href="#" onclick="changeVisibleTab(document.activeElement);">Logs</a>
     </li>
 </ul>
 
@@ -31,26 +31,26 @@
         </div>
     </div>
     <div class="div-table">
-        @foreach (var item in Model.UsersWithRoles)
+        @foreach (var (key, value) in Model.UsersWithRoles)
         {
             var roleString = "";
-            item.Value.ToAsyncEnumerable().ForEachAsync(role =>
+            value.ToList().ForEach(role =>
             {
                 roleString = string.Concat(roleString, " ", role);
             });
                 
             <div class="row">
                 <div class="col s5 truncate">
-                    @Html.DisplayFor(modelItem => item.Key.UserName)
+                    @Html.DisplayFor(modelItem => key.UserName)
                 </div>
                 <div class="col s3">
                 
                 @Html.DisplayFor(modelItem => roleString)
                 </div>
                     <div class="col s4">
-                        <a asp-action="Edit" asp-controller="Manage" asp-route-id=@item.Key.Id><i class="fas fa-pen"></i></a>
-                        <a asp-action="Delete" asp-controller="Manage" asp-route-id="@item.Key.Id"><i class="fas fa-trash-alt"></i></a>
-                        <a asp-action="GeneratePassword" asp-controller="Manage" asp-route-id="@item.Key.Id"><i class="fas fa-key"></i></a>
+                        <a class="teal-text" asp-action="Edit" asp-controller="Manage" asp-route-id=@key.Id><i class="fas fa-pen"></i></a>
+                        <a class="teal-text" asp-action="Delete" asp-controller="Manage" asp-route-id="@key.Id"><i class="fas fa-trash-alt"></i></a>
+                        <a class="teal-text" asp-action="GeneratePassword" asp-controller="Manage" asp-route-id="@key.Id"><i class="fas fa-key"></i></a>
                     </div>
             </div>
         }     

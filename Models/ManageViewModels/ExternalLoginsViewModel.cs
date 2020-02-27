@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 
-namespace FMS2.Models.ManageViewModels
+namespace PikaCore.Models.ManageViewModels
 {
     public class ExternalLoginsViewModel
     {

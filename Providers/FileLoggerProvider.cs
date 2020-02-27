@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FMS2.Providers
+namespace PikaCore.Providers
 {
     [ProviderAlias("File")]
     public class FileLoggerProvider : Extensions.BatchingLoggerProvider

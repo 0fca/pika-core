@@ -1,7 +1,7 @@
-﻿using FMS2.Services;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
+using PikaCore.Services;
 
-namespace FMS2.Controllers.Api.Hubs
+namespace PikaCore.Controllers.Hubs
 {
     public class StatusHub : Hub
     {

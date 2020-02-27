@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace FMS2.Data.Migrations
+namespace PikaCore.Data.Migrations
 {
     public partial class Errornous : Migration
     {

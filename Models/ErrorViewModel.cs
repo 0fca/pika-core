@@ -1,4 +1,4 @@
-namespace FMS2.Models
+namespace PikaCore.Models
 {
     public class ErrorViewModel
     {

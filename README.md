@@ -24,20 +24,20 @@ Production: https://core.lukas-bownik.net/
 
 ### Technical information ###
 *Technology stack*
-* Core 2.1/2.2,
+* .NET Core 3.1,
 * Template Engine,
 * Identity Framework,
 * HTML5 with Materialize and JS,
-* Entity Framework.
+* Entity Framework Core.
 
 Frameworks&libs:
 * Newtonsoft,
 * MySQL Pomelo Connector.
 
 *Deployment*
-Server OS: Debian 9
+Server OS: Debian 10
 
-WWW: Apache 2.4 as a Proxy
+WWW: Apache 2
 
 Core is deployed on localhost.
 

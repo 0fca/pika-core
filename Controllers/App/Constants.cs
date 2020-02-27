@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace FMS2.Controllers
+namespace PikaCore.Controllers
 {
     public sealed class Constants
     {

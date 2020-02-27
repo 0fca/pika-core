@@ -1,7 +1,4 @@
-﻿using FMS2.Models;
-using FMS2.Models.ManageViewModels;
-using FMS2.Services;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
@@ -13,8 +10,12 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using PikaCore.Models;
+using PikaCore.Models.ManageViewModels;
+using PikaCore.Services;
 
-namespace FMS2.Controllers
+namespace PikaCore.Controllers
 {
     [Authorize]
     [Route("[controller]/[action]")]
@@ -22,11 +23,9 @@ namespace FMS2.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IEmailSender _emailSender;
         private readonly UrlEncoder _urlEncoder;
         private readonly IFileLoggerService _loggerService;
-        private readonly IGenerator _urlGeneratorService;
+        private readonly IUrlGenerator _urlUrlGeneratorService;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -34,24 +33,18 @@ namespace FMS2.Controllers
         public ManageController(
           UserManager<ApplicationUser> userManager,
           SignInManager<ApplicationUser> signInManager,
-          RoleManager<IdentityRole> roleManager,
-          IEmailSender emailSender,
-          ILogger<ManageController> logger,
           UrlEncoder urlEncoder,
           IFileLoggerService loggerService,
-          IGenerator generator)
+          IUrlGenerator urlGenerator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _roleManager = roleManager;
-            _emailSender = emailSender;
             _urlEncoder = urlEncoder;
             _loggerService = loggerService;
-            _urlGeneratorService = generator;
+            _urlUrlGeneratorService = urlGenerator;
         }
 
         [TempData] private string StatusMessage { get; set; }
-        [TempData] private string ReturnMessage { get; set; }
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -125,18 +118,17 @@ namespace FMS2.Controllers
 
             if (usersWithRoles.Count == 0)
             {
-                await _userManager.Users.ToAsyncEnumerable().ForEachAsync(async user =>
+                (await _userManager.Users.ToListAsync()).ForEach(async user =>
                 {
                     var roles = await _userManager.GetRolesAsync(user);
                     usersWithRoles.Add(user, roles);
                 });
             }
 
-            AdminPanelViewModel adminPanelViewModel = new AdminPanelViewModel
+            var adminPanelViewModel = new AdminPanelViewModel
             {
-                LogsListViewModel = logListViewModel
+                LogsListViewModel = logListViewModel, UsersWithRoles = usersWithRoles
             };
-            adminPanelViewModel.UsersWithRoles = usersWithRoles;
             ViewData["returnMessage"] = TempData["returnMessage"];
             return View("/Views/Manage/Admin/AdminUserPanel.cshtml", adminPanelViewModel);
         }
@@ -147,16 +139,16 @@ namespace FMS2.Controllers
         public async Task<IActionResult> GeneratePassword(string id)
         {
             var userModel = await _userManager.FindByIdAsync(id);
-            if ((await _userManager.GetLoginsAsync(userModel)).Count == 0)
-            {
-                var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
-                var guid = Guid.NewGuid().ToString();
-                _urlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
-                var hash = _urlGeneratorService.GenerateId(guid);
-                var result = await _userManager.ResetPasswordAsync(userModel, token, hash);
-                TempData["newPassword"] = hash;
-            }
-            ReturnMessage = "This user is logged in via 3rd party provider, cannot reset password.";
+            if ((await _userManager.GetLoginsAsync(userModel)).Count != 0)
+                return RedirectToAction(nameof(AdminUserPanel));
+            
+            var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
+            var guid = Guid.NewGuid().ToString();
+            _urlUrlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
+            var hash = _urlUrlGeneratorService.GenerateId(guid);
+            await _userManager.ResetPasswordAsync(userModel, token, hash);
+            TempData["newPassword"] = hash;
+
             return RedirectToAction(nameof(AdminUserPanel));
         }
 

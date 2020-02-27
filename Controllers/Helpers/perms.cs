@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace FMS2.Controllers.Helpers
+namespace PikaCore.Controllers.Helpers
 {
     [StructLayout(LayoutKind.Sequential, Size = 512), Serializable]
     public struct Perms

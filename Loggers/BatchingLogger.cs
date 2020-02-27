@@ -1,9 +1,9 @@
-﻿using FMS2.Extensions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Text;
+using PikaCore.Extensions;
 
-namespace FMS2.Loggers
+namespace PikaCore.Loggers
 {
     public class BatchingLogger : ILogger
     {

@@ -1,16 +1,8 @@
-﻿using FMS2.Controllers.Api.Hubs;
-using FMS2.Controllers.Helpers;
-using FMS2.Data;
-using FMS2.Models;
-using FMS2.Models.File;
-using FMS2.Services;
-using FMS2.Extensions;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -24,17 +16,24 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using PikaCore.Controllers.Hubs;
+using PikaCore.Controllers.Helpers;
+using PikaCore.Data;
+using PikaCore.Extensions;
+using PikaCore.Models;
+using PikaCore.Models.File;
+using PikaCore.Services;
 
-namespace FMS2.Controllers.App
+namespace PikaCore.Controllers
 {
     public class StorageController : Controller
     {
         private readonly IFileProvider _fileProvider;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private static readonly FileResultModel Lrmv = new FileResultModel();
-        private readonly IZipper _archiveService;
+        private readonly IArchiveService _archiveService;
         private readonly IFileService _fileService;
-        private readonly IGenerator _generatorService;
+        private readonly IUrlGenerator _urlGeneratorService;
         private readonly IFileLoggerService _loggerService;
         private readonly IConfiguration _configuration;
         private readonly StorageIndexContext _storageIndexContext;
@@ -44,8 +43,7 @@ namespace FMS2.Controllers.App
 
         public StorageController(IFileProvider fileProvider,
         SignInManager<ApplicationUser> signInManager,
-        IZipper archiveService, IFileService fileService,
-        ILogger<StorageController> iLogger, IGenerator iGenerator,
+        IArchiveService archiveService, IFileService fileService, IUrlGenerator iUrlGenerator,
         StorageIndexContext storageIndexContext,
         IFileLoggerService fileLoggerService,
         IHubContext<StatusHub> hubContext,
@@ -55,7 +53,7 @@ namespace FMS2.Controllers.App
             _fileProvider = fileProvider;
             _archiveService = archiveService;
             _fileService = fileService;
-            _generatorService = iGenerator;
+            _urlGeneratorService = iUrlGenerator;
             _storageIndexContext = storageIndexContext;
             _loggerService = fileLoggerService;
             _hubContext = hubContext;
@@ -221,7 +219,7 @@ namespace FMS2.Controllers.App
                         s = new StorageIndexRecord { AbsolutePath = entryName };
                         if (s != null)
                         {
-                            s.Urlhash = _generatorService.GenerateId(s.AbsolutePath);
+                            s.Urlhash = _urlGeneratorService.GenerateId(s.AbsolutePath);
                             var user = await _signInManager.UserManager.GetUserAsync(HttpContext.User);
                             s.UserId = user != null
                                 ? await _signInManager.UserManager.GetEmailAsync(user)
@@ -267,6 +265,7 @@ namespace FMS2.Controllers.App
                         ex.Message);
                     
                     message = ex.Message;
+                    TempData["returnMessage"] = message;
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -288,31 +287,34 @@ namespace FMS2.Controllers.App
 
                     if (s != null)
                     {
-                        var fileBytes = await _fileService.DownloadAsStreamAsync(s.AbsolutePath);
-                        var name = Path.GetFileName(s.AbsolutePath);
-                        if (fileBytes != null)
+                        using (var fileBytes = await _fileService.DownloadAsStreamAsync(s.AbsolutePath))
                         {
-                            if (!s.Expires)
+                            var name = Path.GetFileName(s.AbsolutePath);
+                            if (fileBytes != null)
                             {
-                                _loggerService.LogToFileAsync(LogLevel.Information, 
-                                    HttpContext.Connection.RemoteIpAddress.ToString(), 
-                                    "Successfully returned requested resource" 
-                                    + s.AbsolutePath);
-                                return File(fileBytes, MimeAssistant.GetMimeType(name), name);
+                                if (!s.Expires)
+                                {
+                                    _loggerService.LogToFileAsync(LogLevel.Information,
+                                        HttpContext.Connection.RemoteIpAddress.ToString(),
+                                        "Successfully returned requested resource"
+                                        + s.AbsolutePath);
+                                    return File(fileBytes, MimeAssistant.GetMimeType(name), name);
+                                }
+
+                                if (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now)
+                                {
+                                    _loggerService.LogToFileAsync(LogLevel.Information,
+                                        HttpContext.Connection.RemoteIpAddress.ToString(),
+                                        "Successfully returned requested resource"
+                                        + s.AbsolutePath);
+                                    return File(fileBytes, MimeAssistant.GetMimeType(name), name);
+                                }
+
+                                TempData["returnMessage"] =
+                                    "It seems that this url expired today, you need to generate a new one.";
+
+                                return RedirectToAction(nameof(Index), new {path = _last});
                             }
-
-                            if (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now)
-                            {
-                                _loggerService.LogToFileAsync(LogLevel.Information, 
-                                    HttpContext.Connection.RemoteIpAddress.ToString(), 
-                                    "Successfully returned requested resource" 
-                                    + s.AbsolutePath);
-                                return File(fileBytes, MimeAssistant.GetMimeType(name), name);
-                            }
-
-                            TempData["returnMessage"] = "It seems that this url expired today, you need to generate a new one.";
-
-                            return RedirectToAction(nameof(Index), new { path = _last });
                         }
 
                         _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value, 
@@ -371,6 +373,7 @@ namespace FMS2.Controllers.App
                     _loggerService.LogToFileAsync(LogLevel.Warning, 
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         $"Attempting to return file '{path}' of MIME: {mime} as an asynchronous stream.");
+                    await fs.FlushAsync();
                     return File(fs, mime, name);
                 }
 
@@ -403,14 +406,15 @@ namespace FMS2.Controllers.App
             var thumbFileName = $"{id}.{format}";
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                  thumbFileName
-                                    );
+                                                 );
             var thumbFileStream = await _fileService.DownloadAsStreamAsync(absoluteThumbPath);
+            await thumbFileStream.FlushAsync();
             return File(thumbFileStream, "image/jpeg");
         }
 
         [HttpPost]
         [AllowAnonymous]
-	[DisableFormValueModelBinding]
+	    [DisableFormValueModelBinding]
         [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
@@ -577,6 +581,7 @@ namespace FMS2.Controllers.App
                 try
                 {
                     var dirInfo = await _fileService.Create(returnPath, name);
+                    
                     TempData["returnMessage"] = "Successfully created directory: " + dirInfo.Name;
                     _loggerService.LogToFileAsync(LogLevel.Information,
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
@@ -614,7 +619,7 @@ namespace FMS2.Controllers.App
             {
                 try
                 {
-                    await _fileService.Delete(contents.ToAsyncEnumerable());
+                    await _fileService.Delete(contents.ToList());
 
                     _loggerService.LogToFileAsync(LogLevel.Information, 
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
@@ -644,10 +649,10 @@ namespace FMS2.Controllers.App
         [HttpGet]
         [Authorize(Roles = "Admin, FileManagerUser")]
         [AutoValidateAntiforgeryToken]
-        [Route("/[controller]/[action]/{inname}")]
-        public IActionResult Rename(string inname)
+        [Route("/[controller]/[action]/{n}")]
+        public IActionResult Rename(string n)
         {
-            var name = UnixHelper.MapToPhysical(Constants.FileSystemRoot, GetLastPath() + inname);
+            var name = UnixHelper.MapToPhysical(Constants.FileSystemRoot, GetLastPath() + n);
             ViewData["path"] = name;
             var rfm = new RenameFileModel
             {
@@ -763,24 +768,19 @@ namespace FMS2.Controllers.App
 
             return false;
         }
-
-        private bool ValidateDbServerState()
-        {
-            return (_storageIndexContext.Database.GetDbConnection() != null);
-        }
         #endregion
 
         #region CookierHelperMethods
 
         private void Set(string key, string value, int? expireTime)
         {
-            CookieOptions option = new CookieOptions();
-
-            if (expireTime.HasValue)
-                option.Expires = DateTime.Now.AddMinutes(expireTime.Value);
-            else
-                option.Expires = DateTime.Now.AddMilliseconds(10);
-
+            var option = new CookieOptions
+            {
+                Expires = expireTime.HasValue
+                    ? DateTime.Now.AddMinutes(expireTime.Value)
+                    : DateTime.Now.AddMilliseconds(10)
+            };
+            
             Response.Cookies.Append(key, value, option);
         }
 

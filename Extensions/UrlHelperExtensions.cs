@@ -1,10 +1,9 @@
-using FMS2.Controllers;
+using PikaCore.Controllers;
 
 namespace Microsoft.AspNetCore.Mvc
 {
     public static class UrlHelperExtensions
     {
-
         public static string ResetPasswordCallbackLink(this IUrlHelper urlHelper, string userId, string code, string scheme)
         {
             return urlHelper.Action(

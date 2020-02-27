@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 
-namespace FMS2.Controllers.Helpers
+namespace PikaCore.Controllers.Helpers
 {
     public static class UnixHelper
     {

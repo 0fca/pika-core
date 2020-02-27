@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace FMS2.Models.ManageViewModels
+namespace PikaCore.Models.ManageViewModels
 {
     public class EditUserModel
     {

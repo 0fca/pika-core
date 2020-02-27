@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.ComponentModel.DataAnnotations;
 
-namespace FMS2.Models.ManageViewModels
+namespace PikaCore.Models.ManageViewModels
 {
     public class EnableAuthenticatorViewModel
     {

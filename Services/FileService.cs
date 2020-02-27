@@ -1,17 +1,16 @@
-using FMS2.Controllers;
-using FMS2.Controllers.Helpers;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
+using PikaCore.Controllers;
+using PikaCore.Controllers.Helpers;
 
-namespace FMS2.Services
+namespace PikaCore.Services
 {
     public class FileService : IFileService
     {
@@ -37,7 +36,7 @@ namespace FMS2.Services
             }
             catch (OperationCanceledException e)
             {
-                Debug.WriteLine(e.Message + ": Downloading cancled by user.");
+                _fileLoggerService.LogToFileAsync(LogLevel.Warning, "localhost", e.Message + " : Downloading canceled by the user.");
             }
             finally
             {
@@ -47,11 +46,19 @@ namespace FMS2.Services
 
         public async Task<Stream> DownloadAsStreamAsync(string absolutPath)
         {
+            var path = !string.IsNullOrEmpty(absolutPath) && File.Exists(absolutPath) ? absolutPath : null;
+            if (string.IsNullOrEmpty(path))
+            {
+                return new MemoryStream();
+            }
+
+            var fs = new FileStream(path, FileMode.Open);
             return await Task<Stream>.Factory.StartNew(() =>
             {
-	    	_fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutPath}");
-                return File.Exists(absolutPath) ? System.IO.File.OpenRead(absolutPath) : null;
+                _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutPath}");
+                    return fs;
             }, _tokenSource.Token);
+            
         }
 
         public async Task<DirectoryInfo> Create(string returnPath, string name)
@@ -65,14 +72,15 @@ namespace FMS2.Services
 
         public async Task<byte[]> DownloadAsync(string absolutPath)
         {
-            return await Task<byte[]>.Factory.StartNew(() =>
-            {
-                return File.Exists(absolutPath) ? System.IO.File.ReadAllBytes(absolutPath) : null;
-            }, _tokenSource.Token);
+            return await Task<byte[]>.Factory.StartNew(() => 
+                File.Exists(absolutPath) 
+                    ? File.ReadAllBytes(absolutPath) 
+                    : null, _tokenSource.Token
+                );
         }
 
         public async Task MoveFromTmpAsync(string fileName, string toWhere = null)
-	{
+	    {
             var file = Constants.Tmp + Constants.UploadTmp + Path.DirectorySeparatorChar + fileName;
 
             if (string.IsNullOrEmpty(toWhere))
@@ -84,14 +92,17 @@ namespace FMS2.Services
             {
                 Directory.CreateDirectory(toWhere);
             }
-            var fileStream = new FileStream(file, FileMode.Open);
 
-            var buffer = new byte[fileStream.Length];
-            await fileStream.ReadAsync(buffer);
-            await File.WriteAllBytesAsync(toWhere + fileName, buffer);
-            _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File {fileName} moved from tmp to " + toWhere);
-            fileStream.Flush();
-            fileStream.Close();
+            using (var fileStream = new FileStream(file, FileMode.Open))
+            {
+
+                var buffer = new byte[fileStream.Length];
+                await fileStream.ReadAsync(buffer);
+                await File.WriteAllBytesAsync(toWhere + fileName, buffer);
+                _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost",
+                    $"File {fileName} moved from tmp to " + toWhere);
+                fileStream.Flush();
+            }
         }
 
         public Task Move(string absolutePath, string toWhere)
@@ -122,7 +133,7 @@ namespace FMS2.Services
             return await Task<IEnumerable<string>>.Factory.StartNew(() => TraverseDirectories(hostPath));
         }
 
-        private IEnumerable<string> TraverseDirectories(string rootDirectory)
+        private static IEnumerable<string> TraverseDirectories(string rootDirectory)
         {
             var directories = Enumerable.Empty<string>();
             try
@@ -148,7 +159,7 @@ namespace FMS2.Services
             }
         }
 
-        private IEnumerable<string> TraverseFiles(string rootDirectory, int depth)
+        private static IEnumerable<string> TraverseFiles(string rootDirectory, int depth)
         {
             var files = Enumerable.Empty<string>();
             var directories = Enumerable.Empty<string>();
@@ -169,7 +180,8 @@ namespace FMS2.Services
             if (rootDirectory != null)
                 yield return rootDirectory;
 
-            foreach (var file in files)
+            var enumerable = files.ToList();
+            foreach (var file in enumerable)
             {
                 yield return file;
             }
@@ -179,7 +191,7 @@ namespace FMS2.Services
                 yield return directory;
             }
 
-            var subdirectoryItems = files.SelectMany(TraverseFiles);
+            var subdirectoryItems = enumerable.SelectMany(TraverseFiles);
 
             foreach (var result in subdirectoryItems)
             {
@@ -197,9 +209,9 @@ namespace FMS2.Services
             return resultList;
         }
 
-        public async Task Delete(IAsyncEnumerable<string> fileList)
+        public async Task Delete(List<string> fileList)
         {
-            await fileList.ForEachAsync(item =>
+            await Task.Factory.StartNew(() => fileList.ForEach(item =>
             {
                 if (Directory.Exists(item))
                 {
@@ -207,9 +219,9 @@ namespace FMS2.Services
                 }
                 else
                 {
-                    System.IO.File.Delete(item);
+                    File.Delete(item);
                 }
-            });
+            }));
         }
     }
 }

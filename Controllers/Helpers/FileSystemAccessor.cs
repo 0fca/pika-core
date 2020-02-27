@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace FMS2.Controllers.Helpers
+namespace PikaCore.Controllers.Helpers
 {
     internal static class FileSystemAccessor
     {

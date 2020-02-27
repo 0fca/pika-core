@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System;
 
-namespace FMS2.Views.Manage
+namespace PikaCore.Views.Manage
 {
     public static class ManageNavPages
     {

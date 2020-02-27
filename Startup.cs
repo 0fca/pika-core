@@ -1,35 +1,33 @@
-﻿using FMS2.Controllers;
-using FMS2.Controllers.Api.Hubs;
-using FMS2.Data;
-using FMS2.Models;
-using FMS2.Providers;
-using FMS2.Services;
-using FMS2.Extensions;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using PikaCore.Controllers.Api.Hubs;
+using PikaCore.Controllers.Hubs;
 using PikaCore.Services;
 using PikaCore.Services.Helpers;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using PikaCore.Controllers;
+using PikaCore.Data;
+using PikaCore.Extensions;
+using PikaCore.Models;
+using PikaCore.Providers;
 
-namespace FMS2
+namespace PikaCore
 {
     public class Startup
     {
-        private static readonly string OsName = Controllers.Constants.OsName;
-        public Startup(IConfiguration configuration, IHostingEnvironment env)
+        private static readonly string OsName = Constants.OsName;
+        public Startup(IConfiguration configuration)
         {
 
             Configuration = configuration;
@@ -73,10 +71,10 @@ namespace FMS2
                 });
 
             services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddScoped<IZipper, ArchiveService>();
+            services.AddScoped<IArchiveService, ArchiveService>();
             services.AddSingleton<ImageCache>();
             services.AddTransient<IFileService, FileService>();
-            services.AddTransient<IGenerator, HashGeneratorService>();
+            services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
             services.AddTransient<IStreamingService, StreamingService>();
             services.AddScoped<IMediaService, MediaService>();
             services.AddSingleton<ISchedulerService, SchedulerService>();
@@ -110,13 +108,12 @@ namespace FMS2
 	    
 
     	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
-			        {
-		                builder
-		                .AllowAnyMethod()
-		                .AllowAnyHeader()
-		                .AllowAnyOrigin()
-		                .AllowCredentials();
-	    }));
+            {
+                builder
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowAnyOrigin();
+            }));
 
 	   
             services.AddSignalR();
@@ -137,7 +134,7 @@ namespace FMS2
             Constants.UploadTmp = Configuration.GetSection("Paths")["upload-dir-tmp"];
 
             services.AddMvc()
-	    .AddRazorPagesOptions(options =>
+	        .AddRazorPagesOptions(options =>
             {
             	options.Conventions
                 .AddPageApplicationModelConvention("/StreamedSingleFileUploadPhysical",
@@ -149,7 +146,7 @@ namespace FMS2
                             new DisableFormValueModelBindingAttribute());
                     });
             })
-	    .SetCompatibilityVersion(CompatibilityVersion.Latest);
+	        .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -160,14 +157,13 @@ namespace FMS2
         }
 
         public void Configure(IApplicationBuilder app,
-                              IHostingEnvironment env,
+                              IWebHostEnvironment env,
                               IServiceProvider serviceProvider
                              )
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
             }
             else
             {
@@ -190,23 +186,21 @@ namespace FMS2
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
-	    app.UseCors("CorsPolicy");
-	    //app.UseWebSockets();
-
+	        app.UseCors("CorsPolicy");
             app.UseAuthentication();
-            app.UseSignalR(routes =>
+            app.UseRouting();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapHub<StatusHub>("/hubs/status");
-                routes.MapHub<FileOperationHub>("/hubs/files");
-                routes.MapHub<MediaHub>("/hubs/media");
-            });
-
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=home}/{action=index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+                endpoints.MapHub<StatusHub>("/hubs/status");
+                endpoints.MapHub<FileOperationHub>("/hubs/files");
+                endpoints.MapHub<MediaHub>("/hubs/media");
             });
+            
             CreateRoles(serviceProvider).Wait();
         }
 

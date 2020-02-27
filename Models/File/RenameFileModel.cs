@@ -1,4 +1,4 @@
-namespace FMS2.Models.File
+namespace PikaCore.Models.File
 {
     public class RenameFileModel
     {

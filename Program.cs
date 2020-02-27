@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 
-namespace FMS2
+namespace PikaCore
 {
     public class Program
     {

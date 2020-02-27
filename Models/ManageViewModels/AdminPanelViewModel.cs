@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FMS2.Models.ManageViewModels
+namespace PikaCore.Models.ManageViewModels
 {
     public class AdminPanelViewModel
     {
