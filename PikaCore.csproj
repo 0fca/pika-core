@@ -16,6 +16,7 @@
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <AssemblyName>PikaCore</AssemblyName>
     <FileVersion>2.1.1.0</FileVersion>
+    <PackageVersion>2.1.2</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

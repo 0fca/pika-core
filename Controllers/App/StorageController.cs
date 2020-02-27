@@ -41,7 +41,6 @@ namespace FMS2.Controllers.App
         private string _last = Constants.RootPath;
         private bool _wasArchivingCancelled = true;
         private readonly IHubContext<StatusHub> _hubContext;
-        private readonly IHubContext<FileOperationHub> _fileOperationHub;
 
         public StorageController(IFileProvider fileProvider,
         SignInManager<ApplicationUser> signInManager,
@@ -50,7 +49,6 @@ namespace FMS2.Controllers.App
         StorageIndexContext storageIndexContext,
         IFileLoggerService fileLoggerService,
         IHubContext<StatusHub> hubContext,
-        IHubContext<FileOperationHub> fileOperationHub,
         IConfiguration configuration)
         {
             _signInManager = signInManager;
@@ -61,7 +59,6 @@ namespace FMS2.Controllers.App
             _storageIndexContext = storageIndexContext;
             _loggerService = fileLoggerService;
             _hubContext = hubContext;
-            _fileOperationHub = fileOperationHub;
             _configuration = configuration;
 
             ((ArchiveService)_archiveService).PropertyChanged += PropertyChangedHandler;
