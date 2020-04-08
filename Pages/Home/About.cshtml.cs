@@ -22,6 +22,10 @@ namespace PikaCore.Pages.Home
                     var friendlyName = strArr[0].Split("=")[1];
                     OS = friendlyName.Substring(1, friendlyName.Length - 2);
                 }
+                else 
+                {
+                    OS = PlatformID.Unix;
+                }
                 OS = PlatformID.Unix.ToString();
             }
             else
