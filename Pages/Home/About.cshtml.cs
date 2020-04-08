@@ -24,9 +24,8 @@ namespace PikaCore.Pages.Home
                 }
                 else 
                 {
-                    OS = PlatformID.Unix;
+                    OS = PlatformID.Unix.ToString();
                 }
-                OS = PlatformID.Unix.ToString();
             }
             else
             {
