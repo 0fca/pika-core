@@ -10,11 +10,6 @@ namespace PikaCore.Data
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-        }
-
         public DbSet<StorageIndexRecord> IndexStorage { get; set; }
     }
 }
