@@ -14,8 +14,15 @@ namespace PikaCore.Pages.Home
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                var longString = System.Runtime.InteropServices.RuntimeInformation.OSDescription.Split(" ");
-                OS = $"GNU/Linux {longString[4]} {longString[0]} {longString[1]}";
+                var longString = System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+                if (longString.Contains("Linux")
+                && System.IO.File.Exists("/etc/os-release"))
+                {
+                    var strArr = System.IO.File.ReadAllLines("/etc/os-release");
+                    var friendlyName = strArr[0].Split("=")[1];
+                    OS = friendlyName.Substring(1, friendlyName.Length - 2);
+                }
+                OS = longString;
             }
             else
             {

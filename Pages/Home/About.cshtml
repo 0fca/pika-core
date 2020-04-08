@@ -14,8 +14,8 @@
 	@{
 		var dev = "";
 	}
-	<environment include="Development">
-		@{dev = "BETA";}
+	    <environment include="Development">
+		    @{dev = "BETA";}
         </environment>
         <p class="section_paragraph">
             This is Hannah(Pika Core), version: @Model.Version @dev.
@@ -27,7 +27,7 @@
             <ul class="content-list list-unstyled">
                 <li>This software is licensed under <a class="teal-text" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPL v.3.0</a>. </li>
                 <li>System is actually running on <a class="teal-text" href="https://www.debian.org/">@Model.OS</a></li>
-                <li>System uses the following ASP.NET Core version <a class="teal-text" href="https://www.debian.org/">@Model.FrameworkVer</a></li>
+                <li>System uses the following ASP.NET Core version <a class="teal-text" href="https://dotnet.microsoft.com/download/dotnet-core">@Model.FrameworkVer</a></li>
                 <li>DNS service provided by <a class="teal-text" href="https://freedns.afraid.org/">FreeDNS</a>.</li>
                 <li>Development branch of project: <a class="teal-text" href="https://github.com/Obsidiam/fms/tree/development">here</a></li>
             </ul>
