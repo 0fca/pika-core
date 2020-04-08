@@ -165,31 +165,6 @@ namespace PikaCore.Controllers
             return View(Lrmv);
         }
 
-        private IDirectoryContents GetContents(string path)
-        {
-            _last = GetLastPath();
-
-            if (Path.IsPathRooted(path))
-            {
-                _last = path;
-                HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
-                return _fileProvider.GetDirectoryContents(_last);
-            }
-
-            if (path.Equals("/"))
-            {
-                _last = Constants.RootPath;
-                HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
-                return _fileProvider.GetDirectoryContents(_last);
-            }
-            _last = !_last.Equals("/") ? string.Concat(_last, "/", path) : string.Concat(_last, path);
-
-            HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
-
-            return _fileProvider.GetDirectoryContents(_last);
-        }
-
-
         [HttpGet]
         [AllowAnonymous]
         [Route("/[controller]/[action]/{name?}")]
@@ -200,7 +175,7 @@ namespace PikaCore.Controllers
 
             var message = "No proper connection to database server.";
 
-            if (ValidateDbHostState() && !string.IsNullOrEmpty(entryName))
+            if (!string.IsNullOrEmpty(entryName))
             {
                 try
                 {
@@ -277,7 +252,7 @@ namespace PikaCore.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> PermanentDownload(string id)
         {
-            if (ValidateDbHostState() && !string.IsNullOrEmpty(id))
+            if (!string.IsNullOrEmpty(id))
             {
                 StorageIndexRecord s = null;
                 try
@@ -286,40 +261,28 @@ namespace PikaCore.Controllers
 
                     if (s != null)
                     {
-                        using (var fileBytes = await _fileService.DownloadAsStreamAsync(s.AbsolutePath))
+                        if (!s.Expires || (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now))
                         {
-                            var name = Path.GetFileName(s.AbsolutePath);
-                            if (fileBytes != null)
-                            {
-                                if (!s.Expires)
+                                var fileBytes = await _fileService.DownloadAsStreamAsync(s.AbsolutePath);
+                                var name = Path.GetFileName(s.AbsolutePath);
+                                if (fileBytes != null)
                                 {
+
                                     _loggerService.LogToFileAsync(LogLevel.Information,
                                         HttpContext.Connection.RemoteIpAddress.ToString(),
                                         "Successfully returned requested resource"
                                         + s.AbsolutePath);
-                                    return File(fileBytes, MimeAssistant.GetMimeType(name), name);
+                                    return File(fileBytes, MimeAssistant.GetMimeType(name), name, true);
                                 }
-
-                                if (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now)
-                                {
-                                    _loggerService.LogToFileAsync(LogLevel.Information,
-                                        HttpContext.Connection.RemoteIpAddress.ToString(),
-                                        "Successfully returned requested resource"
-                                        + s.AbsolutePath);
-                                    return File(fileBytes, MimeAssistant.GetMimeType(name), name);
-                                }
-
-                                TempData["returnMessage"] =
-                                    "It seems that this url expired today, you need to generate a new one.";
-
-                                return RedirectToAction(nameof(Index), new {path = _last});
-                            }
+                            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value,
+                                "Couldn't read requested resource: " + s.AbsolutePath);
+                            TempData["returnMessage"] = "Couldn't read requested resource: " + s.Urlid;
+                            return RedirectToAction(nameof(Index));
                         }
-
-                        _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value, 
-                            "Couldn't read requested resource: " + s.AbsolutePath);
-                        TempData["returnMessage"] = "Couldn't read requested resource: " + s.Urlid;
-                        return RedirectToAction(nameof(Index));
+                        TempData["returnMessage"] =
+                                        "It seems that this url expired today, you need to generate a new one.";
+                        
+                        return RedirectToAction(nameof(Index), new { path = _last });
                     }
                     TempData["returnMessage"] = "It seems that given token doesn't exist in the database.";
                     return RedirectToAction(nameof(Index), new { path = _last });
@@ -333,12 +296,11 @@ namespace PikaCore.Controllers
                     _loggerService.LogToFileAsync(LogLevel.Error, 
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         ex.Message);
-                    
                     return RedirectToAction(nameof(Index), new { path = _last });
                 }
             }
             TempData["returnMessage"] = "No id given or database is down.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { path = _last });
         }
 
         [HttpGet]
@@ -364,15 +326,16 @@ namespace PikaCore.Controllers
 
                 if (System.IO.File.Exists(path))
 		        {
-		            var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None, 8192, true);
-                    var mime = MimeAssistant.GetMimeType(path);
-               
-                    await _hubContext.Clients.All.SendAsync("DownloadStarted");
-                    _loggerService.LogToFileAsync(LogLevel.Warning, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        $"Attempting to return file '{path}' of MIME: {mime} as an asynchronous stream.");
-                    await fs.FlushAsync();
-                    return File(fs, mime, name);
+                    using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None, 8192, true))
+                    {
+                            var mime = MimeAssistant.GetMimeType(path);
+
+                            await _hubContext.Clients.All.SendAsync("DownloadStarted");
+                            _loggerService.LogToFileAsync(LogLevel.Warning,
+                                HttpContext.Connection.RemoteIpAddress.ToString(),
+                                $"Attempting to return file '{path}' of MIME: {mime} as an asynchronous stream.");
+                            return File(fs, mime, name);
+                        }
                 }
 
                 if (Directory.Exists(path))
@@ -405,9 +368,10 @@ namespace PikaCore.Controllers
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                  thumbFileName
                                                  );
-            var thumbFileStream = await _fileService.DownloadAsStreamAsync(absoluteThumbPath);
-            await thumbFileStream.FlushAsync();
-            return File(thumbFileStream, "image/jpeg");
+            using (var thumbFileStream = await _fileService.DownloadAsStreamAsync(absoluteThumbPath))
+            {
+                return File(thumbFileStream, "image/jpeg");
+            }
         }
 
         [HttpPost]
@@ -719,6 +683,31 @@ namespace PikaCore.Controllers
         }
 
         #region HelperMethods
+
+        private IDirectoryContents GetContents(string path)
+        {
+            _last = GetLastPath();
+
+            if (Path.IsPathRooted(path))
+            {
+                _last = path;
+                HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
+                return _fileProvider.GetDirectoryContents(_last);
+            }
+
+            if (path.Equals("/"))
+            {
+                _last = Constants.RootPath;
+                HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
+                return _fileProvider.GetDirectoryContents(_last);
+            }
+            _last = !_last.Equals("/") ? string.Concat(_last, "/", path) : string.Concat(_last, path);
+
+            HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
+
+            return _fileProvider.GetDirectoryContents(_last);
+        }
+
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
             _wasArchivingCancelled = false;
@@ -744,27 +733,6 @@ namespace PikaCore.Controllers
             if (outPath != null && !outPath.EndsWith("/")) outPath += "/";
 
             return outPath ?? "/";
-        }
-
-        private bool ValidateDbHostState()
-        {
-            Ping pinger = null;
-            try
-            {
-                pinger = new Ping();
-                var reply = pinger.Send(_configuration.GetSection("Network")["DbServer"]);
-                if (reply != null) return reply.Status == IPStatus.Success;
-            }
-            catch (PingException)
-            {
-                return false;
-            }
-            finally
-            {
-                pinger?.Dispose();
-            }
-
-            return false;
         }
         #endregion
 

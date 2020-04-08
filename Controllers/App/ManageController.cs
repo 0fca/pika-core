@@ -127,7 +127,8 @@ namespace PikaCore.Controllers
 
             var adminPanelViewModel = new AdminPanelViewModel
             {
-                LogsListViewModel = logListViewModel, UsersWithRoles = usersWithRoles
+                LogsListViewModel = logListViewModel, 
+                UsersWithRoles = usersWithRoles
             };
             ViewData["returnMessage"] = TempData["returnMessage"];
             return View("/Views/Manage/Admin/AdminUserPanel.cshtml", adminPanelViewModel);

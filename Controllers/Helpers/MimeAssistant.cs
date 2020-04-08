@@ -214,7 +214,7 @@ namespace PikaCore.Controllers.Helpers
                 }
                 else
                 {
-                    return "error";
+                    return "unknown/unknown";
                 }
             }
             catch(Exception e) 
@@ -231,7 +231,7 @@ namespace PikaCore.Controllers.Helpers
                 return "exclamation";
             }
 
-            if (mime.Equals("error")) 
+            if (mime.Equals("unknown/unknown")) 
             {
                 return "times";
             }
