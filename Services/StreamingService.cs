@@ -12,7 +12,7 @@ namespace PikaCore.Services
             _fileDownloader = fileDownloader;
         }
 
-        public async Task<Stream> GetVideoByPath(string path)
+        public Stream GetVideoByPath(string path)
         {
             var extension = Path.GetExtension(path);
             Stream outStream = null;
@@ -21,7 +21,7 @@ namespace PikaCore.Services
                 case ".mp4":
                 case ".mp3":
                 case ".m4a":
-                    outStream = await _fileDownloader.DownloadAsStreamAsync(path);
+                    outStream = _fileDownloader.AsStreamAsync(path);
                     break;
             }
             return outStream;

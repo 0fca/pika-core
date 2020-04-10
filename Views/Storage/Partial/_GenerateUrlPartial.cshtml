@@ -1,7 +1,7 @@
 @{
     var hash = TempData["urlhash"];
     var port = TempData["port"];
-    var url = TempData["protocol"]+"://"+TempData["host"] + "/Storage/PermanentDownload?id=" + hash;
+    var url = TempData["protocol"]+"://"+TempData["host"] + "/Storage/PermanentDownload/" + hash;
 }
 <span id="urlDiv" class="col s2">
     URL generated successfully!

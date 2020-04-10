@@ -12,8 +12,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using PikaCore.Controllers.Hubs;
@@ -22,6 +20,7 @@ using PikaCore.Data;
 using PikaCore.Extensions;
 using PikaCore.Models;
 using PikaCore.Models.File;
+using PikaCore.Security;
 using PikaCore.Services;
 
 namespace PikaCore.Controllers
@@ -30,16 +29,16 @@ namespace PikaCore.Controllers
     {
         private readonly IFileProvider _fileProvider;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private static readonly FileResultModel Lrmv = new FileResultModel();
         private readonly IArchiveService _archiveService;
         private readonly IFileService _fileService;
         private readonly IUrlGenerator _urlGeneratorService;
         private readonly IFileLoggerService _loggerService;
         private readonly IConfiguration _configuration;
         private readonly StorageIndexContext _storageIndexContext;
-        private string _last = Constants.RootPath;
+        //private string _last = Constants.RootPath;
         private bool _wasArchivingCancelled = true;
         private readonly IHubContext<StatusHub> _hubContext;
+        private readonly IdDataProtection _idDataProtection;
 
         public StorageController(IFileProvider fileProvider,
         SignInManager<ApplicationUser> signInManager,
@@ -47,7 +46,8 @@ namespace PikaCore.Controllers
         StorageIndexContext storageIndexContext,
         IFileLoggerService fileLoggerService,
         IHubContext<StatusHub> hubContext,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IdDataProtection idDataProtection)
         {
             _signInManager = signInManager;
             _fileProvider = fileProvider;
@@ -58,111 +58,85 @@ namespace PikaCore.Controllers
             _loggerService = fileLoggerService;
             _hubContext = hubContext;
             _configuration = configuration;
-
+            _idDataProtection = idDataProtection;
             ((ArchiveService)_archiveService).PropertyChanged += PropertyChangedHandler;
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string path, int offset = 0, int count = 50)
+        public async Task<IActionResult> Browse(string path, int offset = 0, int count = 50)
         {
-
+            
             if (string.IsNullOrEmpty(path))
             {
-                path = Constants.RootPath;
+                path = Path.DirectorySeparatorChar.ToString();
             }
             var osUser = _configuration.GetSection("OsUser")["OsUsername"];
+            var contents = GetContents(path);
 
-            var tmp = GetContents(path);
-            if (tmp.Exists)
+            ViewData["path"] = path;
+            ViewData["returnUrl"] =  UnixHelper.GetParent(path);
+
+            if (null == contents)
+                return RedirectToAction("Error", "Home",
+                    new ErrorViewModel
+                    {
+                        ErrorCode = -1,
+                        Message = "There was an error while reading directory content.",
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+                    });
+            var lrmv = new FileResultViewModel();
+            if (contents.Exists)
             {
-                
-                if (HttpContext.User.IsInRole("Admin")
-                 || UnixHelper.HasAccess(osUser, 
-                     UnixHelper.MapToPhysical(Constants.FileSystemRoot, 
-                         _last)))
+                try
                 {
-
-                    Lrmv.Contents = await _fileService.SortContents(tmp);
-                    if (!HttpContext.User.IsInRole("Admin"))
-                    {
-                        if (Environment.OSVersion.Platform == PlatformID.Unix)
-                        {
-                            Lrmv.Contents.RemoveAll(entry => 
-                                !UnixHelper.HasAccess(osUser, entry.PhysicalPath));
-                        }
-                    }
-                    
-                    if (_fileProvider.GetFileInfo(path).Exists)
-                    {
-                        return RedirectToAction(nameof(Download), new { @id = _fileProvider.GetFileInfo(path).Name });
-                    }
-
-                    if (null == Lrmv.Contents)
-                        return RedirectToAction("Error", "Home",
-                            new ErrorViewModel
-                            {
-                                ErrorCode = -1,
-                                Message = "There was an error while reading directory content.",
-                                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
-                            });
-
-                    var pageCount = Lrmv.Contents.Count / count;
-
-                    SetPagingParams(offset, count, pageCount);
-
-                    Set("Offset", offset.ToString(), 3600);
-                    Set("Count", count.ToString(), 3600);
-                    Set("PageCount", pageCount.ToString(), 3600);
-
-                    if (Lrmv.Contents.Count > count)
-                    {
-                        Lrmv.Contents = Lrmv.Contents.GetRange(offset, count);
-                    }
-
-                    _loggerService.LogToFileAsync(LogLevel.Information, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        "Got contents for " + _last);
-                    
-                    return RedirectToAction(nameof(Browse));
+                    UnixHelper.HasAccess(osUser, path);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _loggerService.LogToFileAsync(LogLevel.Debug, "localhost", ex.Message);
                 }
 
-                TempData["returnMessage"] = "Access is forbidden to this application sector.";
-                return RedirectToAction("Index", "Home");
+                lrmv.Contents = contents;
+                lrmv.ContentsList = contents.ToList();
+
+                await lrmv.SortContents();
+                var fileInfosList = lrmv.ContentsList;
+
+                var pageCount = fileInfosList.Count / count;
+
+                SetPagingParams(offset, count, pageCount);
+
+                Set("Offset", offset.ToString(), 3600);
+                Set("Count", count.ToString(), 3600);
+                Set("PageCount", pageCount.ToString(), 3600);
+
+                if (!HttpContext.User.IsInRole("Admin"))
+                {
+                    try
+                    {
+                        lrmv.ApplyAcl(osUser);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        _loggerService.LogToFileAsync(LogLevel.Debug, "localhost", ex.Message);
+                    }
+                }
+
+                if (fileInfosList.Count > count)
+                {
+                    lrmv.ApplyPaging(offset, count);
+                }
+
+                if (_fileProvider.GetFileInfo(path).Exists)
+                {
+                    return RedirectToAction(nameof(Download), new { @id = _fileProvider.GetFileInfo(path).Name });
+                }
+
+                return View(lrmv);
             }
-            _loggerService.LogToFileAsync(LogLevel.Information, 
-                HttpContext.Connection.RemoteIpAddress.ToString(), 
-                _last + " does not exist on the filesystem.");
-            
+
             TempData["returnMessage"] = "The resource doesn't exist on the filesystem.";
-            return RedirectToAction(nameof(Browse));
-        }
-
-        [AllowAnonymous]
-        public IActionResult Browse()
-        {
-            try
-            {
-                var offset = Get("Offset");
-                var count = Get("Count");
-                var pageCount = Get("PageCount");
-
-                if (!string.IsNullOrEmpty(offset) 
-                    && !string.IsNullOrEmpty(count)
-                    && !string.IsNullOrEmpty(pageCount))
-                {
-                    SetPagingParams(int.Parse(offset), int.Parse(count), int.Parse(pageCount));
-                }
-            }
-            catch (Exception e)
-            {
-                _loggerService.LogToFileAsync(LogLevel.Warning, "localhost", e.Message);
-                return LocalRedirect("/Storage/Index");
-            }
-            TempData["showDownloadPartial"] = true;
-            if (_last == null) return View(Lrmv);
-            ViewData["returnUrl"] = UnixHelper.GetParent(GetLastPath());
-            ViewData["path"] = GetLastPath();
-            return View(Lrmv);
+            return View(lrmv);
         }
 
         [HttpGet]
@@ -170,39 +144,29 @@ namespace PikaCore.Controllers
         [Route("/[controller]/[action]/{name?}")]
         public async Task<IActionResult> GenerateUrl(string name, string returnUrl)
         {
-            var systemPart = GetLastPath().Equals("/") ? GetLastPath() + name : (GetLastPath() + Path.DirectorySeparatorChar + name);
-            var entryName = UnixHelper.MapToPhysical(Constants.FileSystemRoot, systemPart);
+            var entryName = _idDataProtection.Decode(name);
 
-            var message = "No proper connection to database server.";
+            var message = "Couldn't generate token for that resource.";
 
             if (!string.IsNullOrEmpty(entryName))
             {
+                TempData["showGenerateUrlPartial"] = false;
                 try
                 {
-                    StorageIndexRecord s = null;
-                    _storageIndexContext.IndexStorage.ToList().ForEach(record =>
-                    {
-                        if (record.AbsolutePath.Equals(entryName))
-                        {
-                            s = record;
-                        }
-                    });
+                    var s = _storageIndexContext.IndexStorage.ToList().Find(record => record.AbsolutePath.Equals(entryName));
 
                     if (s == null)
                     {
                         s = new StorageIndexRecord { AbsolutePath = entryName };
-                        if (s != null)
-                        {
-                            s.Urlhash = _urlGeneratorService.GenerateId(s.AbsolutePath);
-                            var user = await _signInManager.UserManager.GetUserAsync(HttpContext.User);
-                            s.UserId = user != null
+                        s.Urlhash = _urlGeneratorService.GenerateId(s.AbsolutePath);
+                        var user = await _signInManager.UserManager.GetUserAsync(HttpContext.User);
+                        s.UserId = user != null
                                 ? await _signInManager.UserManager.GetEmailAsync(user)
                                 : HttpContext.Connection.RemoteIpAddress.ToString();
-                            s.Expires = true;
-                            s.ExpireDate = ComputeDateTime();
-                            _storageIndexContext.Add(s);
-                        }
-
+                        s.Expires = true;
+                        s.ExpireDate = ComputeDateTime();
+                        _storageIndexContext.Add(s);
+                        
                         await _storageIndexContext.SaveChangesAsync();
                     }
                     else
@@ -223,34 +187,34 @@ namespace PikaCore.Controllers
                         }
                     }
 
-                    if (s != null) TempData["urlhash"] = s.Urlhash;
-                    TempData["url_name"] = name;
+                    TempData["urlhash"] = s.Urlhash;
+                    TempData["showGenerateUrlPartial"] = true;
                     var port = HttpContext.Request.Host.Port;
                     TempData["host"] = HttpContext.Request.Host.Host + 
                                        (port != null ? ":" + HttpContext.Request.Host.Port : "");
                     TempData["protocol"] = "https";
-                    ViewData["returnUrl"] = returnUrl;
-                    return RedirectToAction(nameof(Index), new { @path = GetLastPath() });
+                    TempData["returnUrl"] = returnUrl;
+                    return RedirectToAction(nameof(Browse), new { @path = returnUrl });
                 }
                 catch (InvalidOperationException ex)
                 {
                     _loggerService.LogToFileAsync(LogLevel.Error, 
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         ex.Message);
-                    
                     message = ex.Message;
                     TempData["returnMessage"] = message;
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Browse), new { @path = returnUrl });
                 }
             }
 
             TempData["returnMessage"] = message;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Browse), new { @path = returnUrl });
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult> PermanentDownload(string id)
+        [Route("/[controller]/[action]/{id?}")]
+        public ActionResult PermanentDownload(string id)
         {
             if (!string.IsNullOrEmpty(id))
             {
@@ -261,9 +225,10 @@ namespace PikaCore.Controllers
 
                     if (s != null)
                     {
+                        var returnPath = _fileService.RetrieveSystemPathFromAbsolute(s.AbsolutePath);
                         if (!s.Expires || (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now))
                         {
-                                var fileBytes = await _fileService.DownloadAsStreamAsync(s.AbsolutePath);
+                                var fileBytes = _fileService.AsStreamAsync(s.AbsolutePath);
                                 var name = Path.GetFileName(s.AbsolutePath);
                                 if (fileBytes != null)
                                 {
@@ -274,18 +239,18 @@ namespace PikaCore.Controllers
                                         + s.AbsolutePath);
                                     return File(fileBytes, MimeAssistant.GetMimeType(name), name, true);
                                 }
-                            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value,
-                                "Couldn't read requested resource: " + s.AbsolutePath);
-                            TempData["returnMessage"] = "Couldn't read requested resource: " + s.Urlid;
-                            return RedirectToAction(nameof(Index));
+                                _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value,
+                                    "Couldn't read requested resource: " + s.AbsolutePath);
+                                TempData["returnMessage"] = "Couldn't read requested resource: " + s.Urlid;
+                                return RedirectToAction(nameof(Browse));
                         }
                         TempData["returnMessage"] =
                                         "It seems that this url expired today, you need to generate a new one.";
                         
-                        return RedirectToAction(nameof(Index), new { path = _last });
+                        return RedirectToAction(nameof(Browse), new { path = returnPath });
                     }
                     TempData["returnMessage"] = "It seems that given token doesn't exist in the database.";
-                    return RedirectToAction(nameof(Index), new { path = _last });
+                    return RedirectToAction(nameof(Browse));
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -296,79 +261,73 @@ namespace PikaCore.Controllers
                     _loggerService.LogToFileAsync(LogLevel.Error, 
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         ex.Message);
-                    return RedirectToAction(nameof(Index), new { path = _last });
+                    return RedirectToAction(nameof(Browse));
                 }
             }
             TempData["returnMessage"] = "No id given or database is down.";
-            return RedirectToAction(nameof(Index), new { path = _last });
+            return RedirectToAction(nameof(Browse));
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult> Download(string id, bool z = false)
+        public ActionResult Download(string id,  string returnUrl, bool z = false)
         {
-            var name = id;
-	    try{
-            if (!string.IsNullOrEmpty(name))
-            {
-                var systemsAbsolute = GetLastPath();
-                var fileInfo = _fileProvider.GetFileInfo(string.Concat(systemsAbsolute, "/", name));
-                var path = fileInfo.PhysicalPath;
-
-                if (!fileInfo.Exists)
+            id = _idDataProtection.Decode(id);
+            try{
+                if (!string.IsNullOrEmpty(id))
                 {
-                    ViewData["returnMessage"] = "File doesn't exist on server's filesystem.";
-                    if (z)
-                        path = string.Concat(Constants.Tmp, name);
-                    else
-                        return RedirectToAction(nameof(Index), new { @path = GetLastPath() });
-                }
 
-                if (System.IO.File.Exists(path))
-		        {
-                    using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None, 8192, true))
+                    var fileInfo = _fileService.RetrieveFileInfoFromAbsolutePath(id);
+                    var path = fileInfo.PhysicalPath;
+
+                    if (!fileInfo.Exists)
                     {
-                            var mime = MimeAssistant.GetMimeType(path);
+                        TempData["returnMessage"] = "File doesn't exist on server's filesystem.";
+                        if (z)
+                            path = string.Concat(Constants.Tmp, id);
+                        else
+                            return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+                    }
 
-                            await _hubContext.Clients.All.SendAsync("DownloadStarted");
-                            _loggerService.LogToFileAsync(LogLevel.Warning,
-                                HttpContext.Connection.RemoteIpAddress.ToString(),
-                                $"Attempting to return file '{path}' of MIME: {mime} as an asynchronous stream.");
-                            return File(fs, mime, name);
-                        }
+                    if (System.IO.File.Exists(path))
+                    {
+                        var fs =  _fileService.AsStreamAsync(path);
+                        var mime = MimeAssistant.GetMimeType(path);
+                        return File(fs, mime, fileInfo.Name);
+
+                    }
+
+                    if (Directory.Exists(path))
+                    {
+                        TempData["returnMessage"] = "This is a folder, cannot download it directly.";
+                        return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+                    }
+
+                    TempData["returnMessage"] = "The path " + path + " does not exist on server's filesystem.";
+                    return RedirectToAction(nameof(Browse), new { @path = returnUrl });
                 }
-
-                if (Directory.Exists(path))
-                {
-                    TempData["returnMessage"] = "This is a folder, cannot download it directly.";
-                    return RedirectToAction(nameof(Index), new { @path = GetLastPath() });
-                }
-
-                TempData["returnMessage"] = "The path " + path + " does not exist on server's filesystem.";
-                return RedirectToAction(nameof(Index));
+            }catch(Exception e){
+                _loggerService.LogToFileAsync(LogLevel.Warning, "localhost", e.Message);
             }
-	    }catch(Exception e){
-		    _loggerService.LogToFileAsync(LogLevel.Warning, "localhost", e.Message);
-	    }
 		
             _loggerService.LogToFileAsync(LogLevel.Error, 
                 HttpContext.Connection.RemoteIpAddress.ToString(), 
-                "Couldn't read resuested resource: " + name);
-            TempData["returnMessage"] = "Couldn't read requested resource: " + name;
-            return RedirectToAction(nameof(Index));
+                "Couldn't read requested resource: " + id);
+            TempData["returnMessage"] = "Couldn't read requested resource.";
+            return RedirectToAction(nameof(Browse), new { @path = returnUrl });
 
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Thumb(string id)
+        public IActionResult Thumb(string id)
         {
             var format = _configuration.GetSection("Images")["Format"].ToLower();
             var thumbFileName = $"{id}.{format}";
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                  thumbFileName
                                                  );
-            using (var thumbFileStream = await _fileService.DownloadAsStreamAsync(absoluteThumbPath))
+            using (var thumbFileStream = _fileService.AsStreamAsync(absoluteThumbPath))
             {
                 return File(thumbFileStream, "image/jpeg");
             }
@@ -378,7 +337,7 @@ namespace PikaCore.Controllers
         [AllowAnonymous]
 	    [DisableFormValueModelBinding]
         [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> Upload(List<IFormFile> files)
+        public async Task<IActionResult> Upload(List<IFormFile> files, string returnUrl)
         {
             files.RemoveAll(element => element.Length > Constants.MaxUploadSize);
             var size = files.Sum(f => f.Length);
@@ -484,18 +443,22 @@ namespace PikaCore.Controllers
         // read the headers for the next section.
         	section = await reader.ReadNextSectionAsync();
     		}*/
-            return RedirectToAction(nameof(Index), new { @path = GetLastPath() });
+            return RedirectToAction(nameof(Browse), new { @path = returnUrl });
         }
 
+        /**
+         * <remarks>
+         * Deprecated
+         * </remarks>
+         */
         [HttpGet]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin, FileManagerUser")]
         public async Task<IActionResult> Archive(string id)
         {
-            var systemsAbsolute = GetLastPath();
-            var output = string.Concat(Constants.Tmp, id, ".zip");
+            var output = string.Concat(Constants.Tmp, Path.GetDirectoryName(id), ".zip");
 
-            var path = _fileProvider.GetFileInfo(string.Concat(systemsAbsolute, "/", id)).PhysicalPath;
+            var path = _fileProvider.GetFileInfo(id).PhysicalPath;
 
             if (!((ArchiveService)_archiveService).WasStartedAlready())
             {
@@ -517,110 +480,109 @@ namespace PikaCore.Controllers
                             });
                     }
                     TempData["returnMessage"] = "Archiving was cancelled by user.";
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Browse));
 
                 }
 
                 TempData["returnMessage"] = "Something unexpected happened.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Browse));
             }
 
             TempData["returnMessage"] = "All signs on the Earth and on the sky say that you have already ordered Pika Cloud to zip something.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Browse));
         }
 
 
         [HttpPost]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin, FileManagerUser")]
-        [Route("/[controller]/[action]/{name?}")]
-        public async Task<IActionResult> Create(string name)
+        public async Task<IActionResult> Create(string name, string returnUrl)
         {
             var pattern = new Regex(@"\W|_");
-            var returnPath = GetLastPath();
+
             if (!pattern.Match(name).Success)
             {
                 try
                 {
-                    var dirInfo = await _fileService.Create(returnPath, name);
+                    var dirInfo = await _fileService.Create(_fileService.RetrieveAbsoluteFromSystemPath(name));
                     
                     TempData["returnMessage"] = "Successfully created directory: " + dirInfo.Name;
                     _loggerService.LogToFileAsync(LogLevel.Information,
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         "Created directory: " 
                         + dirInfo.FullName);
-                    return RedirectToAction(nameof(Index), new { path = Path.Combine(returnPath, name) });
+                    return RedirectToAction(nameof(Browse), new { path = returnUrl });
                 }
                 catch (Exception e)
                 {
                     _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(),
                         "Couldn't create directory because of " + e.Message);
                     TempData["returnMessage"] = "Error: Couldn't create directory.";
-                    return RedirectToAction(nameof(Index), new { path = returnPath });
+                    return RedirectToAction(nameof(Browse), new { path = returnUrl });
                 }
             }
 
             TempData["returnMessage"] = "You cannot use non-alphabetic characters in directory names.";
-            return RedirectToAction(nameof(Index), new { path = returnPath });
+            return RedirectToAction(nameof(Browse), new { path = returnUrl });
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public IActionResult Delete()
+        public IActionResult Delete(string currentPath)
         {
-            return View(Lrmv);
+
+            var contentsList = this.GetContents(currentPath).ToList();
+            var toBeDeletedItemsModel = new DeleteResourcesViewModel();
+            toBeDeletedItemsModel.FromFileInfoList(contentsList);
+
+            return View(toBeDeletedItemsModel);
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmation(FileResultModel fileResultModel)
+        public async Task<IActionResult> DeleteConfirmation(DeleteResourcesViewModel deleteResourcesViewModel)
         {
-            var contents = fileResultModel.ToBeDeleted;
-            var returnPath = Path.GetDirectoryName(fileResultModel.Contents.ElementAt(0).PhysicalPath);
+            var contents = deleteResourcesViewModel.ToBeDeletedItems;
+            var returnPath = _fileService.RetrieveSystemPathFromAbsolute(
+                Directory.GetParent(deleteResourcesViewModel.ToBeDeletedItems[0]).FullName);
             if (contents.Count > 0)
             {
                 try
                 {
-                    await _fileService.Delete(contents.ToList());
+                    await _fileService.Delete(contents);
 
                     _loggerService.LogToFileAsync(LogLevel.Information, 
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         "Successfully deleted elements.");
                     TempData["returnMessage"] = "Successfully deleted elements.";
-                    return RedirectToAction(nameof(Index), new { path = returnPath });
+                    return RedirectToAction(nameof(Browse), new { path = returnPath });
                 }
                 catch (Exception e)
-                {
-                    _loggerService.LogToFileAsync(LogLevel.Error, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        "Couldn't delete resource because of " + e.Message);
+                { 
                     TempData["returnMessage"] = "Error: Couldn't delete resource.";
-                    return RedirectToAction(nameof(Index), new { path =  returnPath});
+                    return RedirectToAction(nameof(Browse), new { path =  returnPath});
                 }
             }
             else
             {
-                _loggerService.LogToFileAsync(LogLevel.Error, 
-                    HttpContext.Connection.RemoteIpAddress.ToString(), 
-                    "Cannot stat.");
                 TempData["returnMessage"] = "Error: Nothing to be deleted.";
-                return RedirectToAction(nameof(Index), new { path = returnPath });
+                return RedirectToAction(nameof(Browse), new { path = returnPath });
             }
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin, FileManagerUser")]
         [AutoValidateAntiforgeryToken]
-        [Route("/[controller]/[action]/{n}")]
         public IActionResult Rename(string n)
         {
-            var name = UnixHelper.MapToPhysical(Constants.FileSystemRoot, GetLastPath() + n);
+            var name = _fileService.RetrieveAbsoluteFromSystemPath(n);
             ViewData["path"] = name;
             var rfm = new RenameFileModel
             {
                 IsDirectory = IsDirectory(name),
-                OldName = IsDirectory(name) ? Path.GetDirectoryName(name + "/") : Path.GetFullPath(name),
-                AbsolutePath = name
+                OldName = name,
+                AbsoluteParentPath = Directory.GetParent(name).FullName,
+                ReturnUrl = n
             };
             _loggerService.LogToFileAsync(LogLevel.Error, 
                 HttpContext.Connection.RemoteIpAddress.ToString(), 
@@ -636,31 +598,19 @@ namespace PikaCore.Controllers
         {
             if (!string.IsNullOrEmpty(rfm.NewName))
             {
-                if (rfm.IsDirectory)
+                var isRenamed = _fileService.Move(Path.Combine(rfm.AbsoluteParentPath, rfm.OldName), Path.Combine(rfm.AbsoluteParentPath, rfm.NewName));
+                if (!isRenamed)
                 {
-                    Directory.Move(rfm.AbsolutePath, Directory.GetParent(rfm.AbsolutePath) + "/" + rfm.NewName);
-                    _loggerService.LogToFileAsync(LogLevel.Information, 
-                        HttpContext.Connection.RemoteIpAddress.ToString(), 
-                        "Successfully renamed directory " 
-                        + rfm.OldName 
-                        + " to " + rfm.NewName);
-                    TempData["returnMessage"] = "Successfully renamed to " + rfm.NewName;
-                    return RedirectToAction(nameof(Index), 
-                        new { path = UnixHelper.MapToSystemPath(UnixHelper.GetParent(rfm.AbsolutePath)) });
+                    TempData["returnMessage"] = "Couldn't renamed to " + rfm.NewName;
+                    return RedirectToAction(nameof(Browse),
+                        new {path = rfm.ReturnUrl});
                 }
-
-                System.IO.File.Move(rfm.AbsolutePath, 
-                    Directory.GetParent(rfm.AbsolutePath) + "/" + rfm.NewName);
-                _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), 
-                    "Successfully renamed file " + rfm.OldName + " to " + rfm.NewName);
                 TempData["returnMessage"] = "Successfully renamed to " + rfm.NewName;
-                return RedirectToAction(nameof(Index), 
-                    new { path = UnixHelper.MapToSystemPath(UnixHelper.GetParent(rfm.AbsolutePath)) });
+
+                return RedirectToAction(nameof(Browse), 
+                    new { path = rfm.ReturnUrl });
 
             }
-
-            _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), 
-                "Rename action aborted because passed data were inappropiate.");
             ModelState.AddModelError(HttpContext.TraceIdentifier, "New name cannot be empty!");
             return View(rfm);
         }
@@ -668,44 +618,21 @@ namespace PikaCore.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin, FileManagerUser")]
         [AutoValidateAntiforgeryToken]
-        public IActionResult CancelDownloadAsync()
+        public IActionResult CancelDownloadAsync(string returnUrl)
         {
             _archiveService.Cancel();
             _hubContext.Clients.User(_signInManager.UserManager.GetUserId(HttpContext.User))
                 .SendAsync("ArchivingCancelled", "Cancelled by the user.");
-            
-            _loggerService.LogToFileAsync(LogLevel.Information, 
-                HttpContext.Connection.RemoteIpAddress.ToString(), 
-                "Attempting to cancel download task.");
-            
-            return RedirectToAction(nameof(Index), 
-                new { path = GetLastPath() });
+
+            return RedirectToAction(nameof(Browse), 
+                new { path = returnUrl });
         }
 
         #region HelperMethods
 
-        private IDirectoryContents GetContents(string path)
+        private IDirectoryContents GetContents(string systemPath)
         {
-            _last = GetLastPath();
-
-            if (Path.IsPathRooted(path))
-            {
-                _last = path;
-                HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
-                return _fileProvider.GetDirectoryContents(_last);
-            }
-
-            if (path.Equals("/"))
-            {
-                _last = Constants.RootPath;
-                HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
-                return _fileProvider.GetDirectoryContents(_last);
-            }
-            _last = !_last.Equals("/") ? string.Concat(_last, "/", path) : string.Concat(_last, path);
-
-            HttpContext.Session.Set("lastPath", Encoding.UTF8.GetBytes(_last));
-
-            return _fileProvider.GetDirectoryContents(_last);
+            return _fileProvider.GetDirectoryContents(systemPath);
         }
 
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
@@ -723,16 +650,6 @@ namespace PikaCore.Controllers
             var now = DateTime.Now;
             now = now.AddDays(Constants.DayCount);
             return now;
-        }
-
-        private string GetLastPath()
-        {
-            HttpContext.Session.TryGetValue("lastPath", out var result);
-            var outPath = result != null ? Encoding.UTF8.GetString(result) : null;
-
-            if (outPath != null && !outPath.EndsWith("/")) outPath += "/";
-
-            return outPath ?? "/";
         }
         #endregion
 

@@ -7,18 +7,22 @@ namespace PikaCore.Services
 {
     public interface IFileService
     {
-        Task<DirectoryInfo> Create(string returnPath, string name);
-        Task<byte[]> DownloadAsync(string absolutPath);
-        Task<Stream> DownloadAsStreamAsync(string absolutPath);
+        Task<DirectoryInfo> Create(string systemPath);
+        Task<byte[]> AsBytesAsync(string absolutePath);
+        Stream AsStreamAsync(string absolutePath, int bufferSize = 8192, bool useAsync = true);
         Task MoveFromTmpAsync(string fileName, string toWhere);
         Task Copy(string what, string toWhere);
-        Task Move(string what, string toWhere);
+        bool Move(string what, string toWhere);
         Task Delete(List<string> fileList);
         Task<IEnumerable<string>> WalkFileTree(string path, int depth = 1);
         Task<IEnumerable<string>> WalkDirectoryTree(string path);
 
         Task<List<string>> ListPath(string path);
-        Task<List<IFileInfo>> SortContents(IDirectoryContents tmp);
         void Cancel();
+        string RetrieveAbsoluteFromSystemPath(string path);
+
+        string RetrieveSystemPathFromAbsolute(string absolutePath);
+
+        IFileInfo RetrieveFileInfoFromAbsolutePath(string path);
     }
 }

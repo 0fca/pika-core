@@ -28,8 +28,8 @@ namespace PikaCore
                     logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"))
                     .AddDebug();
                 })
-	        .UseUrls($"http://localhost:{port}")
-		.UseKestrel()
+	            .UseUrls($"http://localhost:{port}")
+		        .UseKestrel()
                 .Build();
 
             host.Run();

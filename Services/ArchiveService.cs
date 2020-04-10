@@ -46,17 +46,13 @@ namespace PikaCore.Services
                 _tokenSource = new CancellationTokenSource();
             }
 
-            //_task = Task.Delay(TimeSpan.FromSeconds(10d));
             _task = Task.Factory.StartNew(() =>
             {
-
-                if (!_tokenSource.IsCancellationRequested)
-                {
-                    CanBeCancelled = false;
-                    OnPropertyChanged("CanBeCancelled");
-                    ZipFile.CreateFromDirectory(absolutePath, output, CompressionLevel.Fastest, false);
-                    CanBeCancelled = true;
-                }
+                if (_tokenSource.IsCancellationRequested) return;
+                CanBeCancelled = false;
+                OnPropertyChanged("CanBeCancelled");
+                ZipFile.CreateFromDirectory(absolutePath, output, CompressionLevel.Fastest, false);
+                CanBeCancelled = true;
             }, _tokenSource.Token);
             return _task;
         }

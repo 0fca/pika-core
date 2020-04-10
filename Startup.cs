@@ -21,6 +21,7 @@ using PikaCore.Data;
 using PikaCore.Extensions;
 using PikaCore.Models;
 using PikaCore.Providers;
+using PikaCore.Security;
 
 namespace PikaCore
 {
@@ -78,6 +79,8 @@ namespace PikaCore
             services.AddTransient<IStreamingService, StreamingService>();
             services.AddScoped<IMediaService, MediaService>();
             services.AddSingleton<ISchedulerService, SchedulerService>();
+            services.AddSingleton<UniqueCode>();
+            services.AddSingleton<IdDataProtection>();
 
             var option = new FileLoggerOptions
             {
@@ -136,15 +139,21 @@ namespace PikaCore
             services.AddMvc()
 	        .AddRazorPagesOptions(options =>
             {
-            	options.Conventions
-                .AddPageApplicationModelConvention("/StreamedSingleFileUploadPhysical",
-                    model =>
-                    {
-                        model.Filters.Add(
-                            new GenerateAntiforgeryTokenCookieAttribute());
-                        model.Filters.Add(
-                            new DisableFormValueModelBindingAttribute());
-                    });
+                options.Conventions
+                    .AddPageApplicationModelConvention("/StreamedSingleFileUploadPhysical",
+                        model =>
+                        {
+                            model.Filters.Add(
+                                new GenerateAntiforgeryTokenCookieAttribute());
+                            model.Filters.Add(
+                                new DisableFormValueModelBindingAttribute());
+                        });
+            })
+            .AddMvcOptions(options =>
+            {
+                options.MaxModelValidationErrors = 50;
+                options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
+                    _ => "The field is required.");
             })
 	        .SetCompatibilityVersion(CompatibilityVersion.Latest);
 

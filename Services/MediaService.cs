@@ -17,12 +17,15 @@ namespace PikaCore.Services
     {
         private readonly IConfiguration _configuration;
         private readonly IFileLoggerService _fileLoggerService;
+        private readonly IFileService _fileService;
 
         public MediaService(IConfiguration configuration,
-                            IFileLoggerService fileLoggerService)
+                            IFileLoggerService fileLoggerService,
+                            IFileService fileService)
         {
             _configuration = configuration;
             _fileLoggerService = fileLoggerService;
+            _fileService = fileService;
         }
 
         public void Dispose()
@@ -37,7 +40,7 @@ namespace PikaCore.Services
 
         public async Task<string> CreateThumb(string path, string guid, int size = 0)
         {
-	        var physicalPath = UnixHelper.MapToPhysical(_configuration.GetSection("Paths")["linux-root"], path);
+	        var physicalPath = _fileService.RetrieveAbsoluteFromSystemPath(path);
             var mime = MimeAssistant.GetMimeType(physicalPath);
 	        _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost" ,$"{path} : {mime}");
             var mediaType = DetectType(mime);
@@ -63,7 +66,7 @@ namespace PikaCore.Services
 
         private async Task<string> CreateThumbFromVideoAsync(string path, string guid, int size)
         {
-            var absoluteHostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
+            var absoluteHostPath = _fileService.RetrieveAbsoluteFromSystemPath(path);
             var thumbAbsolutePath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
             var wScale = int.Parse(size == 1
@@ -104,7 +107,7 @@ namespace PikaCore.Services
                 wScale = int.Parse(_configuration.GetSection("Images")["WidthBig"]);
             }
 
-            var absoluteHostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
+            var absoluteHostPath = _fileService.RetrieveAbsoluteFromSystemPath(path);
 
             if (!File.Exists(absoluteThumbPath))
             {

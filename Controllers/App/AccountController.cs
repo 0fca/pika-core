@@ -39,7 +39,7 @@ namespace PikaCore.Controllers
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/Home/Index" : returnUrl;
+            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/Home/Browse" : returnUrl;
             return View();
         }
 

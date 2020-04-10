@@ -7,8 +7,8 @@ using System.Linq;
 using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using PikaCore.Controllers;
-using PikaCore.Controllers.Helpers;
 
 namespace PikaCore.Services
 {
@@ -16,12 +16,15 @@ namespace PikaCore.Services
     {
         private readonly IFileLoggerService _fileLoggerService;
         private readonly IFileProvider _fileProvider;
+        private readonly IConfiguration _configuration;
 
         public FileService(IFileLoggerService fileLoggerService,
-                           IFileProvider fileProvider)
+                           IFileProvider fileProvider,
+                           IConfiguration configuration)
         {
             _fileLoggerService = fileLoggerService;
             _fileProvider = fileProvider;
+            _configuration = configuration;
         }
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
 
@@ -44,33 +47,47 @@ namespace PikaCore.Services
             }
         }
 
-        public async Task<Stream> DownloadAsStreamAsync(string absolutPath)
+        public string RetrieveAbsoluteFromSystemPath(string systemPath)
         {
-            var path = !string.IsNullOrEmpty(absolutPath) && File.Exists(absolutPath) ? absolutPath : null;
+            var fileInfo = _fileProvider.GetFileInfo(systemPath);
+            return fileInfo.PhysicalPath;
+        }
+
+        public string RetrieveSystemPathFromAbsolute(string absolutePath)
+        {
+            return absolutePath.Remove(0,
+                (_configuration.GetSection("Paths")[Constants.OsName + "-root"]).Length - 1);
+        }
+
+        public IFileInfo RetrieveFileInfoFromAbsolutePath(string absolutePath)
+        {
+            var fileInfo = _fileProvider.GetFileInfo(absolutePath.Remove(0,
+                (_configuration.GetSection("Paths")[Constants.OsName + "-root"]).Length - 1));
+            return fileInfo;
+        }
+
+        public Stream AsStreamAsync(string absolutePath, int bufferSize = 8192, bool useAsync = true)
+        {
+            var path = !string.IsNullOrEmpty(absolutePath) && File.Exists(absolutePath) ? absolutePath : null;
             if (string.IsNullOrEmpty(path))
             {
-                return new MemoryStream();
+                throw new ArgumentException("Path cannot be null!");
             }
 
-            var fs = new FileStream(path, FileMode.Open);
-            return await Task<Stream>.Factory.StartNew(() =>
-            {
-                _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutPath}");
-                    return fs;
-            }, _tokenSource.Token);
             
+            var fs = this.RetrieveFileInfoFromAbsolutePath(absolutePath).CreateReadStream(); 
+            _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutePath}");
+            return fs;
         }
 
-        public async Task<DirectoryInfo> Create(string returnPath, string name)
+        public async Task<DirectoryInfo> Create(string systemPath)
         {
-            return await Task.Factory.StartNew(() => Directory.CreateDirectory(string.Concat(
-                        _fileProvider.GetFileInfo(returnPath).PhysicalPath,
-                        Path.DirectorySeparatorChar,
-                        name
-            )));
+            return await Task.Factory.StartNew(() => 
+                Directory.CreateDirectory(systemPath)
+                );
         }
 
-        public async Task<byte[]> DownloadAsync(string absolutPath)
+        public async Task<byte[]> AsBytesAsync(string absolutPath)
         {
             return await Task<byte[]>.Factory.StartNew(() => 
                 File.Exists(absolutPath) 
@@ -105,9 +122,27 @@ namespace PikaCore.Services
             }
         }
 
-        public Task Move(string absolutePath, string toWhere)
+        public bool Move(string absolutePath, string toWhere)
         {
-            throw new NotImplementedException();
+            var isMoved = true;
+            try
+            {
+                if (Directory.Exists(absolutePath))
+                {
+                    Directory.Move(absolutePath, toWhere);
+                }
+                else
+                {
+                    File.Move(absolutePath, toWhere);
+                }
+            }
+            catch (Exception e)
+            {
+                _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost", $"Couldn't move {absolutePath} to {toWhere}");
+                isMoved = false;
+            }
+
+            return isMoved;
         }
 
         public Task Copy(string absolutePath, string toWhere)
@@ -117,19 +152,19 @@ namespace PikaCore.Services
 
         public async Task<List<string>> ListPath(string path)
         {
-            var hostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
+            var hostPath = this.RetrieveAbsoluteFromSystemPath(path);
             return (await Task.Factory.StartNew(() => Directory.GetDirectories(hostPath))).ToList();
         }
 
         public async Task<IEnumerable<string>> WalkFileTree(string path, int depth)
         {
-            var hostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
+            var hostPath = this.RetrieveAbsoluteFromSystemPath(path);
             return await Task<IEnumerable<string>>.Factory.StartNew(() => TraverseFiles(hostPath, depth));
         }
 
         public async Task<IEnumerable<string>> WalkDirectoryTree(string path)
         {
-            var hostPath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, path);
+            var hostPath = this.RetrieveAbsoluteFromSystemPath(path);
             return await Task<IEnumerable<string>>.Factory.StartNew(() => TraverseDirectories(hostPath));
         }
 
@@ -197,16 +232,6 @@ namespace PikaCore.Services
             {
                 yield return result;
             }
-        }
-
-        public async Task<List<IFileInfo>> SortContents(IDirectoryContents tmp)
-        {
-            var asyncFileEnum = await Task.Factory.StartNew(() => tmp.Where(entry => !entry.IsDirectory).OrderBy(predicate => predicate.Name));
-            var asyncDirEnum = await Task.Factory.StartNew(() => tmp.Where(entry => entry.IsDirectory).OrderBy(predicate => predicate.Name));
-            var resultList = new List<IFileInfo>();
-            resultList.AddRange(asyncDirEnum);
-            resultList.AddRange(asyncFileEnum);
-            return resultList;
         }
 
         public async Task Delete(List<string> fileList)

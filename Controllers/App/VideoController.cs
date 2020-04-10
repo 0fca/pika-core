@@ -11,19 +11,23 @@ namespace PikaCore.Controllers
     public class VideoController : Controller
     {
         private readonly IStreamingService _streamingService;
+        private readonly IFileService _fileService;
 
-        public VideoController(IStreamingService streamingService)
+        public VideoController(IStreamingService streamingService,
+                               IFileService fileService)
         {
             _streamingService = streamingService;
+            _fileService = fileService;
+
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin,FileManagerUser,User")]
         public IActionResult Watch(string path)
         {
-            ViewData["Mime"] = MimeAssistant.GetMimeType(UnixHelper.MapToPhysical(Constants.FileSystemRoot, path));
+            ViewData["Mime"] = MimeAssistant.GetMimeType(_fileService.RetrieveAbsoluteFromSystemPath(path));
             
-            ViewData["VideoTitle"] = Path.GetFileName(UnixHelper.MapToPhysical(Constants.FileSystemRoot, path));
+            ViewData["VideoTitle"] = Path.GetFileName(_fileService.RetrieveAbsoluteFromSystemPath(path));
 
             if (path != null)
             {
@@ -35,19 +39,19 @@ namespace PikaCore.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin, FileManagerUser, User")]
-        public async Task<ActionResult> Convert(string path)
+        public ActionResult Convert(string path)
         {
             Debug.WriteLine("Converting...");
-            var str = await _streamingService.GetVideoByPath(UnixHelper.MapToPhysical(Constants.FileSystemRoot, path));
+            var str = _streamingService.GetVideoByPath(_fileService.RetrieveAbsoluteFromSystemPath(path));
             return Ok(str != null);// new FileStreamResult();
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin, FileManagerUser, User")]
-        public async Task<FileStreamResult> Stream(string p)
+        public FileStreamResult Stream(string p)
         {
-            var absolutePath = UnixHelper.MapToPhysical(Constants.FileSystemRoot, p);
-            return File(await _streamingService.GetVideoByPath(absolutePath), MimeAssistant.GetMimeType(absolutePath), true);
+            var absolutePath = _fileService.RetrieveAbsoluteFromSystemPath(p);
+            return File(_streamingService.GetVideoByPath(absolutePath), MimeAssistant.GetMimeType(absolutePath), true);
         }
     }
 }

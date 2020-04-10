@@ -1,5 +1,5 @@
-@model PikaCore.Models.FileResultModel
-@using Microsoft.Extensions.FileProviders
+@model PikaCore.Models.DeleteResourcesViewModel
+
 @{
     ViewData["Title"] = "Delete";
 }
@@ -9,28 +9,18 @@
     <div class="input-field col s12">
         <form asp-controller="Storage" asp-action="Delete" method="post" class="form-horizontal">
 
-            <select asp-for="ToBeDeleted" multiple>
-                @{
-
-                    foreach (IFileInfo i in Model.Contents)
-                    {
-
-                        <option value="@i.PhysicalPath">@i.Name</option>
-                    }
-                }
-            </select>
-
-
+            @Html.DropDownListFor(m => m.ToBeDeletedItems, Model.ResourceList, "Choose resources to be deleted.")
+            
             <span>
                 <input type="submit" value="Delete" class="btn btn-primary" asp-action="DeleteConfirmation" />
-                <button type="submit" class="btn btn-primary" formaction="Index">Cancel</button>
+                <button type="submit" class="btn btn-primary" formaction="Browse">Cancel</button>
             </span>
         </form>
     </div>
     </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var elems = document.querySelectorAll('select');
-        var instances = M.FormSelect.init(elems);
+        const elems = document.querySelectorAll('select');
+        const instances = M.FormSelect.init(elems);
     });
 </script>
