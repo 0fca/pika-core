@@ -51,7 +51,7 @@
                 @if (User.IsInRole("Admin"))
                 {
                     <li class="collection-item">
-                        <a class="navlink" title="Pika Cloud Admin">
+                        <a asp-controller="Admin" asp-action="Index" class="navlink" title="Pika Cloud Admin">
                             <i class="material-icons">
                                 supervisor_account
                             </i>

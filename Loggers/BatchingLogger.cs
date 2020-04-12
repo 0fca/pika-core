@@ -42,6 +42,9 @@ namespace PikaCore.Loggers
             builder.Append(" [");
             builder.Append(logLevel.ToString());
             builder.Append("] ");
+            builder.Append("[");
+            builder.Append(state.GetType().FullName);
+            builder.Append("] ");
             builder.Append(_category);
             builder.Append(": ");
             builder.AppendLine(formatter(state, exception));

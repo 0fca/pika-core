@@ -1,10 +1,7 @@
 ﻿@model PikaCore.Models.ManageViewModels.LogsListViewModel
 @{ var content = "";
     if (Model != null && Model.Lines != null) {
-        foreach (var item in Model.Lines)
-        {
-                content += item + "\n";
-        }   
+        content = Model.Lines.Aggregate(content, (current, item) => current + (item + "\n"));
     }
 }
 <textarea class="log-area" wrap="hard" id="log-area" readonly>
