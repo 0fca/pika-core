@@ -5,9 +5,19 @@
 <div class="row">
     <div class="main-page-content col s12">
         <h1 class="center">Welcome to Pika Cloud!</h1>
-            <p class="typewrite center" data-period="2000" data-type='[ "Hello stranger!", "Welcome to Pika Core.", "Pika Core is a core of Pika Cloud.", "Refer to About page for more information." ]'>
-                <span class="wrap"></span>
-            </p>
+        <p class="typewrite center" data-period="2000" data-type='[ "Hello stranger!", "Welcome to Pika Core.", "Pika Core is a core of Pika Cloud.", "Refer to About page for more information." ]'>
+            <span class="wrap"></span>
+        </p>
     </div>
 </div>
+<div class="pushpin">
+    Pushpin
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const elems = document.querySelectorAll('.pushpin');
+        const instances = M.Pushpin.init(elems, options);
+    });
+</script>
 @await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)   

@@ -26,8 +26,6 @@ namespace PikaCore.Views.Manage
 
         public static string TwoFactorAuthenticationNavClass(ViewContext viewContext) => PageNavClass(viewContext, TwoFactorAuthentication);
 
-        public static string AdminPanelNavClass(ViewContext viewContext) => PageNavClass(viewContext, AdminPanel);
-
         public static string PageNavClass(ViewContext viewContext, string page)
         {
             var activePage = viewContext.ViewData["ActivePage"] as string;

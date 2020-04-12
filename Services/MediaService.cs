@@ -1,5 +1,4 @@
 ﻿using FFmpeg.NET;
-using PikaCore.Controllers;
 using PikaCore.Controllers.Helpers;
 using Microsoft.Extensions.Configuration;
 using PikaCore.Services.Helpers;
@@ -58,7 +57,6 @@ namespace PikaCore.Services
         private MediaType DetectType(string mime)
         {
             var props = (MediaType[])Enum.GetValues(typeof(MediaType));
-
             var mediaType = Array.Find(props, x => mime.Split("/").Contains(x.ToString().ToLower()));
 	        _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"{mediaType} mediaType detected from MIME: {mime}");	   
             return mediaType;
@@ -69,16 +67,8 @@ namespace PikaCore.Services
             var absoluteHostPath = _fileService.RetrieveAbsoluteFromSystemPath(path);
             var thumbAbsolutePath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
-            var wScale = int.Parse(size == 1
-                ? _configuration.GetSection("Images")["WidthBig"]
-                : _configuration.GetSection("Images")["Width"]);
-            
-            var hScale = int.Parse(size == 1
-                ? _configuration.GetSection("Images")["HeightBig"]
-                : _configuration.GetSection("Images")["Height"]);
-            
 
-                _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost",
+            _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost",
                     absoluteHostPath);
                 if (File.Exists(thumbAbsolutePath)) return guid;
 

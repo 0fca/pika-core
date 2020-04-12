@@ -3,7 +3,7 @@
     var role = "";
     if (User.Identity.Name != null)
     {
-        role = (await UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).ElementAt(0);
+        role = (UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).Result.ElementAt(0);
 
         ViewData["Role"] = role;
     }
@@ -29,22 +29,21 @@
     <script src="~/js/archiveStatus.js" asp-append-version="true"></script>
     <script src="~/js/typewriter.js" asp-append-version="true"></script>
     <script src="~/js/file.js" asp-append-version="true"></script>
-      
 </head>
 <body>
 <main>
 <form asp-area="" asp-action="Logout" asp-controller="Account" method="post" id="logoutForm">
     <div class="navbar-fixed">
-	
         <nav>
             <div class="nav-wrapper navbar-color">
                 <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="fas fa-bars"></i></a>
                 <a asp-area="" asp-controller="Home" asp-action="Index" class="brand-logo brand-margin">
-                    <img class="responsive-img hide-on-med-and-down" src="~/images/logooftheyear2018.png" width="96" height="64" />
+                    <img class="responsive-img hide-on-med-and-down" src="~/images/logooftheyear2018.png" width="96" height="64" alt="Hannah"/>
                 </a>
+
                 
                 @await Html.PartialAsync("_LoginPartial")
-                @await Html.PartialAsync("_ActionLinksPartial")
+                
             </div>
         </nav>
     </div>
@@ -54,7 +53,7 @@
 </form>
 <environment include="Development">
 <div class="row">
-    <p class="red-text text-lighten-1 center-align">This is a developer instance of Pika Core Application.</p>
+    <p class="red-text text-lighten-1 center-align">This is an developer instance of Pika Core Application.</p>
 </div>
 </environment>
 <div class="container d-flex justify-content-center container-padding">
@@ -62,6 +61,10 @@
 </div>
 </main>
 <footer class="page-footer footer">
+    <div class="container">
+        <small class="white-text">Interested in this app? See <a class="text-teal" asp-page="/Home/About"><small>About</small></a> page to take a better look at it!</small>
+        
+    </div>
     <div class="footer-copyright">
         <div class="container">
             © 2018 - @DateTime.Now.Year Pika Cloud
@@ -88,7 +91,12 @@
     </script>
     <script src="~/js/site.min.js" asp-append-version="true"></script>
 </environment>
-
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const elems = document.querySelectorAll('.modal');
+        const instances = M.Modal.init(elems, options);
+    });
+</script>
 @RenderSection("Scripts", required: false)
     
 </body>

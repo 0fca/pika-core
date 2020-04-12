@@ -1,12 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -14,8 +6,16 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using PikaCore.Controllers.Hubs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using PikaCore.Controllers.Helpers;
+using PikaCore.Controllers.Hubs;
 using PikaCore.Data;
 using PikaCore.Extensions;
 using PikaCore.Models;
@@ -23,7 +23,7 @@ using PikaCore.Models.File;
 using PikaCore.Security;
 using PikaCore.Services;
 
-namespace PikaCore.Controllers
+namespace PikaCore.Controllers.App
 {
     public class StorageController : Controller
     {
@@ -35,19 +35,18 @@ namespace PikaCore.Controllers
         private readonly IFileLoggerService _loggerService;
         private readonly IConfiguration _configuration;
         private readonly StorageIndexContext _storageIndexContext;
-        //private string _last = Constants.RootPath;
         private bool _wasArchivingCancelled = true;
         private readonly IHubContext<StatusHub> _hubContext;
         private readonly IdDataProtection _idDataProtection;
 
-        public StorageController(IFileProvider fileProvider,
-        SignInManager<ApplicationUser> signInManager,
-        IArchiveService archiveService, IFileService fileService, IUrlGenerator iUrlGenerator,
-        StorageIndexContext storageIndexContext,
-        IFileLoggerService fileLoggerService,
-        IHubContext<StatusHub> hubContext,
-        IConfiguration configuration,
-        IdDataProtection idDataProtection)
+        public StorageController(IFileProvider fileProvider, 
+               SignInManager<ApplicationUser> signInManager,
+               IArchiveService archiveService, IFileService fileService, IUrlGenerator iUrlGenerator,
+               StorageIndexContext storageIndexContext,
+               IFileLoggerService fileLoggerService,
+               IHubContext<StatusHub> hubContext,
+               IConfiguration configuration,
+               IdDataProtection idDataProtection)
         {
             _signInManager = signInManager;
             _fileProvider = fileProvider;
@@ -62,6 +61,14 @@ namespace PikaCore.Controllers
             ((ArchiveService)_archiveService).PropertyChanged += PropertyChangedHandler;
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Index()
+        {
+            return RedirectToActionPermanent(nameof(Browse));
+        }
+
+        [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Browse(string path, int offset = 0, int count = 50)
         {
@@ -557,7 +564,7 @@ namespace PikaCore.Controllers
                     TempData["returnMessage"] = "Successfully deleted elements.";
                     return RedirectToAction(nameof(Browse), new { path = returnPath });
                 }
-                catch (Exception e)
+                catch
                 { 
                     TempData["returnMessage"] = "Error: Couldn't delete resource.";
                     return RedirectToAction(nameof(Browse), new { path =  returnPath});
@@ -666,16 +673,6 @@ namespace PikaCore.Controllers
             
             Response.Cookies.Append(key, value, option);
         }
-
-        private string Get(string key)
-        {
-            if (!HttpContext.Request.Cookies.Keys.Contains(key)) 
-            {
-                throw new ArgumentException("No such cookie stored!");
-            }
-            return HttpContext.Request.Cookies[key];
-        }
-
 
         private void SetPagingParams(int offset, int count, int pageCount)
         {

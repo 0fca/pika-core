@@ -1,16 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using PikaCore.Models;
 using PikaCore.Models.ManageViewModels;
 using PikaCore.Services;
@@ -104,128 +101,6 @@ namespace PikaCore.Controllers
 
             StatusMessage = "Your profile has been updated";
             return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AdminUserPanel()
-        {
-            LogsListViewModel logListViewModel = new LogsListViewModel
-            {
-                Lines = await _loggerService.GetLogs()
-            };
-            Dictionary<ApplicationUser, IList<string>> usersWithRoles = new Dictionary<ApplicationUser, IList<string>>();
-
-            if (usersWithRoles.Count == 0)
-            {
-                (await _userManager.Users.ToListAsync()).ForEach(async user =>
-                {
-                    var roles = await _userManager.GetRolesAsync(user);
-                    usersWithRoles.Add(user, roles);
-                });
-            }
-
-            var adminPanelViewModel = new AdminPanelViewModel
-            {
-                LogsListViewModel = logListViewModel, 
-                UsersWithRoles = usersWithRoles
-            };
-            ViewData["returnMessage"] = TempData["returnMessage"];
-            return View("/Views/Manage/Admin/AdminUserPanel.cshtml", adminPanelViewModel);
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        [Route("{id}")]
-        public async Task<IActionResult> GeneratePassword(string id)
-        {
-            var userModel = await _userManager.FindByIdAsync(id);
-            if ((await _userManager.GetLoginsAsync(userModel)).Count != 0)
-                return RedirectToAction(nameof(AdminUserPanel));
-            
-            var token = await _userManager.GeneratePasswordResetTokenAsync(userModel);
-            var guid = Guid.NewGuid().ToString();
-            _urlUrlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
-            var hash = _urlUrlGeneratorService.GenerateId(guid);
-            await _userManager.ResetPasswordAsync(userModel, token, hash);
-            TempData["newPassword"] = hash;
-
-            return RedirectToAction(nameof(AdminUserPanel));
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(string id)
-        {
-            var userModel = await _userManager.FindByIdAsync(id);
-            var editUserModel = new EditUserModel
-            {
-                Id = userModel.Id,
-                Phone = userModel.PhoneNumber,
-                Email = userModel.Email,
-                UserName = userModel.UserName,
-                Roles = await _userManager.GetRolesAsync(userModel)
-            };
-            return View("/Views/Manage/Admin/Edit.cshtml", editUserModel);
-        }
-
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> EditConfirmation(EditUserModel editModel)
-        {
-            var userModel = await _userManager.FindByIdAsync(editModel.Id);
-            userModel.Email = editModel.Email;
-            userModel.UserName = editModel.UserName;
-            userModel.PhoneNumber = editModel.Phone;
-            if (editModel.Roles != null)
-            {
-                await _userManager.AddToRolesAsync(userModel, editModel.Roles);
-            }
-            var result = await _userManager.UpdateAsync(userModel);
-            TempData["returnMessage"] = result.Succeeded ? "Successfully edited user's information." : "Could not edit user's information.";
-            return RedirectToAction(nameof(AdminUserPanel));
-        }
-
-        [HttpGet]
-        [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> RemoveFromRole(string id, string roleName)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-            if ((await _userManager.GetRolesAsync(user)).Count > 1)
-            {
-                var result = await _userManager.RemoveFromRoleAsync(user, roleName);
-                if (!result.Succeeded)
-                {
-                    StatusMessage = "User of id " + id + " couldn't be deleted from role: " + roleName;
-                    _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), StatusMessage + "\n" + result.Errors);
-                }
-            }
-            else
-            {
-                StatusMessage = "Couldn't delete user of id " + id + " from role " + roleName + ", user has to be in one role at least.";
-            }
-            return RedirectToAction(nameof(Edit), new { @Id = id });
-        }
-
-        [HttpGet]
-        [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(string id)
-        {
-            var email = await _userManager.FindByIdAsync(id);
-            return View("/Views/Manage/Admin/Delete.cshtml", email);
-        }
-
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmation(string id)
-        {
-            var result = await _userManager.DeleteAsync(await _userManager.FindByIdAsync(id));
-            TempData["returnMessage"] = result.Succeeded ? "Successfully deleted user of id " + id : "Could not delete user of id " + id;
-            return RedirectToAction(nameof(AdminUserPanel));
         }
 
         [HttpGet]

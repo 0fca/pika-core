@@ -41,14 +41,14 @@ function loadThumb(path, s) {
             const systemPath = path.toString() + text;
             
             mediaHubconnection.invoke("CreateThumb", systemPath, guid, 1).catch(err => {
-                const img = document.getElementById(guid);
-                const imgParentLink = img.parentElement;
+                const imgEl = document.getElementById(guid);
+                const imgParentLink = imgEl.parentElement;
                 const icon = document.createElement("i");
                 icon.setAttribute("class", "material-icons");
                 icon.setAttribute("title", "There was an error loading a thumb...");
                 icon.innerText = "error";
-                imgParentLink.insertBefore(icon, img);
-                imgParentLink.removeChild(img);
+                imgParentLink.insertBefore(icon, imgEl);
+                imgParentLink.removeChild(imgEl);
 		        console.log(err.toString());
             });
         }

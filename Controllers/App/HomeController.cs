@@ -12,14 +12,7 @@ namespace PikaCore.Controllers
 
         public IActionResult Error(ErrorViewModel errorViewModel)
         {
-            if (errorViewModel != null)
-            {
-                return View(errorViewModel);
-            }
-            else
-            {
-                return View(nameof(Index));
-            }
+            return errorViewModel != null ? View(errorViewModel) : View(nameof(Index));
         }
 
         public IActionResult ErrorByCode(int id)

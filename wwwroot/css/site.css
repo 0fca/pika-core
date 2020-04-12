@@ -156,7 +156,6 @@ a, a:hover, a:focus {
     color: #303F9F  !important;
     padding: 8px !important;
     width: 100% !important;
-    height: 500px !important;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -285,4 +284,8 @@ a, a:hover, a:focus {
 
 .pagination li.active{
     background-color: #009688 !important;
+}
+
+.alert-danger {
+    color: red;
 }

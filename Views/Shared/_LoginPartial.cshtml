@@ -1,16 +1,19 @@
-@using Microsoft.AspNetCore.Identity
-@using PikaCore.Models
-
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
-
+<div class="right">
+    <a class="navlink modal-trigger hide-on-med-and-down left" href="#app-modal">
+        <i class="large material-icons">apps</i>
+    </a>
     <ul class="right hide-on-med-and-down">
+
         @if (SignInManager.IsSignedIn(User))
         {
             <li>
-                <a asp-area="" class="navlink" asp-controller="Manage" asp-action="Index" title="Manage"><i class="material-icons">
-                    account_box
-                </i></a>
+                <a asp-area="" class="navlink" asp-controller="Manage" asp-action="Index" title="Manage">
+                    <i class="material-icons">
+                        account_box
+                    </i>
+                </a>
             </li>
             <li>
                 <button type="submit" class="waves-effect waves-teal btn-flat">Log out</button>
@@ -19,11 +22,44 @@
         }
         else
         {
-    <li><a asp-area="" class="navlink" asp-controller="Account" asp-action="Register">Register</a></li>
-    <li><a asp-area="" class="navlink" asp-controller="Account" asp-action="Login">Log in</a></li>
+            <li><a asp-area="" class="navlink" asp-controller="Account" asp-action="Register">Register</a></li>
+            <li><a asp-area="" class="navlink" asp-controller="Account" asp-action="Login">Log in</a></li>
         }
     </ul>
+</div>
 
-    
-
-
+<div id="app-modal" class="modal bottom-sheet">
+    <div class="modal-content">
+        <div class="row">
+            <ul class="collection">
+                <li class="collection-item">
+                    <a class="navlink" asp-controller="Storage" asp-action="Index" title="Pika Browser">
+                        <i class="material-icons">
+                            search
+                        </i>
+                        Pika Browser
+                    </a>
+                </li>
+                <li class="collection-item">
+                    <a class="navlink" href="https://player.lukas-bownik.net/" title="Pika Player">
+                        <i class="material-icons">
+                            play_arrow
+                        </i>
+                        Pika Player
+                    </a>
+                </li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="collection-item">
+                        <a class="navlink" title="Pika Cloud Admin">
+                            <i class="material-icons">
+                                supervisor_account
+                            </i>
+                            Pika Cloud Admin
+                        </a>
+                    </li>
+                }
+            </ul>
+            </div>
+    </div>
+</div>

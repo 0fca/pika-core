@@ -31,16 +31,15 @@
                 <label asp-for="Roles" class="control-label"></label>
                 <ul class="list-unstyled" id="roleList">
                     @foreach (var role in Model.Roles) {
-                        <li><a class="fas fa-trash-alt" asp-controller="Manage" asp-action="RemoveFromRole" asp-route-id="@Model.Id" asp-route-roleName="@role"> @role</a></li>
+                        <li><a class="fas fa-trash-alt" asp-controller="Admin" asp-action="RemoveFromRole" asp-route-id="@Model.Id" asp-route-roleName="@role"> @role</a></li>
                     }
                 </ul>
                 <select asp-for="Roles" id="roleSelect" class="form-control" multiple>
                     @{ 
                         var roles = RoleManager.Roles;
-                        foreach (var role in roles) {
-                            if (!(await UserManager.GetRolesAsync(await UserManager.FindByIdAsync(Model.Id))).Contains(role.Name)) { 
-                                <option value="@role.Name">@role.Name</option>
-                            }
+                        foreach (var role in roles)
+                        { 
+                            <option value="@role.Name">@role.Name</option>
                         }
                     }
                 </select>

@@ -7,7 +7,7 @@ namespace PikaCore.Pages.Home
     public class AboutModel : PageModel
     {
         public string Version;
-        public string OS;
+        public string Os;
         public string FrameworkVer;
 
         public void OnGet()
@@ -20,19 +20,19 @@ namespace PikaCore.Pages.Home
                 {
                     var strArr = System.IO.File.ReadAllLines("/etc/os-release");
                     var friendlyName = strArr[0].Split("=")[1];
-                    OS = friendlyName.Substring(1, friendlyName.Length - 2);
+                    Os = friendlyName.Substring(1, friendlyName.Length - 2);
                 }
                 else 
                 {
-                    OS = PlatformID.Unix.ToString();
+                    Os = PlatformID.Unix.ToString();
                 }
             }
             else
             {
-                OS = Environment.OSVersion.Platform.ToString();
+                Os = Environment.OSVersion.Platform.ToString();
             }
             FrameworkVer = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
-            Version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            Version = (Assembly.GetEntryAssembly() ?? throw new InvalidOperationException()).GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
         }
     }
 }

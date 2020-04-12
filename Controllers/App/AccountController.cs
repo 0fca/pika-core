@@ -39,7 +39,7 @@ namespace PikaCore.Controllers
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/Home/Browse" : returnUrl;
+            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/Home/" : returnUrl;
             return View();
         }
 
@@ -212,11 +212,12 @@ namespace PikaCore.Controllers
             if (!ModelState.IsValid) return View(model);
             
             var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+            await _userManager.AddToRoleAsync(user, "USER");
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
                 _logger.LogInformation("User created a new account with password.");
-                
+                return RedirectToAction("Index", "Manage");
             }
             AddErrors(result);
 

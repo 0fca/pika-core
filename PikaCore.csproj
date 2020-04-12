@@ -13,6 +13,14 @@
         <FileVersion>2.2.2</FileVersion>
         <Version>2.2.2</Version>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Services\Helpers\Jobs\**" />
+      <Content Remove="Services\Helpers\Jobs\**" />
+      <EmbeddedResource Remove="Services\Helpers\Jobs\**" />
+      <None Remove="Services\Helpers\Jobs\**" />
+      <TypeScriptCompile Remove="Services\Helpers\Jobs\**" />
+    </ItemGroup>
     <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="3.0.0" />
     <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="3.0.0" />
@@ -23,11 +31,13 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Https" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.0-preview1.19506.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.0-preview1.19506.1" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.6.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -43,11 +53,11 @@
   </ItemGroup>
 
     <ItemGroup>
-    <Folder Include="Services\Helpers\Jobs\" />
-  </ItemGroup>
+      <None Remove="app.db" />
+    </ItemGroup>
 
     <ItemGroup>
-      <None Remove="app.db" />
+      <Folder Include="wwwroot\images\github\" />
     </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

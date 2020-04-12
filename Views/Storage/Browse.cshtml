@@ -82,7 +82,7 @@
                 @if (item.IsDirectory)
                     {
 
-                        <a class="collection-item" asp-controller="Storage" asp-action="Browse" asp-route-path="@System.IO.Path.Combine(lastPath, item.Name)" title="@item.Name"><i class="fas fa-folder browse-icon-margin"></i>@item.Name</a>
+                        <a class="collection-item" asp-controller="Storage" asp-action="Browse" asp-route-path="@System.IO.Path.Combine(lastPath, item.Name)" title="@item.Name"><i class="fas fa-folder prefix browse-icon-margin"></i>@item.Name</a>
                     }
                     else
                     {
@@ -93,7 +93,7 @@
                         {
                             var type = MimeAssistant.RecognizeIconByMime(mime);
                             
-                            <a class="collection-item" asp-controller="Storage" asp-action="Download" asp-route-id=@DataProtection.Encode(item.PhysicalPath) asp-route-returnUrl=@lastPath title="@item.Name"><i class="fas fa-@type browse-icon-margin"></i>@item.Name</a>
+                            <a class="collection-item" asp-controller="Storage" asp-action="Download" asp-route-id=@DataProtection.Encode(item.PhysicalPath) asp-route-returnUrl=@lastPath title="@item.Name"><i class="fas fa-@type prefix browse-icon-margin"></i>@item.Name</a>
                         }
                         else
                         {
@@ -198,9 +198,10 @@
 
 <script src="~/js/media.js" asp-append-version="true"></script>
 <script>
+    const path = "@lastPath";
+
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
         if (e.code === "Enter") {
-	    loadThumb(path);
             searchFileList();
         }
     });
@@ -222,9 +223,6 @@
     document.addEventListener('DOMContentLoaded', function () {
         const elems = document.querySelectorAll('.autocomplete');
         const instances = M.Autocomplete.init(elems, {});
-    });
-
-    const path = "@lastPath";
-
+    })
 
 </script>

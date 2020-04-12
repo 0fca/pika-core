@@ -8,22 +8,22 @@ namespace PikaCore.Services
     public class HashUrlGeneratorService : IUrlGenerator
     {
         private static KeyDerivationPrf Prf { get; set; } = KeyDerivationPrf.HMACSHA256;
-        public string GenerateId(string aboslutPath)
+        public string GenerateId(string aboslutePath)
         {
-            return Hash(aboslutPath);
+            return Hash(aboslutePath);
         }
 
 
 
-        private string Hash(string input)
+        private static string Hash(string input)
         {
-            byte[] salt = new byte[128 / 8];
+            var salt = new byte[128 / 8];
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(salt);
             }
 
-            string hash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+            var hash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 password: input,
                 salt: salt,
                 prf: Prf,
@@ -33,9 +33,9 @@ namespace PikaCore.Services
             return hash;
         }
 
-        private void PrepareHashString(ref string hash)
+        private static void PrepareHashString(ref string hash)
         {
-            Dictionary<char, char> dictionary = new Dictionary<char, char>
+            var dictionary = new Dictionary<char, char>
             {
                 { '+', '_' },
                 { '=', '-' },
@@ -43,15 +43,14 @@ namespace PikaCore.Services
                 { '/', '.' }
             };
 
-            foreach (char c in hash.ToCharArray())
+            foreach (var c in hash.ToCharArray())
             {
-                if (dictionary.ContainsKey(c))
-                {
-                    dictionary.TryGetValue(c, out char replaceChar);
-                    hash = hash.Replace(c, replaceChar);
-                }
+                if (!dictionary.ContainsKey(c)) continue;
+                dictionary.TryGetValue(c, out var replaceChar);
+                hash = hash.Replace(c, replaceChar);
             }
 
+            hash = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(hash));
         }
 
         public void SetDerivationPrf(KeyDerivationPrf prf)

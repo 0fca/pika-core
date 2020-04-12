@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -14,11 +16,8 @@ namespace PikaCore
             .AddCommandLine(args)
             .AddEnvironmentVariables()
             .Build();
-            var port = 5000;
-            if (args.Length > 0 && args[0] != null)
-            {
-                port = int.Parse(args[0]);
-            }
+
+            var port = ReadPortFromStdIn(args);
 
             var host = WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
@@ -33,6 +32,20 @@ namespace PikaCore
                 .Build();
 
             host.Run();
+        }
+
+        private static int ReadPortFromStdIn(IReadOnlyList<string> args)
+        {
+            var port = 5000;
+            try
+            {
+                port = int.Parse(args[0]);
+            }
+            catch
+            {
+                // ignored
+            }
+            return port;
         }
     }
 }
