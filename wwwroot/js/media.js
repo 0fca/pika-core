@@ -29,6 +29,18 @@ mediaHubconnection.start().then(function () {
     return console.error(err.toString());
 });
 
+function setErrorIcon(guid) {
+    const imgEl = document.getElementById(guid);
+    const imgParentLink = imgEl.parentElement;
+    const icon = document.createElement("i");
+    icon.setAttribute("class", "material-icons");
+    icon.setAttribute("title", "There was an error loading a thumb...");
+    icon.innerText = "error";
+    imgParentLink.insertBefore(icon, imgEl);
+    imgParentLink.removeChild(imgEl);
+    console.log(err.toString());
+}
+
 function loadThumb(path, s) {
     const imgs = document.getElementById("file-list").querySelectorAll("img");
 
@@ -41,15 +53,7 @@ function loadThumb(path, s) {
             const systemPath = path.toString() + text;
             
             mediaHubconnection.invoke("CreateThumb", systemPath, guid, 1).catch(err => {
-                const imgEl = document.getElementById(guid);
-                const imgParentLink = imgEl.parentElement;
-                const icon = document.createElement("i");
-                icon.setAttribute("class", "material-icons");
-                icon.setAttribute("title", "There was an error loading a thumb...");
-                icon.innerText = "error";
-                imgParentLink.insertBefore(icon, imgEl);
-                imgParentLink.removeChild(imgEl);
-		        console.log(err.toString());
+                setErrorIcon();
             });
         }
     }
@@ -59,5 +63,7 @@ function ReceiveThumb(thumbId) {
     if (thumbId !== "") {
         const url = "/Storage/Thumb?id=" + thumbId;
         document.getElementById(thumbId).setAttribute("src", url);
+    }else{
+        setErrorIcon(thumbId);
     }
 }
