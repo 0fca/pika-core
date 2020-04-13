@@ -1,10 +1,10 @@
-﻿using PikaCore.Models;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
+using PikaCore.Models;
 using PikaCore.Services;
-using System.Threading.Tasks;
 
-namespace PikaCore.Controllers.Hubs
+namespace PikaCore.Controllers.Api.Hubs
 {
     public class MediaHub : Hub
     {

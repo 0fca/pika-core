@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.Hosting;
 using PikaCore.Controllers;
+using PikaCore.Controllers.Api.Hubs;
 using PikaCore.Controllers.App;
 using PikaCore.Data;
 using PikaCore.Extensions;
