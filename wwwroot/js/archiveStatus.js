@@ -1,10 +1,8 @@
-﻿const connection = new signalR.HubConnectionBuilder().withUrl("/hubs/status",
-	                                {
-						transport: 2,
-						skipNegotiation: false
-					})
-                                .configureLogging(signalR.LogLevel.Information)
-                                .build();
+﻿const connection = new signalR.HubConnectionBuilder().withUrl("/hubs/status",{
+    transport: signalR.HttpTransportType.LongPolling | signalR.HttpTransportType.ServerSentEvents
+})
+    .configureLogging(signalR.LogLevel.Information)
+    .build();
 
 
 

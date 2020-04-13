@@ -1,10 +1,8 @@
-﻿const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/hubs/files",
-	                                {
-						transport: 4,
-						skipNegotiation: false
-					})
-                                .configureLogging(signalR.LogLevel.Information)
-                                .build();
+﻿const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/hubs/files",{
+    transport: signalR.HttpTransportType.LongPolling | signalR.HttpTransportType.ServerSentEvents
+})
+    .configureLogging(signalR.LogLevel.Information)
+    .build();
 
 
 fileHubconnection.on("ReceiveListing", ReceiveListing);
