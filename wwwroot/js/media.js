@@ -1,6 +1,6 @@
 ﻿const mediaHubconnection = new signalR.HubConnectionBuilder()
                         .withUrl("/hubs/media", {
-                            transport: signalR.HttpTransportType.LongPolling | signalR.HttpTransportType.ServerSentEvents 
+                            transport: signalR.HttpTransportType.LongPolling | signalR.HttpTransportType.ServerSentEvents
                         })
 	            		.configureLogging(signalR.LogLevel.Information)
 				.build();
