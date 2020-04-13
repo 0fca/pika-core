@@ -114,8 +114,8 @@ namespace PikaCore
     	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
             {
                 builder
-                    .AllowAnyMethod()
-                    .AllowAnyOrigin()
+                    .WithMethods("GET", "POST")
+                    .WithOrigins("dev-core.lukas-bownik.net", "core.lukas-bownik.net", "me.lukas-bownik.net", "localhost")
                     .AllowAnyHeader();
             }));
             
@@ -208,19 +208,19 @@ namespace PikaCore
                 endpoints.MapHub<StatusHub>("/hubs/status", options =>
                 {
                     options.Transports =
-                        HttpTransportType.WebSockets |
+                        HttpTransportType.LongPolling |
                         HttpTransportType.ServerSentEvents;
                 });
                 endpoints.MapHub<FileOperationHub>("/hubs/files", options =>
                 {
                     options.Transports =
-                        HttpTransportType.WebSockets |
+                        HttpTransportType.LongPolling |
                         HttpTransportType.ServerSentEvents;
                 });
                 endpoints.MapHub<MediaHub>("/hubs/media", options =>
                 {
                     options.Transports =
-                        HttpTransportType.WebSockets |
+                        HttpTransportType.LongPolling |
                         HttpTransportType.ServerSentEvents;
                 });
             });
