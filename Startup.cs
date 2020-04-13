@@ -115,8 +115,7 @@ namespace PikaCore
             {
                 builder
                     .AllowAnyMethod()
-                    .WithOrigins("me.lukas-bownik.net", "core.lukas-bownik.net", "dev-core.lukas-bownik.net",
-                        "localhost")
+                    .AllowAnyOrigin()
                     .AllowAnyHeader();
             }));
             

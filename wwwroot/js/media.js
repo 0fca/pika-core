@@ -1,13 +1,13 @@
 ﻿const mediaHubconnection = new signalR.HubConnectionBuilder()
                         .withUrl("/hubs/media", {
-                            transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.ServerSentEvents 
+                            transport: signalR.HttpTransportType.LongPolling | signalR.HttpTransportType.ServerSentEvents 
                         })
 	            		.configureLogging(signalR.LogLevel.Information)
 				.build();
 
-mediaHubconnection.onclose(async () => {
+/*mediaHubconnection.onclose(async () => {
     await start();
-});
+});*/
 
 mediaHubconnection.on("ReceiveThumb", ReceiveThumb);
 
@@ -19,13 +19,7 @@ mediaHubconnection.start().then(function () {
 });
 
 async function start() {
-    try {
-        await mediaHubconnection.start();
-        console.log("connected");
-    } catch (err) {
-        console.log(err);
-        setTimeout(() => start(), 5000);
-    }
+    await mediaHubconnection.start();
 }
 
 function setErrorIcon(guid, err) {
