@@ -201,8 +201,8 @@
     @await Html.PartialAsync("Partial/_GenerateUrlPartial.cshtml")
 }
 
-<script src="~/js/media.js" asp-append-version="true"></script>
 <script>
+    const listingPath = "@lastPath";
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
         if (e.code === "Enter") {
             searchFileList();
@@ -228,3 +228,4 @@
         const instances = M.Autocomplete.init(elems, {});
     })
 </script>
+<script src="~/js/media.js" asp-append-version="true"></script>

@@ -14,7 +14,7 @@ async function start() {
         console.log(err);
         setTimeout(() => start(), 5000);
     }
-};
+}
 
 mediaHubconnection.onclose(async () => {
     await start();
@@ -24,7 +24,7 @@ mediaHubconnection.on("ReceiveThumb", ReceiveThumb);
 
 mediaHubconnection.start().then(function () {
     console.log("MediaHub is ready.");
-    loadThumb(path, 1);
+    loadThumb(listingPath, 1);
 }).catch(function (err) {
     return console.error(err.toString());
 });
