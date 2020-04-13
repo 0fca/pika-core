@@ -1,5 +1,5 @@
 ﻿@model string
-@if (!String.IsNullOrEmpty(Model))
+@if (!string.IsNullOrEmpty(Model))
 {
     var type = Model.StartsWith("Error") ? "times" : "check";
     <div class="row">

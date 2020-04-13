@@ -3,6 +3,10 @@
     if (Model != null && Model.Lines != null) {
         content = Model.Lines.Aggregate(content, (current, item) => current + (item + "\n"));
     }
+    else
+    {
+        content = "Logs are disabled at the moment.";
+    }
 }
 <textarea class="log-area" wrap="hard" id="log-area" readonly>
     @content

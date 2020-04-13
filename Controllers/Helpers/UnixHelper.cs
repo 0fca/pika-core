@@ -3,6 +3,7 @@ using Mono.Unix;
 using System;
 using System.IO;
 using System.Linq;
+using PikaCore.Controllers.App;
 
 namespace PikaCore.Controllers.Helpers
 {

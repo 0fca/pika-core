@@ -8,37 +8,38 @@
 
 <div class="row">
     <h1>Pika Cloud Critical Error</h1>
-    <section class="col s12">
+    <div class="row">
         If you can read this it means that something went wrong.
         This page handles errors of Pika Cloud system. Details are below, please copy them and pass to the administrator. Thanks and sorry for the inconvenience.<br />
-        <br />
-        @if (Model != null)
-        {
-            if (Model.ShowRequestId)
-            {
-        <span class="text-info">
-            <strong>Request ID:</strong> <code>@Model.RequestId</code>
-            <br>
-            <strong>Message: </strong><code>@Model.Message</code>
-            <br>
-            <strong>Code: </strong><code>@Model.ErrorCode</code>
-            <br />
-
-            <strong>URL: </strong>
-            <code>
-                @{
-                    var url = !(String.IsNullOrEmpty(Model.Url)) ? Model.Url : "unknown";
-                }
-		@url
-            </code>
-        </span>
-            }
-        }
         <div class="col s12 m12 l12">
-            <img class="responsive-img center-align" src="~/images/logooftheyear2018-128x128.png" width="128" height="128" alt="pika" />
-        </div>
-    </section>
+            @if (Model != null)
+            {
+                <span class="text-info">
+                    @if (Model.ShowRequestId)
+                    {
+                        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+                        <br/>
+                    }
+                    <strong>Message: </strong><code>@Model.Message</code>
+                    <br>
+                    <strong>Code: </strong><code>@Model.ErrorCode</code>
+                    <br/>
 
+                    <strong>URL: </strong>
+                    <code>
+                        @Model.Url
+                    </code>
+                </span>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s4 m4 l4"></div>
+        <div class="col s4 m4 l4">
+            <img class="responsive-img center-align" src="https://http.cat/@Model.ErrorCode" width="666" height="499" alt="Sorry, am having spanko now."/>
+        </div>
+        <div class="col s4 m4 l4"></div>
+    </div>
 </div>
 
 

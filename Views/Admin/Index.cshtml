@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Panel";
-    var msg = ViewData["returnMessage"];
+    var msg = @TempData["StatusMessage"];
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -62,7 +62,7 @@
             <a class="nav-link teal-text" href="#">Logs</a>
         </div>
         <div class="collapsible-body log-area">
-            @await Html.PartialAsync("_LogsViewPartial.cshtml", Model.LogsListViewModel)
+            <strong>Logs are disabled in application, migrating to Filebeat.</strong>
         </div>
     </li>
 </ul>

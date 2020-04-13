@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -27,7 +26,6 @@ namespace PikaCore.Controllers.App
 {
     public class StorageController : Controller
     {
-        private readonly IFileProvider _fileProvider;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IArchiveService _archiveService;
         private readonly IFileService _fileService;
@@ -39,8 +37,14 @@ namespace PikaCore.Controllers.App
         private readonly IHubContext<StatusHub> _hubContext;
         private readonly IdDataProtection _idDataProtection;
 
-        public StorageController(IFileProvider fileProvider, 
-               SignInManager<ApplicationUser> signInManager,
+
+        #region TempDataMessages
+        [TempData(Key = "showGenerateUrlPartial")]public  bool ShowGenerateUrlPartial { get; set; }
+        [TempData(Key = "returnMessage")] public  string ReturnMessage { get; set; }
+
+        #endregion
+
+        public StorageController(SignInManager<ApplicationUser> signInManager,
                IArchiveService archiveService, IFileService fileService, IUrlGenerator iUrlGenerator,
                StorageIndexContext storageIndexContext,
                IFileLoggerService fileLoggerService,
@@ -49,7 +53,6 @@ namespace PikaCore.Controllers.App
                IdDataProtection idDataProtection)
         {
             _signInManager = signInManager;
-            _fileProvider = fileProvider;
             _archiveService = archiveService;
             _fileService = fileService;
             _urlGeneratorService = iUrlGenerator;
@@ -72,7 +75,6 @@ namespace PikaCore.Controllers.App
         [AllowAnonymous]
         public async Task<IActionResult> Browse(string path, int offset = 0, int count = 50)
         {
-            
             if (string.IsNullOrEmpty(path))
             {
                 path = Path.DirectorySeparatorChar.ToString();
@@ -88,21 +90,11 @@ namespace PikaCore.Controllers.App
                     new ErrorViewModel
                     {
                         ErrorCode = -1,
-                        Message = "There was an error while reading directory content.",
-                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+                        Message = "There was an error while reading directory content."
                     });
             var lrmv = new FileResultViewModel();
             if (contents.Exists)
             {
-                try
-                {
-                    UnixHelper.HasAccess(osUser, path);
-                }
-                catch (InvalidOperationException ex)
-                {
-                    _loggerService.LogToFileAsync(LogLevel.Debug, "localhost", ex.Message);
-                }
-
                 lrmv.Contents = contents;
                 lrmv.ContentsList = contents.ToList();
 
@@ -134,44 +126,42 @@ namespace PikaCore.Controllers.App
                     lrmv.ApplyPaging(offset, count);
                 }
 
-                if (_fileProvider.GetFileInfo(path).Exists)
+                var fileInfo = _fileService.RetrieveFileInfoFromSystemPath(path);
+                if (fileInfo.Exists)
                 {
-                    return RedirectToAction(nameof(Download), new { @id = _fileProvider.GetFileInfo(path).Name });
+                    return RedirectToAction(nameof(Download), new { @id = fileInfo.Name });
                 }
 
                 return View(lrmv);
             }
 
-            TempData["returnMessage"] = "The resource doesn't exist on the filesystem.";
+            ReturnMessage = "The resource doesn't exist on the filesystem.";
             return View(lrmv);
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin, FileManagerUser, User")]
         [Route("/[controller]/[action]/{name?}")]
         public async Task<IActionResult> GenerateUrl(string name, string returnUrl)
         {
             var entryName = _idDataProtection.Decode(name);
 
-            var message = "Couldn't generate token for that resource.";
-
             if (!string.IsNullOrEmpty(entryName))
             {
-                TempData["showGenerateUrlPartial"] = false;
+                ShowGenerateUrlPartial = false;
                 try
                 {
                     var s = _storageIndexContext.IndexStorage.ToList().Find(record => record.AbsolutePath.Equals(entryName));
 
                     if (s == null)
                     {
-                        s = new StorageIndexRecord { AbsolutePath = entryName };
-                        s.Urlhash = _urlGeneratorService.GenerateId(s.AbsolutePath);
-                        var user = await _signInManager.UserManager.GetUserAsync(HttpContext.User);
-                        s.UserId = user != null
-                                ? await _signInManager.UserManager.GetEmailAsync(user)
-                                : HttpContext.Connection.RemoteIpAddress.ToString();
-                        s.Expires = true;
-                        s.ExpireDate = ComputeDateTime();
+                        s = new StorageIndexRecord
+                        {
+                            AbsolutePath = entryName,
+                            Urlhash = _urlGeneratorService.GenerateId(entryName),
+                            UserId = await IdentifyUser(),
+                            Expires = true
+                        };
                         _storageIndexContext.Add(s);
                         
                         await _storageIndexContext.SaveChangesAsync();
@@ -180,22 +170,13 @@ namespace PikaCore.Controllers.App
                     {
                         if (s.ExpireDate.Date == DateTime.Now.Date || s.ExpireDate.Date < DateTime.Now.Date)
                         {
-                            s.ExpireDate = ComputeDateTime();
                             _storageIndexContext.Update(s);
                             await _storageIndexContext.SaveChangesAsync();
-                        }
-                        else
-                        {
-                            _loggerService.LogToFileAsync(LogLevel.Warning, 
-                                HttpContext.Connection.RemoteIpAddress.ToString(), 
-                                "Record for the file: " 
-                                + entryName 
-                                + " exists in the database, no need of updating it.");
                         }
                     }
 
                     TempData["urlhash"] = s.Urlhash;
-                    TempData["showGenerateUrlPartial"] = true;
+                    ShowGenerateUrlPartial = true;
                     var port = HttpContext.Request.Host.Port;
                     TempData["host"] = HttpContext.Request.Host.Host + 
                                        (port != null ? ":" + HttpContext.Request.Host.Port : "");
@@ -208,16 +189,16 @@ namespace PikaCore.Controllers.App
                     _loggerService.LogToFileAsync(LogLevel.Error, 
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         ex.Message);
-                    message = ex.Message;
-                    TempData["returnMessage"] = message;
+                    ReturnMessage = ex.Message;
                     return RedirectToAction(nameof(Browse), new { @path = returnUrl });
                 }
             }
 
-            TempData["returnMessage"] = message;
+            ReturnMessage = "Couldn't generate token for that resource.";
             return RedirectToAction(nameof(Browse), new { @path = returnUrl });
         }
 
+       
         [HttpGet]
         [AllowAnonymous]
         [Route("/[controller]/[action]/{id?}")]
@@ -248,20 +229,20 @@ namespace PikaCore.Controllers.App
                                 }
                                 _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Request.Host.Value,
                                     "Couldn't read requested resource: " + s.AbsolutePath);
-                                TempData["returnMessage"] = "Couldn't read requested resource: " + s.Urlid;
+                                ReturnMessage = "Couldn't read requested resource: " + s.Urlid;
                                 return RedirectToAction(nameof(Browse));
                         }
-                        TempData["returnMessage"] =
+                        ReturnMessage =
                                         "It seems that this url expired today, you need to generate a new one.";
                         
                         return RedirectToAction(nameof(Browse), new { path = returnPath });
                     }
-                    TempData["returnMessage"] = "It seems that given token doesn't exist in the database.";
+                    ReturnMessage = "It seems that given token doesn't exist in the database.";
                     return RedirectToAction(nameof(Browse));
                 }
                 catch (InvalidOperationException ex)
                 {
-                    TempData["returnMessage"] = s != null 
+                    ReturnMessage = s != null 
                         ? "Couldn't read requested resource: " + s.Urlid 
                         : "Database error occured.";
                     
@@ -271,7 +252,7 @@ namespace PikaCore.Controllers.App
                     return RedirectToAction(nameof(Browse));
                 }
             }
-            TempData["returnMessage"] = "No id given or database is down.";
+            ReturnMessage = "No id given or database is down.";
             return RedirectToAction(nameof(Browse));
         }
 
@@ -289,7 +270,7 @@ namespace PikaCore.Controllers.App
 
                     if (!fileInfo.Exists)
                     {
-                        TempData["returnMessage"] = "File doesn't exist on server's filesystem.";
+                        ReturnMessage = "File doesn't exist on server's filesystem.";
                         if (z)
                             path = string.Concat(Constants.Tmp, id);
                         else
@@ -306,11 +287,11 @@ namespace PikaCore.Controllers.App
 
                     if (Directory.Exists(path))
                     {
-                        TempData["returnMessage"] = "This is a folder, cannot download it directly.";
+                        ReturnMessage = "This is a folder, cannot download it directly.";
                         return RedirectToAction(nameof(Browse), new { @path = returnUrl });
                     }
 
-                    TempData["returnMessage"] = "The path " + path + " does not exist on server's filesystem.";
+                    ReturnMessage = "The path " + path + " does not exist on server's filesystem.";
                     return RedirectToAction(nameof(Browse), new { @path = returnUrl });
                 }
             }catch(Exception e){
@@ -320,7 +301,7 @@ namespace PikaCore.Controllers.App
             _loggerService.LogToFileAsync(LogLevel.Error, 
                 HttpContext.Connection.RemoteIpAddress.ToString(), 
                 "Couldn't read requested resource: " + id);
-            TempData["returnMessage"] = "Couldn't read requested resource.";
+            ReturnMessage = "Couldn't read requested resource.";
             return RedirectToAction(nameof(Browse), new { @path = returnUrl });
 
         }
@@ -334,10 +315,8 @@ namespace PikaCore.Controllers.App
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                  thumbFileName
                                                  );
-            using (var thumbFileStream = _fileService.AsStreamAsync(absoluteThumbPath))
-            {
-                return File(thumbFileStream, "image/jpeg");
-            }
+            using var thumbFileStream = _fileService.AsStreamAsync(absoluteThumbPath);
+            return File(thumbFileStream, "image/jpeg");
         }
 
         [HttpPost]
@@ -352,13 +331,11 @@ namespace PikaCore.Controllers.App
 
             foreach (var formFile in files.Where(formFile => formFile.Length > 0))
             {
-                using (var stream = new FileStream(filePath 
-                                                   + Path.DirectorySeparatorChar 
-                                                   + formFile.FileName, 
-                    FileMode.Create))
-                {
-                    await formFile.CopyToAsync(stream);
-                }
+                await using var stream = new FileStream(filePath 
+                                                        + Path.DirectorySeparatorChar 
+                                                        + formFile.FileName, 
+                    FileMode.Create);
+                await formFile.CopyToAsync(stream);
             }
 
             var uploadedFiles = Directory.GetFiles(Constants.Tmp + Constants.UploadTmp);
@@ -367,9 +344,9 @@ namespace PikaCore.Controllers.App
                 await _fileService.MoveFromTmpAsync(Path.GetFileName(file), Constants.UploadDirectory);
             }
 
-            TempData["returnMessage"] = files.Count 
-                                        + " files uploaded of summary size " 
-                                        + FileSystemAccessor.DetectUnitBySize(size);
+            ReturnMessage = files.Count 
+                            + " files uploaded of summary size " 
+                            + FileSystemAccessor.DetectUnitBySize(size);
 	    /*if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
     {
         ModelState.AddModelError("File", 
@@ -465,7 +442,7 @@ namespace PikaCore.Controllers.App
         {
             var output = string.Concat(Constants.Tmp, Path.GetDirectoryName(id), ".zip");
 
-            var path = _fileProvider.GetFileInfo(id).PhysicalPath;
+            var path = "";
 
             if (!((ArchiveService)_archiveService).WasStartedAlready())
             {
@@ -486,16 +463,16 @@ namespace PikaCore.Controllers.App
                                 @z = true 
                             });
                     }
-                    TempData["returnMessage"] = "Archiving was cancelled by user.";
+                    ReturnMessage = "Archiving was cancelled by user.";
                     return RedirectToAction(nameof(Browse));
 
                 }
 
-                TempData["returnMessage"] = "Something unexpected happened.";
+                ReturnMessage = "Something unexpected happened.";
                 return RedirectToAction(nameof(Browse));
             }
 
-            TempData["returnMessage"] = "All signs on the Earth and on the sky say that you have already ordered Pika Cloud to zip something.";
+            ReturnMessage = "All signs on the Earth and on the sky say that you have already ordered Pika Cloud to zip something.";
             return RedirectToAction(nameof(Browse));
         }
 
@@ -513,7 +490,7 @@ namespace PikaCore.Controllers.App
                 {
                     var dirInfo = await _fileService.Create(_fileService.RetrieveAbsoluteFromSystemPath(name));
                     
-                    TempData["returnMessage"] = "Successfully created directory: " + dirInfo.Name;
+                    ReturnMessage = "Successfully created directory: " + dirInfo.Name;
                     _loggerService.LogToFileAsync(LogLevel.Information,
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         "Created directory: " 
@@ -524,12 +501,12 @@ namespace PikaCore.Controllers.App
                 {
                     _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(),
                         "Couldn't create directory because of " + e.Message);
-                    TempData["returnMessage"] = "Error: Couldn't create directory.";
+                    ReturnMessage = "Error: Couldn't create directory.";
                     return RedirectToAction(nameof(Browse), new { path = returnUrl });
                 }
             }
 
-            TempData["returnMessage"] = "You cannot use non-alphabetic characters in directory names.";
+            ReturnMessage = "You cannot use non-alphabetic characters in directory names.";
             return RedirectToAction(nameof(Browse), new { path = returnUrl });
         }
 
@@ -561,18 +538,18 @@ namespace PikaCore.Controllers.App
                     _loggerService.LogToFileAsync(LogLevel.Information, 
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         "Successfully deleted elements.");
-                    TempData["returnMessage"] = "Successfully deleted elements.";
+                    ReturnMessage = "Successfully deleted elements.";
                     return RedirectToAction(nameof(Browse), new { path = returnPath });
                 }
                 catch
                 { 
-                    TempData["returnMessage"] = "Error: Couldn't delete resource.";
+                    ReturnMessage = "Error: Couldn't delete resource.";
                     return RedirectToAction(nameof(Browse), new { path =  returnPath});
                 }
             }
             else
             {
-                TempData["returnMessage"] = "Error: Nothing to be deleted.";
+                ReturnMessage = "Error: Nothing to be deleted.";
                 return RedirectToAction(nameof(Browse), new { path = returnPath });
             }
         }
@@ -608,11 +585,11 @@ namespace PikaCore.Controllers.App
                 var isRenamed = _fileService.Move(Path.Combine(rfm.AbsoluteParentPath, rfm.OldName), Path.Combine(rfm.AbsoluteParentPath, rfm.NewName));
                 if (!isRenamed)
                 {
-                    TempData["returnMessage"] = "Couldn't renamed to " + rfm.NewName;
+                    ReturnMessage = "Couldn't renamed to " + rfm.NewName;
                     return RedirectToAction(nameof(Browse),
                         new {path = rfm.ReturnUrl});
                 }
-                TempData["returnMessage"] = "Successfully renamed to " + rfm.NewName;
+                ReturnMessage = "Successfully renamed to " + rfm.NewName;
 
                 return RedirectToAction(nameof(Browse), 
                     new { path = rfm.ReturnUrl });
@@ -637,9 +614,17 @@ namespace PikaCore.Controllers.App
 
         #region HelperMethods
 
+        private async Task<string> IdentifyUser()
+        {
+            var user = await _signInManager.UserManager.GetUserAsync(HttpContext.User);
+            return user != null
+                ? await _signInManager.UserManager.GetEmailAsync(user)
+                : HttpContext.Connection.RemoteIpAddress.ToString();
+        }
+
         private IDirectoryContents GetContents(string systemPath)
         {
-            return _fileProvider.GetDirectoryContents(systemPath);
+            return _fileService.GetDirectoryContents(systemPath);
         }
 
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
@@ -652,12 +637,6 @@ namespace PikaCore.Controllers.App
             return !System.IO.File.Exists(name);
         }
 
-        private static DateTime ComputeDateTime()
-        {
-            var now = DateTime.Now;
-            now = now.AddDays(Constants.DayCount);
-            return now;
-        }
         #endregion
 
         #region CookierHelperMethods

@@ -1,15 +1,14 @@
-﻿@inject UserManager<ApplicationUser> UserManager
+﻿<!DOCTYPE html>
+@inject UserManager<ApplicationUser> UserManager
 @{ 
     var role = "";
     if (User.Identity.Name != null)
     {
         role = (UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).Result.ElementAt(0);
-
         ViewData["Role"] = role;
     }
 
 }
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -41,8 +40,7 @@
                     <img class="responsive-img hide-on-med-and-down" src="~/images/logooftheyear2018.png" width="96" height="64" alt="Hannah"/>
                 </a>
 
-                
-                @await Html.PartialAsync("_LoginPartial")
+                @await Html.PartialAsync("_LinksPartial")
                 
             </div>
         </nav>
@@ -52,9 +50,17 @@
     </ul>
 </form>
 <environment include="Development">
-<div class="row">
-    <p class="red-text text-lighten-1 center-align">This is an developer instance of Pika Core Application.</p>
-</div>
+    <div class="row">
+        <div class="col m4 l4">
+        </div>
+        <div class="col s12 m4 l4">
+            <div class="card-panel red darken-3 center-align">
+                <strong class="white-text">This is an developer instance of Pika Core Application.</strong>
+            </div>
+        </div>
+        <div class="col m4 l4">
+        </div>
+    </div>
 </environment>
 <div class="container d-flex justify-content-center container-padding">
     @RenderBody()
@@ -94,7 +100,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const elems = document.querySelectorAll('.modal');
-        const instances = M.Modal.init(elems, options);
+        const instances = M.Modal.init(elems);
     });
 </script>
 @RenderSection("Scripts", required: false)

@@ -1,16 +1,16 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using PikaCore.Models;
 using PikaCore.Models.AccountViewModels;
 using PikaCore.Services;
 
-namespace PikaCore.Controllers
+namespace PikaCore.Controllers.App
 {
     [Authorize]
     [Route("[controller]/[action]")]
@@ -29,8 +29,7 @@ namespace PikaCore.Controllers
             _logger = logger;
         }
 
-        [TempData]
-        public string ErrorMessage { get; set; }
+        [TempData] private string ErrorMessage { get; set; }
 
         [HttpGet]
         [AllowAnonymous]
@@ -49,32 +48,27 @@ namespace PikaCore.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+            if (result.Succeeded)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User logged in.");
-                    return RedirectPermanent(returnUrl);
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToAction(nameof(LoginWith2Fa), new { returnUrl, model.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToAction(nameof(Lockout));
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return View(model);
-                }
+                _logger.LogInformation("User logged in.");
+                return RedirectPermanent(returnUrl);
             }
-
-            // If we got this far, something failed, redisplay form
-            return View(model);
+            if (result.RequiresTwoFactor)
+            {
+                return RedirectToAction(nameof(LoginWith2Fa), new { returnUrl, model.RememberMe });
+            }
+            if (result.IsLockedOut)
+            {
+                _logger.LogWarning("User account locked out.");
+                return RedirectToAction(nameof(Lockout));
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return View(model);
+            }
         }
 
         [HttpGet]
@@ -90,7 +84,7 @@ namespace PikaCore.Controllers
             }
 
             var model = new LoginWith2FaViewModel { RememberMe = rememberMe };
-            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/Home/" : returnUrl;
 
             return View(model);
         }
@@ -208,7 +202,7 @@ namespace PikaCore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
         {
-            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/Home/" : returnUrl;
             if (!ModelState.IsValid) return View(model);
             
             var user = new ApplicationUser { UserName = model.Email, Email = model.Email };

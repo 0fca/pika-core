@@ -1,11 +1,14 @@
+using System.Diagnostics;
+using Microsoft.AspNetCore.Http;
+
 namespace PikaCore.Models
 {
     public class ErrorViewModel
     {
-        public string RequestId { get; set; }
+        public string RequestId { get; set; } = Activity.Current?.Id ?? "No data";
         public int ErrorCode { get; set; } = 500;
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-        public string Url { get; set; }
+        public string Url { get; set; } = "Unknown";
         public string Message { get; set; } = "Unknown error occured.";
     }
 }

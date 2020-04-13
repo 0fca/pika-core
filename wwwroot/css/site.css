@@ -277,15 +277,14 @@ a, a:hover, a:focus {
     margin-left: 120px !important;
 }
 
-
-::placeholder { /* Most modern browsers support this now. */
-    color:    #0f0f0f !important;
-}
-
 .pagination li.active{
     background-color: #009688 !important;
 }
 
 .alert-danger {
     color: red;
+}
+
+.app-menu-item {
+    font-size: 24px;
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PikaCore.Models;
 
-namespace PikaCore.Controllers
+namespace PikaCore.Controllers.App
 {
     public class HomeController : Controller
     {

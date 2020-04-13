@@ -1,18 +1,18 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using PikaCore.Models;
 using PikaCore.Models.ManageViewModels;
 using PikaCore.Services;
 
-namespace PikaCore.Controllers
+namespace PikaCore.Controllers.App
 {
     [Authorize]
     [Route("[controller]/[action]")]
@@ -22,7 +22,6 @@ namespace PikaCore.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UrlEncoder _urlEncoder;
         private readonly IFileLoggerService _loggerService;
-        private readonly IUrlGenerator _urlUrlGeneratorService;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -31,17 +30,15 @@ namespace PikaCore.Controllers
           UserManager<ApplicationUser> userManager,
           SignInManager<ApplicationUser> signInManager,
           UrlEncoder urlEncoder,
-          IFileLoggerService loggerService,
-          IUrlGenerator urlGenerator)
+          IFileLoggerService loggerService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _urlEncoder = urlEncoder;
             _loggerService = loggerService;
-            _urlUrlGeneratorService = urlGenerator;
         }
 
-        [TempData] private string StatusMessage { get; set; }
+        [TempData] public string StatusMessage { get; set; }
 
         [HttpGet]
         public async Task<IActionResult> Index()

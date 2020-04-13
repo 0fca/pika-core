@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using PikaCore.Controllers;
+using PikaCore.Controllers.App;
 
 namespace PikaCore.Models
 {
@@ -18,7 +20,13 @@ namespace PikaCore.Models
         [Required]
         public bool Expires { get; set; }
 
-        [Required]
-        public DateTime ExpireDate { get; set; }
+        [Required] public DateTime ExpireDate { get; set; } = ComputeDateTime();
+
+        private static DateTime ComputeDateTime()
+        {
+            var now = DateTime.Now;
+            now = now.AddDays(Constants.DayCount);
+            return now;
+        }
     }
 }

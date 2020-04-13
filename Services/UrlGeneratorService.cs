@@ -7,13 +7,11 @@ namespace PikaCore.Services
 {
     public class HashUrlGeneratorService : IUrlGenerator
     {
-        private static KeyDerivationPrf Prf { get; set; } = KeyDerivationPrf.HMACSHA256;
+        private static KeyDerivationPrf Prf { get; set; } = KeyDerivationPrf.HMACSHA1;
         public string GenerateId(string aboslutePath)
         {
             return Hash(aboslutePath);
         }
-
-
 
         private static string Hash(string input)
         {

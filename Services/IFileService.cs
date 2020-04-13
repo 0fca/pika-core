@@ -23,6 +23,10 @@ namespace PikaCore.Services
 
         string RetrieveSystemPathFromAbsolute(string absolutePath);
 
+        IFileInfo RetrieveFileInfoFromSystemPath(string systemPath);
+
         IFileInfo RetrieveFileInfoFromAbsolutePath(string path);
+
+        IDirectoryContents GetDirectoryContents(string systemPath);
     }
 }

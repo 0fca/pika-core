@@ -1,8 +1,8 @@
 using System.Runtime.InteropServices;
 
-namespace PikaCore.Controllers
+namespace PikaCore.Controllers.App
 {
-    public sealed class Constants
+    public static class Constants
     {
 
         static Constants()
@@ -32,7 +32,5 @@ namespace PikaCore.Controllers
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) OsName = OSPlatform.Windows.ToString();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) OsName = OSPlatform.Linux.ToString();
         }
-
-
     }
 }

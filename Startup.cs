@@ -17,6 +17,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using PikaCore.Controllers;
+using PikaCore.Controllers.App;
 using PikaCore.Data;
 using PikaCore.Extensions;
 using PikaCore.Models;
@@ -108,17 +109,16 @@ namespace PikaCore
                 options.LoginPath = "/Account/Login";
 
             });
-	    
-
+            
     	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
             {
                 builder
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowAnyOrigin();
+                    .WithMethods("POST", "GET")
+                    .WithOrigins("me.lukas-bownik.net", "core.lukas-bownik.net", "dev-core.lukas-bownik.net",
+                        "localhost")
+                    .AllowAnyHeader();
             }));
-
-	   
+            
             services.AddSignalR();
             services.AddSession(options =>
             {

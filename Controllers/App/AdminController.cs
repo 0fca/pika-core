@@ -20,7 +20,10 @@ namespace PikaCore.Controllers.App
         private readonly IFileLoggerService _loggerService;
         private readonly IUrlGenerator _urlUrlGeneratorService;
 
-        [TempData] private string StatusMessage { get; set; }
+        [TempData] 
+        public string StatusMessage { get; set; }
+        [TempData(Key = "newPassword")]
+        public string NewPassword { get; set; }
 
         public AdminController(
             UserManager<ApplicationUser> userManager,
@@ -36,10 +39,6 @@ namespace PikaCore.Controllers.App
         [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
-            var logListViewModel = new LogsListViewModel
-            {
-                Lines = _loggerService.GetLogs().Result
-            };
             var usersWithRoles = new Dictionary<ApplicationUser, IList<string>>();
 
             if (usersWithRoles.Count == 0)
@@ -53,10 +52,10 @@ namespace PikaCore.Controllers.App
 
             var adminPanelViewModel = new AdminPanelViewModel
             {
-                LogsListViewModel = logListViewModel,
+                LogsListViewModel = null,
                 UsersWithRoles = usersWithRoles
             };
-            ViewData["returnMessage"] = TempData["returnMessage"];
+            
             return View(adminPanelViewModel);
         }
 
@@ -74,7 +73,7 @@ namespace PikaCore.Controllers.App
             _urlUrlGeneratorService.SetDerivationPrf(KeyDerivationPrf.HMACSHA256);
             var hash = _urlUrlGeneratorService.GenerateId(guid);
             await _userManager.ResetPasswordAsync(userModel, token, hash);
-            TempData["newPassword"] = hash;
+            NewPassword = hash;
 
             return RedirectToAction(nameof(Index));
         }
@@ -111,7 +110,7 @@ namespace PikaCore.Controllers.App
                 await _userManager.AddToRolesAsync(userModel, editModel.Roles);
             }
             var result = await _userManager.UpdateAsync(userModel);
-            TempData["returnMessage"] = result.Succeeded ? "Successfully edited user's information." : "Could not edit user's information.";
+            StatusMessage = result.Succeeded ? "Successfully edited user's information." : "Could not edit user's information.";
             return RedirectToAction(nameof(Index), "Admin");
         }
 
@@ -153,7 +152,7 @@ namespace PikaCore.Controllers.App
         public async Task<IActionResult> DeleteConfirmation(string id)
         {
             var result = await _userManager.DeleteAsync(await _userManager.FindByIdAsync(id));
-            TempData["returnMessage"] = result.Succeeded ? "Successfully deleted user of id " + id : "Could not delete user of id " + id;
+            StatusMessage = result.Succeeded ? "Successfully deleted user of id " + id : "Could not delete user of id " + id;
             return RedirectToAction(nameof(Index), "Admin");
         }
 

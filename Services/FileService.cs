@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using PikaCore.Controllers;
+using PikaCore.Controllers.App;
 
 namespace PikaCore.Services
 {
@@ -59,11 +60,21 @@ namespace PikaCore.Services
                 (_configuration.GetSection("Paths")[Constants.OsName + "-root"]).Length - 1);
         }
 
+        public IFileInfo RetrieveFileInfoFromSystemPath(string systemPath)
+        {
+            return this._fileProvider.GetFileInfo(systemPath);
+        }
+
         public IFileInfo RetrieveFileInfoFromAbsolutePath(string absolutePath)
         {
             var fileInfo = _fileProvider.GetFileInfo(absolutePath.Remove(0,
                 (_configuration.GetSection("Paths")[Constants.OsName + "-root"]).Length - 1));
             return fileInfo;
+        }
+
+        public IDirectoryContents GetDirectoryContents(string systemPath)
+        {
+            return _fileProvider.GetDirectoryContents(systemPath);
         }
 
         public Stream AsStreamAsync(string absolutePath, int bufferSize = 8192, bool useAsync = true)
