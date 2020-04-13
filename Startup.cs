@@ -15,6 +15,7 @@ using PikaCore.Services;
 using PikaCore.Services.Helpers;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.Hosting;
 using PikaCore.Controllers;
 using PikaCore.Controllers.App;
@@ -113,7 +114,7 @@ namespace PikaCore
     	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
             {
                 builder
-                    .WithMethods("POST", "GET")
+                    .AllowAnyMethod()
                     .WithOrigins("me.lukas-bownik.net", "core.lukas-bownik.net", "dev-core.lukas-bownik.net",
                         "localhost")
                     .AllowAnyHeader();
@@ -205,9 +206,24 @@ namespace PikaCore
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
-                endpoints.MapHub<StatusHub>("/hubs/status");
-                endpoints.MapHub<FileOperationHub>("/hubs/files");
-                endpoints.MapHub<MediaHub>("/hubs/media");
+                endpoints.MapHub<StatusHub>("/hubs/status", options =>
+                {
+                    options.Transports =
+                        HttpTransportType.WebSockets |
+                        HttpTransportType.ServerSentEvents;
+                });
+                endpoints.MapHub<FileOperationHub>("/hubs/files", options =>
+                {
+                    options.Transports =
+                        HttpTransportType.WebSockets |
+                        HttpTransportType.ServerSentEvents;
+                });
+                endpoints.MapHub<MediaHub>("/hubs/media", options =>
+                {
+                    options.Transports =
+                        HttpTransportType.WebSockets |
+                        HttpTransportType.ServerSentEvents;
+                });
             });
             
             CreateRoles(serviceProvider).Wait();

@@ -1,20 +1,9 @@
-﻿const mediaHubconnection = new signalR.HubConnectionBuilder().withUrl("/hubs/media",
-				{                   
-					transport: 2,
-					skipNegotiation: false
-			   	})
+﻿const mediaHubconnection = new signalR.HubConnectionBuilder()
+                        .withUrl("/hubs/media", {
+                            transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.ServerSentEvents 
+                        })
 	            		.configureLogging(signalR.LogLevel.Information)
 				.build();
-
-async function start() {
-    try {
-        await mediaHubconnection.start();
-        console.log("connected");
-    } catch (err) {
-        console.log(err);
-        setTimeout(() => start(), 5000);
-    }
-}
 
 mediaHubconnection.onclose(async () => {
     await start();
@@ -28,6 +17,16 @@ mediaHubconnection.start().then(function () {
 }).catch(function (err) {
     return console.error(err.toString());
 });
+
+async function start() {
+    try {
+        await mediaHubconnection.start();
+        console.log("connected");
+    } catch (err) {
+        console.log(err);
+        setTimeout(() => start(), 5000);
+    }
+}
 
 function setErrorIcon(guid, err) {
     const imgEl = document.getElementById(guid);
