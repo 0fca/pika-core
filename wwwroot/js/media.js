@@ -29,7 +29,7 @@ mediaHubconnection.start().then(function () {
     return console.error(err.toString());
 });
 
-function setErrorIcon(guid) {
+function setErrorIcon(guid, err) {
     const imgEl = document.getElementById(guid);
     const imgParentLink = imgEl.parentElement;
     const icon = document.createElement("i");
@@ -38,7 +38,7 @@ function setErrorIcon(guid) {
     icon.innerText = "error";
     imgParentLink.insertBefore(icon, imgEl);
     imgParentLink.removeChild(imgEl);
-    console.log(err.toString());
+    console.log(err);
 }
 
 function loadThumb(path, s) {
@@ -53,7 +53,7 @@ function loadThumb(path, s) {
             const systemPath = path.toString() + text;
             
             mediaHubconnection.invoke("CreateThumb", systemPath, guid, 1).catch(err => {
-                setErrorIcon(guid);
+                setErrorIcon(guid, err.toString());
             });
         }
     }
@@ -64,6 +64,6 @@ function ReceiveThumb(thumbId) {
         const url = "/Storage/Thumb?id=" + thumbId;
         document.getElementById(thumbId).setAttribute("src", url);
     }else{
-        setErrorIcon(thumbId);
+        setErrorIcon(thumbId, "Error receivinf thumb url from server.");
     }
 }
