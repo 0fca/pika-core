@@ -23,7 +23,7 @@ namespace PikaCore.Controllers.Api.Hubs
         {
             var thumbId = await _mediaService.CreateThumb(systemPath, guid, s);
 
-            await Clients.User(_userManager.GetUserId(Context.User)).SendAsync("ReceiveThumb", thumbId);
+            await Clients.User(_userManager.GetUserId(Context.User)).SendAsync("ReceiveThumb", thumbId ?? guid);
         }
     }
 }
