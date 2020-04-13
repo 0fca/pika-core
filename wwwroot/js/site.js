@@ -4,7 +4,7 @@ function searchFileList(){
     let fileList = document.getElementById("file-list").querySelectorAll(".row");
 
     if(searchParam !== ""){
-        for(let i = 1; i < fileList.length - 1; i ++){
+        for(let i = 2; i < fileList.length - 1; i ++){
             if (!fileList[i].children[0].textContent.toLowerCase().includes(searchParam.toLowerCase())) {
                 fileList[i].setAttribute("hidden", true);
                 
@@ -75,7 +75,7 @@ function onPathSpanOut() {
 }
 
 function scrollLogAreaToEnd() {
-    var textarea = document.getElementById('log-area');
+    const textarea = document.getElementById('log-area');
     textarea.scrollTop = textarea.scrollHeight;
 }
 

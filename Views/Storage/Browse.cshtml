@@ -50,7 +50,6 @@
 @await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
 
 <div id="file-list" class="collection">
-    
     <div class="row">
         <div class="col s5 l7 m8">
             <span>File and directory count: @Model.ContentsList.Count</span>
@@ -204,8 +203,6 @@
 
 <script src="~/js/media.js" asp-append-version="true"></script>
 <script>
-    const path = "@lastPath";
-
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
         if (e.code === "Enter") {
             searchFileList();
@@ -215,7 +212,7 @@
     document.getElementById("pathField").addEventListener("keydown", (key) => {
         if (key.code === "Enter") {
             const path = document.getElementById("pathField").value;
-            location = `/Storage?path=${path}`;
+            window.location = `/Storage/Browse?path=${path}`;
         }
     });
 
@@ -230,5 +227,4 @@
         const elems = document.querySelectorAll('.autocomplete');
         const instances = M.Autocomplete.init(elems, {});
     })
-
 </script>
