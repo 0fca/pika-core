@@ -102,7 +102,10 @@
                     }
             </div>
             <div class="col m2 l2 hide-on-small-only">
-                <p>@item.LastModified</p>
+                @{
+                    var dateString = @item.LastModified.Date.ToLongDateString();
+                }
+                <p>@dateString</p>
             </div>
             <div class="col m2 l2">
                 @if (!item.IsDirectory)
@@ -120,11 +123,11 @@
                                     }
                                 }
                                 unitStrPart = Math.Round(i / Math.Pow(1024, unitIndex), 2) + " " + units[unitIndex];
-                <p>@unitStrPart</p>
+                                <p>@unitStrPart</p>
                             }
                             else
                             {
-                <p>---</p>
+                                <p>---</p>
                             }
             </div>
             <div class="col m2 l2 opt-font">

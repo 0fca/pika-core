@@ -44,7 +44,7 @@ function loadThumb(path, s) {
             const guid = img.getAttribute("id");
             const text = img.getAttribute("alt");
             const systemPath = path.toString() + text;
-            
+            console.log(guid);
             mediaHubconnection.invoke("CreateThumb", systemPath, guid, 1).catch(err => {
                 setErrorIcon(guid, err.toString());
             });
