@@ -53,7 +53,7 @@ function loadThumb(path, s) {
             const systemPath = path.toString() + text;
             
             mediaHubconnection.invoke("CreateThumb", systemPath, guid, 1).catch(err => {
-                setErrorIcon();
+                setErrorIcon(guid);
             });
         }
     }
