@@ -20,6 +20,28 @@
       <EmbeddedResource Remove="Services\Helpers\Jobs\**" />
       <None Remove="Services\Helpers\Jobs\**" />
       <TypeScriptCompile Remove="Services\Helpers\Jobs\**" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\AbortController.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\browser-index.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Errors.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HandshakeProtocol.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HttpClient.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HttpConnection.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HubConnection.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HubConnectionBuilder.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\IConnection.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\IHttpConnectionOptions.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\IHubProtocol.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\ILogger.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\index.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\ITransport.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\JsonHubProtocol.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Loggers.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\LongPollingTransport.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\ServerSentEventsTransport.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Stream.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\TextMessageFormat.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Utils.d.ts" />
+      <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.d.ts" />
     </ItemGroup>
     <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="3.0.0" />
