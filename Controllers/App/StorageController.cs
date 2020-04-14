@@ -309,6 +309,7 @@ namespace PikaCore.Controllers.App
         [AllowAnonymous]
         public IActionResult Thumb(string id)
         {
+            _loggerService.LogToFileAsync(LogLevel.Warning, "localhost", $"Request for thumb of {id}.");
             var format = _configuration.GetSection("Images")["Format"].ToLower();
             var thumbFileName = $"{id}.{format}";
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],

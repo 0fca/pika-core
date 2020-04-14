@@ -87,7 +87,7 @@ namespace PikaCore.Services
             }
 
             
-            var fs = this.RetrieveFileInfoFromAbsolutePath(absolutePath).CreateReadStream(); 
+            var fs = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, useAsync);
             _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutePath}");
             return fs;
         }
@@ -122,16 +122,13 @@ namespace PikaCore.Services
                 Directory.CreateDirectory(toWhere);
             }
 
-            using (var fileStream = new FileStream(file, FileMode.Open))
-            {
-
-                var buffer = new byte[fileStream.Length];
-                await fileStream.ReadAsync(buffer);
-                await File.WriteAllBytesAsync(toWhere + fileName, buffer);
-                _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost",
-                    $"File {fileName} moved from tmp to " + toWhere);
-                fileStream.Flush();
-            }
+            await using var fileStream = new FileStream(file, FileMode.Open);
+            var buffer = new byte[fileStream.Length];
+            await fileStream.ReadAsync(buffer);
+            await File.WriteAllBytesAsync(toWhere + fileName, buffer);
+            _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost",
+                $"File {fileName} moved from tmp to " + toWhere);
+            fileStream.Flush();
         }
 
         public bool Move(string absolutePath, string toWhere)
