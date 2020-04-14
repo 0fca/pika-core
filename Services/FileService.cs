@@ -82,6 +82,7 @@ namespace PikaCore.Services
             var path = !string.IsNullOrEmpty(absolutePath) && File.Exists(absolutePath) ? absolutePath : null;
             if (string.IsNullOrEmpty(path))
             {
+                _fileLoggerService.LogToFileAsync(LogLevel.Critical, "localhost", $"Path for AsStreamAsync() cannot be null!");
                 throw new ArgumentException("Path cannot be null!");
             }
 

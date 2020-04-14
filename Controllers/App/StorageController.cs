@@ -36,8 +36,7 @@ namespace PikaCore.Controllers.App
         private bool _wasArchivingCancelled = true;
         private readonly IHubContext<StatusHub> _hubContext;
         private readonly IdDataProtection _idDataProtection;
-
-
+        
         #region TempDataMessages
         [TempData(Key = "showGenerateUrlPartial")]public  bool ShowGenerateUrlPartial { get; set; }
         [TempData(Key = "returnMessage")] public  string ReturnMessage { get; set; }
@@ -315,7 +314,7 @@ namespace PikaCore.Controllers.App
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                  thumbFileName
                                                  );
-            using var thumbFileStream = _fileService.AsStreamAsync(absoluteThumbPath);
+            var thumbFileStream = _fileService.AsStreamAsync(absoluteThumbPath);
             return File(thumbFileStream, "image/jpeg");
         }
 
