@@ -1,5 +1,5 @@
 ﻿const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/hubs/files",{
-    transport: signalR.HttpTransportType.LongPolling | signalR.HttpTransportType.ServerSentEvents
+    transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.LongPolling
 })
     .configureLogging(signalR.LogLevel.Information)
     .build();

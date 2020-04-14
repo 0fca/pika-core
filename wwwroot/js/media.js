@@ -1,13 +1,13 @@
 ﻿const mediaHubconnection = new signalR.HubConnectionBuilder()
                         .withUrl("/hubs/media", {
-                            transport: signalR.HttpTransportType.LongPolling | signalR.HttpTransportType.ServerSentEvents
+                            transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.LongPolling
                         })
 	            		.configureLogging(signalR.LogLevel.Information)
 				.build();
 
-/*mediaHubconnection.onclose(async () => {
+mediaHubconnection.onclose(async () => {
     await start();
-});*/
+});
 
 mediaHubconnection.on("ReceiveThumb", ReceiveThumb);
 
@@ -43,7 +43,7 @@ function loadThumb(path, s) {
         if (img.hasAttribute("id")) {
             const guid = img.getAttribute("id");
             const text = img.getAttribute("alt");
-            const systemPath = path.toString() + text;
+            const systemPath = path.toString() + directorySeparator +text;
 
             mediaHubconnection.invoke("CreateThumb", systemPath, guid, 1).catch(err => {
                 setErrorIcon(guid, err.toString());

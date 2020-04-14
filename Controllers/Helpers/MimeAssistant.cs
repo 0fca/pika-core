@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PikaCore.Controllers.Helpers
 {
-    public sealed class MimeAssistant
+    public static class MimeAssistant
     {
         public static string GetMimeType(string fileName)
         {
@@ -18,10 +18,7 @@ namespace PikaCore.Controllers.Helpers
                 {
                     return ReadMimeUsingFile(fileName).Result.Trim();
                 }
-                else
-                {
-                    return "unknown/unknown";
-                }
+                return "unknown/unknown";
             }
             catch(Exception e) 
             {
@@ -58,11 +55,11 @@ namespace PikaCore.Controllers.Helpers
         
             var parts = mime.Split("/");
 
-            if (translationParts.Keys.Any(x => parts.Contains(x))) {
-                translationParts.TryGetValue(translationParts.Keys.Single(x => parts.Contains(x)), out string value);
+            if (!translationParts.Keys.Any(x => parts.Contains(x))) return "file";
+            {
+                translationParts.TryGetValue(translationParts.Keys.Single(x => parts.Contains(x)), out var value);
                 return value;
             }
-            return "file";
         }
 
         private static async Task<string> ReadMimeUsingFile(string fileName) 

@@ -14,7 +14,7 @@
     var pageCount = int.Parse(TempData["PageCount"].ToString());
     var offset = int.Parse(TempData["Offset"].ToString());
     var count = int.Parse(TempData["Count"].ToString());
-
+    var directorySeparator = System.IO.Path.DirectorySeparatorChar;
     var paginationData = new Dictionary<string, object> {{"Offset", offset}, {"Count", count}, {"PageCount", pageCount}, {"Last", lastPath}};
 }
 
@@ -54,8 +54,8 @@
         <div class="col s5 l7 m8">
             <span>File and directory count: @Model.ContentsList.Count</span>
         </div>
-        <div class="col s7 m5 l4">
-            <input class="right" type="text" id="searchBox" maxlength="32" placeholder="Search" oninput="searchFileList();"/>
+        <div class="col s7 m5 l4 right">
+            <input type="text" id="searchBox" maxlength="32" placeholder="Search" oninput="searchFileList();"/>
         </div>
     </div>
     <div class="row">
@@ -206,6 +206,7 @@
 
 <script>
     const listingPath = "@lastPath";
+    const directorySeparator = "@directorySeparator";
     document.getElementById("searchBox").addEventListener("keydown", function (e) {
         if (e.code === "Enter") {
             searchFileList();
