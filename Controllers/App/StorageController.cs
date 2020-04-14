@@ -278,7 +278,7 @@ namespace PikaCore.Controllers.App
                         return RedirectToAction(nameof(Browse), new { @path = returnUrl });
                     }
                     
-                    using var fs =  _fileService.AsStreamAsync(path);
+                    var fs =  _fileService.AsStreamAsync(path);
                     var mime = MimeAssistant.GetMimeType(path);
                     return File(fs, mime, fileInfo.Name);
                 }
@@ -300,7 +300,7 @@ namespace PikaCore.Controllers.App
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                  thumbFileName
                                                  );
-            using var thumbFileStream = _fileService.AsStreamAsync(absoluteThumbPath);
+            var thumbFileStream = _fileService.AsStreamAsync(absoluteThumbPath);
             return File(thumbFileStream, "image/jpeg");
         }
 
