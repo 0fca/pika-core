@@ -68,7 +68,7 @@ namespace PikaCore.Services
         public IFileInfo RetrieveFileInfoFromAbsolutePath(string absolutePath)
         {
             var fileInfo = _fileProvider.GetFileInfo(absolutePath.Remove(0,
-                (_configuration.GetSection("Paths")[Constants.OsName + "-root"]).Length - 2));
+                (_configuration.GetSection("Paths")[Constants.OsName + "-root"]).Length - 1));
             return fileInfo;
         }
 
