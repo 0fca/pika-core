@@ -130,7 +130,11 @@ namespace PikaCore
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
 
             services.AddDistributedMemoryCache();
-
+            services.AddStackExchangeRedisCache(a => { 
+                a.InstanceName = "redis-docker-master";
+                a.Configuration = "localhost:6379";
+            });
+                
             IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[OsName + "-root"]);
             services.AddSingleton(physicalProvider);
 

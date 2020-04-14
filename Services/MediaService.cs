@@ -120,7 +120,7 @@ namespace PikaCore.Services
                     );
 
                     graphics.CompositingQuality = CompositingQuality.HighQuality;
-                    graphics.InterpolationMode = InterpolationMode.High;
+                    graphics.InterpolationMode = InterpolationMode.Bicubic;
                     graphics.CompositingMode = CompositingMode.SourceCopy;
                     graphics.DrawImage(image, 0, 0, resized.Width, resized.Height);
 
