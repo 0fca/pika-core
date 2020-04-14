@@ -265,7 +265,7 @@ namespace PikaCore.Controllers.App
                 {
                     var fileInfo = _fileService.RetrieveFileInfoFromAbsolutePath(id); 
                     var path = fileInfo.PhysicalPath;
-                    _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), $"Trying to download {path}");
+                    _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), $"Trying to download {id}");
                     if (!fileInfo.Exists)
                     {
                         ReturnMessage = "File doesn't exist on server's filesystem.";
