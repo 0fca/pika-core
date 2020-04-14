@@ -131,8 +131,8 @@ namespace PikaCore
 
             services.AddDistributedMemoryCache();
             services.AddStackExchangeRedisCache(a => { 
-                a.InstanceName = "redis-docker-master";
-                a.Configuration = "localhost:6379";
+                a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
+                a.Configuration = Configuration.GetConnectionString("RedisConnection");
             });
                 
             IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[OsName + "-root"]);
