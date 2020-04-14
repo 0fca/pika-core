@@ -9,6 +9,10 @@
         "dist/browser/signalr.js",
         "dist/browser/signalr.min.js"
       ]
+    },
+    {
+      "library": "@aspnet/signalr@latest",
+      "destination": "wwwroot/lib/@aspnet/signalr/"
     }
   ]
 }
