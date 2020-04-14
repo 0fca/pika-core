@@ -79,13 +79,11 @@ namespace PikaCore.Services
 
         public Stream AsStreamAsync(string absolutePath, int bufferSize = 8192, bool useAsync = true)
         {
-            var path = !string.IsNullOrEmpty(absolutePath) && File.Exists(absolutePath) ? absolutePath : null;
-            if (string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(absolutePath) || !File.Exists(absolutePath))
             {
                 _fileLoggerService.LogToFileAsync(LogLevel.Critical, "localhost", $"Path for AsStreamAsync() cannot be null!");
                 throw new ArgumentException("Path cannot be null!");
             }
-
             
             var fs = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, useAsync);
             _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutePath}");

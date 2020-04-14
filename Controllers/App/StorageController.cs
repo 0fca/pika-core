@@ -263,44 +263,29 @@ namespace PikaCore.Controllers.App
             try{
                 if (!string.IsNullOrEmpty(id))
                 {
-
-                    var fileInfo = _fileService.RetrieveFileInfoFromAbsolutePath(id);
+                    var fileInfo = _fileService.RetrieveFileInfoFromAbsolutePath(id); 
                     var path = fileInfo.PhysicalPath;
-
+                    _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Connection.RemoteIpAddress.ToString(), $"Trying to download {path}");
                     if (!fileInfo.Exists)
                     {
                         ReturnMessage = "File doesn't exist on server's filesystem.";
-                        if (z)
-                            path = string.Concat(Constants.Tmp, id);
-                        else
-                            return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+                        return RedirectToAction(nameof(Browse), new { @path = returnUrl });
                     }
-
-                    if (System.IO.File.Exists(path))
-                    {
-                        var fs =  _fileService.AsStreamAsync(path);
-                        var mime = MimeAssistant.GetMimeType(path);
-                        return File(fs, mime, fileInfo.Name);
-
-                    }
-
+                    
                     if (Directory.Exists(path))
                     {
                         ReturnMessage = "This is a folder, cannot download it directly.";
                         return RedirectToAction(nameof(Browse), new { @path = returnUrl });
                     }
-
-                    ReturnMessage = "The path " + path + " does not exist on server's filesystem.";
-                    return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+                    
+                    var fs =  _fileService.AsStreamAsync(path);
+                    var mime = MimeAssistant.GetMimeType(path);
+                    return File(fs, mime, fileInfo.Name);
                 }
             }catch(Exception e){
                 _loggerService.LogToFileAsync(LogLevel.Warning, "localhost", e.Message);
             }
-		
-            _loggerService.LogToFileAsync(LogLevel.Error, 
-                HttpContext.Connection.RemoteIpAddress.ToString(), 
-                "Couldn't read requested resource: " + id);
-            ReturnMessage = "Couldn't read requested resource.";
+            ReturnMessage = "Resource id cannot be null.";
             return RedirectToAction(nameof(Browse), new { @path = returnUrl });
 
         }
