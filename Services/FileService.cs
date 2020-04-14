@@ -145,7 +145,7 @@ namespace PikaCore.Services
             }
             catch (Exception e)
             {
-                _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost", $"Couldn't move {absolutePath} to {toWhere}");
+                _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost", $"Couldn't move {absolutePath} to {toWhere} because of {e.Message}");
                 isMoved = false;
             }
 
