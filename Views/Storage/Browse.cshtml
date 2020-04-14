@@ -135,20 +135,20 @@
 
                 <ul id='options-@item.Name' class='dropdown-content'>
                     @{var ext = System.IO.Path.GetExtension(item.Name);}
-                    @if (ext.Equals(".mp3") || ext.Equals(".mp4") || ext.Equals(".m4a"))
+                    @if (ext.Equals(".mp3") || ext.Equals(".mp4"))
                     {
-                        <li><a asp-action="Watch" asp-controller="Video" asp-route-path="@last/@item.Name"><i class="fas fa-play" title="Play"></i></a></li>
+                        <li><a href="https://player.lukas-bownik.net/"><i class="fas fa-play" title="Play"></i></a></li>
                     }
 
                     @if (user != null
                      && !(await UserManager.IsInRoleAsync(user, "User")))
                     {
-                    <li><a asp-action="Rename" asp-route-n="@System.IO.Path.Combine(lastPath, item.Name)"><i class="fas fa-pen"></i></a></li>
+                        <li><a asp-action="Rename" asp-route-n="@System.IO.Path.Combine(lastPath, item.Name)"><i class="fas fa-pen"></i></a></li>
                     }
-                        @if(!item.IsDirectory)
-                        {
-                        <li><a asp-action="GenerateUrl" asp-route-name="@DataProtection.Encode(item.PhysicalPath)" asp-route-returnUrl="@lastPath"><i class="fas fa-bolt" title="Generate download url"></i></a></li>
-                        }
+                    @if(!item.IsDirectory)
+                    {
+                        <li><a asp-action="GenerateUrl" asp-route-name="@DataProtection.Encode(item.PhysicalPath)" asp-route-returnUrl="@lastPath"><i class="fas fa-link" title="Generate download url"></i></a></li>
+                    }
                 </ul>
             </div>
         </div>

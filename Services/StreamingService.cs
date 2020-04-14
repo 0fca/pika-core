@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
 
 namespace PikaCore.Services
 {
@@ -15,15 +14,13 @@ namespace PikaCore.Services
         public Stream GetVideoByPath(string path)
         {
             var extension = Path.GetExtension(path);
-            Stream outStream = null;
-            switch (extension)
+            var outStream = extension switch
             {
-                case ".mp4":
-                case ".mp3":
-                case ".m4a":
-                    outStream = _fileDownloader.AsStreamAsync(path);
-                    break;
-            }
+                ".mp4" => _fileDownloader.AsStreamAsync(path),
+                ".mp3" => _fileDownloader.AsStreamAsync(path),
+                ".m4a" => _fileDownloader.AsStreamAsync(path),
+                _ => null
+            };
             return outStream;
         }
     }
