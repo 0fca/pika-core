@@ -92,7 +92,7 @@ namespace PikaCore
 
             var opts = new Pomelo.Logging.FileLogger.FileLoggerOptions()
             {
-                FileName = $"pika_core_{DateTime.Today.ToShortDateString()}.log",
+                FileName = $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log",
                 MaxSize = Constants.MaxLogFileSize,
                 OutputFolder = Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
             };
