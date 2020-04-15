@@ -22,12 +22,7 @@ namespace PikaCore
             var host = WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .UseConfiguration(configuration)
-                .ConfigureLogging((hostingContext, logging) =>
-                {
-                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"))
-                    .AddDebug();
-                })
-	            .UseUrls($"http://localhost:{port}")
+                .UseUrls($"http://localhost:{port}")
 		        .UseKestrel()
                 .Build();
 

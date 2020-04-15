@@ -92,8 +92,7 @@ namespace PikaCore
             var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
                 $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
             Console.WriteLine(Resources.Startup_ConfigureServices_Logger_output___0_, path);
-            var provider = new FileLoggerProvider(path, LogLevel.Debug);
-            provider.CreateLogger("Development");
+            var provider = new FileLoggerProvider(path, LogLevel.Trace);
             services.AddSingleton(provider);
             
             services.Configure<CookiePolicyOptions>(options =>
