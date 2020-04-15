@@ -13,6 +13,7 @@ using PikaCore.Controllers.Hubs;
 using PikaCore.Services;
 using PikaCore.Services.Helpers;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.Hosting;
@@ -21,6 +22,7 @@ using PikaCore.Controllers.App;
 using PikaCore.Data;
 using PikaCore.Extensions;
 using PikaCore.Models;
+using PikaCore.Properties;
 using PikaCore.Security;
 
 namespace PikaCore
@@ -94,7 +96,7 @@ namespace PikaCore
                 MaxSize = Constants.MaxLogFileSize,
                 OutputFolder = Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
             };
-            Console.WriteLine(opts.OutputFolder);
+            Console.WriteLine(Resources.Startup_ConfigureServices_Logger_output___0_, Path.Combine(opts.OutputFolder, opts.FileName));
             services.AddSingleton<ILoggerProvider>(loggerProvider => new Pomelo.Logging.FileLogger.FileLoggerProvider(opts));
 
             services.Configure<CookiePolicyOptions>(options =>
