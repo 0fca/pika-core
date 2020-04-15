@@ -9,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using PikaCore.Controllers.Hubs;
 using PikaCore.Services;
 using PikaCore.Services.Helpers;
@@ -17,13 +16,11 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.Hosting;
-using PikaCore.Controllers;
 using PikaCore.Controllers.Api.Hubs;
 using PikaCore.Controllers.App;
 using PikaCore.Data;
 using PikaCore.Extensions;
 using PikaCore.Models;
-using PikaCore.Providers;
 using PikaCore.Security;
 
 namespace PikaCore
@@ -42,7 +39,9 @@ namespace PikaCore
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            {
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             services.AddDbContext<StorageIndexContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
@@ -85,17 +84,14 @@ namespace PikaCore
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
 
-            var option = new FileLoggerOptions
+            var opts = new Pomelo.Logging.FileLogger.FileLoggerOptions()
             {
-                FileName = "fms-",
-                FileSizeLimit = Constants.MaxLogFileSize,
-                LogDirectory = Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
-                ShouldBackupLogs = bool.Parse(Configuration.GetSection("Logging")["ShouldBackupLogs"]),
-                BackupLogDir = Configuration.GetSection("Logging")["LogBackupDir-" + OsName]
+                FileName = $"pika_core_{DateTime.Today.ToShortDateString()}.log",
+                MaxSize = Constants.MaxLogFileSize,
+                OutputFolder = Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
             };
 
-            var opts = Options.Create(option);
-            services.AddSingleton<ILoggerProvider>(loggerProvider => new FileLoggerProvider(opts));
+            services.AddSingleton<ILoggerProvider>(loggerProvider => new Pomelo.Logging.FileLogger.FileLoggerProvider(opts));
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -109,14 +105,13 @@ namespace PikaCore
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
                 options.SlidingExpiration = true;
                 options.LoginPath = "/Account/Login";
-
             });
             
     	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
             {
                 builder
                     .WithMethods("GET", "POST")
-                    .WithOrigins("dev-core.lukas-bownik.net", "core.lukas-bownik.net", "me.lukas-bownik.net", "localhost")
+                    .WithOrigins("dev-core.lukas-bownik.net", "core.lukas-bownik.net", "me.lukas-bownik.net", "localhost:5000")
                     .AllowAnyHeader();
             }));
             
@@ -129,7 +124,7 @@ namespace PikaCore
             });
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
 
-            services.AddDistributedMemoryCache();
+            //services.AddDistributedMemoryCache();
             services.AddStackExchangeRedisCache(a => { 
                 a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
                 a.Configuration = Configuration.GetConnectionString("RedisConnection");
@@ -190,7 +185,6 @@ namespace PikaCore
             Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
 
             app.UseStaticFiles();
-
             app.UseFileServer();
             app.UseStatusCodePagesWithRedirects("/Home/ErrorByCode/{0}");
             app.UseSession();
@@ -232,7 +226,6 @@ namespace PikaCore
             
             CreateRoles(serviceProvider).Wait();
         }
-
 
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {

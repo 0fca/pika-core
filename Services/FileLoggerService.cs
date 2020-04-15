@@ -1,25 +1,21 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using PikaCore.Providers;
+using Microsoft.Extensions.Hosting;
+using FileLoggerProvider = Pomelo.Logging.FileLogger.FileLoggerProvider;
 
 namespace PikaCore.Services
 {
     public class FileLoggerService : IFileLoggerService
     {
-        private readonly ILoggerProvider _fileLoggerProvider;
+        private readonly FileLoggerProvider _fileLoggerProvider;
         private readonly ILogger _logger;
 
-        public FileLoggerService(ILoggerProvider fileLoggerProvider)
+        public FileLoggerService(ILoggerProvider fileLoggerProvider,
+                                 IHostEnvironment env)
         {
-            this._fileLoggerProvider = fileLoggerProvider;
-            _logger = fileLoggerProvider.CreateLogger("Production");
+            this._fileLoggerProvider = (FileLoggerProvider)fileLoggerProvider;
+            _logger = fileLoggerProvider.CreateLogger(env.EnvironmentName);
         }
 
-        public void Cleanup() => ((FileLoggerProvider)_fileLoggerProvider).IdleForCleanup();
-
         public void LogToFileAsync(LogLevel logLevel, string address, string message) => _logger.Log(logLevel, address + " : " + message);
-
-        public async Task<List<string>> GetLogs() => await ((FileLoggerProvider)_fileLoggerProvider).GetLogs();
     }
 }
