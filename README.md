@@ -2,9 +2,7 @@
 
 __Pika Core__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem(but only for download purposes) to all registered users.
 
-It is also my portfolio page.
-
-Production: https://core.lukas-bownik.net/
+Developer Instance: https://dev-core.lukas-bownik.net/
 
 *Done features*
 * Registered and anonymous access to public part of the server's filesystem,
