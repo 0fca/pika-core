@@ -8,15 +8,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
 using PikaCore.Controllers.Hubs;
 using PikaCore.Services;
-using PikaCore.Services.Helpers;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using PikaCore.Controllers.Api.Hubs;
 using PikaCore.Controllers.App;
 using PikaCore.Data;
@@ -24,6 +23,7 @@ using PikaCore.Extensions;
 using PikaCore.Models;
 using PikaCore.Properties;
 using PikaCore.Security;
+using FileLoggerProvider = Germes.AspNetCore.FileLogger.FileLoggerProvider;
 
 namespace PikaCore
 {
@@ -89,17 +89,13 @@ namespace PikaCore
             services.AddSingleton<ISchedulerService, SchedulerService>();
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
-
-            var opts = new Pomelo.Logging.FileLogger.FileLoggerOptions()
-            {
-                FileName = $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log",
-                MaxSize = Constants.MaxLogFileSize,
-                OutputFolder = Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
-            };
-            File.Create(Path.Combine(opts.OutputFolder, opts.FileName)).Close();
-            Console.WriteLine(Resources.Startup_ConfigureServices_Logger_output___0_, Path.Combine(opts.OutputFolder, opts.FileName));
-            services.AddSingleton<ILoggerProvider>(loggerProvider => new Pomelo.Logging.FileLogger.FileLoggerProvider(opts));
-
+            var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
+                $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
+            Console.WriteLine(Resources.Startup_ConfigureServices_Logger_output___0_, path);
+            var provider = new FileLoggerProvider(path, LogLevel.Debug);
+            provider.CreateLogger("Development");
+            services.AddSingleton(provider);
+            
             services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;

@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Germes.AspNetCore.FileLogger;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
-using FileLoggerProvider = Pomelo.Logging.FileLogger.FileLoggerProvider;
 
 namespace PikaCore.Services
 {
@@ -9,10 +9,10 @@ namespace PikaCore.Services
         private readonly FileLoggerProvider _fileLoggerProvider;
         private readonly ILogger _logger;
 
-        public FileLoggerService(ILoggerProvider fileLoggerProvider,
+        public FileLoggerService(FileLoggerProvider fileLoggerProvider,
                                  IHostEnvironment env)
         {
-            _fileLoggerProvider = (FileLoggerProvider)fileLoggerProvider;
+            _fileLoggerProvider = fileLoggerProvider;
             _logger = fileLoggerProvider.CreateLogger(env.EnvironmentName);
         }
 
