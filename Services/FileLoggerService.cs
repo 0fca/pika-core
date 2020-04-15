@@ -1,17 +1,18 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
+using FileLoggerProvider = Pomelo.Logging.FileLogger.FileLoggerProvider;
 
 namespace PikaCore.Services
 {
     public class FileLoggerService : IFileLoggerService
     {
-        private readonly ILoggerProvider _fileLoggerProvider;
+        private readonly FileLoggerProvider _fileLoggerProvider;
         private readonly ILogger _logger;
 
         public FileLoggerService(ILoggerProvider fileLoggerProvider,
                                  IHostEnvironment env)
         {
-            this._fileLoggerProvider = fileLoggerProvider;
+            this._fileLoggerProvider = (FileLoggerProvider)fileLoggerProvider;
             _logger = fileLoggerProvider.CreateLogger(env.EnvironmentName);
         }
 
