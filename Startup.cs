@@ -30,7 +30,6 @@ namespace PikaCore
         private static readonly string OsName = Constants.OsName;
         public Startup(IConfiguration configuration)
         {
-
             Configuration = configuration;
         }
 
@@ -38,6 +37,12 @@ namespace PikaCore
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMemoryCache();
+            services.AddStackExchangeRedisCache(a => { 
+                a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
+                a.Configuration = Configuration.GetConnectionString("RedisConnection");
+            });
+            
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
@@ -75,7 +80,6 @@ namespace PikaCore
 
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddScoped<IArchiveService, ArchiveService>();
-            services.AddSingleton<ImageCache>();
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
             services.AddTransient<IStreamingService, StreamingService>();
@@ -91,7 +95,7 @@ namespace PikaCore
                 OutputFolder = Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
             };
 
-            services.AddSingleton<ILoggerProvider>(loggerProvider => new Pomelo.Logging.FileLogger.FileLoggerProvider(opts));
+            //services.AddSingleton<ILoggerProvider>(loggerProvider => new Logger<ILoggerProvider>(new LoggerFactory()));
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -124,12 +128,6 @@ namespace PikaCore
             });
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
 
-            //services.AddDistributedMemoryCache();
-            services.AddStackExchangeRedisCache(a => { 
-                a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
-                a.Configuration = Configuration.GetConnectionString("RedisConnection");
-            });
-                
             IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[OsName + "-root"]);
             services.AddSingleton(physicalProvider);
 
@@ -194,6 +192,8 @@ namespace PikaCore
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
+            app.UseWebSockets();
+            app.UseResponseCaching();
 	        app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseRouting();
