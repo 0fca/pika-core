@@ -96,6 +96,7 @@ namespace PikaCore
                 MaxSize = Constants.MaxLogFileSize,
                 OutputFolder = Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
             };
+            File.Create(Path.Combine(opts.OutputFolder, opts.FileName)).Close();
             Console.WriteLine(Resources.Startup_ConfigureServices_Logger_output___0_, Path.Combine(opts.OutputFolder, opts.FileName));
             services.AddSingleton<ILoggerProvider>(loggerProvider => new Pomelo.Logging.FileLogger.FileLoggerProvider(opts));
 

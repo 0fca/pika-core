@@ -12,7 +12,7 @@ namespace PikaCore.Services
         public FileLoggerService(ILoggerProvider fileLoggerProvider,
                                  IHostEnvironment env)
         {
-            this._fileLoggerProvider = (FileLoggerProvider)fileLoggerProvider;
+            _fileLoggerProvider = (FileLoggerProvider)fileLoggerProvider;
             _logger = fileLoggerProvider.CreateLogger(env.EnvironmentName);
         }
 
