@@ -3,35 +3,54 @@
     ViewData["Title"] = "Register";
 }
 
-
-
-<div class="d-flex align-items-center text-center align-content-center row row-margins">
-    <h1>@ViewData["Title"]</h1>
-    <div class="col-md-4 col-centered">
-        <form asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
-            <h4>Create a new account.</h4>
-            <hr />
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Email"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+<div class="container">
+<div class="col s12 m12 offset-2">
+    <div class="card blue-grey darken-1">
+        <div class="card-content grey-text text-lighten-4 center">
+            <span class="card-title">Register</span>
+        </div>
+        <section>
+            <div class="card-action center white-text">
+                <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+                    <div class="row">
+                        <div class="col s12 m12 l12">
+                            <div class="input-field">
+                                <label class="left">@Html.DisplayNameFor(m => m.Email)</label>
+                                <input asp-for="Email" class="validate login-input-color"/>
+                                <span asp-validation-for="Email" class="red-text"></span>
+                            </div>
+                            <div class="input-field">
+                                <label class="left">@Html.DisplayNameFor(m => m.Password)</label>
+                                <input asp-for="Password" class="validate login-input-color"/>
+                                <span asp-validation-for="Password" class="red-text"></span>
+                            </div>
+                            <div class="input-field">
+                                <label class="left">@Html.DisplayNameFor(m => m.ConfirmPassword)</label>
+                                <input asp-for="ConfirmPassword" class="validate login-input-color" />
+                                <span asp-validation-for="ConfirmPassword" class="red-text"></span>
+                                </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12 m12 l12">
+                            <button type="submit" class="btn btn-default center">Sign up</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12 m12 l12">
+                            <ul>
+                                <li>
+                                    <a class="grey-text text-lighten-4 left small-text" asp-action="Login">Already has an account? Sign in!</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label asp-for="Password"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ConfirmPassword"></label>
-                <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-            <button type="submit" class="btn btn-default">Register</button>
-        </form>
+        </section>
     </div>
 </div>
-
+</div>
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 }

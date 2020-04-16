@@ -195,8 +195,7 @@ namespace PikaCore.Controllers.App
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
-
-
+        
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -206,16 +205,16 @@ namespace PikaCore.Controllers.App
             if (!ModelState.IsValid) return View(model);
             
             var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-            await _userManager.AddToRoleAsync(user, "USER");
             var result = await _userManager.CreateAsync(user, model.Password);
+            
             if (result.Succeeded)
             {
-                _logger.LogInformation("User created a new account with password.");
+                await _userManager.AddToRoleAsync(user, "USER");
+                _logger.LogInformation("User created a new account.");
                 return RedirectToAction("Index", "Manage");
             }
             AddErrors(result);
 
-            // If we got this far, something failed, redisplay form
             return View(model);
         }
 

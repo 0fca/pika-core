@@ -5,74 +5,92 @@
     ViewData["Title"] = "Log in";
 }
 
-<div class="d-flex align-items-center text-center align-content-center row row-margins">
-    <h2>@ViewData["Title"]</h2>
-    <div class="col-md-4">
+<div class="container">
+    <div class="col s12 m12 offset-2">
+    <div class="card blue-grey darken-1">
+        <div class="card-content grey-text text-lighten-4 center">
+            <span class="card-title">Log in using a local account.</span>
+            </div>
         <section>
-            <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
-                <h4>Use a local account to log in.</h4>
-                <hr />
-                <div class="alert-danger" asp-validation-summary="All"></div>
-                <div class="form-group">
-                    <label>@Html.DisplayNameFor(m => m.Email)</label>
-                    <input asp-for="Email" class="form-control" />
-                    <span asp-validation-for="Email"></span>
+            <div class="card-action center white-text">
+                <div class="card-panel teal">
+                    Due to migration of data sources to new RDBMS system, all user accounts has become unavailable permanently.
                 </div>
-                <div class="form-group">
-                    <label>@Html.DisplayNameFor(m => m.Password)</label>
-                    <input asp-for="Password" class="form-control" />
-                    <span asp-validation-for="Password"></span>
-                </div>
-                <div class="form-group">
-                    <label for="RememberMe">@Html.DisplayNameFor(m => m.RememberMe)</label>
-                    <input asp-for="RememberMe" id="RememberMe" type="checkbox" class="form-control"/>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-default">Log in</button>
-                </div>
-                <div class="form-group">
-                    <p>
-                        <a class="teal-text" asp-action="ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a class="teal-text" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register as a new user?</a>
-                    </p>
-                </div>
-            </form>
+                <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+                    <div class="row">
+                        <div class="col s12 m12 l12">
+                            <div class="input-field">
+                                <label class="left">@Html.DisplayNameFor(m => m.Email)</label>
+                                <input asp-for="Email" class="validate login-input-color"/>
+                                <span asp-validation-for="Email" class="red-text"></span>
+                            </div>
+                            <div class="input-field">
+                                <label class="left">@Html.DisplayNameFor(m => m.Password)</label>
+                                <input asp-for="Password" class="validate login-input-color"/>
+                                <span asp-validation-for="Password" class="red-text"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12 m12 l12">
+                            <button type="submit" class="btn btn-default center">Log in</button>
+                        </div>
+                    </div>
+                     <div class="row">
+                                            <div class="col s12 m12 l12">
+                                                <ul>
+                                                    <!--
+                                                    <li>
+                                                        <label for="RememberMe">@Html.DisplayNameFor(m => m.RememberMe)</label>
+                                                        <input asp-for="RememberMe" id="RememberMe" type="checkbox" class="validate"/>
+                                                    </li>
+                                                    -->
+                                                    <li>
+                                                        <a class="grey-text text-lighten-4 left small-text" asp-action="ForgotPassword">Forgot your password?</a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="grey-text text-lighten-4 left small-text" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register as a new user?</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                </form>
+            </div>
         </section>
+        </div>
     </div>
     <div class="col s12 m12 offset-2">
         <section>
-            <h4>Use another service to log in.</h4>
-            <hr />
-            @{
-                var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-                if (loginProviders.Count == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
-                            for details on setting up this ASP.NET application to support logging in via external services.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <div class="g-signin2" data-onsuccess="onSignIn"></div>
-                    <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in loginProviders)
-                                {
-                                    var name = System.IO.File.Exists("wwwroot/images/"+@provider.Name.ToLower() + "-icon.png") ? @provider.Name.ToLower()+"-icon.png" : @provider.Name.ToLower()+"-icon.svg";
-
-                                    <button type="submit" class="waves-effect waves-teal btn-flat btn-lg" style="width: 150px; height: 80px;" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account"><img src="~/images/@name" alt="@provider.DisplayName"/></button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
+            <div class="card-panel blue-grey darken-1 center">
+                            <span class="grey-text text-lighten-4">Log in using 3rd party authorization provider.</span>
+                          @{
+                                          var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+                                          if (loginProviders.Count == 0)
+                                          {
+                                              <div>
+                                                  <p>
+                                                      Sorry, but you can't use any 3rd party authorization provider at the moment.
+                                                  </p>
+                                              </div>
+                                          }
+                                          else
+                                          {
+                                              <div class="g-signin2" data-onsuccess="onSignIn"></div>
+                                              <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
+                                                  <div>
+                                                      <p>
+                                                          @foreach (var provider in loginProviders)
+                                                          {
+                                                              var name = System.IO.File.Exists("wwwroot/images/"+@provider.Name.ToLower() + "-icon.png") ? @provider.Name.ToLower()+"-icon.png" : @provider.Name.ToLower()+"-icon.svg";
+                          
+                                                              <button type="submit" style="width: 150px; height: 80px;" class="btn btn-flat transparent" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account"><img src="~/images/@name" alt="@provider.DisplayName"/></button>
+                                                          }
+                                                      </p>
+                                                  </div>
+                                              </form>
+                                          }
+                                      }
+            </div>
         </section>
     </div>
 </div>

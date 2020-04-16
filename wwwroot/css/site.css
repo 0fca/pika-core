@@ -150,20 +150,6 @@ a, a:hover, a:focus {
 }
 
 
-.log-area {
-    background-color: #fefefe !important;
-    border: 1px solid #000 !important;
-    color: #303F9F  !important;
-    padding: 8px !important;
-    width: 100% !important;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    resize: none;
-    font-size: small;
-}
-
-
 .element-margins {
     margin: 10px auto;
 }
@@ -178,14 +164,6 @@ a, a:hover, a:focus {
     float: right;
     margin-top: 9px;
     width: 250px;
-}
-
-.pika-img {
-    align-items: center !important;
-    align-content: center !important;
-    display: block !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
 }
 
 .brand-margin {
@@ -287,4 +265,12 @@ a, a:hover, a:focus {
 
 .app-menu-item {
     font-size: 24px;
+}
+
+.small-text{
+    font-size: small;
+}
+
+.login-input-color, .login-input-color::placeholder{
+    border-bottom-color: #f5f5f5 !important;
 }

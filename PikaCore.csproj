@@ -83,7 +83,6 @@
 
     <ItemGroup>
       <Folder Include="Loggers" />
-      <Folder Include="Providers" />
       <Folder Include="wwwroot\images\github\" />
     </ItemGroup>
 
@@ -203,6 +202,7 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.js.map" />
       <_ContentIncludedByDefault Remove="wwwroot\@microsoft\signalr\dist\browser\signalr.js" />
       <_ContentIncludedByDefault Remove="wwwroot\@microsoft\signalr\dist\browser\signalr.min.js" />
+      <_ContentIncludedByDefault Remove="Views\Api\ApiIndex.cshtml" />
     </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

@@ -10,14 +10,5 @@
         </p>
     </div>
 </div>
-<div class="pushpin">
-    Pushpin
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const elems = document.querySelectorAll('.pushpin');
-        const instances = M.Pushpin.init(elems);
-    });
-</script>
 @await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)   
