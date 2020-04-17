@@ -1,0 +1,16 @@
+﻿@model PikaCore.Models.ManageViewModels.LogsListViewModel
+@{ var content = "";
+    if (Model != null && Model.Lines != null) {
+        content = Model.Lines.Aggregate(content, (current, item) => current + (item + "\n"));
+    }
+    else
+    {
+        content = "Logs are disabled at the moment.";
+    }
+}
+<textarea wrap="hard" id="log-area" readonly>
+    @content
+</textarea>
+<script>
+    scrollLogAreaToEnd();
+</script>

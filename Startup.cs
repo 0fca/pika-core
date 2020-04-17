@@ -12,6 +12,7 @@ using PikaCore.Controllers.Hubs;
 using PikaCore.Services;
 using System;
 using System.IO;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.Hosting;
@@ -99,9 +100,11 @@ namespace PikaCore
             services.AddSingleton<ISchedulerService, SchedulerService>();
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
+            
             var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
                 $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
             Console.WriteLine(Resources.Startup_ConfigureServices_Logger_output___0_, path);
+            
             var provider = new FileLoggerProvider(path, LogLevel.Debug);
             services.AddSingleton(provider);
             
@@ -182,7 +185,7 @@ namespace PikaCore
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Core/Home/Error");
             }
 
             Constants.RootPath = Configuration.GetSection("Paths")["storage"];
@@ -192,7 +195,7 @@ namespace PikaCore
 
             app.UseStaticFiles();
             app.UseFileServer();
-            app.UseStatusCodePagesWithRedirects("/Home/ErrorByCode/{0}");
+            app.UseStatusCodePagesWithRedirects("/Core/Home/ErrorByCode/{0}");
             app.UseSession();
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
@@ -209,6 +212,9 @@ namespace PikaCore
             
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");

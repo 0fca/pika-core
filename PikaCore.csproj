@@ -82,7 +82,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Loggers" />
+      <Folder Include="Areas\Api" />
+      <Folder Include="Areas\Core" />
+      <Folder Include="Areas\Infrastracture" />
       <Folder Include="wwwroot\images\github\" />
     </ItemGroup>
 
@@ -203,6 +205,61 @@
       <_ContentIncludedByDefault Remove="wwwroot\@microsoft\signalr\dist\browser\signalr.js" />
       <_ContentIncludedByDefault Remove="wwwroot\@microsoft\signalr\dist\browser\signalr.min.js" />
       <_ContentIncludedByDefault Remove="Views\Api\ApiIndex.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\AccessDenied.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\AdminUserPanel.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\ExternalLogin.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\ForgotPassword.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\ForgotPasswordConfirmation.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\Lockout.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\Login.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\LoginWith2fa.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\LoginWithRecoveryCode.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\Register.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\ResetPassword.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\ResetPasswordConfirmation.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\SignedOut.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Admin\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Admin\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Admin\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Admin\_GeneratePasswordViewPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Admin\_LogsViewPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Admin\_StatusMessage.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Home\Partial\_StatusMessage.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\ChangePassword.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\Disable2fa.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\EnableAuthenticator.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\ExternalLogins.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\GenerateRecoveryCodes.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\ResetAuthenticator.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\SetPassword.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\ShowRecoveryCodes.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\TwoFactorAuthentication.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\_Layout.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\_ManageNav.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\_StatusMessage.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Manage\_ViewImports.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\Error.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_Layout.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_LinksPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_Sidenav.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_Sidenav.cshtml.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_ValidationScriptsPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Storage\Browse.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Storage\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Storage\Partial\_AddDirectoryPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Storage\Partial\_DownloadPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Storage\Partial\_FileOperationPartialView.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Storage\Partial\_GenerateUrlPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Storage\Partial\_PaginationPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Storage\Partial\_StatusMessage.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Storage\Partial\_UploadPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Storage\Rename.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\_ViewImports.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\_ViewStart.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Home\About.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\_ViewStart.cshtml" />
     </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

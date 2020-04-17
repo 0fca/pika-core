@@ -1,0 +1,64 @@
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+<div class="right">
+    <ul class="right hide-on-med-and-down">
+        <li>
+            <a class="navlink left" asp-area="Core" asp-controller="Storage" asp-action="Index" title="Pika Browser">Pika Browser</a>
+        </li>
+        <li>
+            <a class="navlink modal-trigger hide-on-med-and-down" href="#app-modal">
+                <i class="large material-icons">apps</i>
+            </a>
+        </li>
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <li>
+                <a asp-area="Core" class="navlink" asp-controller="Manage" asp-action="Index" title="Manage">
+                    <i class="material-icons">
+                        account_box
+                    </i>
+                </a>
+            </li>
+            <li>
+                <button type="submit" class="waves-effect waves-teal btn-flat">Log out</button>
+            </li>
+
+        }
+        else
+        {
+            <li><a asp-area="Core" class="navlink" asp-controller="Account" asp-action="Register">Register</a></li>
+            <li><a asp-area="Core" class="navlink" asp-controller="Account" asp-action="Login">Log in</a></li>
+        }
+    </ul>
+</div>
+
+<div id="app-modal" class="modal bottom-sheet">
+    <div class="modal-content">
+        <div class="container">
+            <header class="teal-text">
+                <h4>Pika Cloud Apps</h4>
+            </header>
+            <div class="row">
+                <div class="col s6 m6 l6">
+                    <a class="navlink app-menu-item" href="https://player.lukas-bownik.net/" title="Pika Player">
+                        <span class="material-icons prefix">
+                            play_arrow
+                        </span>
+                        Pika Player
+                    </a>
+                </div>
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="col s6 m6 l6">
+                        <a asp-area="Core" asp-controller="Admin" asp-action="Index" class="navlink app-menu-item" title="Pika Cloud Admin">
+                            <span class="material-icons prefix">
+                                supervisor_account
+                            </span>
+                            Pika Cloud Admin
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
