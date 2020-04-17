@@ -225,7 +225,7 @@ namespace PikaCore
                         HttpTransportType.LongPolling |
                         HttpTransportType.ServerSentEvents;
                 });
-                endpoints.MapHub<MediaHub>("https://dev-core.lukas-bownik.net/hubs/media", options =>
+                endpoints.MapHub<MediaHub>("/hubs/media", options =>
                 {
                     options.Transports =
                         HttpTransportType.ServerSentEvents |

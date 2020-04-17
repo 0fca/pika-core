@@ -1,5 +1,5 @@
 ﻿const mediaHubconnection = new signalR.HubConnectionBuilder()
-                        .withUrl("https://dev-core.lukas-bownik.net/hubs/media", {
+                        .withUrl("/hubs/media", {
                             transport:  signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.ServerSentEvents 
                         })
 	            		.configureLogging(signalR.LogLevel.Information)
