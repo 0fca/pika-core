@@ -206,6 +206,7 @@ namespace PikaCore
             app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -228,7 +229,7 @@ namespace PikaCore
                 {
                     options.Transports =
                         HttpTransportType.ServerSentEvents |
-                        HttpTransportType.LongPolling;
+                        HttpTransportType.WebSockets;
                 });
             });
             
