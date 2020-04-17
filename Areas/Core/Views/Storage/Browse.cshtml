@@ -145,11 +145,11 @@
                     @if (user != null
                      && !(await UserManager.IsInRoleAsync(user, "User")))
                     {
-                        <li><a asp-action="Rename" asp-route-n="@System.IO.Path.Combine(lastPath, item.Name)"><i class="fas fa-pen"></i></a></li>
+                        <li><a asp-area="Core" asp-action="Rename" asp-route-n="@System.IO.Path.Combine(lastPath, item.Name)"><i class="fas fa-pen"></i></a></li>
                     }
                     @if(!item.IsDirectory)
                     {
-                        <li><a asp-action="GenerateUrl" asp-route-name="@DataProtection.Encode(item.PhysicalPath)" asp-route-returnUrl="@lastPath"><i class="fas fa-link" title="Generate download url"></i></a></li>
+                        <li><a asp-area="Core" asp-action="GenerateUrl" asp-route-name="@DataProtection.Encode(item.PhysicalPath)" asp-route-returnUrl="@lastPath"><i class="fas fa-link" title="Generate download url"></i></a></li>
                     }
                 </ul>
             </div>
