@@ -16,7 +16,6 @@ namespace PikaCore.Controllers.App
 {
     [Authorize]
     [Area("Core")]
-    [Route("[controller]/[action]")]
     public class AccountController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
