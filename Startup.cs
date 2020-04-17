@@ -216,8 +216,8 @@ namespace PikaCore
                     name: "default",
                     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    name: "fallback",
+                    pattern: "{area=Core}/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
                 endpoints.MapHub<StatusHub>("/hubs/status", options =>
                 {
