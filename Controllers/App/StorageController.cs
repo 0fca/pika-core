@@ -143,7 +143,9 @@ namespace PikaCore.Controllers.App
         public async Task<IActionResult> GenerateUrl(string name, string returnUrl)
         {
             var entryName = _idDataProtection.Decode(name);
-
+            int offset = int.Parse(Get("Offset"));
+            int count = int.Parse(Get("Count"));
+            
             if (!string.IsNullOrEmpty(entryName))
             {
                 ShowGenerateUrlPartial = false;
@@ -180,7 +182,7 @@ namespace PikaCore.Controllers.App
                                        (port != null ? ":" + HttpContext.Request.Host.Port : "");
                     TempData["protocol"] = "https";
                     TempData["returnUrl"] = returnUrl;
-                    return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+                    return RedirectToAction(nameof(Browse), new { @path = returnUrl, offset, count });
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -188,7 +190,7 @@ namespace PikaCore.Controllers.App
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         ex.Message);
                     ReturnMessage = ex.Message;
-                    return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+                    return RedirectToAction(nameof(Browse), new { @path = returnUrl, offset, count });
                 }
             }
 
@@ -202,6 +204,9 @@ namespace PikaCore.Controllers.App
         [Route("/[controller]/[action]/{id?}")]
         public ActionResult PermanentDownload(string id)
         {
+            int offset = int.Parse(Get("Offset"));
+            int count = int.Parse(Get("Count"));
+            
             if (!string.IsNullOrEmpty(id))
             {
                 StorageIndexRecord s = null;
@@ -233,7 +238,7 @@ namespace PikaCore.Controllers.App
                         ReturnMessage =
                                         "It seems that this url expired today, you need to generate a new one.";
                         
-                        return RedirectToAction(nameof(Browse), new { path = returnPath });
+                        return RedirectToAction(nameof(Browse), new { path = returnPath, offset, count });
                     }
                     ReturnMessage = "It seems that given token doesn't exist in the database.";
                     return RedirectToAction(nameof(Browse));
@@ -259,6 +264,9 @@ namespace PikaCore.Controllers.App
         public ActionResult Download(string id,  string returnUrl, bool z = false)
         {
             id = _idDataProtection.Decode(id);
+            int offset = int.Parse(Get("Offset"));
+            int count = int.Parse(Get("Count"));
+            
             try{
                 if (!string.IsNullOrEmpty(id))
                 {
@@ -285,7 +293,7 @@ namespace PikaCore.Controllers.App
                 _loggerService.LogToFileAsync(LogLevel.Warning, "localhost", e.Message);
             }
             ReturnMessage = "Resource id cannot be null.";
-            return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+            return RedirectToAction(nameof(Browse), new { @path = returnUrl, offset, count });
 
         }
 
@@ -309,7 +317,7 @@ namespace PikaCore.Controllers.App
         [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files, string returnUrl)
         {
-            files.RemoveAll(element => element.Length > Constants.MaxUploadSize);
+            /*files.RemoveAll(element => element.Length > Constants.MaxUploadSize);
             var size = files.Sum(f => f.Length);
             var filePath = Constants.Tmp + Constants.UploadTmp;
 
@@ -331,6 +339,7 @@ namespace PikaCore.Controllers.App
             ReturnMessage = files.Count 
                             + " files uploaded of summary size " 
                             + FileSystemAccessor.DetectUnitBySize(size);
+                            */
 	    /*if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
     {
         ModelState.AddModelError("File", 
@@ -411,7 +420,7 @@ namespace PikaCore.Controllers.App
         // read the headers for the next section.
         	section = await reader.ReadNextSectionAsync();
     		}*/
-            return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+            return StatusCode(501);
         }
 
         /**
@@ -424,7 +433,7 @@ namespace PikaCore.Controllers.App
         [Authorize(Roles = "Admin, FileManagerUser")]
         public async Task<IActionResult> Archive(string id)
         {
-            var output = string.Concat(Constants.Tmp, Path.GetDirectoryName(id), ".zip");
+            /*var output = string.Concat(Constants.Tmp, Path.GetDirectoryName(id), ".zip");
 
             var path = "";
 
@@ -457,7 +466,9 @@ namespace PikaCore.Controllers.App
             }
 
             ReturnMessage = "All signs on the Earth and on the sky say that you have already ordered Pika Cloud to zip something.";
-            return RedirectToAction(nameof(Browse));
+            */
+            
+            return StatusCode(501);
         }
 
 
@@ -467,7 +478,9 @@ namespace PikaCore.Controllers.App
         public async Task<IActionResult> Create(string name, string returnUrl)
         {
             var pattern = new Regex(@"\W|_");
-
+            int offset = int.Parse(Get("Offset"));
+            int count = int.Parse(Get("Count"));
+            
             if (!pattern.Match(name).Success)
             {
                 try
@@ -486,12 +499,12 @@ namespace PikaCore.Controllers.App
                     _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(),
                         "Couldn't create directory because of " + e.Message);
                     ReturnMessage = "Error: Couldn't create directory.";
-                    return RedirectToAction(nameof(Browse), new { path = returnUrl });
+                    return RedirectToAction(nameof(Browse), new { path = returnUrl, offset, count });
                 }
             }
 
             ReturnMessage = "You cannot use non-alphabetic characters in directory names.";
-            return RedirectToAction(nameof(Browse), new { path = returnUrl });
+            return RedirectToAction(nameof(Browse), new { path = returnUrl, offset, count });
         }
 
         [HttpGet]
@@ -513,6 +526,8 @@ namespace PikaCore.Controllers.App
             var contents = deleteResourcesViewModel.ToBeDeletedItems;
             var returnPath = _fileService.RetrieveSystemPathFromAbsolute(
                 Directory.GetParent(deleteResourcesViewModel.ToBeDeletedItems[0]).FullName);
+            int offset = int.Parse(Get("Offset"));
+            int count = int.Parse(Get("Count"));
             if (contents.Count > 0)
             {
                 try
@@ -523,19 +538,17 @@ namespace PikaCore.Controllers.App
                         HttpContext.Connection.RemoteIpAddress.ToString(), 
                         "Successfully deleted elements.");
                     ReturnMessage = "Successfully deleted elements.";
-                    return RedirectToAction(nameof(Browse), new { path = returnPath });
+                    return RedirectToAction(nameof(Browse), new { path = returnPath, offset,  count});
                 }
                 catch
                 { 
                     ReturnMessage = "Error: Couldn't delete resource.";
-                    return RedirectToAction(nameof(Browse), new { path =  returnPath});
+                    return RedirectToAction(nameof(Browse), new { path =  returnPath,  offset,  count});
                 }
             }
-            else
-            {
-                ReturnMessage = "Error: Nothing to be deleted.";
-                return RedirectToAction(nameof(Browse), new { path = returnPath });
-            }
+
+            ReturnMessage = "Error: Nothing to be deleted.";
+            return RedirectToAction(nameof(Browse), new { path = returnPath });
         }
 
         [HttpGet]
@@ -623,7 +636,7 @@ namespace PikaCore.Controllers.App
 
         #endregion
 
-        #region CookierHelperMethods
+        #region CookieHelperMethods
 
         private void Set(string key, string value, int? expireTime)
         {
@@ -643,7 +656,12 @@ namespace PikaCore.Controllers.App
             TempData["Count"] = count;
             TempData["PageCount"] = pageCount;
         }
-
+        
+        private string Get(string key)
+        {
+            return HttpContext.Request.Cookies[key];
+        }
+        
         #endregion
     }
 }

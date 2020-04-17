@@ -2,7 +2,15 @@
     ViewData["Title"] = "Locked out";
 }
 
-<header>
-    <h2 class="text-danger">@ViewData["Title"]</h2>
-    <p class="text-danger">This account has been locked out, please try again later.</p>
-</header>
+<div class="container">
+    <div class="card indigo white-text">
+          <div class="card-content white-text">
+                <span class="card-title">@ViewData["Title"]</span>
+                <p class="white-text">@TempData["LockoutMessage"]</p>
+            </div>
+            <div class="card-action white-text">
+                <a href="/">Home Page</a>
+            </div>
+    </div>
+</div>
+

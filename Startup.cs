@@ -53,7 +53,17 @@ namespace PikaCore
             services.AddDbContext<StorageIndexContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
+                {
+                    opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(
+                        int.Parse(Configuration
+                            .GetSection("Policies")
+                            .GetSection("LoginPolicy")["DefaultLockout"])
+                        );
+                    opt.Lockout.MaxFailedAccessAttempts = int.Parse(Configuration
+                        .GetSection("Policies")
+                        .GetSection("LoginPolicy")["MaxFailedAttempts"]);
+                })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -92,7 +102,7 @@ namespace PikaCore
             var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
                 $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
             Console.WriteLine(Resources.Startup_ConfigureServices_Logger_output___0_, path);
-            var provider = new FileLoggerProvider(path, LogLevel.Trace);
+            var provider = new FileLoggerProvider(path, LogLevel.Debug);
             services.AddSingleton(provider);
             
             services.Configure<CookiePolicyOptions>(options =>
@@ -217,7 +227,7 @@ namespace PikaCore
                 endpoints.MapHub<MediaHub>("/hubs/media", options =>
                 {
                     options.Transports =
-                        HttpTransportType.LongPolling |
+                        HttpTransportType.WebSockets |
                         HttpTransportType.ServerSentEvents;
                 });
             });

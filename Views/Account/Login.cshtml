@@ -5,73 +5,70 @@
     ViewData["Title"] = "Log in";
 }
 
-    <div class="row">
+    <div class="container">
     <div class="col s12 m6 l6 offset-2">
         <div class="card indigo">
             <div class="card-content grey-text text-lighten-4 center">
                 <span class="card-title">Log in using a local account.</span>
                 <hr/>
-                 <section>
-                     <div class="card-panel teal">
-                                        Due to migration of data sources to new RDBMS system, all user accounts has become unavailable permanently.
-                                    </div>
-                                    <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
-                                        <div class="row">
-                                            <div class="col s12 m12 l12">
-                                                <div class="input-field">
-                                                    <label class="left">@Html.DisplayNameFor(m => m.Email)</label>
-                                                    <input asp-for="Email" class="validate login-input-color"/>
-                                                    <span asp-validation-for="Email" class="red-text"></span>
-                                                </div>
-                                                <div class="input-field">
-                                                    <label class="left">@Html.DisplayNameFor(m => m.Password)</label>
-                                                    <input asp-for="Password" class="validate login-input-color"/>
-                                                    <span asp-validation-for="Password" class="red-text"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col s12 m12 l12">
-                                                <button type="submit" class="btn btn-default center">Log in</button>
-                                            </div>
-                                        </div>
-                                        <div class="card-action">
-                                            <a class="grey-text text-lighten-4 left small-text" asp-action="ForgotPassword">Forgot your password?</a>
-                                            <a class="grey-text text-lighten-4 left small-text" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register as a new user?</a>
-                                        </div>
-                                    </form>
-                 </section>
+                <section id="local_account_login">
+                    <div class="card-panel teal">
+                        Due to migration of data sources to new RDBMS system, all user accounts has become unavailable permanently.
+                    </div>
+                    <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+                        <div class="row">
+                            <div class="col s12 m12 l12">
+                                <div class="input-field">
+                                    <label class="left">@Html.DisplayNameFor(m => m.Email)</label>
+                                    <input asp-for="Email" class="validate login-input-color"/>
+                                    <span asp-validation-for="Email" class="red-text"></span>
+                                </div>
+                                <div class="input-field">
+                                    <label class="left">@Html.DisplayNameFor(m => m.Password)</label>
+                                    <input asp-for="Password" class="validate login-input-color"/>
+                                    <span asp-validation-for="Password" class="red-text"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12 m12 l12">
+                                <button type="submit" class="btn btn-default center">Log in</button>
+                            </div>
+                        </div>
+                         <section id="external_account_login">
+                             <div class="row">
+                                 <p>OR</p>
+                                 @{
+                                     var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+                                     if (loginProviders.Count == 0)
+                                     {
+
+                                         <p>Sorry, but you can't use any 3rd party authorization provider at the moment.</p>
+                                     }
+                                     else
+                                     {
+                                         <div class="g-signin2" data-onsuccess="onSignIn"></div>
+                                         <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
+
+                                             @foreach (var provider in loginProviders)
+                                             {
+                                                 var name = System.IO.File.Exists("wwwroot/images/" + @provider.Name.ToLower() + "-icon.png") ? @provider.Name.ToLower() + "-icon.png" : @provider.Name.ToLower() + "-icon.svg";
+
+                                                 <button type="submit" class="btn btn-flat transparent" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account"><img height="32" width="32" src="~/images/@name" alt="@provider.DisplayName"/></button>
+                                             }
+
+                                         </form>
+                                     }
+                                 }
+                             </div>
+                             </section>
+                        <div class="card-action">
+                            <a class="grey-text text-lighten-4 left small-text" asp-action="ForgotPassword">Forgot your password?</a>
+                            <a class="grey-text text-lighten-4 left small-text" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register as a new user?</a>
+                        </div>
+                    </form>
+                </section>
             </div>
-        </div>
-    </div>
-    <div class="col s12 m6 l6 offset-2">
-        <div class="card indigo">
-            <div class="card-content grey-text text-lighten-4 center">
-                <span class="card-title grey-text text-lighten-4">Log in using 3rd party authorization provider.</span>
-            </div>
-            @{
-                                    var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-                                    if (loginProviders.Count == 0)
-                                    {
-                                        <div class="card-action center">
-                                            Sorry, but you can't use any 3rd party authorization provider at the moment.
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="g-signin2" data-onsuccess="onSignIn"></div>
-                                        <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
-                                          <div class="card-action center">
-                                            @foreach (var provider in loginProviders)
-                                                {
-                                                    var name = System.IO.File.Exists("wwwroot/images/" + @provider.Name.ToLower() + "-icon.png") ? @provider.Name.ToLower() + "-icon.png" : @provider.Name.ToLower() + "-icon.svg";
-     
-                                                        <button type="submit" class="btn btn-flat transparent" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account"><img height="32" width="32" src="~/images/@name" alt="@provider.DisplayName"/></button>
-                                                }
-                                            </div>
-                                        </form>
-                                    }
-                                }
         </div>
     </div>
     </div>

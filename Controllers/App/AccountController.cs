@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PikaCore.Models;
 using PikaCore.Models.AccountViewModels;
@@ -49,10 +51,10 @@ namespace PikaCore.Controllers.App
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid) return View(model);
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
             if (result.Succeeded)
             {
-                _logger.LogInformation("User logged in.");
+                _logger.LogInformation($"User of email: {model.Email} logged in.");
                 return RedirectPermanent(returnUrl);
             }
             if (result.RequiresTwoFactor)
@@ -61,14 +63,14 @@ namespace PikaCore.Controllers.App
             }
             if (result.IsLockedOut)
             {
-                _logger.LogWarning("User account locked out.");
+                _logger.LogWarning($"User account of email: {model.Email} locked out.");
+                TempData["LockoutMessage"] = "Account has been locked out.";
                 return RedirectToAction(nameof(Lockout));
             }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return View(model);
-            }
+            
+            ModelState.AddModelError(string.Empty, $"Invalid login attempt. Email: {model.Email}");
+            return View(model);
+            
         }
 
         [HttpGet]

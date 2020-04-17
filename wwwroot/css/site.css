@@ -253,6 +253,7 @@ a, a:hover, a:focus {
 
 .login-input-color, .login-input-color::placeholder{
     border-bottom-color: #f5f5f5 !important;
+    color: white !important;
 }
 
 .nav-menu-colors{
