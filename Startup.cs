@@ -227,8 +227,8 @@ namespace PikaCore
                 endpoints.MapHub<MediaHub>("/hubs/media", options =>
                 {
                     options.Transports =
-                        HttpTransportType.WebSockets |
-                        HttpTransportType.ServerSentEvents;
+                        HttpTransportType.ServerSentEvents |
+                        HttpTransportType.LongPolling;
                 });
             });
             
