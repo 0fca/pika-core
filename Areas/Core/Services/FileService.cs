@@ -8,8 +8,9 @@ using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using PikaCore.Areas.Core.Controllers.App;
+using PikaCore.Areas.Core.Services;
 using PikaCore.Controllers;
-using PikaCore.Controllers.App;
 
 namespace PikaCore.Services
 {

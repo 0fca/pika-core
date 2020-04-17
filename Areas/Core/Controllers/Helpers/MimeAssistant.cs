@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PikaCore.Controllers.Helpers
+namespace PikaCore.Areas.Core.Controllers.Helpers
 {
     public static class MimeAssistant
     {

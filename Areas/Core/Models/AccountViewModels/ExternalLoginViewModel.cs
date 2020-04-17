@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace PikaCore.Models.AccountViewModels
+namespace PikaCore.Areas.Core.Models.AccountViewModels
 {
     public class ExternalLoginViewModel
     {

@@ -6,36 +6,32 @@ using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Core.Services
 {
     public class ArchiveService : IArchiveService, INotifyPropertyChanged
     {
         private Task _task;
         private CancellationTokenSource _tokenSource = new CancellationTokenSource();
-        private string _outputPath = "";
         private bool CanBeCancelled { get; set; } = true;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void Cancel()
         {
-            if (CanBeCancelled)
+            if (!CanBeCancelled) return;
+            _tokenSource.Cancel();
+            try
             {
-                _tokenSource.Cancel();
-                try
-                {
-                    _tokenSource.Token.ThrowIfCancellationRequested();
-                }
-                catch (OperationCanceledException e)
-                {
-                    CanBeCancelled = true;
-                    Debug.WriteLine(e.Message + " Zipping cancelled by user.");
-                }
+                _tokenSource.Token.ThrowIfCancellationRequested();
+            }
+            catch (OperationCanceledException e)
+            {
+                CanBeCancelled = true;
+                Debug.WriteLine(e.Message + " Zipping cancelled by user.");
             }
         }
 
         public async Task<Task> ZipDirectoryAsync(string absolutePath, string output)
         {
-            _outputPath = output;
             if (File.Exists(output))
             {
                 File.Delete(output);

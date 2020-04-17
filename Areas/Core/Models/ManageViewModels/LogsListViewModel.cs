@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PikaCore.Models.ManageViewModels
+namespace PikaCore.Areas.Core.Models.ManageViewModels
 {
     public class LogsListViewModel
     {

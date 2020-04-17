@@ -1,7 +1,8 @@
-﻿using Quartz;
-using System;
+﻿using System;
+using PikaCore.Services.Helpers;
+using Quartz;
 
-namespace PikaCore.Services.Helpers
+namespace PikaCore.Areas.Core.Services.Helpers
 {
     public class TriggerData
     {

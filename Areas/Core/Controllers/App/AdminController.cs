@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PikaCore.Areas.Core.Models;
+using PikaCore.Areas.Core.Models.ManageViewModels;
+using PikaCore.Areas.Core.Services;
 using PikaCore.Models;
-using PikaCore.Models.ManageViewModels;
 using PikaCore.Services;
 
-namespace PikaCore.Controllers.App
+namespace PikaCore.Areas.Core.Controllers.App
 {
     [Area("Core")]
     [Route("/{controller}/{action}")]

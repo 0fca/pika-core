@@ -1,4 +1,4 @@
-using PikaCore.Controllers.App;
+using PikaCore.Areas.Core.Controllers.App;
 
 namespace Microsoft.AspNetCore.Mvc
 {

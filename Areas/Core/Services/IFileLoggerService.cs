@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Core.Services
 {
     public interface IFileLoggerService
     {

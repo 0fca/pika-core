@@ -1,7 +1,9 @@
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using PikaCore.Areas.Core.Services;
+using PikaCore.Services;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Core.Extensions
 {
     public static class EmailSenderExtensions
     {

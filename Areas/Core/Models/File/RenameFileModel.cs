@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
-namespace PikaCore.Models.File
+namespace PikaCore.Areas.Core.Models.File
 {
     public class RenameFileModel
     {

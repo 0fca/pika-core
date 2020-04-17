@@ -1,8 +1,8 @@
-﻿using Quartz;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Quartz;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Core.Services
 {
     public interface ISchedulerService
     {

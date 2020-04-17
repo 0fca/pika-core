@@ -13,16 +13,18 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using PikaCore.Areas.Core.Controllers.Helpers;
+using PikaCore.Areas.Core.Controllers.Hubs;
+using PikaCore.Areas.Core.Data;
+using PikaCore.Areas.Core.Extensions;
+using PikaCore.Areas.Core.Models;
+using PikaCore.Areas.Core.Models.File;
+using PikaCore.Areas.Core.Services;
 using PikaCore.Controllers.Helpers;
-using PikaCore.Controllers.Hubs;
-using PikaCore.Data;
-using PikaCore.Extensions;
 using PikaCore.Models;
-using PikaCore.Models.File;
 using PikaCore.Security;
-using PikaCore.Services;
 
-namespace PikaCore.Controllers.App
+namespace PikaCore.Areas.Core.Controllers.App
 {
     [Area("Core")]
     public class StorageController : Controller
@@ -34,7 +36,7 @@ namespace PikaCore.Controllers.App
         private readonly IFileLoggerService _loggerService;
         private readonly IConfiguration _configuration;
         private readonly StorageIndexContext _storageIndexContext;
-        private bool _wasArchivingCancelled = true;
+        public bool _wasArchivingCancelled = true;
         private readonly IHubContext<StatusHub> _hubContext;
         private readonly IdDataProtection _idDataProtection;
         
@@ -316,7 +318,7 @@ namespace PikaCore.Controllers.App
         [AllowAnonymous]
 	    [DisableFormValueModelBinding]
         [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> Upload(List<IFormFile> files, string returnUrl)
+        public IActionResult Upload(List<IFormFile> files, string returnUrl)
         {
             /*files.RemoveAll(element => element.Length > Constants.MaxUploadSize);
             var size = files.Sum(f => f.Length);
@@ -432,7 +434,7 @@ namespace PikaCore.Controllers.App
         [HttpGet]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin, FileManagerUser")]
-        public async Task<IActionResult> Archive(string id)
+        public IActionResult Archive(string id)
         {
             /*var output = string.Concat(Constants.Tmp, Path.GetDirectoryName(id), ".zip");
 

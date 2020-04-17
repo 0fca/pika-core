@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Core.Services
 {
     public interface IStreamingService
     {

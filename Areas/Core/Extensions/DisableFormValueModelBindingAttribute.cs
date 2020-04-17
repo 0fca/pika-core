@@ -2,7 +2,7 @@ using System;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace PikaCore.Extensions{
+namespace PikaCore.Areas.Core.Extensions{
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class DisableFormValueModelBindingAttribute : Attribute, IResourceFilter
 	{

@@ -1,8 +1,7 @@
-﻿using FFmpeg.NET;
-using PikaCore.Services.Helpers;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using FFmpeg.NET;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Core.Services
 {
     public interface IMediaService
     {

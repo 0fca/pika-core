@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Distributed;
+using PikaCore.Areas.Core.Models;
 using PikaCore.Models;
 
-namespace PikaCore.Extensions
+namespace PikaCore.Areas.Core.Extensions
 {
     public static class UserManagerCacheExtension
     {

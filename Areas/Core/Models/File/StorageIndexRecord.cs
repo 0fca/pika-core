@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Controllers;
-using PikaCore.Controllers.App;
 
 namespace PikaCore.Models
 {

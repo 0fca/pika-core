@@ -1,4 +1,4 @@
-﻿@model PikaCore.Models.ManageViewModels.LogsListViewModel
+﻿@model LogsListViewModel
 @{ var content = "";
     if (Model != null && Model.Lines != null) {
         content = Model.Lines.Aggregate(content, (current, item) => current + (item + "\n"));

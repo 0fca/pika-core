@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
 
-namespace PikaCore.Models.ManageViewModels
+namespace PikaCore.Areas.Core.Models.ManageViewModels
 {
     public class ExternalLoginsViewModel
     {

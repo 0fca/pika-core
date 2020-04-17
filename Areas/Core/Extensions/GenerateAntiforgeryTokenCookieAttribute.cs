@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
-
-namespace PikaCore.Extensions
+namespace PikaCore.Areas.Core.Extensions
 {
 public class GenerateAntiforgeryTokenCookieAttribute : ResultFilterAttribute
 {

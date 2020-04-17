@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace PikaCore.Controllers.Helpers
+namespace PikaCore.Areas.Core.Controllers.Helpers
 {
     [StructLayout(LayoutKind.Sequential, Size = 512), Serializable]
     public struct Perms

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Core.Services
 {
     public interface IUrlGenerator
     {

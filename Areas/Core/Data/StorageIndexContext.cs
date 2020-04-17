@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PikaCore.Models;
 
-namespace PikaCore.Data
+namespace PikaCore.Areas.Core.Data
 {
     public class StorageIndexContext : DbContext
     {

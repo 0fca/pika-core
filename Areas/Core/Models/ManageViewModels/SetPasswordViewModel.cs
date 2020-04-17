@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PikaCore.Models.ManageViewModels
+namespace PikaCore.Areas.Core.Models.ManageViewModels
 {
     public class SetPasswordViewModel
     {

@@ -1,16 +1,16 @@
-﻿using FFmpeg.NET;
-using PikaCore.Controllers.Helpers;
-using Microsoft.Extensions.Configuration;
-using PikaCore.Services.Helpers;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using FFmpeg.NET;
+using Microsoft.Extensions.Configuration;
+using PikaCore.Areas.Core.Controllers.Helpers;
+using PikaCore.Areas.Core.Services.Helpers;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Core.Services
 {
     public class MediaService : IMediaService
     {

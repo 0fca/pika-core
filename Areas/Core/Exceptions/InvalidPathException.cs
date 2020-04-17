@@ -1,6 +1,6 @@
 using System;
 
-namespace FMS.Exceptions
+namespace PikaCore.Areas.Core.Exceptions
 {
     public class InvalidPathException : Exception
     {

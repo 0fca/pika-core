@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
+using PikaCore.Areas.Core.Data;
 
 namespace PikaCore.Data.Migrations
 {

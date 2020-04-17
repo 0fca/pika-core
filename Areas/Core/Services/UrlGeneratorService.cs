@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Core.Services
 {
     public class HashUrlGeneratorService : IUrlGenerator
     {

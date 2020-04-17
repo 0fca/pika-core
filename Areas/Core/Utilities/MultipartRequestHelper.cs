@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Microsoft.Net.Http.Headers;
 
-namespace PikaCore.Utilities
+namespace PikaCore.Areas.Core.Utilities
 {
     public static class MultipartRequestHelper
     {

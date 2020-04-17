@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.FileProviders;
 
-namespace PikaCore.Models
+namespace PikaCore.Areas.Core.Models.File
 {
     public class DeleteResourcesViewModel
     {

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using PikaCore.Models;
 
-namespace PikaCore.Models.ManageViewModels
+namespace PikaCore.Areas.Core.Models.ManageViewModels
 {
     public class AdminPanelViewModel
     {

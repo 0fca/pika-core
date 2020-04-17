@@ -1,10 +1,10 @@
-﻿using Quartz;
-using Quartz.Impl;
-using System;
+﻿using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
+using Quartz;
+using Quartz.Impl;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Core.Services
 {
     public class SchedulerService : ISchedulerService
     {

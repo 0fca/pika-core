@@ -1,4 +1,4 @@
-namespace FMS.Models
+namespace PikaCore.Areas.Core.Models.AccountViewModels
 {
     public class LoginResultModel
     {

@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace PikaCore.Controllers.App
+namespace PikaCore.Areas.Core.Controllers.App
 {
     public static class Constants
     {

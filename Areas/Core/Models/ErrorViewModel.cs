@@ -1,7 +1,6 @@
 using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
 
-namespace PikaCore.Models
+namespace PikaCore.Areas.Core.Models
 {
     public class ErrorViewModel
     {
