@@ -1,6 +1,8 @@
-﻿using System.Net.Mime;
+﻿using System.Collections.Generic;
+using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PikaCore.Areas.Api.v1.Models;
 
 namespace PikaCore.Areas.Api.v1.Controllers
 {
@@ -13,10 +15,23 @@ namespace PikaCore.Areas.Api.v1.Controllers
     {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [Produces(MediaTypeNames.Application.Json)]
         [Route("[action]")]
         public IActionResult Index()
         {
-            return Ok("Welcome to PikaCore REST API.");
+            var data = new List<string> {"Welcome to PikaCore REST API."};
+            var apiMessage = new ApiMessage<IList<string>>();
+            apiMessage.SetData(data);
+            apiMessage.AddMessage("Everythin is fine.");
+            return Ok(apiMessage);
+        }
+        
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("[action]")]
+        public IActionResult NotFoundHandler()
+        {
+            return NotFound();
         }
     }
 }

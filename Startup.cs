@@ -146,7 +146,15 @@ namespace PikaCore
 
             Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-" + OsName];
             Constants.UploadTmp = Configuration.GetSection("Paths")["upload-dir-tmp"];
-
+            services.AddControllers()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressInferBindingSourcesForParameters = true;
+                    options.SuppressModelStateInvalidFilter = true;
+                    options.SuppressMapClientErrors = true;
+                    options.ClientErrorMapping[404].Link = "/Api/v1/notfoundhandler";
+                });
+            
             services.AddMvc()
 	        .AddRazorPagesOptions(options =>
             {
