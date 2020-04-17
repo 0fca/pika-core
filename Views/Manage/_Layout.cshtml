@@ -2,16 +2,21 @@
     Layout = "/Views/Shared/_Layout.cshtml";
 }
 
-    <div class="d-flex align-items-center text-center align-content-center row row-margins">
-        <h1>Manage your account</h1>
-        <hr />
-        <div class="col-md-3">
-            @await Html.PartialAsync("_ManageNav")
+<div class="container">
+    <div class="col s12 m12 offset-2">
+        <div class="card indigo darken-1 center white-text">
+            <span class="card-title">Manage your account</span>
+            <div class="card-content white-text">
+                <header>
+                    <div class="col m3 l3">
+                                    @await Html.PartialAsync("_ManageNav")
+                        </div>
+                </header>
+                @RenderBody()
+            </div>
         </div>
-        <div class="col-md-9">
-            @RenderBody()
         </div>
-    </div>
+</div>
 
 @section Scripts {
     @RenderSection("Scripts", required: false)

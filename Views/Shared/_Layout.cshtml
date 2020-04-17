@@ -41,9 +41,7 @@
                     <a asp-area="" asp-controller="Home" asp-action="Index" class="brand-logo brand-margin">
                         <img class="responsive-img hide-on-med-and-down" src="~/images/logooftheyear2018.png" width="96" height="64" alt="Hannah"/>
                     </a>
-
                     @await Html.PartialAsync("_LinksPartial")
-                
                 </div>
             </nav>
         </div>
@@ -52,15 +50,21 @@
         </ul>
     </form>
     <div class="container container-padding">
-    @RenderBody()
-</div>
+        @RenderBody()
+    </div>
 </main>
 <footer class="page-footer footer">
     <div class="container">
-        <small class="white-text">Interested in this app? See <a class="text-teal" asp-page="/Home/About"><small>About</small></a> page to take a better look at it!</small>
-        <environment include="Development">
-            <strong class="teal-text right">This is an developer instance of Pika Core Application.</strong>
-        </environment>
+        <div class="row">
+            <div class="col s12 m6 l6">
+                <small class="white-text left">Interested in this app? See <a class="text-teal" asp-page="/Home/About"><small>About</small></a> page to take a better look at it!</small>
+            </div>
+            <environment include="Development">
+                <div class="col s12 m6 l6">
+                    <strong class="teal-text right">This is an developer instance of Pika Core Application.</strong>
+                </div>
+             </environment>
+        </div>
     </div>
     <div class="footer-copyright">
         <div class="container">
