@@ -18,19 +18,19 @@ Developer Instance: https://dev-core.lukas-bownik.net/
 *Planned features*
 * Online video watching,
 * Other archive formats(possibly 7-zip, tar.gz),
-* Bookmarks - so you will be able to easily find the same resource in Pika Cloud any time, 
+* Bookmarks - so you will be able to easily find the same resource in Pika Cloud any time.
 
 ### Technical information ###
 *Technology stack*
 * .NET Core 3.1,
-* Template Engine,
+* Template Engine "Razor",
 * Identity Framework,
 * HTML5 with Materialize and JS,
 * Entity Framework Core.
 
 Frameworks&libs:
 * Newtonsoft,
-* MySQL Pomelo Connector.
+* Microsoft Npgsql.
 
 *Deployment*
 Server OS: Debian 10
