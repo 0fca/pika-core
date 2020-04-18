@@ -4,43 +4,23 @@ namespace PikaCore.Areas.Api.v1.Models
 {
     public class ApiMessage<T> : IPayload<T>
     {
-        private T _data;
-        private readonly Stack<string> _messages = new Stack<string>();
-        private bool _status = true;
-        
-        public void SetStatus(bool status)
-        {
-            this._status = status;
-        }
-
-        public bool GetStatus()
-        {
-            return this._status;
-        }
-
-        public void SetData(T o)
-        {
-            this._data = o;
-        }
-
-        public T GetData()
-        {
-            return this._data;
-        }
+        public T Data { get; set; }
+        public Stack<string> Messages { get; set; } = new Stack<string>();
+        public bool Status { get; set; } = true;
 
         public void AddMessage(string message)
         {
-            this._messages.Push(message);
+            this.Messages.Push(message);
         }
 
         public string GetLastAddedMessage()
         {
-            return this._messages.Pop();
+            return this.Messages.Pop();
         }
 
         public Stack<string> GetMessages()
         {
-            return this._messages;
+            return this.Messages;
         }
     }
 }

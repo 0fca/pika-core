@@ -1,6 +1,6 @@
 ﻿@using PikaCore.Areas.Core.Controllers.Helpers
 @using PikaCore.Areas.Core.Services
-@using PikaCore.Controllers.Helpers
+@using PikaCore.Areas.Infrastructure.Services
 @using PikaCore.Security
 @model FileResultViewModel
 @inject UserManager<ApplicationUser> UserManager
@@ -27,7 +27,7 @@
             var last = "";
             var tmp = "/Core/Storage/Browse?path=" + last;
 
-            <a class="teal-text" href="/Storage/Browse/">Browse</a>
+            <a class="teal-text" href="/Core/Storage/Browse/">Browse</a>
 
             foreach (var part in splitted)
             {
@@ -112,19 +112,7 @@
             <div class="col m1 l1">
                 @if (!item.IsDirectory)
                             {
-                                var unitStrPart = "";
-                                var i = item.Length;
-                                string[] units = { "B", "kiB", "MiB", "GiB", "TiB" };
-                                var unitIndex = 0;
-                                for (var ptr = 0; ptr <= units.Length; ptr++)
-                                {
-                                    if (i < Math.Pow(1024, ptr) && i > 1024)
-                                    {
-                                        unitIndex = ptr - 1;
-                                        break;
-                                    }
-                                }
-                                unitStrPart = Math.Round(i / Math.Pow(1024, unitIndex), 2) + " " + units[unitIndex];
+                                var unitStrPart = UnixHelper.DetectUnitBySize(item.Length);
                                 <p>@unitStrPart</p>
                             }
                             else
@@ -199,7 +187,7 @@
 
 @await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)
 
-@await Html.PartialAsync("Partial/_UploadPartial.cshtml", new List<IFormFile>())
+@await Html.PartialAsync("Partial/_UploadPartial.cshtml", lastPath)
 
 @if (TempData["showGenerateUrlPartial"] != null && bool.Parse(TempData["showGenerateUrlPartial"].ToString()))
 {

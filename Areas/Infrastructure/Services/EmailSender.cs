@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using PikaCore.Services;
+using PikaCore.Areas.Core.Services;
 
-namespace PikaCore.Areas.Core.Services
+namespace PikaCore.Areas.Infrastructure.Services
 {
     public class EmailSender : IEmailSender
     {

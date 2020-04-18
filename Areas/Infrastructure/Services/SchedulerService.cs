@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Quartz;
 using Quartz.Impl;
 
-namespace PikaCore.Areas.Core.Services
+namespace PikaCore.Areas.Infrastructure.Services
 {
     public class SchedulerService : ISchedulerService
     {

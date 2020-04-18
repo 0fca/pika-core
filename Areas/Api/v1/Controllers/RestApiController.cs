@@ -14,14 +14,16 @@ namespace PikaCore.Areas.Api.v1.Controllers
     public class RestApiController : ControllerBase
     {
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [Produces(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ApiMessage<IList<string>>),StatusCodes.Status200OK)]
         [Route("[action]")]
         public IActionResult Index()
         {
             var data = new List<string> {"Welcome to PikaCore REST API."};
-            var apiMessage = new ApiMessage<IList<string>>();
-            apiMessage.SetData(data);
+            var apiMessage = new ApiMessage<IList<string>>()
+            {
+                Data = data
+            };
+            
             apiMessage.AddMessage("Everythin is fine.");
             return Ok(apiMessage);
         }

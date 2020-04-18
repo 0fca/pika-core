@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using FFmpeg.NET;
 
-namespace PikaCore.Areas.Core.Services
+namespace PikaCore.Areas.Infrastructure.Services
 {
     public interface IMediaService
     {

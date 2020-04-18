@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using PikaCore.Models;
+using PikaCore.Areas.Core.Models.File;
 
 namespace PikaCore.Areas.Core.Data
 {

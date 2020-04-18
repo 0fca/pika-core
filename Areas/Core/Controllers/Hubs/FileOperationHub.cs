@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
+using PikaCore.Areas.Core.Controllers.Helpers;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Controllers.Helpers;
+using PikaCore.Areas.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Controllers.Hubs
 {

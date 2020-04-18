@@ -8,22 +8,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using PikaCore.Services;
 using System;
 using System.IO;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
-using PikaCore.Areas.Core.Extensions;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Data;
-using PikaCore.Models;
+using PikaCore.Areas.Infrastructure.Services;
 using PikaCore.Properties;
 using PikaCore.Security;
 using FileLoggerProvider = Germes.AspNetCore.FileLogger.FileLoggerProvider;
@@ -103,6 +100,11 @@ namespace PikaCore
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
             
+            services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 268435456; //256MB
+            });
+            
             var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
                 $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
             Console.WriteLine(Resources.Startup_ConfigureServices_Logger_output___0_, path);
@@ -121,14 +123,17 @@ namespace PikaCore
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
                 options.SlidingExpiration = true;
-                options.LoginPath = "/Account/Login";
+                options.LoginPath = "/Core/Account/Login";
             });
             
     	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
             {
                 builder
-                    .WithMethods("GET", "POST")
-                    .WithOrigins("dev-core.lukas-bownik.net", "core.lukas-bownik.net", "me.lukas-bownik.net", "localhost:5000")
+                    .AllowAnyMethod()
+                    .WithOrigins("dev-core.lukas-bownik.net", 
+                        "core.lukas-bownik.net", 
+                        "me.lukas-bownik.net", 
+                        "localhost:5000")
                     .AllowAnyHeader();
             }));
             
@@ -152,23 +157,12 @@ namespace PikaCore
                     options.SuppressInferBindingSourcesForParameters = true;
                     options.SuppressModelStateInvalidFilter = true;
                     options.SuppressMapClientErrors = true;
-                    options.ClientErrorMapping[404].Link = "/Api/v1/notfoundhandler";
+                    options.ClientErrorMapping[404].Link = "/api/v1/notfoundhandler";
                 });
+               
             
             services.AddMvc()
-	        .AddRazorPagesOptions(options =>
-            {
-                options.Conventions
-                    .AddPageApplicationModelConvention("/StreamedSingleFileUploadPhysical",
-                        model =>
-                        {
-                            model.Filters.Add(
-                                new GenerateAntiforgeryTokenCookieAttribute());
-                            model.Filters.Add(
-                                new DisableFormValueModelBindingAttribute());
-                        });
-            })
-            .AddMvcOptions(options =>
+                .AddMvcOptions(options =>
             {
                 options.MaxModelValidationErrors = 50;
                 options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(

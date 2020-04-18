@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using FFmpeg.NET;
 using Microsoft.Extensions.Configuration;
 using PikaCore.Areas.Core.Controllers.Helpers;
-using PikaCore.Areas.Core.Services.Helpers;
+using PikaCore.Areas.Infrastructure.Services.Helpers;
 
-namespace PikaCore.Areas.Core.Services
+namespace PikaCore.Areas.Infrastructure.Services
 {
     public class MediaService : IMediaService
     {

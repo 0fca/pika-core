@@ -1,5 +1,3 @@
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,11 +6,12 @@ using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Controllers;
 
-namespace PikaCore.Services
+namespace PikaCore.Areas.Infrastructure.Services
 {
     public class FileService : IFileService
     {
@@ -91,83 +90,119 @@ namespace PikaCore.Services
             return fs;
         }
 
-        public async Task<DirectoryInfo> Create(string systemPath)
+        public async Task<DirectoryInfo> MkdirAsync(string systemPath)
         {
-            return await Task.Factory.StartNew(() => 
-                Directory.CreateDirectory(systemPath)
-                );
+            return await Task.Factory.StartNew(() =>
+                {
+                    try
+                    {
+                        return Directory.CreateDirectory(systemPath);
+                    }
+                    catch (Exception e)
+                    {
+                        _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost", e.Message);
+                        return null;
+                    }
+                }
+            );
         }
 
-        public async Task<byte[]> AsBytesAsync(string absolutPath)
+        public async Task<FileStream> TouchAsync(string physicalAbsolutePath)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                try
+                {
+                    return File.Create(physicalAbsolutePath);
+                }
+                catch (Exception e)
+                {
+                    _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost", e.Message);
+                    return null;
+                }
+            });
+        }
+
+        public async Task<string> DumpFileStreamAsync(FileStream physicalAbsolutePath)
+        {
+            if (physicalAbsolutePath.Length == 0) return null;
+            await physicalAbsolutePath.FlushAsync();
+            physicalAbsolutePath.Close();
+
+            return physicalAbsolutePath.Name;
+        }
+
+        public async Task<byte[]> AsBytesAsync(string absolutePath)
         {
             return await Task<byte[]>.Factory.StartNew(() => 
-                File.Exists(absolutPath) 
-                    ? File.ReadAllBytes(absolutPath) 
+                File.Exists(absolutePath) 
+                    ? File.ReadAllBytes(absolutePath) 
                     : null, _tokenSource.Token
                 );
-        }
-
-        public async Task MoveFromTmpAsync(string fileName, string toWhere = null)
-	    {
-            var file = Constants.Tmp + Constants.UploadTmp + Path.DirectorySeparatorChar + fileName;
-
-            if (string.IsNullOrEmpty(toWhere))
-            {
-                toWhere = Constants.UploadDirectory + fileName;
-            }
-
-            if (!Directory.Exists(toWhere))
-            {
-                Directory.CreateDirectory(toWhere);
-            }
-
-            await using var fileStream = new FileStream(file, FileMode.Open);
-            var buffer = new byte[fileStream.Length];
-            await fileStream.ReadAsync(buffer);
-            await File.WriteAllBytesAsync(toWhere + fileName, buffer);
-            _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost",
-                $"File {fileName} moved from tmp to " + toWhere);
-            fileStream.Flush();
         }
 
         public bool Move(string absolutePath, string toWhere)
         {
             var isMoved = true;
+            Task.Factory.StartNew(() =>
+            {
+                try
+                {
+                    if (Directory.Exists(absolutePath))
+                    {
+                        Directory.Move(absolutePath, toWhere);
+                    }
+                    else
+                    {
+                        File.Move(absolutePath, toWhere);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost",
+                        $"Couldn't move {absolutePath} to {toWhere} because of {e.Message}");
+                    isMoved = false;
+                }
+            });
+            return isMoved;
+        }
+
+        public async Task Copy(string absolutePath, string toWhere)
+        {
             try
             {
                 if (Directory.Exists(absolutePath))
                 {
-                    Directory.Move(absolutePath, toWhere);
+                    var directories = await WalkDirectoryTree(absolutePath);
+                    directories.ToList().ForEach(dir => { Directory.CreateDirectory(dir); });
+                    var filePaths = await WalkFileTree(absolutePath);
+                    filePaths.ToList().ForEach(path =>
+                    {
+                        File.Copy(path, Path.Combine(toWhere, Path.GetFileName(path)));
+                    });       
                 }
                 else
                 {
-                    File.Move(absolutePath, toWhere);
+                    File.Copy(absolutePath, toWhere);
                 }
             }
             catch (Exception e)
             {
-                _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost", $"Couldn't move {absolutePath} to {toWhere} because of {e.Message}");
-                isMoved = false;
+                _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost",
+                    $"Couldn't move {absolutePath} to {toWhere} because of {e.Message}");
             }
-
-            return isMoved;
-        }
-
-        public Task Copy(string absolutePath, string toWhere)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<List<string>> ListPath(string path)
         {
             var hostPath = this.RetrieveAbsoluteFromSystemPath(path);
-            return (await Task.Factory.StartNew(() => Directory.GetDirectories(hostPath))).ToList();
+            return !Directory.Exists(hostPath) ? null : (await Task.Factory.StartNew(() => Directory.GetDirectories(hostPath))).ToList();
         }
 
-        public async Task<IEnumerable<string>> WalkFileTree(string path, int depth)
+        public async Task<IEnumerable<string>> WalkFileTree(string path)
         {
             var hostPath = this.RetrieveAbsoluteFromSystemPath(path);
-            return await Task<IEnumerable<string>>.Factory.StartNew(() => TraverseFiles(hostPath, depth));
+            return await Task<IEnumerable<string>>.Factory.StartNew(() => TraverseFiles(hostPath));
         }
 
         public async Task<IEnumerable<string>> WalkDirectoryTree(string path)
@@ -176,7 +211,7 @@ namespace PikaCore.Services
             return await Task<IEnumerable<string>>.Factory.StartNew(() => TraverseDirectories(hostPath));
         }
 
-        private static IEnumerable<string> TraverseDirectories(string rootDirectory)
+        public static IEnumerable<string> TraverseDirectories(string rootDirectory)
         {
             var directories = Enumerable.Empty<string>();
             try
@@ -202,7 +237,7 @@ namespace PikaCore.Services
             }
         }
 
-        private static IEnumerable<string> TraverseFiles(string rootDirectory, int depth)
+        private static IEnumerable<string> TraverseFiles(string rootDirectory)
         {
             var files = Enumerable.Empty<string>();
             var directories = Enumerable.Empty<string>();

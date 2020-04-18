@@ -85,7 +85,6 @@
     <ItemGroup>
       <Folder Include="Areas\Api\v1\Data" />
       <Folder Include="Areas\Core" />
-      <Folder Include="Areas\Infrastracture" />
       <Folder Include="wwwroot\images\github\" />
     </ItemGroup>
 

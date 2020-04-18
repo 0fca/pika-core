@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
-using PikaCore.Controllers.Helpers;
+using PikaCore.Areas.Core.Controllers.Helpers;
 
 namespace PikaCore.Areas.Core.Models.File
 {

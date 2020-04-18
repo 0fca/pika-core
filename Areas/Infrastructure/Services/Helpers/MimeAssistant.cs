@@ -9,14 +9,14 @@ namespace PikaCore.Areas.Core.Controllers.Helpers
 {
     public static class MimeAssistant
     {
-        public static string GetMimeType(string fileName)
+        public static string GetMimeType(string absolutePhysicalPath)
         {
             try
             {
-                if (Path.IsPathFullyQualified(fileName)
+                if (Path.IsPathFullyQualified(absolutePhysicalPath)
                 && Environment.OSVersion.Platform == PlatformID.Unix)
                 {
-                    return ReadMimeUsingFile(fileName).Result.Trim();
+                    return ReadMimeUsingFile(absolutePhysicalPath).Result.Trim();
                 }
                 return "unknown/unknown";
             }

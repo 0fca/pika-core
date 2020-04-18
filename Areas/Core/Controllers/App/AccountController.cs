@@ -9,8 +9,7 @@ using Microsoft.Extensions.Logging;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.AccountViewModels;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Models;
-using PikaCore.Services;
+using PikaCore.Areas.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {

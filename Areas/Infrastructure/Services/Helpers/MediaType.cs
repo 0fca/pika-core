@@ -1,4 +1,4 @@
-﻿namespace PikaCore.Areas.Core.Services.Helpers
+﻿namespace PikaCore.Areas.Infrastructure.Services.Helpers
 {
     public enum MediaType
     {

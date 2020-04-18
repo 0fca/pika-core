@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-
 
 namespace PikaCore
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -20,6 +17,10 @@ namespace PikaCore
             var port = ReadPortFromStdIn(args);
 
             var host = WebHost.CreateDefaultBuilder(args)
+                .ConfigureKestrel((context, options) =>
+                {
+                    options.Limits.MaxRequestBodySize = 268435456;
+                })
                 .UseStartup<Startup>()
                 .UseConfiguration(configuration)
                 .UseUrls($"http://localhost:{port}")

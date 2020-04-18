@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Distributed;
 using PikaCore.Areas.Core.Models;
-using PikaCore.Models;
 
 namespace PikaCore.Areas.Core.Extensions
 {

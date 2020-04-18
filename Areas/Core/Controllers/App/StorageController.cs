@@ -3,25 +3,26 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using PikaCore.Areas.Core.Controllers.Helpers;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
-using PikaCore.Areas.Core.Extensions;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Controllers.Helpers;
-using PikaCore.Models;
+using PikaCore.Areas.Infrastructure.Services;
 using PikaCore.Security;
 
 namespace PikaCore.Areas.Core.Controllers.App
@@ -36,10 +37,10 @@ namespace PikaCore.Areas.Core.Controllers.App
         private readonly IFileLoggerService _loggerService;
         private readonly IConfiguration _configuration;
         private readonly StorageIndexContext _storageIndexContext;
-        public bool _wasArchivingCancelled = true;
+        public bool WasArchivingCancelled = true;
         private readonly IHubContext<StatusHub> _hubContext;
         private readonly IdDataProtection _idDataProtection;
-        
+
         #region TempDataMessages
         [TempData(Key = "showGenerateUrlPartial")]public  bool ShowGenerateUrlPartial { get; set; }
         [TempData(Key = "returnMessage")] public  string ReturnMessage { get; set; }
@@ -47,7 +48,9 @@ namespace PikaCore.Areas.Core.Controllers.App
         #endregion
 
         public StorageController(SignInManager<ApplicationUser> signInManager,
-               IArchiveService archiveService, IFileService fileService, IUrlGenerator iUrlGenerator,
+               IArchiveService archiveService, 
+               IFileService fileService, 
+               IUrlGenerator iUrlGenerator,
                StorageIndexContext storageIndexContext,
                IFileLoggerService fileLoggerService,
                IHubContext<StatusHub> hubContext,
@@ -313,119 +316,32 @@ namespace PikaCore.Areas.Core.Controllers.App
             var thumbFileStream = _fileService.AsStreamAsync(absoluteThumbPath);
             return File(thumbFileStream, "image/jpeg");
         }
-
+        
         [HttpPost]
-        [AllowAnonymous]
-	    [DisableFormValueModelBinding]
         [AutoValidateAntiforgeryToken]
-        public IActionResult Upload(List<IFormFile> files, string returnUrl)
+        [AllowAnonymous]
+        [RequestFormLimits(MultipartBodyLengthLimit = 268435456)]
+        public async Task<IActionResult> Upload(List<IFormFile> files, string returnPath = null)
         {
-            /*files.RemoveAll(element => element.Length > Constants.MaxUploadSize);
-            var size = files.Sum(f => f.Length);
+            files.RemoveAll(element => element.Length > Constants.MaxUploadSize);
+            if (files.Count == 0){
+                TempData["returnMessage"] = "No files has been uploaded, because of size.";
+                return LocalRedirect($"/Core/Storage/Browse?path={returnPath}");
+            }
             var filePath = Constants.Tmp + Constants.UploadTmp;
-
+            long size = files.Sum(f => f.Length);
+            
             foreach (var formFile in files.Where(formFile => formFile.Length > 0))
             {
-                await using var stream = new FileStream(filePath 
-                                                        + Path.DirectorySeparatorChar 
-                                                        + formFile.FileName, 
-                    FileMode.Create);
-                await formFile.CopyToAsync(stream);
+                var fs = await _fileService.TouchAsync(Path.Combine(filePath, formFile.FileName));
+                await formFile.CopyToAsync(fs);
+                await _fileService.DumpFileStreamAsync(fs);
             }
-
-            var uploadedFiles = Directory.GetFiles(Constants.Tmp + Constants.UploadTmp);
-            foreach (var file in uploadedFiles)
-            {
-                await _fileService.MoveFromTmpAsync(Path.GetFileName(file), Constants.UploadDirectory);
-            }
-
-            ReturnMessage = files.Count 
-                            + " files uploaded of summary size " 
-                            + FileSystemAccessor.DetectUnitBySize(size);
-                            */
-	    /*if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
-    {
-        ModelState.AddModelError("File", 
-            $"The request couldn't be processed (Error 1).");
-        // Log error
-
-        return BadRequest(ModelState);
-    }
-
-    var boundary = MultipartRequestHelper.GetBoundary(
-        MediaTypeHeaderValue.Parse(Request.ContentType),
-        _defaultFormOptions.MultipartBoundaryLengthLimit);
-    var reader = new MultipartReader(boundary, HttpContext.Request.Body);
-    var section = await reader.ReadNextSectionAsync();
-
-    while (section != null)
-    {
-        var hasContentDispositionHeader = 
-            ContentDispositionHeaderValue.TryParse(
-                section.ContentDisposition, out var contentDisposition);
-
-        if (hasContentDispositionHeader)
-        {
-            // This check assumes that there's a file
-            // present without form data. If form data
-            // is present, this method immediately fails
-            // and returns the model error.
-            if (!MultipartRequestHelper
-                .HasFileContentDisposition(contentDisposition))
-            {
-                ModelState.AddModelError("File", 
-                    $"The request couldn't be processed (Error 2).");
-                // Log error
-
-                return BadRequest(ModelState);
-            }
-            else
-            {
-                // Don't trust the file name sent by the client. To display
-                // the file name, HTML-encode the value.
-                var trustedFileNameForDisplay = WebUtility.HtmlEncode(
-                        contentDisposition.FileName.Value);
-                var trustedFileNameForFileStorage = Path.GetRandomFileName();
-
-                // **WARNING!**
-                // In the following example, the file is saved without
-                // scanning the file's contents. In most production
-                // scenarios, an anti-virus/anti-malware scanner API
-                // is used on the file before making the file available
-                // for download or for use by other systems. 
-                // For more information, see the topic that accompanies 
-                // this sample.
-
-                var streamedFileContent = await FileHelpers.ProcessStreamedFile(
-                    section, contentDisposition, ModelState, 
-                    _permittedExtensions, _fileSizeLimit);
-
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                using (var targetStream = System.IO.File.Create(
-                    Path.Combine(_targetFilePath, trustedFileNameForFileStorage)))
-                {
-                    await targetStream.WriteAsync(streamedFileContent);
-
-                    _logger.LogInformation(
-                        "Uploaded file '{TrustedFileNameForDisplay}' saved to " +
-                        "'{TargetFilePath}' as {TrustedFileNameForFileStorage}", 
-                        trustedFileNameForDisplay, _targetFilePath, 
-                        trustedFileNameForFileStorage);
-                }
-            }
+            //Here is just an upload, further logic will be moved to another service.
+            TempData["returnMessage"] = files.Count + $" files uploaded of summary size " + UnixHelper.DetectUnitBySize(size);
+            return LocalRedirect($"/Core/Storage/Browse?path={returnPath}");
         }
-
-        // Drain any remaining section body that hasn't been consumed and
-        // read the headers for the next section.
-        	section = await reader.ReadNextSectionAsync();
-    		}*/
-            return StatusCode(501);
-        }
-
+        
         /**
          * <remarks>
          * Deprecated
@@ -488,7 +404,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             {
                 try
                 {
-                    var dirInfo = await _fileService.Create(_fileService.RetrieveAbsoluteFromSystemPath(name));
+                    var dirInfo = await _fileService.MkdirAsync(_fileService.RetrieveAbsoluteFromSystemPath(name));
                     
                     ReturnMessage = "Successfully created directory: " + dirInfo.Name;
                     _loggerService.LogToFileAsync(LogLevel.Information,
@@ -629,7 +545,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
-            _wasArchivingCancelled = false;
+            WasArchivingCancelled = false;
         }
 
         private static bool IsDirectory(string name)

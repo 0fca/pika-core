@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PikaCore.Areas.Core.Models;
-using PikaCore.Models;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {

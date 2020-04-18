@@ -5,8 +5,9 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
+using PikaCore.Areas.Core.Services;
 
-namespace PikaCore.Areas.Core.Services
+namespace PikaCore.Areas.Infrastructure.Services
 {
     public class ArchiveService : IArchiveService, INotifyPropertyChanged
     {

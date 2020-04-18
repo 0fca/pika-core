@@ -1,12 +1,11 @@
-using Mono.Unix;
 using System;
 using System.IO;
 using System.Linq;
+using Mono.Unix;
 using PikaCore.Areas.Core.Controllers.App;
-using PikaCore.Areas.Core.Controllers.Helpers;
 using PikaCore.Areas.Core.Exceptions;
 
-namespace PikaCore.Controllers.Helpers
+namespace PikaCore.Areas.Core.Controllers.Helpers
 {
     public static class UnixHelper
     {
@@ -20,12 +19,12 @@ namespace PikaCore.Controllers.Helpers
             
             var resultPath = separator;
             var pathParts = path.Split(separator);
-            pathParts[pathParts.Length - 1] = null;
+            pathParts[^1] = null;
 
             return pathParts.Where(part => !string.IsNullOrEmpty(part)).Aggregate(resultPath, (current, part) => string.Concat(current, separator, part));
         }
 
-        public static void ClearPath(ref string path)
+        private static void ClearPath(ref string path)
         {
             var separator = Path.DirectorySeparatorChar.ToString();
             var pathParts = path.Split(separator);
@@ -57,6 +56,20 @@ namespace PikaCore.Controllers.Helpers
             return systemPath;
         }
 
+        public static string DetectUnitBySize(long i)
+        {
+            string[] units = { "B", "kiB", "MiB", "GiB", "TiB" };
+            var unitIndex = 0;
+            for (var ptr = 1; ptr <= units.Length; ptr++)
+            {
+                if (!(i < Math.Pow(1024, ptr)) || i <= 1024) continue;
+                unitIndex = ptr - 1;
+                break;
+            }
+            var scaledSize = Math.Round(i / Math.Pow(1024, unitIndex), 2);
+            return scaledSize + " " + units[unitIndex];
+        }
+        
         internal static bool HasAccess(string username, string absolutePath)
         {
             if (Environment.OSVersion.Platform != PlatformID.Unix)
@@ -64,7 +77,6 @@ namespace PikaCore.Controllers.Helpers
             var userInfo = new UnixUserInfo(username);
             var oid = FileSystemAccessor.owner(absolutePath);
             return userInfo.UserId == oid;
-
         }
     }
 }

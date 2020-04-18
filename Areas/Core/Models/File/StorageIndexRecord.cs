@@ -1,9 +1,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using PikaCore.Areas.Core.Controllers.App;
-using PikaCore.Controllers;
 
-namespace PikaCore.Models
+namespace PikaCore.Areas.Core.Models.File
 {
     public class StorageIndexRecord
     {

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace PikaCore.Areas.Core.Services
+namespace PikaCore.Areas.Infrastructure.Services
 {
     public interface IEmailSender
     {

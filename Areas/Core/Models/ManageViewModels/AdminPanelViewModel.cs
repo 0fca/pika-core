@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using PikaCore.Models;
 
 namespace PikaCore.Areas.Core.Models.ManageViewModels
 {

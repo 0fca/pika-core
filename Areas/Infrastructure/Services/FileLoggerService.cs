@@ -1,9 +1,9 @@
 ﻿using Germes.AspNetCore.FileLogger;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using PikaCore.Services;
+using PikaCore.Areas.Core.Services;
 
-namespace PikaCore.Areas.Core.Services
+namespace PikaCore.Areas.Infrastructure.Services
 {
     public class FileLoggerService : IFileLoggerService
     {
