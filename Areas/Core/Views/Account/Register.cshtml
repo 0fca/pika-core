@@ -1,0 +1,49 @@
+﻿@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container">
+<div class="col s12 m12 offset-2">
+    <div class="card indigo">
+        <div class="card-content grey-text text-lighten-4 center">
+            <span class="card-title">Register</span>
+            <hr/>
+        <section>
+        <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+                    <div class="row">
+                        <div class="col s12 m12 l12">
+                            <div class="input-field">
+                                <label class="left">@Html.DisplayNameFor(m => m.Email)</label>
+                                <input asp-for="Email" class="validate login-input-color"/>
+                                <span asp-validation-for="Email" class="red-text"></span>
+                            </div>
+                            <div class="input-field">
+                                <label class="left">@Html.DisplayNameFor(m => m.Password)</label>
+                                <input asp-for="Password" class="validate login-input-color"/>
+                                <span asp-validation-for="Password" class="red-text"></span>
+                            </div>
+                            <div class="input-field">
+                                <label class="left">@Html.DisplayNameFor(m => m.ConfirmPassword)</label>
+                                <input asp-for="ConfirmPassword" class="validate login-input-color" />
+                                <span asp-validation-for="ConfirmPassword" class="red-text"></span>
+                                </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12 m12 l12">
+                            <button type="submit" class="btn btn-default center">Sign up</button>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <a class="grey-text text-lighten-4 left small-text" asp-action="Login">Already has an account? Sign in!</a>
+                    </div>
+                </form>
+        </section>
+        </div>
+    </div>
+</div>
+</div>
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

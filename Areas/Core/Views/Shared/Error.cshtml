@@ -1,0 +1,65 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+<head>
+    <title>Oops! Something went wrong!</title>
+</head>
+
+<div class="row">
+       @if (Model != null)
+            {
+    <div class="col s12 m12 l12">
+        <div class="card large sticky-action indigo  white-text center">
+            <span class="card-title activator">Pika Core Error</span>
+            <div class="card-content">
+                <p class="flow-text">
+                    If you can read this it means that something went wrong.
+                    This page handles errors of Pika Core system. Details are below, please copy them and pass to the administrator. Thanks and sorry for the inconvenience.<br/>
+                </p>
+                <img class="responsive-img center-align activator" src="https://http.cat/@Model.ErrorCode" width="390" height="270" alt="Couldn't load kitty :c."/>
+            </div>
+                <div class="card-action white-text">
+                    <a href="mailto:lukasbownik99@gmail.com?&title=Error%20report%20PikaCore&body=@Model.Message+@Model.RequestId">Report it</a>
+                    <a href="#" class="activator">Show details</a>
+                </div>
+            <div class="card-reveal teal-text center">
+                <span class="card-title grey-text text-darken-4">Error Details<i class="material-icons right">close</i></span>
+                <div class="row">
+                    <div class="col s12 m6 l6">
+                        <span class="text-info">
+                            @if (Model.ShowRequestId)
+                            {
+                                <strong>Request ID:</strong>
+                                <code>@Model.RequestId</code>
+                                <br/>
+                            }
+                            <strong>Message: </strong><code>@Model.Message</code>
+                            <br>
+                            <strong>Code: </strong><code>@Model.ErrorCode</code>
+                            <br/>
+                        
+                            <strong>URL: </strong>
+                            <code>
+                                @Model.Url
+                            </code>
+                        </span>
+                    </div>
+                    <div class="col s12 m6 l6">
+                        <img class="responsive-img center-align activator" src="~/images/error.jpg" width="300" height="300" alt="Welp, even this does not work..."/>
+                    </div>
+                </div>
+            </div>
+            </div>
+            </div>
+            }
+       else
+       {
+           <div class="card-content white-text">
+               Sorry, there is no detailed inormation about the error.
+           </div>
+           <div class="card-action white-text">
+               <a href="/Core">Home Page</a>
+           </div>
+       }
+</div>

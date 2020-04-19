@@ -4,7 +4,7 @@ function searchFileList(){
     let fileList = document.getElementById("file-list").querySelectorAll(".row");
 
     if(searchParam !== ""){
-        for(let i = 1; i < fileList.length - 1; i ++){
+        for(let i = 2; i < fileList.length - 1; i ++){
             if (!fileList[i].children[0].textContent.toLowerCase().includes(searchParam.toLowerCase())) {
                 fileList[i].setAttribute("hidden", true);
                 
@@ -22,27 +22,33 @@ function searchFileList(){
 }
 
 
-function resetFileList(){
+function resetFileList(qualifiedName){
     const fileList = document.getElementById("file-list").querySelectorAll("div");
     for(let i = 0; i < fileList.length; i++){
-        fileList[i].removeAttribute("hidden", false);  
+        fileList[i].removeAttribute("hidden");  
     }
 }
 
 function showDownloadBox() {
-    document.getElementById("info").innerText = "You have about 10s to cancel archiving process.";
-    document.getElementById("download-panel").removeAttribute("hidden");
-    document.getElementById("cancelArchivingButton").removeAttribute("disabled");
+    console.log(getBrowser());
+    if (getBrowser() !== "Firefox") {
+        document.getElementById("info").innerText = "You have about 10s to cancel archiving process.";
+        document.getElementById("download-panel").removeAttribute("hidden");
+        document.getElementById("cancelArchivingButton").removeAttribute("disabled");
+    } else {
+        document.getElementById("info").innerText = "Firefox is not supported, you little shit.";
+    }
 } 
 
 function hideDownloadBox() {
+    console.log("Hide download box.");
     let downloadPartial = document.getElementById("download-panel");
-    downloadPartial.setAttribute("hidden", true);
+    downloadPartial.setAttribute("hidden", "true");
 }
 
 function reloadDownloadPartial(message) {
     let cancelArchivingButton = document.getElementById("cancelArchivingButton");
-    cancelArchivingButton.setAttribute("disabled", true);
+    cancelArchivingButton.setAttribute("disabled", "true");
     let info = document.getElementById("info");
     info.innerText = message;
     document.getElementById("progress-bar").removeAttribute("hidden");
@@ -65,11 +71,11 @@ function copyToClipboard(id) {
 
 function onPathSpanOut() {
     let promptLbl = document.getElementById("pathOutput");
-    promptLbl.setAttribute("hidden", true);
+    promptLbl.setAttribute("hidden", "true");
 }
 
 function scrollLogAreaToEnd() {
-    var textarea = document.getElementById('log-area');
+    const textarea = document.getElementById('log-area');
     textarea.scrollTop = textarea.scrollHeight;
 }
 
@@ -93,7 +99,7 @@ function changeVisibleTab(controlName) {
 
 function hideDownloadPartial() {
     let downloadPartial = document.getElementById("downloadPartialDiv");
-    downloadPartial.setAttribute("hidden",true);
+    downloadPartial.setAttribute("hidden","true");
 }
 
 function resetListOnView() {
@@ -102,7 +108,7 @@ function resetListOnView() {
     for (let listItem in fileList) {
         filesList.removeChild(listItem);
     }
-    uploadButton.setAttribute("disabled", true);
+    uploadButton.setAttribute("disabled", "true");
 }
 
 function validateDirectoryName(text){
@@ -122,5 +128,19 @@ function validateDirectoryName(text){
 document.addEventListener('DOMContentLoaded', function () {
     M.AutoInit();
 });
+
+function getBrowser() {
+    if (navigator.userAgent.indexOf("Chrome") !== -1) {
+        return "Chrome";
+    } else if (navigator.userAgent.indexOf("Opera") !== -1) {
+        return "Opera";
+    } else if (navigator.userAgent.indexOf("MSIE") !== -1) {
+        return "IE";
+    } else if (navigator.userAgent.indexOf("Firefox") !== -1) {
+        return "Firefox";
+    } else {
+        return "unknown";
+    }
+}
 
 

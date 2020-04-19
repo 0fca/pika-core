@@ -2,9 +2,7 @@
 
 __Pika Core__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem(but only for download purposes) to all registered users.
 
-It is also my portfolio page.
-
-Production: https://core.lukas-bownik.net/
+Developer Instance: https://dev-core.lukas-bownik.net/
 
 *Done features*
 * Registered and anonymous access to public part of the server's filesystem,
@@ -20,24 +18,24 @@ Production: https://core.lukas-bownik.net/
 *Planned features*
 * Online video watching,
 * Other archive formats(possibly 7-zip, tar.gz),
-* Bookmarks - so you will be able to easily find the same resource in Pika Cloud any time, 
+* Bookmarks - so you will be able to easily find the same resource in Pika Cloud any time.
 
 ### Technical information ###
 *Technology stack*
-* Core 2.1/2.2,
-* Template Engine,
+* .NET Core 3.1,
+* Template Engine "Razor",
 * Identity Framework,
 * HTML5 with Materialize and JS,
-* Entity Framework.
+* Entity Framework Core.
 
 Frameworks&libs:
 * Newtonsoft,
-* MySQL Pomelo Connector.
+* Microsoft Npgsql.
 
 *Deployment*
-Server OS: Debian 9
+Server OS: Debian 10
 
-WWW: Apache 2.4 as a Proxy
+WWW: Apache 2
 
 Core is deployed on localhost.
 

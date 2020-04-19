@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    var msg = TempData["returnMessage"];
+}
+<div class="row">
+    <div class="main-page-content col s12 m12 l12">
+        <h1 class="center">Welcome to Pika Cloud!</h1>
+        <p class="typewrite center" data-period="2000" data-type='[ "Hello stranger!", "Welcome to Pika Core.", "Pika Core is a core of Pika Cloud.", "Refer to About page for more information." ]'>
+            <span class="wrap"></span>
+        </p>
+    </div>
+</div>
+
+@await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)   

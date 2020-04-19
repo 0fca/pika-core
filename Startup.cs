@@ -1,36 +1,37 @@
-﻿using FMS2.Controllers;
-using FMS2.Controllers.Api.Hubs;
-using FMS2.Data;
-using FMS2.Models;
-using FMS2.Providers;
-using FMS2.Services;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using PikaCore.Controllers.Api.Hubs;
-using PikaCore.Services;
-using PikaCore.Services.Helpers;
 using System;
+using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using PikaCore.Areas.Core.Controllers.App;
+using PikaCore.Areas.Core.Controllers.Hubs;
+using PikaCore.Areas.Core.Data;
+using PikaCore.Areas.Core.Models;
+using PikaCore.Areas.Core.Services;
+using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Properties;
+using PikaCore.Security;
+using FileLoggerProvider = Germes.AspNetCore.FileLogger.FileLoggerProvider;
 
-namespace FMS2
+namespace PikaCore
 {
     public class Startup
     {
-        private static readonly string OsName = Controllers.Constants.OsName;
-        public Startup(IConfiguration configuration, IHostingEnvironment env)
+        private static readonly string OsName = Constants.OsName;
+        public Startup(IConfiguration configuration)
         {
-
             Configuration = configuration;
         }
 
@@ -38,13 +39,31 @@ namespace FMS2
 
         public void ConfigureServices(IServiceCollection services)
         {
-            //var key = Encoding.ASCII.GetBytes(Configuration.GetSection("TokenSettings")["Secret"]);
+            services.AddMemoryCache();
+            services.AddStackExchangeRedisCache(a => { 
+                a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
+                a.Configuration = Configuration.GetConnectionString("RedisConnection");
+            });
+            
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            {
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
+            });
 
-            services.AddDbContext<StorageIndexContext>(options => options.UseMySql(Configuration.GetConnectionString("StorageConnection")));
+            services.AddDbContext<StorageIndexContext>(options => 
+                options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
+                {
+                    opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(
+                        int.Parse(Configuration
+                            .GetSection("Policies")
+                            .GetSection("LoginPolicy")["DefaultLockout"])
+                        );
+                    opt.Lockout.MaxFailedAccessAttempts = int.Parse(Configuration
+                        .GetSection("Policies")
+                        .GetSection("LoginPolicy")["MaxFailedAttempts"]);
+                })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -72,26 +91,27 @@ namespace FMS2
                 });
 
             services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddSingleton<IZipper, ArchiveService>();
-            services.AddSingleton<ImageCache>();
+            services.AddScoped<IArchiveService, ArchiveService>();
             services.AddTransient<IFileService, FileService>();
-            services.AddTransient<IGenerator, HashGeneratorService>();
+            services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
             services.AddTransient<IStreamingService, StreamingService>();
             services.AddScoped<IMediaService, MediaService>();
             services.AddSingleton<ISchedulerService, SchedulerService>();
-
-            var option = new FileLoggerOptions
+            services.AddSingleton<UniqueCode>();
+            services.AddSingleton<IdDataProtection>();
+            
+            services.Configure<FormOptions>(options =>
             {
-                FileName = "fms-",
-                FileSizeLimit = Constants.MaxLogFileSize,
-                LogDirectory = Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
-                ShouldBackupLogs = bool.Parse(Configuration.GetSection("Logging")["ShouldBackupLogs"]),
-                BackupLogDir = Configuration.GetSection("Logging")["LogBackupDir-" + OsName]
-            };
-
-            var opts = Options.Create(option);
-            services.AddSingleton<ILoggerProvider>(loggerProvider => new FileLoggerProvider(opts));
-
+                options.MultipartBodyLengthLimit = 268435456; //256MB
+            });
+            
+            var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
+                $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
+            Console.WriteLine(Resources.Startup_ConfigureServices_Logger_output___0_, path);
+            
+            var provider = new FileLoggerProvider(path, LogLevel.Debug);
+            services.AddSingleton(provider);
+            
             services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;
@@ -101,30 +121,54 @@ namespace FMS2
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
                 options.SlidingExpiration = true;
-                options.LoginPath = "/Account/Login";
-
+                options.LoginPath = "/Core/Account/Login";
             });
-
+            
+    	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
+            {
+                builder
+                    .AllowAnyMethod()
+                    .WithOrigins("dev-core.lukas-bownik.net", 
+                        "core.lukas-bownik.net", 
+                        "me.lukas-bownik.net", 
+                        "localhost:5000")
+                    .AllowAnyHeader();
+            }));
+            
             services.AddSignalR();
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.IdleTimeout = TimeSpan.FromMinutes(120);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
-
-            services.AddDistributedMemoryCache();
 
             IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[OsName + "-root"]);
             services.AddSingleton(physicalProvider);
 
             Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-" + OsName];
             Constants.UploadTmp = Configuration.GetSection("Paths")["upload-dir-tmp"];
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
+            services.AddControllers()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressInferBindingSourcesForParameters = true;
+                    options.SuppressModelStateInvalidFilter = true;
+                    options.SuppressMapClientErrors = true;
+                    options.ClientErrorMapping[404].Link = "/api/v1/notfoundhandler";
+                });
+               
+            
+            services.AddMvc()
+                .AddMvcOptions(options =>
+            {
+                options.MaxModelValidationErrors = 50;
+                options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
+                    _ => "The field is required.");
+            })
+	        .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -135,19 +179,17 @@ namespace FMS2
         }
 
         public void Configure(IApplicationBuilder app,
-                              IHostingEnvironment env,
-                              IServiceProvider serviceProvider,
-                              IApplicationLifetime lifetime,
-                              IDistributedCache cache)
+                              IWebHostEnvironment env,
+                              IServiceProvider serviceProvider
+                             )
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Core/Home/Error");
             }
 
             Constants.RootPath = Configuration.GetSection("Paths")["storage"];
@@ -156,9 +198,8 @@ namespace FMS2
             Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
 
             app.UseStaticFiles();
-
             app.UseFileServer();
-            app.UseStatusCodePagesWithRedirects("/Home/ErrorByCode/{0}");
+            app.UseStatusCodePagesWithRedirects("/Core/Home/ErrorByCode/{0}");
             app.UseSession();
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
@@ -166,23 +207,44 @@ namespace FMS2
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
+            app.UseWebSockets();
+            app.UseResponseCaching();
+	        app.UseCors("CorsPolicy");
             app.UseAuthentication();
-            app.UseSignalR(routes =>
+            app.UseRouting();
+            app.UseAuthorization();
+            
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapHub<StatusHub>("/hubs/status");
-                routes.MapHub<FileOperationHub>("/hubs/files");
-                routes.MapHub<MediaHub>("/hubs/media");
-            });
-
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=home}/{action=index}/{id?}");
+                    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                    name: "fallback",
+                    pattern: "{area=Core}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+                endpoints.MapHub<StatusHub>("/hubs/status", options =>
+                {
+                    options.Transports =
+                        HttpTransportType.LongPolling |
+                        HttpTransportType.ServerSentEvents;
+                });
+                endpoints.MapHub<FileOperationHub>("/hubs/files", options =>
+                {
+                    options.Transports =
+                        HttpTransportType.LongPolling |
+                        HttpTransportType.ServerSentEvents;
+                });
+                endpoints.MapHub<MediaHub>("/hubs/media", options =>
+                {
+                    options.Transports =
+                        HttpTransportType.ServerSentEvents |
+                        HttpTransportType.WebSockets;
+                });
             });
+            
             CreateRoles(serviceProvider).Wait();
         }
-
 
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {

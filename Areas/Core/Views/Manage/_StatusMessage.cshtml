@@ -1,0 +1,11 @@
+﻿@model string
+@if (!string.IsNullOrEmpty(Model))
+{
+    var type = Model.StartsWith("Error") ? "times" : "check";
+    <div class="row">
+        <div class="col s1 m1">
+            <i class="fas fa-@type"></i>
+        </div>
+        <p>@Model</p>
+    </div>
+}

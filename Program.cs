@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
-
-namespace FMS2
+namespace PikaCore
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -15,17 +14,35 @@ namespace FMS2
             .AddEnvironmentVariables()
             .Build();
 
+            var port = ReadPortFromStdIn(args);
+
             var host = WebHost.CreateDefaultBuilder(args)
+                .ConfigureKestrel((context, options) =>
+                {
+                    options.Limits.MaxRequestBodySize = 268435456;
+                })
                 .UseStartup<Startup>()
                 .UseConfiguration(configuration)
-                .ConfigureLogging((hostingContext, logging) =>
-                {
-                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"))
-                    .AddDebug();
-                })
+                .UseUrls($"http://localhost:{port}")
+                .UseKestrel()
+                .UseSockets(opts => { opts.NoDelay = true; })
                 .Build();
 
             host.Run();
+        }
+
+        private static int ReadPortFromStdIn(IReadOnlyList<string> args)
+        {
+            var port = 5000;
+            try
+            {
+                port = int.Parse(args[0]);
+            }
+            catch
+            {
+                // ignored
+            }
+            return port;
         }
     }
 }

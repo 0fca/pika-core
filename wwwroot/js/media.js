@@ -1,39 +1,62 @@
-﻿const mediaHubconnection = new signalR.HubConnectionBuilder().withUrl("/hubs/media").build();
+﻿const mediaHubconnection = new signalR.HubConnectionBuilder()
+                        .withUrl("/hubs/media", {
+                            transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.LongPolling
+                        })
+	            		.configureLogging(signalR.LogLevel.Information)
+				.build();
+
+mediaHubconnection.onclose(async () => {
+    await start();
+});
 
 mediaHubconnection.on("ReceiveThumb", ReceiveThumb);
 
 mediaHubconnection.start().then(function () {
     console.log("MediaHub is ready.");
-    loadThumb(path);
+    loadThumb(listingPath, 1);
 }).catch(function (err) {
     return console.error(err.toString());
 });
 
-function loadThumb(path) {
+async function start() {
+    await mediaHubconnection.start();
+}
+
+function setErrorIcon(guid, err) {
+    const imgEl = document.getElementById(guid);
+    const imgParentLink = imgEl.parentElement;
+    const icon = document.createElement("i");
+    icon.setAttribute("class", "material-icons");
+    icon.setAttribute("title", "There was an error loading a thumb...");
+    icon.innerText = "error";
+    imgParentLink.insertBefore(icon, imgEl);
+    imgParentLink.removeChild(imgEl);
+    console.log(err);
+}
+
+function loadThumb(path, s) {
     const imgs = document.getElementById("file-list").querySelectorAll("img");
 
     for (let i = 0; i < imgs.length; i++) {
         const img = imgs[i];
 
         if (img.hasAttribute("id")) {
-            const id = img.getAttribute("id");
+            const guid = img.getAttribute("id");
             const text = img.getAttribute("alt");
-            mediaHubconnection.invoke("CreateThumb", path.toString() + text, id).catch(err => {
-                const img = document.getElementById(id);
-                const imgParentLink = img.parentElement;
-                const icon = document.createElement("i");
-                icon.setAttribute("class", "material-icons");
-                icon.innerText = "error";
-                imgParentLink.insertBefore(icon, img);
-                imgParentLink.removeChild(img);
+            const systemPath = path.toString() + directorySeparator +text;
+
+            mediaHubconnection.invoke("CreateThumb", systemPath, guid, 1).catch(err => {
+                setErrorIcon(guid, err.toString());
             });
         }
     }
 }
 
-function ReceiveThumb(thumbId) {
-    if (thumbId != "") {
-        const url = "/Storage/Thumb?id=" + thumbId;
+function ReceiveThumb(isSuccess, thumbId) {
+    if (isSuccess) {
+        const url = "/Core/Storage/Thumb?id=" + thumbId;
         document.getElementById(thumbId).setAttribute("src", url);
+    }else{
+        setErrorIcon(thumbId, "Error receiving thumb for: "+thumbId);
     }
 }
