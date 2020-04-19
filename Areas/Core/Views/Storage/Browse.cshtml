@@ -61,7 +61,7 @@
         </div>
     </div>
     <div class="row">
-        <a class="collection-item" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
+        <a class="collection-item" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
     </div>
     @{
         if (Model.Contents != null)
@@ -163,7 +163,7 @@
         }
     }
     <div class="row">
-        <a class="collection-item" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
+        <a class="collection-item" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
     </div>
     
 <div class="fixed-action-btn">
@@ -206,7 +206,7 @@
     document.getElementById("pathField").addEventListener("keydown", (key) => {
         if (key.code === "Enter") {
             const path = document.getElementById("pathField").value;
-            window.location = `/Storage/Browse?path=${path}`;
+            window.location = `/Core/Storage/Browse?path=${path}`;
         }
     });
 
