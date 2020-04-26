@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.FileProviders;
 
@@ -31,5 +32,7 @@ namespace PikaCore.Areas.Core.Models.File
             count = count > ResourceList.Count ? ResourceList.Count : count;
             this.ResourceList.GetRange(offset, count);
         }
+
+        public string ReturnPath { get; set; } = Path.DirectorySeparatorChar.ToString();
     }
 }

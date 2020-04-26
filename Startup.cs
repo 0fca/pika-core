@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
@@ -23,7 +22,7 @@ using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Infrastructure.Services;
 using PikaCore.Properties;
 using PikaCore.Security;
-using FileLoggerProvider = Germes.AspNetCore.FileLogger.FileLoggerProvider;
+using Serilog;
 
 namespace PikaCore
 {
@@ -39,16 +38,17 @@ namespace PikaCore
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMemoryCache();
-            services.AddStackExchangeRedisCache(a => { 
-                a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
-                a.Configuration = Configuration.GetConnectionString("RedisConnection");
-            });
+            var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
+                $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .WriteTo.File(path,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
             
             services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
-            });
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDbContext<StorageIndexContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
@@ -66,6 +66,12 @@ namespace PikaCore
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+            
+            services.AddMemoryCache();
+            services.AddStackExchangeRedisCache(a => { 
+                a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
+                a.Configuration = Configuration.GetConnectionString("RedisConnection");
+            });
 
             services.AddAuthentication()
                 .AddGoogle(googleOpts =>
@@ -105,19 +111,15 @@ namespace PikaCore
                 options.MultipartBodyLengthLimit = 268435456; //256MB
             });
             
-            var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
-                $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
-            Console.WriteLine(Resources.Startup_ConfigureServices_Logger_output___0_, path);
             
-            var provider = new FileLoggerProvider(path, LogLevel.Debug);
-            services.AddSingleton(provider);
+            Log.Information(Resources.Startup_ConfigureServices_Logger_output___0_, path);
             
             services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
+                options.MinimumSameSitePolicy = SameSiteMode.Lax;
             });
-
+            
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
@@ -129,11 +131,11 @@ namespace PikaCore
     	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
             {
                 builder
-                    .AllowAnyMethod()
-                    .WithOrigins("dev-core.lukas-bownik.net", 
-                        "core.lukas-bownik.net", 
-                        "me.lukas-bownik.net", 
-                        "localhost:5000")
+                    .WithMethods("POST", "GET")
+                    .WithOrigins("https://dev-core.lukas-bownik.net", 
+                        "https://core.lukas-bownik.net", 
+                        "https://me.lukas-bownik.net", 
+                        "http://localhost:5000")
                     .AllowAnyHeader();
             }));
             
@@ -144,7 +146,6 @@ namespace PikaCore
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
-            services.AddSingleton<IFileLoggerService, FileLoggerService>();
 
             IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[OsName + "-root"]);
             services.AddSingleton(physicalProvider);
@@ -180,7 +181,8 @@ namespace PikaCore
 
         public void Configure(IApplicationBuilder app,
                               IWebHostEnvironment env,
-                              IServiceProvider serviceProvider
+                              IServiceProvider serviceProvider,
+                              IHostApplicationLifetime lifetime
                              )
         {
             if (env.IsDevelopment())
@@ -191,6 +193,9 @@ namespace PikaCore
             {
                 app.UseExceptionHandler("/Core/Home/Error");
             }
+            
+            lifetime.ApplicationStopping.Register(OnStart);
+            lifetime.ApplicationStopping.Register(OnShutdown);
 
             Constants.RootPath = Configuration.GetSection("Paths")["storage"];
             Constants.FileSystemRoot = Configuration.GetSection("Paths")[OsName + "-root"];
@@ -198,7 +203,7 @@ namespace PikaCore
             Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
 
             app.UseStaticFiles();
-            app.UseFileServer();
+            app.UseFileServer("/wwwroot/files");
             app.UseStatusCodePagesWithRedirects("/Core/Home/ErrorByCode/{0}");
             app.UseSession();
 
@@ -284,5 +289,17 @@ namespace PikaCore
                 }
             }
         }
+        
+        #region LifetimeHelpers
+        
+        private static void OnStart()
+        {
+            Console.WriteLine(Resources.Startup_OnStart_System_is_starting___);
+        }
+        private static void OnShutdown()
+        {
+            Log.Information("System is stopping... Good bye.");
+        }
+        #endregion
     }
 }

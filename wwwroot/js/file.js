@@ -78,7 +78,6 @@ function ReceiveListing(listing) {
         result[item] = "";
         return result;
     }, {})
-    
     instance.updateData(pathObject);
 }
 

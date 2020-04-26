@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace PikaCore
 {
@@ -10,9 +12,9 @@ namespace PikaCore
         public static void Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
-            .AddCommandLine(args)
-            .AddEnvironmentVariables()
-            .Build();
+                .AddCommandLine(args)
+                .AddEnvironmentVariables()
+                .Build();
 
             var port = ReadPortFromStdIn(args);
 
@@ -21,13 +23,16 @@ namespace PikaCore
                 {
                     options.Limits.MaxRequestBodySize = 268435456;
                 })
+                .ConfigureLogging(l =>
+                {
+                    l.AddSerilog();
+                })
                 .UseStartup<Startup>()
                 .UseConfiguration(configuration)
                 .UseUrls($"http://localhost:{port}")
                 .UseKestrel()
                 .UseSockets(opts => { opts.NoDelay = true; })
                 .Build();
-
             host.Run();
         }
 

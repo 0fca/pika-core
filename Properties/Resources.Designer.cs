@@ -68,5 +68,14 @@ namespace PikaCore.Properties {
                 return ResourceManager.GetString("Startup_ConfigureServices_Logger_output___0_", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to System is starting....
+        /// </summary>
+        public static string Startup_OnStart_System_is_starting___ {
+            get {
+                return ResourceManager.GetString("Startup_OnStart_System_is_starting___", resourceCulture);
+            }
+        }
     }
 }

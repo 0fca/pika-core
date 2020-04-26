@@ -7,11 +7,11 @@
     {
         role = (UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).Result.ElementAt(0);
         ViewData["Role"] = role;
-        roleName = string.IsNullOrEmpty(role) ?  $" - {role} - " : "" ;
+        roleName = !string.IsNullOrEmpty(role) ?  $" - {role} - " : "" ;
     }
 
 }
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -58,6 +58,7 @@
         <div class="row">
             <div class="col s12 m6 l6">
                 <small class="white-text left">Interested in this app? See <a class="text-teal" asp-page="/Home/About"><small>About</small></a> page to take a better look at it!</small>
+                <small class="white-text left">PikaCloud uses cookies, by using all apps in PikaCloud, you accept our <a asp-page="/Home/Policy">policies</a>.</small>
             </div>
             <environment include="Development">
                 <div class="col s12 m6 l6">
@@ -80,7 +81,7 @@
         const instances = M.Modal.init(elems);
     });
 </script>
-@RenderSection("Scripts", required: false)
-    
+@await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>
