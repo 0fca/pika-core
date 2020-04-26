@@ -6,11 +6,9 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.ManageViewModels;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Areas.Infrastructure.Services;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
@@ -20,21 +18,18 @@ namespace PikaCore.Areas.Core.Controllers.App
     public class AdminController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IFileLoggerService _loggerService;
         private readonly IUrlGenerator _urlUrlGeneratorService;
 
         [TempData] 
-        public string StatusMessage { get; set; }
+        public string StatusMessage { get; set; } = "";
         [TempData(Key = "newPassword")]
         public string NewPassword { get; set; }
 
         public AdminController(
             UserManager<ApplicationUser> userManager,
-            IFileLoggerService loggerService,
             IUrlGenerator urlGenerator)
         {
             _userManager = userManager;
-            _loggerService = loggerService;
             _urlUrlGeneratorService = urlGenerator;
         }
 
@@ -55,7 +50,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
             var adminPanelViewModel = new AdminPanelViewModel
             {
-                LogsListViewModel = null,
+                LogsListViewModel = null,//TODO: To be deleted.
                 UsersWithRoles = usersWithRoles
             };
             
