@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
+using Serilog.Events;
 
 namespace PikaCore.Areas.Infrastructure.Services
 {
     public interface IFileLoggerService
     {
-        void LogToFileAsync(LogLevel logLevel, string address, string message);
+        void LogToFileAsync(LogEventLevel logLevel, Exception e);
     }
 }

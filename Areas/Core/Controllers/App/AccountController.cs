@@ -39,7 +39,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/Home/" : returnUrl;
+            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
             return View();
         }
 
@@ -85,7 +85,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
 
             var model = new LoginWith2FaViewModel { RememberMe = rememberMe };
-            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/Home/" : returnUrl;
+            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
 
             return View(model);
         }
@@ -115,24 +115,21 @@ namespace PikaCore.Areas.Core.Controllers.App
                 _logger.LogInformation("User with ID {UserId} logged in with 2fa.", user.Id);
                 return RedirectToLocal(returnUrl);
             }
-            else if (result.IsLockedOut)
+
+            if (result.IsLockedOut)
             {
                 _logger.LogWarning("User with ID {UserId} account locked out.", user.Id);
                 return RedirectToAction(nameof(Lockout));
             }
-            else
-            {
-                _logger.LogWarning("Invalid authenticator code entered for user with ID {UserId}.", user.Id);
-                ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
-                return View();
-            }
+            _logger.LogWarning("Invalid authenticator code entered for user with ID {UserId}.", user.Id);
+            ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
+            return View();
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> LoginWithRecoveryCode(string returnUrl = null)
         {
-            // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
@@ -140,7 +137,6 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
 
             ViewData["ReturnUrl"] = returnUrl;
-
             return View();
         }
 

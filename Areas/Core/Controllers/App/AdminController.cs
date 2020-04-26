@@ -11,6 +11,7 @@ using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.ManageViewModels;
 using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Infrastructure.Services;
+using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {
@@ -128,7 +129,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 if (result.Succeeded) return RedirectToAction(nameof(Edit), new {@Id = id});
 
                 StatusMessage = "User of id " + id + " couldn't be deleted from role: " + roleName;
-                _loggerService.LogToFileAsync(LogLevel.Error, HttpContext.Connection.RemoteIpAddress.ToString(), StatusMessage + "\n" + result.Errors);
+                Log.Error(StatusMessage);
             }
             else
             {

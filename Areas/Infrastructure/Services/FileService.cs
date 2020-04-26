@@ -2,28 +2,27 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
 using PikaCore.Areas.Core.Controllers.App;
-using PikaCore.Areas.Core.Services;
+using PikaCore.Areas.Infrastructure.Services.Helpers;
+using Serilog;
 
 namespace PikaCore.Areas.Infrastructure.Services
 {
     public class FileService : IFileService
     {
-        private readonly IFileLoggerService _fileLoggerService;
         private readonly IFileProvider _fileProvider;
         private readonly IConfiguration _configuration;
 
-        public FileService(IFileLoggerService fileLoggerService,
-                           IFileProvider fileProvider,
+        public FileService(IFileProvider fileProvider,
                            IConfiguration configuration)
         {
-            _fileLoggerService = fileLoggerService;
             _fileProvider = fileProvider;
             _configuration = configuration;
         }
@@ -40,7 +39,7 @@ namespace PikaCore.Areas.Infrastructure.Services
             }
             catch (OperationCanceledException e)
             {
-                _fileLoggerService.LogToFileAsync(LogLevel.Warning, "localhost", e.Message + " : Downloading canceled by the user.");
+                Log.Error(e, "FileService#Cancel");
             }
             finally
             {
@@ -81,16 +80,15 @@ namespace PikaCore.Areas.Infrastructure.Services
         {
             if (string.IsNullOrEmpty(absolutePath) || !File.Exists(absolutePath))
             {
-                _fileLoggerService.LogToFileAsync(LogLevel.Critical, "localhost", $"Path for AsStreamAsync() cannot be null!");
+                Log.Error("Path cannot be null!");
                 throw new ArgumentException("Path cannot be null!");
             }
             
             var fs = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, useAsync);
-            _fileLoggerService.LogToFileAsync(LogLevel.Information, "localhost", $"File: {absolutePath}");
             return fs;
         }
 
-        public async Task<DirectoryInfo> MkdirAsync(string systemPath)
+        public async Task<DirectoryInfo?> MkdirAsync(string systemPath)
         {
             return await Task.Factory.StartNew(() =>
                 {
@@ -100,14 +98,14 @@ namespace PikaCore.Areas.Infrastructure.Services
                     }
                     catch (Exception e)
                     {
-                        _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost", e.Message);
+                        Log.Error(e, "FileService#MkdirAsync");
                         return null;
                     }
                 }
             );
         }
 
-        public async Task<FileStream> TouchAsync(string physicalAbsolutePath)
+        public async Task<FileStream?> TouchAsync(string physicalAbsolutePath)
         {
             return await Task.Factory.StartNew(() =>
             {
@@ -117,27 +115,67 @@ namespace PikaCore.Areas.Infrastructure.Services
                 }
                 catch (Exception e)
                 {
-                    _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost", e.Message);
+                    Log.Error(e, "FileService#TouchAsync");
                     return null;
                 }
             });
         }
 
-        public async Task<string> DumpFileStreamAsync(FileStream physicalAbsolutePath)
+        public async Task<string?> DumpFileStreamAsync(FileStream? physicalAbsolutePath)
         {
-            if (physicalAbsolutePath.Length == 0) return null;
-            await physicalAbsolutePath.FlushAsync();
+            if (physicalAbsolutePath != null && physicalAbsolutePath.Length == 0) return null;
+            await physicalAbsolutePath?.FlushAsync()!;
             physicalAbsolutePath.Close();
 
             return physicalAbsolutePath.Name;
         }
 
+        public async Task<Tuple<string?, Dictionary<string, string>>> SanitizeFileUpload(List<IFormFile> formFileList,
+            string destinationPath,
+            bool isAdmin = false)
+        {
+            var tmpFilesMap = new Dictionary<string, string>();
+            var filePath = Constants.UploadTmp;
+
+            var checkResultMessage = "";
+            foreach (var formFile in formFileList.Where(formFile => formFile.Length > 0))
+            {
+                var originalName = WebUtility.HtmlEncode(formFile.FileName);
+                var tmpPath = Path.Combine(filePath, Path.GetRandomFileName());
+                await using var fs = await TouchAsync(tmpPath);
+                tmpFilesMap.Add(tmpPath, Path.Combine(RetrieveAbsoluteFromSystemPath(destinationPath), originalName));
+                await formFile.CopyToAsync(fs);
+
+                checkResultMessage = FileSecurityHelper.ProcessTemporaryStoredFile(
+                    originalName,
+                    fs, 
+                    _configuration.GetSection("Storage:PermittedExtensions").Get<List<string>>(),
+                    _configuration.GetSection("Storage:PermittedMimes").Get<List<string>>(),
+                    Constants.MaxUploadSize,
+                    isAdmin);
+                await DumpFileStreamAsync(fs);
+            }
+
+            return Tuple.Create(checkResultMessage, tmpFilesMap);
+        }
+
+        public async Task PostSanitizeUpload(Dictionary<string, string> files)
+        {
+            var enumerator = files.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                var (tmpFilePath, resultDestination) = enumerator.Current;
+                await Copy(tmpFilePath, resultDestination);
+            }
+            enumerator.Dispose();
+        }
+
         public async Task<byte[]> AsBytesAsync(string absolutePath)
         {
             return await Task<byte[]>.Factory.StartNew(() => 
-                File.Exists(absolutePath) 
+                (File.Exists(absolutePath) 
                     ? File.ReadAllBytes(absolutePath) 
-                    : null, _tokenSource.Token
+                    : null) ?? Array.Empty<byte>(), _tokenSource.Token
                 );
         }
 
@@ -159,8 +197,7 @@ namespace PikaCore.Areas.Infrastructure.Services
                 }
                 catch (Exception e)
                 {
-                    _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost",
-                        $"Couldn't move {absolutePath} to {toWhere} because of {e.Message}");
+                    Log.Error(e, "FileService#Move");
                     isMoved = false;
                 }
             });
@@ -188,12 +225,11 @@ namespace PikaCore.Areas.Infrastructure.Services
             }
             catch (Exception e)
             {
-                _fileLoggerService.LogToFileAsync(LogLevel.Error, "localhost",
-                    $"Couldn't move {absolutePath} to {toWhere} because of {e.Message}");
+                Log.Error(e, "FileService#Copy");
             }
         }
 
-        public async Task<List<string>> ListPath(string path)
+        public async Task<List<string>?> ListPath(string path)
         {
             var hostPath = this.RetrieveAbsoluteFromSystemPath(path);
             return !Directory.Exists(hostPath) ? null : (await Task.Factory.StartNew(() => Directory.GetDirectories(hostPath))).ToList();
@@ -211,7 +247,7 @@ namespace PikaCore.Areas.Infrastructure.Services
             return await Task<IEnumerable<string>>.Factory.StartNew(() => TraverseDirectories(hostPath));
         }
 
-        public static IEnumerable<string> TraverseDirectories(string rootDirectory)
+        public static IEnumerable<string> TraverseDirectories(string? rootDirectory)
         {
             var directories = Enumerable.Empty<string>();
             try
@@ -237,7 +273,7 @@ namespace PikaCore.Areas.Infrastructure.Services
             }
         }
 
-        private static IEnumerable<string> TraverseFiles(string rootDirectory)
+        private static IEnumerable<string> TraverseFiles(string? rootDirectory)
         {
             var files = Enumerable.Empty<string>();
             var directories = Enumerable.Empty<string>();

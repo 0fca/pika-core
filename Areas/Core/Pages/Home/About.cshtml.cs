@@ -1,14 +1,14 @@
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace PikaCore.Pages.Home
+namespace PikaCore.Areas.Core.Pages.Home
 {
     public class AboutModel : PageModel
     {
-        public string Version;
-        public string Os;
-        public string FrameworkVer;
+        public string? Version;
+        public string? Os;
+        public string? FrameworkVer;
 
         public void OnGet()
         {
@@ -32,7 +32,7 @@ namespace PikaCore.Pages.Home
                 Os = Environment.OSVersion.Platform.ToString();
             }
             FrameworkVer = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
-            Version = (Assembly.GetEntryAssembly() ?? throw new InvalidOperationException()).GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            Version = (Assembly.GetEntryAssembly() ?? throw new InvalidOperationException()).GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
         }
     }
 }
