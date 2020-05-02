@@ -2,16 +2,17 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>2.2.2</PackageVersion>
+        <PackageVersion>2.3.1</PackageVersion>
         <Authors>Arkasian</Authors>
         <Description>Pika Core Cloud</Description>
         <PackageProjectUrl>https://core.lukas-bownik.net</PackageProjectUrl>
         <RepositoryUrl>https://www.github.com/Arkasian/pika-core</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>cms core cloud</PackageTags>
-        <AssemblyVersion>2.2.2</AssemblyVersion>
-        <FileVersion>2.2.2</FileVersion>
+        <AssemblyVersion>2.3.1</AssemblyVersion>
+        <FileVersion>2.3.1</FileVersion>
         <Version>2.2.2</Version>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -42,14 +43,63 @@
       <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\TextMessageFormat.d.ts" />
       <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Utils.d.ts" />
       <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.d.ts" />
+      <Content Update="wwwroot\robots.txt">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="wwwroot\humans.txt">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Core\Pages\Home\Policy.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="wwwroot\lib\toopay-bootstrap-markdown-a496d34\.editorconfig">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="wwwroot\lib\toopay-bootstrap-markdown-a496d34\.gitignore">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="wwwroot\lib\toopay-bootstrap-markdown-a496d34\bower.json">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="wwwroot\lib\toopay-bootstrap-markdown-a496d34\LICENSE">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="wwwroot\lib\toopay-bootstrap-markdown-a496d34\package.json">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="wwwroot\lib\toopay-bootstrap-markdown-a496d34\README.md">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="wwwroot\files\privacy_policy.md">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="wwwroot\files\data_policy.md">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="wwwroot\lib\aspnetcore-custom-validation\aspnetcore-custom-validation.min.js">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
     </ItemGroup>
     <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="3.0.0" />
     <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="3.0.0" />
     <PackageReference Include="AspNet.Security.OAuth.Reddit" Version="3.0.0" />
-    <PackageReference Include="Germes.AspNetCore.FileLogger" Version="2.0.5" />
+    <PackageReference Include="AspNetCore.CustomValidation" Version="2.0.0" />
     <PackageReference Include="Google.Apis" Version="1.40.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Https" Version="2.2.0" />
@@ -73,7 +123,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.3" />
     <PackageReference Include="Quartz" Version="3.0.7" />
+    <PackageReference Include="Serilog" Version="2.9.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.3.0-dev-00152" />
+    <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.5.1" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="4.7.0" />
     <PackageReference Include="xFFmpeg.NET" Version="3.4.0" />
   </ItemGroup>
@@ -83,7 +137,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Areas\Api\v1\Data" />
       <Folder Include="Areas\Core" />
       <Folder Include="wwwroot\images\github\" />
     </ItemGroup>

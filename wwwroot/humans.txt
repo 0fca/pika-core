@@ -1,0 +1,14 @@
+﻿# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+    Dev: Łukasz Bownik -- https://www.facebook.com/obsidiam
+
+# THANKS
+
+    Dominik Drąg, Franek Łaniewski, Basia Pałyszka, Oskar Barcz, Zdzisław Goik
+
+# TECHNOLOGY COLOPHON
+
+    Apache2 Server Configs, Kestrel, ASP.NET Core 3.1.1, jQuery3.4, Modernizr, Normalize.css,  Materializecss
+    CSS3, HTML5

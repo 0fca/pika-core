@@ -13,10 +13,14 @@
                 <hr/>
                 <section id="local_account_login">
                     <div class="card-panel teal">
-                        Due to migration of data sources to new RDBMS system, all user accounts have become unavailable permanently.
+                        @ViewData["Message"]
                     </div>
                     <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
                         <div class="row">
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                @Html.ValidationSummary(true,"", new {@class = "card-panel red white-text"})
+                            }
                             <div class="col s12 m12 l12">
                                 <div class="input-field">
                                     <label class="left">@Html.DisplayNameFor(m => m.Email)</label>
@@ -35,6 +39,7 @@
                                 <button type="submit" class="btn btn-default center">Log in</button>
                             </div>
                         </div>
+                    </form>
                          <section id="external_account_login">
                              <div class="row">
                                  <p>OR</p>
@@ -66,7 +71,7 @@
                             <a class="grey-text text-lighten-4 left small-text" asp-action="ForgotPassword">Forgot your password?</a>
                             <a class="grey-text text-lighten-4 left small-text" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register as a new user?</a>
                         </div>
-                    </form>
+                    
                 </section>
             </div>
         </div>

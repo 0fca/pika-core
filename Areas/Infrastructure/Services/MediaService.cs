@@ -9,21 +9,19 @@ using FFmpeg.NET;
 using Microsoft.Extensions.Configuration;
 using PikaCore.Areas.Core.Controllers.Helpers;
 using PikaCore.Areas.Infrastructure.Services.Helpers;
+using Serilog;
 
 namespace PikaCore.Areas.Infrastructure.Services
 {
     public class MediaService : IMediaService
     {
         private readonly IConfiguration _configuration;
-        private readonly IFileLoggerService _fileLoggerService;
         private readonly IFileService _fileService;
 
         public MediaService(IConfiguration configuration,
-                            IFileLoggerService fileLoggerService,
-                            IFileService fileService)
+            IFileService fileService)
         {
             _configuration = configuration;
-            _fileLoggerService = fileLoggerService;
             _fileService = fileService;
         }
 
@@ -41,7 +39,7 @@ namespace PikaCore.Areas.Infrastructure.Services
         {
 	        var physicalPath = _fileService.RetrieveAbsoluteFromSystemPath(path);
             var mime = MimeAssistant.GetMimeType(physicalPath);
-	        _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost" ,$"{path} : {mime}");
+	        Log.Information($"Creating thumb for {path}");
             var mediaType = DetectType(mime);
             return mediaType switch
             {
@@ -51,11 +49,10 @@ namespace PikaCore.Areas.Infrastructure.Services
             };
         }
 
-        private MediaType DetectType(string mime)
+        private static MediaType DetectType(string mime)
         {
             var props = (MediaType[])Enum.GetValues(typeof(MediaType));
             var mediaType = Array.Find(props, x => mime.Split("/").Contains(x.ToString().ToLower()));
-	        _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"{mediaType} mediaType detected from MIME: {mime}");	   
             return mediaType;
         }
 
@@ -63,9 +60,7 @@ namespace PikaCore.Areas.Infrastructure.Services
         {
             var thumbAbsolutePath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
-
-            _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost",
-                    absoluteHostPath);
+                Log.Information($"Creating thumb from video {absoluteHostPath} as {thumbAbsolutePath}");
                 if (File.Exists(thumbAbsolutePath)) return guid;
 
                 var options = new ConversionOptions()
@@ -86,7 +81,7 @@ namespace PikaCore.Areas.Infrastructure.Services
 
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
-            _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", absoluteThumbPath);
+            Log.Information($"Creating thumb from video {absoluteHostPath} as {absoluteThumbPath}");
             if (size == 1) 
             {
                 hScale = int.Parse(_configuration.GetSection("Images")["HeightBig"]);
@@ -107,17 +102,10 @@ namespace PikaCore.Areas.Infrastructure.Services
                 try
                 {
                     using var pngStream = new FileStream(absoluteSystemPath, FileMode.Open, FileAccess.Read);
-                    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, 
-                        "localhost", 
-                        $"Filestream for {absoluteSystemPath} opened."
-                    );
                     using var image = new Bitmap(pngStream);
                     var resized = new Bitmap(image.Width/wScale, image.Height/hScale);
                     using var graphics = Graphics.FromImage(resized);
-                    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, 
-                        "localhost", 
-                        $"{absoluteSystemPath} loaded as Image."
-                    );
+                    
 
                     graphics.CompositingQuality = CompositingQuality.HighQuality;
                     graphics.InterpolationMode = InterpolationMode.Bicubic;
@@ -132,17 +120,18 @@ namespace PikaCore.Areas.Infrastructure.Services
                             f.Name.Equals(_configuration.GetSection("Images")["Format"]));
                     var imageFormat = (ImageFormat)field.GetValue(field);
 
-                    var name = $"{Path.Combine(whereToSave,id)}.{imageFormat.ToString().ToLower()}";
-                    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"Saving... {name}");
-
-                    resized.Save(name, imageFormat);
-                    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Information, "localhost", $"Saved... {name}");
+                    if (imageFormat != null)
+                    {
+                        var name = $"{Path.Combine(whereToSave,id)}.{imageFormat.ToString().ToLower()}";
+                        resized.Save(name, imageFormat);
+                        Log.Information($"Thumb saved: {name}");
+                    }
                     resized.Dispose();
                     return id;
                 }
                 catch (Exception e)
                 {
-                    _fileLoggerService.LogToFileAsync(Microsoft.Extensions.Logging.LogLevel.Error, "localhost", e.Message);
+                    Log.Error(e, "MediaService#GrabFromImage");
                     return "";
                 }
             });

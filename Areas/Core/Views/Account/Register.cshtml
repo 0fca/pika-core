@@ -9,10 +9,19 @@
         <div class="card-content grey-text text-lighten-4 center">
             <span class="card-title">Register</span>
             <hr/>
-        <section>
-        <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+            <section>
+                <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
                     <div class="row">
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            @Html.ValidationSummary(true,"", new {@class = "card-panel red white-text"})
+                        }
                         <div class="col s12 m12 l12">
+                            <div class="input-field">
+                                <label class="left">@Html.DisplayNameFor(m => m.Username)</label>
+                                <input asp-for="Username" class="validate login-input-color"/>
+                                <span asp-validation-for="Username" class="red-text"></span>
+                                </div>
                             <div class="input-field">
                                 <label class="left">@Html.DisplayNameFor(m => m.Email)</label>
                                 <input asp-for="Email" class="validate login-input-color"/>
@@ -25,9 +34,9 @@
                             </div>
                             <div class="input-field">
                                 <label class="left">@Html.DisplayNameFor(m => m.ConfirmPassword)</label>
-                                <input asp-for="ConfirmPassword" class="validate login-input-color" />
+                                <input asp-for="ConfirmPassword" class="validate login-input-color"/>
                                 <span asp-validation-for="ConfirmPassword" class="red-text"></span>
-                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -39,7 +48,7 @@
                         <a class="grey-text text-lighten-4 left small-text" asp-action="Login">Already has an account? Sign in!</a>
                     </div>
                 </form>
-        </section>
+            </section>
         </div>
     </div>
 </div>

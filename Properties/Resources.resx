@@ -101,4 +101,7 @@
 	<data name="Startup_ConfigureServices_Logger_output___0_" xml:space="preserve">
 		<value>Logger output: {0}</value>
 	</data>
+	<data name="Startup_OnStart_System_is_starting___" xml:space="preserve">
+		<value>System is starting...</value>
+	</data>
 </root>

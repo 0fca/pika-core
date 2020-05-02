@@ -1,7 +1,9 @@
 ﻿@page
-@model PikaCore.Pages.Home.AboutModel
+@model PikaCore.Areas.Core.Pages.Home.AboutModel
+@{
+    ViewData["Title"] = "About";
+}
     <div class="row">
-        <h1>@ViewData["Title"]</h1>
         <div class="col s12 m6">
             <div class="card indigo">
                 <div class="card-content white-text">
@@ -11,14 +13,8 @@
                             Pika Cloud is a web application built especially to make an access to my server's filesystem easier.
                             It is my first web app I've ever build. I started development on .NET Core 2.1 SDK, but now I use .NET Core SDK of version @Model.FrameworkVer.
                         </p>
-                        @{
-                            var dev = "";
-                        }
-                        <environment include="Development">
-                            @{dev = "BETA";}
-                        </environment>
                         <p class="section_paragraph">
-                            This is Hannah(Pika Core), version: @Model.Version @dev.
+                            This is Hannah(Pika Core), version: @Model.Version.
                         </p>
                     </section>
                 </div>

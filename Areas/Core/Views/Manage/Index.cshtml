@@ -5,18 +5,17 @@
 }
 <div class="row">
     <h3>@ViewData["Title"]</h3>
-    @(await Html.PartialAsync("_StatusMessage", Model.StatusMessage))
+    @(await Html.PartialAsync("_StatusMessage", TempData["StatusMessage"]))
 
     <div class="col s12 m12 l12">
         <form method="post">
-            <div asp-validation-summary="All" class="red-text"></div>
             <div class=input-field>
-                <label >@Html.DisplayNameFor(m => m.Username)</label>
-                <input asp-for="Username" class="validate login-input-color" disabled />
+                <label>@Html.DisplayNameFor(m => m.Username)</label>
+                <input asp-for="Username" class="validate login-input-color" />
                 <span asp-validation-for="Username" class="red-text"></span>
             </div>
             <div class="input-field">
-                <label >@Html.DisplayNameFor(m => m.Email)</label>
+                <label>@Html.DisplayNameFor(m => m.Email)</label>
                 <input asp-for="Email" class="validate login-input-color" />
                 <span asp-validation-for="Email" class="red-text"></span>
             </div>

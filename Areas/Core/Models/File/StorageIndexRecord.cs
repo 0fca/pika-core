@@ -1,11 +1,13 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using PikaCore.Areas.Core.Controllers.App;
 
 namespace PikaCore.Areas.Core.Models.File
 {
     public class StorageIndexRecord
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Key]
         [Required]
         public int Urlid { get; set; }

@@ -7,11 +7,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.ManageViewModels;
-using PikaCore.Areas.Core.Services;
-using PikaCore.Areas.Infrastructure.Services;
+using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {
@@ -22,7 +20,6 @@ namespace PikaCore.Areas.Core.Controllers.App
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UrlEncoder _urlEncoder;
-        private readonly IFileLoggerService _loggerService;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -30,13 +27,11 @@ namespace PikaCore.Areas.Core.Controllers.App
         public ManageController(
           UserManager<ApplicationUser> userManager,
           SignInManager<ApplicationUser> signInManager,
-          UrlEncoder urlEncoder,
-          IFileLoggerService loggerService)
+          UrlEncoder urlEncoder)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _urlEncoder = urlEncoder;
-            _loggerService = loggerService;
         }
 
         [TempData] public string StatusMessage { get; set; }
@@ -56,9 +51,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 IsEmailConfirmed = user.EmailConfirmed,
-                StatusMessage = StatusMessage
             };
-
             return View(model);
         }
 
@@ -143,7 +136,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
 
             await _signInManager.SignInAsync(user, isPersistent: false);
-            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User changed their password successfully.");
+            Log.Information($"User's password has been changed. User id: {user.Id}");
             StatusMessage = "Your password has been changed.";
 
             return RedirectToAction(nameof(ChangePassword));
@@ -330,7 +323,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
             }
 
-            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with ID " + user.Id + " has disabled 2fa.");
+            Log.Information($"Successfully logged in with 2FA for user: {user.Id}");
             return RedirectToAction(nameof(TwoFactorAuthentication));
         }
 
@@ -379,7 +372,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
-            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with ID" + user.Id + " has enabled 2FA with an authenticator app.");
+            Log.Information($"Authenticator has been enabled for user: {user.Email}");
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
             TempData[RecoveryCodesKey] = recoveryCodes.ToArray();
 
@@ -417,8 +410,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             await _userManager.ResetAuthenticatorKeyAsync(user);
-            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with id " + user.Id + " has reset their authentication app key.");
-
+            Log.Information("Authenticator has been resetted successfully.");
             return RedirectToAction(nameof(EnableAuthenticator));
         }
 
@@ -455,7 +447,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-            _loggerService.LogToFileAsync(LogLevel.Information, HttpContext.Request.Host.Value, "User with ID " + user.Id + " has generated new 2FA recovery codes.");
+            Log.Information($"Recovery codes generated successfully for user: {user.Id}");
 
             var model = new ShowRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
 

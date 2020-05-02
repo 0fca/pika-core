@@ -2,26 +2,30 @@
 @{
     ViewData["Title"] = "Register";
 }
-<div class="d-flex align-items-center text-center align-content-center row row-margins">
-    <h2>@ViewData["Title"]</h2>
-    <h4>Associate your @ViewData["LoginProvider"] account.</h4>
-    <hr />
-
-    <p class="text-info">
-        You've successfully authenticated with <strong>@ViewData["LoginProvider"]</strong>.
-        Please enter an email address for this site below and click the Register button to finish logging in.
-
-    </p>
-
-    <div class="col-md-4">
+<div class="row row-margins">
+    <div class="card indigo white-text center">
         <form asp-action="ExternalLoginConfirmation" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Email"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+        <div class="card-content">
+            <span class="card-title white-text">@ViewData["Title"] via @ViewData["LoginProvider"]</span>
+            You've successfully authenticated with <strong>@ViewData["LoginProvider"]</strong>.
+            Please enter an email address for this site below and click the Register button to finish logging in.
+            <div class="row">
+                <div asp-validation-summary="All" class="red-text"></div>
+                <div class="input-field">
+                    <label asp-for="Email"></label>
+                    <input asp-for="Email" class="validate login-input-color"/>
+                    <span asp-validation-for="Email" class="red-text"></span>
+                    </div>
+                        <div class="input-field">
+                            <label asp-for="Username"></label>
+                            <input asp-for="Username" class="validate login-input-color"/>
+                            <span asp-validation-for="Username" class="red-text"></span>
+                        </div>
             </div>
+        </div>
+        <div class="card-action">
             <button type="submit" class="btn btn-default">Register</button>
+        </div>
         </form>
     </div>
 </div>
