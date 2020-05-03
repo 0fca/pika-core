@@ -11,9 +11,18 @@ using Microsoft.Extensions.FileProviders;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+<<<<<<< HEAD
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
+=======
+using AspNetCore.CustomValidation.Extensions;
+using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Hosting;
+using PikaCore.Areas.Api.v1.Data;
+using PikaCore.Areas.Api.v1.Services;
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
@@ -52,6 +61,12 @@ namespace PikaCore
 
             services.AddDbContext<StorageIndexContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
+<<<<<<< HEAD
+=======
+            
+            services.AddDbContext<MessageContext>(options => 
+                options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
 
             services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
                 {
@@ -105,12 +120,22 @@ namespace PikaCore
             services.AddSingleton<ISchedulerService, SchedulerService>();
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
+<<<<<<< HEAD
             
+=======
+            services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IAuthService, AuthService>();
+
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
             services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 268435456; //256MB
             });
             
+<<<<<<< HEAD
+=======
+            services.AddAspNetCoreCustomValidation();
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
             
             Log.Information(Resources.Startup_ConfigureServices_Logger_output___0_, path);
             
@@ -158,9 +183,18 @@ namespace PikaCore
                     options.SuppressInferBindingSourcesForParameters = true;
                     options.SuppressModelStateInvalidFilter = true;
                     options.SuppressMapClientErrors = true;
+<<<<<<< HEAD
                     options.ClientErrorMapping[404].Link = "/api/v1/notfoundhandler";
                 });
                
+=======
+                });
+            services.AddRazorPages()
+                .AddRazorPagesOptions(options =>
+                {
+                    options.Conventions.AuthorizeAreaFolder("Core", "/Admin");
+                });
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
             
             services.AddMvc()
                 .AddMvcOptions(options =>
@@ -176,7 +210,6 @@ namespace PikaCore
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-
         }
 
         public void Configure(IApplicationBuilder app,
@@ -217,6 +250,10 @@ namespace PikaCore
 	        app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseRouting();
+<<<<<<< HEAD
+=======
+            
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
             app.UseAuthorization();
             
             app.UseEndpoints(endpoints =>
