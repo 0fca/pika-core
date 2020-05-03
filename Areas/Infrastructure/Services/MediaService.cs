@@ -62,12 +62,21 @@ namespace PikaCore.Areas.Infrastructure.Services
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
                 Log.Information($"Creating thumb from video {absoluteHostPath} as {thumbAbsolutePath}");
                 if (File.Exists(thumbAbsolutePath)) return guid;
-
+                
+                var wScale = int.Parse(_configuration.GetSection("Images")["Width"]);
+                var hScale = int.Parse(_configuration.GetSection("Images")["Height"]);
+                
+                if (size == 1) 
+                {
+                    hScale = int.Parse(_configuration.GetSection("Images")["HeightBig"]);
+                    wScale = int.Parse(_configuration.GetSection("Images")["WidthBig"]);
+                }
+                
                 var options = new ConversionOptions()
                 {
                     Seek = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("ConversionOptions")["Seek"])),
-                    CustomWidth = 128,
-                    CustomHeight = 128
+                    CustomWidth = wScale,
+                    CustomHeight = hScale
                 };
                 await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options);
                 return guid;
@@ -139,11 +148,21 @@ namespace PikaCore.Areas.Infrastructure.Services
 
         public async Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions)
         {
-            var inputFile = new MediaFile(absoluteSystemVideoPath);
-            var outputFile = new MediaFile(absoluteSystemOutputPath);
+            try
+            {
+                var inputFile = new MediaFile(absoluteSystemVideoPath);
+                var outputFile = new MediaFile(absoluteSystemOutputPath);
 
-            var ffmpeg = new Engine(_configuration.GetSection("Images")["Ffmpeg"]);
-            await ffmpeg.GetThumbnailAsync(inputFile, outputFile, conversionOptions);
+                var ffmpeg = new Engine(_configuration.GetSection("Images")["Ffmpeg"]);
+                var mediaFile = await ffmpeg.GetThumbnailAsync(inputFile, outputFile, conversionOptions);
+                Log.Information($"Thumb from video: {mediaFile.FileInfo.FullName} : {mediaFile.FileInfo.Exists}");
+            }
+            catch (Exception e)
+            {
+                
+                Log.Error(e, e.Message);
+            }
+
         }
     }
 }

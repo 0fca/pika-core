@@ -1,5 +1,4 @@
 ﻿@using PikaCore.Areas.Core.Controllers.Helpers
-@using PikaCore.Areas.Core.Services
 @using PikaCore.Areas.Infrastructure.Services
 @using PikaCore.Security
 @model FileResultViewModel
@@ -61,7 +60,7 @@
         </div>
     </div>
     <div class="row">
-        <a class="collection-item" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
+        <a class="collection-item browse-collection-item" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
     </div>
     @{
         if (Model.ContentsList.Count > 0)
@@ -73,7 +72,7 @@
                         @if (item.IsDirectory)
                         {
 
-                            <a class="collection-item" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@System.IO.Path.Combine(lastPath, item.Name)" title="@item.Name"><i class="fas fa-folder prefix browse-icon-margin"></i>@item.Name</a>
+                            <a class="collection-item browse-collection-item" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@System.IO.Path.Combine(lastPath, item.Name)" title="@item.Name"><i class="fas fa-folder prefix browse-icon-margin"></i>@item.Name</a>
                         }
                         else
                         {
@@ -84,7 +83,7 @@
                             {
                                 var type = MimeAssistant.RecognizeIconByMime(mime);
                             
-                                <a class="collection-item" asp-area="Core" asp-controller="Storage" asp-action="Download" asp-route-id=@DataProtection.Encode(item.PhysicalPath) asp-route-returnUrl=@lastPath title="@item.Name"><i class="fas fa-@type prefix browse-icon-margin"></i>@item.Name</a>
+                                <a class="collection-item browse-collection-item" asp-area="Core" asp-controller="Storage" asp-action="Download" asp-route-id=@DataProtection.Encode(item.PhysicalPath) asp-route-returnUrl=@lastPath title="@item.Name"><i class="fas fa-@type prefix browse-icon-margin"></i>@item.Name</a>
                             }
                             else
                             {
@@ -94,7 +93,7 @@
                                     <img class="materialboxed" id="@id" alt="@item.Name" width="48" src="~/images/loading_icon.gif"/>
                                 </div>
                                 <div class="col s5 m7 l7 center-align">
-                                    <a class="collection-item left-align" asp-area="Core" asp-controller="Storage" asp-action="Download" asp-route-returnUrl="@lastPath" asp-route-id=@DataProtection.Encode(item.PhysicalPath) title="@item.Name">
+                                    <a class="collection-item browse-collection-item left-align" asp-area="Core" asp-controller="Storage" asp-action="Download" asp-route-returnUrl="@lastPath" asp-route-id=@DataProtection.Encode(item.PhysicalPath) title="@item.Name">
                                         @item.Name
                                     </a>
                                 </div>
@@ -154,7 +153,7 @@
         }
     }
     <div class="row">
-        <a class="collection-item" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
+        <a class="collection-item browse-collection-item" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
     </div>
     
 <div class="fixed-action-btn">

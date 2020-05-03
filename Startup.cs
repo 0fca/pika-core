@@ -113,7 +113,7 @@ namespace PikaCore
             services.AddSingleton<IdDataProtection>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IAuthService, AuthService>();
-            
+
             services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 268435456; //256MB
@@ -167,9 +167,12 @@ namespace PikaCore
                     options.SuppressInferBindingSourcesForParameters = true;
                     options.SuppressModelStateInvalidFilter = true;
                     options.SuppressMapClientErrors = true;
-                    options.ClientErrorMapping[404].Link = "/api/v1/notfoundhandler";
                 });
-               
+            services.AddRazorPages()
+                .AddRazorPagesOptions(options =>
+                {
+                    options.Conventions.AuthorizeAreaFolder("Core", "/Admin");
+                });
             
             services.AddMvc()
                 .AddMvcOptions(options =>
@@ -185,7 +188,6 @@ namespace PikaCore
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-
         }
 
         public void Configure(IApplicationBuilder app,

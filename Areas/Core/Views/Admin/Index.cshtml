@@ -59,14 +59,52 @@
     </li>
     <li>
         <div class="collapsible-header">
-            <a class="nav-link teal-text" href="#">Logs</a>
+            <a class="nav-link teal-text" href="#">System Messages</a>
         </div>
-        <div class="collapsible-body log-area">
-            <strong>Logs are disabled in application, migrating to Filebeat.</strong>
+        <div class="collapsible-body center">
+             <div class="row">
+                <ul class="pagination">
+                    @for (var pageIndex = 0; pageIndex < @Model.MessageViewModel.PageCount; pageIndex++)
+                    {
+                        var displayIndex = pageIndex + 1;
+                        <li><a asp-controller="Admin" asp-action="Index" asp-route-offset="@pageIndex" class="btn btn-flat">@displayIndex</a></li>
+                    }
+                </ul>
+            </div>
+            <div class="row">
+                <div class="col s12 m6 l6">
+                    <a class="btn btn-primary teal" href="/Core/Admin/CreateMessage">Create</a>
+                </div>
+                <div class="col s12 m6 l6">
+                    <a  class="btn btn-danger" asp-controller="Admin" asp-action="RemoveMessages">Delete</a>
+                </div>
+            </div>
+            <table class="collection">
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Message</th>
+                    <th>Message Type</th>
+                    <th>Issues Count</th>
+                    <th>Is visible</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var message in Model.MessageViewModel.Messages)
+                {
+                    <tr class="collection-item teal-text transparent">
+                        <td>@message.Id</td>
+                        <td class="truncate"><a class="teal-text" href="/Core/Admin/MessageEdit/@message.Id">@message.Message</a></td>
+                        <td>@message.MessageType</td>
+                        <td>@message.RelatedIssues.Count</td>
+                        <td>@message.IsVisible</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
         </div>
     </li>
 </ul>
-
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 }

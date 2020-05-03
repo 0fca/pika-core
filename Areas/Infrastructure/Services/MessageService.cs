@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -72,6 +73,33 @@ namespace PikaCore.Areas.Infrastructure.Services
             messageEntities = messageEntities.Count - offset >= count 
                 ? messageEntities.ToList().GetRange(offset, count) 
                 : messageEntities.ToList().GetRange(offset, messageEntities.Count);
+        }
+
+        public async Task RemoveMessages(IList<int> ids)
+        {
+            _messageContext.Messages.RemoveRange(_messageContext.Messages.Where(m => ids.Contains(m.Id)));
+            await _messageContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateMessage(MessageEntity e)
+        {
+            var currentMessage = await _messageContext.Messages.FindAsync(e.Id);
+            if (currentMessage != null)
+            {
+                currentMessage.Message = e.Message;
+                currentMessage.IsVisible = e.IsVisible;
+                currentMessage.RelatedIssues = e.RelatedIssues;
+                currentMessage.UpdatedAt = DateTime.Now;
+                currentMessage.MessageType = e.MessageType;
+                _messageContext.Update(currentMessage);
+                await _messageContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task CreateMessage(MessageEntity e)
+        {
+            await _messageContext.Messages.AddAsync(e);
+            await _messageContext.SaveChangesAsync();
         }
     }
 }

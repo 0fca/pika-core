@@ -215,7 +215,7 @@ a, a:hover, a:focus {
 }
 
 
-.collection-item{
+.browse-collection-item{
     background-color: inherit !important;
     color: rgb(12,12,12) !important;
     border-bottom: #000 !important;
@@ -223,7 +223,7 @@ a, a:hover, a:focus {
     border-width: 1px !important;
 }
 
-.collection-item:hover{
+.browse-collection-item:hover{
     color: #303F9F !important;
 }
 
@@ -260,4 +260,8 @@ a, a:hover, a:focus {
     color: white !important;
     background-color: inherit !important;
     
+}
+
+.hand-cursor{
+    cursor: pointer;
 }

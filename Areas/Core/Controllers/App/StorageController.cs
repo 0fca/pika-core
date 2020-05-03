@@ -41,7 +41,8 @@ namespace PikaCore.Areas.Core.Controllers.App
         [TempData(Key = "showGenerateUrlPartial")]
         public bool ShowGenerateUrlPartial { get; set; }
         
-        [TempData(Key = "returnMessage")] public string ReturnMessage { get; set; } = "";
+        [TempData(Key = "returnMessage")] 
+        public string ReturnMessage { get; set; } = "";
 
         #endregion
 
@@ -170,8 +171,9 @@ namespace PikaCore.Areas.Core.Controllers.App
                     }
                     else
                     {
-                        if (s.ExpireDate.Date == DateTime.Now.Date || s.ExpireDate.Date < DateTime.Now.Date)
+                        if (s.ExpireDate.Date <= DateTime.Now.Date)
                         {
+                            s.ExpireDate = StorageIndexRecord.ComputeDateTime();
                             _storageIndexContext.Update(s);
                             await _storageIndexContext.SaveChangesAsync();
                         }
@@ -216,7 +218,6 @@ namespace PikaCore.Areas.Core.Controllers.App
 
                     if (s != null)
                     {
-                        var returnPath = _fileService.RetrieveSystemPathFromAbsolute(s.AbsolutePath);
                         if (!s.Expires || (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now))
                         {
                                 var fileBytes = _fileService.AsStreamAsync(s.AbsolutePath);
@@ -231,7 +232,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                                 return RedirectToAction(nameof(Browse));
                         }
                         ReturnMessage = "It seems that this url expired today, you need to generate a new one.";
-                        return RedirectToAction(nameof(Browse), new { path = returnPath, offset, count });
+                        return RedirectToAction(nameof(Browse));
                     }
                     ReturnMessage = "It seems that given token doesn't exist in the database.";
                     return RedirectToAction(nameof(Browse));

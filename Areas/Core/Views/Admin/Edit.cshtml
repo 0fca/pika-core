@@ -12,22 +12,22 @@
     <div class="col s12 m12 l12">
         <form method="post" asp-area="Core" asp-controller="Admin" asp-action="EditConfirmation">
             <div asp-validation-summary="ModelOnly" class="red-text"></div>
-            <div class="form-group">
-                <label asp-for="Id" class="control-label"></label>
+            <div class="input-field">
+                <label>@Html.DisplayNameFor(m => m.Id)</label>
                 <input asp-for="Id" class="form-control" />
                 <span asp-validation-for="Id" class="red-text"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
+            <div class="input-field">
+                <label>@Html.DisplayNameFor(m => m.Email)</label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="red-text"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="UserName" class="control-label"></label>
+            <div class="input-field">
+                <label>@Html.DisplayNameFor(m => m.UserName)<</label>
                 <input asp-for="UserName" class="form-control" />
                 <span asp-validation-for="UserName" class="red-text"></span>
             </div>
-            <div class="form-group">
+            <div class="input-field">
                 <label asp-for="Roles"></label>
                 <ul class="list-unstyled" id="roleList">
                     @foreach (var role in Model.Roles) {
@@ -45,13 +45,12 @@
                 </select>
                 <span asp-validation-for="Roles" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="input-field">
                 <label asp-for="Phone" class="control-label"></label>
                 <input asp-for="Phone" class="form-control" />
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
-
-            <div class="form-group">
+            <div class="row">
                 <input type="submit" value="Save" class="btn btn-danger" asp-action="EditConfirmation" />
                 <input type="submit" value="Cancel" class="btn btn-default" formmethod="get" asp-controller="Admin" asp-action="Index" />
             </div>

@@ -19,5 +19,11 @@ namespace PikaCore.Areas.Infrastructure.Services
         public Task<IssueEntity> GetLatestIssueByMessageId(int id);
 
         public void ApplyPaging(ref IList<MessageEntity> messageEntities, int count, int offset = 0);
+
+        public Task RemoveMessages(IList<int> ids);
+
+        public Task UpdateMessage(MessageEntity e);
+
+        public Task CreateMessage(MessageEntity e);
     }
 }

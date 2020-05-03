@@ -23,11 +23,9 @@ namespace PikaCore.Areas.Core.Models.File
 
         [Required] public DateTime ExpireDate { get; set; } = ComputeDateTime();
 
-        private static DateTime ComputeDateTime()
+        public static DateTime ComputeDateTime()
         {
-            var now = DateTime.Now;
-            now = now.AddDays(Constants.DayCount);
-            return now;
+            return DateTime.Now.AddDays(Constants.DayCount);
         }
     }
 }
