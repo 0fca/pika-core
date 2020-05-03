@@ -51,9 +51,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 IsEmailConfirmed = user.EmailConfirmed,
-                StatusMessage = StatusMessage
             };
-
             return View(model);
         }
 

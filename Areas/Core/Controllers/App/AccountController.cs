@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.AccountViewModels;
-using PikaCore.Areas.Core.Services;
+using PikaCore.Areas.Core.Security;
 using PikaCore.Areas.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Controllers.App
@@ -21,32 +21,38 @@ namespace PikaCore.Areas.Core.Controllers.App
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
+        private readonly IMessageService _messageService;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, ILogger<AccountController> logger)
+        public AccountController(UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager, 
+            IEmailSender emailSender,
+            ILogger<AccountController> logger,
+            IMessageService messageService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
+            _messageService = messageService;
         }
 
         [TempData] private string ErrorMessage { get; set; }
 
         [HttpGet]
         [AllowAnonymous]
-
-        public async Task<IActionResult> Login(string returnUrl = null)
+        public async Task<IActionResult> Login(string returnUrl = "/")
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
+            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["Message"] = (await _messageService.GetMessageById(3)).Message;
             return View();
         }
 
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = "/")
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid) return View(model);
@@ -74,7 +80,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> LoginWith2Fa(bool rememberMe, string returnUrl = null)
+        public async Task<IActionResult> LoginWith2Fa(bool rememberMe, string returnUrl = "/")
         {
             // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
@@ -93,7 +99,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWith2Fa(LoginWith2FaViewModel model, bool rememberMe, string returnUrl = null)
+        public async Task<IActionResult> LoginWith2Fa(LoginWith2FaViewModel model, bool rememberMe, string returnUrl = "/")
         {
             if (!ModelState.IsValid)
             {
@@ -115,7 +121,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 _logger.LogInformation("User with ID {UserId} logged in with 2fa.", user.Id);
                 return RedirectToLocal(returnUrl);
             }
-
+            
             if (result.IsLockedOut)
             {
                 _logger.LogWarning("User with ID {UserId} account locked out.", user.Id);
@@ -128,7 +134,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> LoginWithRecoveryCode(string returnUrl = null)
+        public async Task<IActionResult> LoginWithRecoveryCode(string returnUrl = "/")
         {
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
@@ -143,7 +149,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWithRecoveryCode(LoginWithRecoveryCodeViewModel model, string returnUrl = null)
+        public async Task<IActionResult> LoginWithRecoveryCode(LoginWithRecoveryCodeViewModel model, string returnUrl = "/")
         {
             if (!ModelState.IsValid)
             {
@@ -187,7 +193,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Register(string returnUrl = null)
+        public IActionResult Register(string returnUrl = "/")
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -196,17 +202,17 @@ namespace PikaCore.Areas.Core.Controllers.App
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = "/")
         {
-            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/Home/" : returnUrl;
+            ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid) return View(model);
             
-            var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+            var user = new ApplicationUser { UserName = model.Username, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
             
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, "USER");
+                await _userManager.AddToRoleAsync(user, RoleString.User);
                 _logger.LogInformation("User created a new account.");
                 return RedirectToAction("Index", "Manage");
             }
@@ -227,7 +233,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         [HttpPost]
         [AllowAnonymous]
         [AutoValidateAntiforgeryToken]
-        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        public IActionResult ExternalLogin(string provider, string returnUrl = "/")
         {
             // Request a redirect to the external login provider.
             var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
@@ -238,7 +244,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         [HttpGet]
         [AllowAnonymous]
 
-        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = "/", string remoteError = null)
         {
             if (remoteError != null)
             {
@@ -261,21 +267,19 @@ namespace PikaCore.Areas.Core.Controllers.App
             {
                 return RedirectToAction(nameof(Lockout));
             }
-            else
-            {
-                ViewData["ReturnUrl"] = returnUrl;
-                ViewData["LoginProvider"] = info.LoginProvider;
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
 
-                return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
-            }
+            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["LoginProvider"] = info.LoginProvider;
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+
+            return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
         }
 
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model,
-            string returnUrl = null)
+            string returnUrl = "/")
         {
             if (ModelState.IsValid)
             {
@@ -320,26 +324,19 @@ namespace PikaCore.Areas.Core.Controllers.App
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
             {
-                var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
-                {
-                    // Don't reveal that the user does not exist or is not confirmed
-                    return RedirectToAction(nameof(ForgotPasswordConfirmation));
-                }
-
-                // For more information on how to enable account confirmation and password reset please
-                // visit https://go.microsoft.com/fwlink/?LinkID=532713
-                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
-                await _emailSender.SendEmailAsync(model.Email, "Reset Password",
-                   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
                 return RedirectToAction(nameof(ForgotPasswordConfirmation));
             }
-
-            // If we got this far, something failed, redisplay form
-            return View(model);
+                
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
+            //TODO: This just wont work, email sender is not working.
+            await _emailSender.SendEmailAsync(model.Email, "Reset Password",
+                $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
+            return RedirectToAction(nameof(ForgotPasswordConfirmation));
         }
 
         [HttpGet]

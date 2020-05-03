@@ -1,0 +1,37 @@
+﻿@model DeleteMessageDto
+
+@{
+    Layout = "_Layout";
+}
+@{ 
+    ViewData["Title"] = "Delete messages";
+}
+<div class="container">
+    <div class="card indigo white-text center">
+        <span class="card-title">
+            @ViewData["Title"]
+        </span>
+        <div class="card-content">
+            <div class="row">
+                <p id="output" class="transparent"></p>
+            </div>
+            <ul class="collection">
+                @foreach (var (key, value) in Model.Messages)
+                {
+                    <li class="collection-item teal">
+                        <div>
+                            @value
+                            <span id="@key" class="secondary-content white-text transparent hand-cursor"><i class="material-icons">check_box_outline_blank</i></span>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="card-action">
+            <button id="delete-button" class="btn btn-danger">Delete</button>
+            <a class="btn btn-primary" asp-controller="Admin" asp-action="Index">Cancel</a>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/delete_form.js"></script>

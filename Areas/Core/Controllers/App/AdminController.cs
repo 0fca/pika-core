@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
@@ -7,35 +8,43 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PikaCore.Areas.Core.Models;
+using PikaCore.Areas.Core.Models.AdminViewModels;
+using PikaCore.Areas.Core.Models.AdminViewModels.DTO;
 using PikaCore.Areas.Core.Models.ManageViewModels;
 using PikaCore.Areas.Core.Services;
+using PikaCore.Areas.Infrastructure.Services;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {
     [Area("Core")]
     [Route("/{controller}/{action}")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUrlGenerator _urlUrlGeneratorService;
+        private readonly IMessageService _messageService;
 
         [TempData] 
         public string StatusMessage { get; set; } = "";
+        
         [TempData(Key = "newPassword")]
         public string NewPassword { get; set; }
 
         public AdminController(
             UserManager<ApplicationUser> userManager,
-            IUrlGenerator urlGenerator)
+            IUrlGenerator urlGenerator,
+            IMessageService messageService)
         {
             _userManager = userManager;
             _urlUrlGeneratorService = urlGenerator;
+            _messageService = messageService;
+
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int offset = 0)
         {
             var usersWithRoles = new Dictionary<ApplicationUser, IList<string>>();
 
@@ -47,10 +56,17 @@ namespace PikaCore.Areas.Core.Controllers.App
                     usersWithRoles.Add(user, roles);
                 });
             }
-
+            
+            var messageViewModel = new MessageViewModel();
+            var messages = await _messageService.GetAllMessages();
+            const int messagesPerPageCount = 5;
+            messageViewModel.OrganizeMessages(ref messages, messagesPerPageCount);
+            _messageService.ApplyPaging(ref messages, messagesPerPageCount, offset);
+            messageViewModel.Messages = messages;
+            
             var adminPanelViewModel = new AdminPanelViewModel
             {
-                LogsListViewModel = null,//TODO: To be deleted.
+                MessageViewModel = messageViewModel,
                 UsersWithRoles = usersWithRoles
             };
             
@@ -58,7 +74,6 @@ namespace PikaCore.Areas.Core.Controllers.App
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         [Route("{id}")]
         public async Task<IActionResult> GeneratePassword(string id)
         {
@@ -78,7 +93,6 @@ namespace PikaCore.Areas.Core.Controllers.App
 
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         [Route("{id}")]
         public async Task<IActionResult> Edit(string id)
         {
@@ -96,7 +110,6 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpPost]
         [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditConfirmation(EditUserModel editModel)
         {
             var userModel = await _userManager.FindByIdAsync(editModel.Id);
@@ -114,7 +127,6 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpGet]
         [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RemoveFromRole(string id, string roleName)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -135,7 +147,6 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpGet]
         [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin")]
         [Route("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -145,7 +156,6 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpPost]
         [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin")]
         [Route("{id}")]
         public async Task<IActionResult> DeleteConfirmation(string id)
         {
@@ -154,5 +164,35 @@ namespace PikaCore.Areas.Core.Controllers.App
             return RedirectToAction(nameof(Index), "Admin");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> RemoveMessages()
+        {
+            var deletedDto = new DeleteMessageDto();
+            var messages = await _messageService.GetAllMessages();
+            deletedDto.Messages = DeleteMessageDto.MessageListToDto(messages);
+            return View(deletedDto);
+        }
+
+        [HttpPost]
+        [Route("{idsList?}")]
+        public async Task<IActionResult> RemoveMessagesExecute(string idsList)
+        {
+            if (string.IsNullOrEmpty(idsList))
+            {
+                return BadRequest("No ids given.");
+            }
+            try
+            {
+                var intIdsList = idsList.Remove(idsList.Length - 1).Split(",").Select(int.Parse).ToList();
+                await _messageService.RemoveMessages(intIdsList);
+                return Accepted("/Admin/Index");
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, e.Message);
+            }
+
+            return BadRequest("Couldn't delete messages, because none of them found.");
+        }
     }
 }

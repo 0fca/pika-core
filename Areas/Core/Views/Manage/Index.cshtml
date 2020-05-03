@@ -5,6 +5,7 @@
 }
 <div class="row">
     <h3>@ViewData["Title"]</h3>
+<<<<<<< HEAD
     @(await Html.PartialAsync("_StatusMessage", Model.StatusMessage))
 
     <div class="col s12 m12 l12">
@@ -17,6 +18,19 @@
             </div>
             <div class="input-field">
                 <label >@Html.DisplayNameFor(m => m.Email)</label>
+=======
+    @(await Html.PartialAsync("_StatusMessage", TempData["StatusMessage"]))
+
+    <div class="col s12 m12 l12">
+        <form method="post">
+            <div class="input-field">
+                <label>@Html.DisplayNameFor(m => m.Username)</label>
+                <input asp-for="Username" class="validate login-input-color" />
+                <span asp-validation-for="Username" class="red-text"></span>
+            </div>
+            <div class="input-field">
+                <label>@Html.DisplayNameFor(m => m.Email)</label>
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
                 <input asp-for="Email" class="validate login-input-color" />
                 <span asp-validation-for="Email" class="red-text"></span>
             </div>
