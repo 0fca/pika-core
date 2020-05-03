@@ -5,7 +5,7 @@
             <h4>Upload one or more files</h4>
             
             <div class="row">
-                <p class="transparent">
+                <p id="output-paragraph" class="transparent">
                     <output id="result"></output>
                 </p>
                     <div class="col s12 m12 l12">
@@ -46,7 +46,7 @@
         const messageLabel = document.getElementById("result");
         const uploadButton = document.getElementById("upload-submit");
         messageLabel.innerText = returnFileSize(getSummarySize());
-        messageLabel.setAttribute("class", "card-panel teal white-text");
+        document.getElementById("output-paragraph").setAttribute("class", "card-panel teal white-text");
         if (getSummarySize() === 0) {
             uploadButton.setAttribute("disabled", "true");
         }
@@ -64,7 +64,7 @@
         progressSpinner.setAttribute("class", progressSpinner.getAttribute("class").concat(" active"));
         const oFormElement = document.getElementById("upload-form");
             const resultElement = oFormElement.elements.namedItem("result");
-            resultElement.setAttribute("class", "card-panel teal white-text");
+            document.getElementById("output-paragraph").setAttribute("class", "card-panel teal white-text");
             const formData = new FormData(oFormElement);
     
             try {

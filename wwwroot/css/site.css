@@ -265,3 +265,8 @@ a, a:hover, a:focus {
 .hand-cursor{
     cursor: pointer;
 }
+
+.appdropdown{
+    width: 300px !important;
+    top: 100% !important;
+}
