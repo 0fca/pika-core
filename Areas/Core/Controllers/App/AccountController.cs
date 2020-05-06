@@ -43,9 +43,18 @@ namespace PikaCore.Areas.Core.Controllers.App
         public async Task<IActionResult> Login(string returnUrl = "/")
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            var message = "";
+            try
+            {
+                message = (await _messageService.GetMessageById(3)).Message;
+            }
+            catch 
+            {
+                // ignore
+            }
 
             ViewData["ReturnUrl"] = returnUrl;
-            ViewData["Message"] = (await _messageService.GetMessageById(3)).Message;
+            ViewData["Message"] = message;
             return View();
         }
 
