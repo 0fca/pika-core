@@ -111,6 +111,10 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
+      <Content Update="Areas\Core\Views\Shared\_SystemMessagePartial.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
     </ItemGroup>
     <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="3.0.0" />

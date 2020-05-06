@@ -12,9 +12,7 @@
                 <span class="card-title">Log in using a local account.</span>
                 <hr/>
                 <section id="local_account_login">
-                    <div class="card-panel teal">
-                        @ViewData["Message"]
-                    </div>
+                    @await Html.PartialAsync("_SystemMessagePartial", ViewData["Message"])
                     <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
                         <div class="row">
                             @if (!ViewData.ModelState.IsValid)
