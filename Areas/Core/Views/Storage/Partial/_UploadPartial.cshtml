@@ -5,10 +5,17 @@
             <h4>Upload one or more files</h4>
             
             <div class="row">
+<<<<<<< HEAD
+                <p class="card-panel teal white-text">
+                    <output id="result"></output>
+                </p>
+                    <div class="col s12 m6 l6">
+=======
                 <p id="output-paragraph" class="transparent">
                     <output id="result"></output>
                 </p>
                     <div class="col s12 m12 l12">
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
                         <div class="file-field input-field">
                             <div class="btn">
                                 <span>Choose</span>
@@ -19,7 +26,11 @@
                             </div>
                             </div>
                     </div>
+<<<<<<< HEAD
+                    <div class="col s12 m6 l6 center">
+=======
                     <div class="col s12 m12 l12 center">
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
                         <div class="preloader-wrapper big" id="progress-spinner">
                             <div class="spinner-layer spinner-teal-only">
                               <div class="circle-clipper left">
@@ -46,7 +57,10 @@
         const messageLabel = document.getElementById("result");
         const uploadButton = document.getElementById("upload-submit");
         messageLabel.innerText = returnFileSize(getSummarySize());
+<<<<<<< HEAD
+=======
         document.getElementById("output-paragraph").setAttribute("class", "card-panel teal white-text");
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
         if (getSummarySize() === 0) {
             uploadButton.setAttribute("disabled", "true");
         }
@@ -64,7 +78,10 @@
         progressSpinner.setAttribute("class", progressSpinner.getAttribute("class").concat(" active"));
         const oFormElement = document.getElementById("upload-form");
             const resultElement = oFormElement.elements.namedItem("result");
+<<<<<<< HEAD
+=======
             document.getElementById("output-paragraph").setAttribute("class", "card-panel teal white-text");
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
             const formData = new FormData(oFormElement);
     
             try {

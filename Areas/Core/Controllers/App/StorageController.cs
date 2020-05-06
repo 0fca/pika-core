@@ -372,7 +372,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 catch (Exception e)
                 {
                     Log.Error(e, "StorageController#Create");
-                    ReturnMessage = "Couldn't create directory.";
+                    ReturnMessage = "Error: Couldn't create directory.";
                     return RedirectToAction(nameof(Browse), new { path = returnUrl, offset, count });
                 }
             }

@@ -238,11 +238,19 @@ a, a:hover, a:focus {
 .pagination li.active{
     background-color: #009688 !important;
 }
+<<<<<<< HEAD
 
 .alert-danger {
     color: red;
 }
 
+=======
+
+.alert-danger {
+    color: red;
+}
+
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
 .app-menu-item {
     font-size: 24px;
 }
@@ -260,6 +268,8 @@ a, a:hover, a:focus {
     color: white !important;
     background-color: inherit !important;
     
+<<<<<<< HEAD
+=======
 }
 
 .hand-cursor{
@@ -269,4 +279,5 @@ a, a:hover, a:focus {
 .appdropdown{
     width: 300px !important;
     top: 100% !important;
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
 }

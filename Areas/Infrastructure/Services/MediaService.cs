@@ -62,6 +62,14 @@ namespace PikaCore.Areas.Infrastructure.Services
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
                 Log.Information($"Creating thumb from video {absoluteHostPath} as {thumbAbsolutePath}");
                 if (File.Exists(thumbAbsolutePath)) return guid;
+<<<<<<< HEAD
+
+                var options = new ConversionOptions()
+                {
+                    Seek = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("ConversionOptions")["Seek"])),
+                    CustomWidth = 128,
+                    CustomHeight = 128
+=======
                 
                 var wScale = int.Parse(_configuration.GetSection("Images")["Width"]);
                 var hScale = int.Parse(_configuration.GetSection("Images")["Height"]);
@@ -77,6 +85,7 @@ namespace PikaCore.Areas.Infrastructure.Services
                     Seek = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("ConversionOptions")["Seek"])),
                     CustomWidth = wScale,
                     CustomHeight = hScale
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
                 };
                 await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options);
                 return guid;
@@ -148,6 +157,13 @@ namespace PikaCore.Areas.Infrastructure.Services
 
         public async Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions)
         {
+<<<<<<< HEAD
+            var inputFile = new MediaFile(absoluteSystemVideoPath);
+            var outputFile = new MediaFile(absoluteSystemOutputPath);
+
+            var ffmpeg = new Engine(_configuration.GetSection("Images")["Ffmpeg"]);
+            await ffmpeg.GetThumbnailAsync(inputFile, outputFile, conversionOptions);
+=======
             try
             {
                 var inputFile = new MediaFile(absoluteSystemVideoPath);
@@ -163,6 +179,7 @@ namespace PikaCore.Areas.Infrastructure.Services
                 Log.Error(e, e.Message);
             }
 
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
         }
     }
 }
