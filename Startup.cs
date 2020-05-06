@@ -15,13 +15,13 @@ using AspNetCore.CustomValidation.Extensions;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
-using PikaCore.Areas.Api.v1.Data;
 using PikaCore.Areas.Api.v1.Services;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Services;
+using PikaCore.Areas.Infrastructure.Data;
 using PikaCore.Areas.Infrastructure.Services;
 using PikaCore.Properties;
 using PikaCore.Security;
@@ -57,6 +57,9 @@ namespace PikaCore
                 options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
             
             services.AddDbContext<MessageContext>(options => 
+                options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
+            
+            services.AddDbContext<SystemContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
@@ -113,6 +116,8 @@ namespace PikaCore
             services.AddSingleton<IdDataProtection>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddTransient<ISystemService, SystemService>();
+            services.AddTransient<IStatusService, StatusService>();
 
             services.Configure<FormOptions>(options =>
             {

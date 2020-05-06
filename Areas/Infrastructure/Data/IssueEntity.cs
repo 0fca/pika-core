@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PikaCore.Areas.Api.v1.Data
+namespace PikaCore.Areas.Infrastructure.Data
 {
     [Table("Issues")]
     public class IssueEntity
