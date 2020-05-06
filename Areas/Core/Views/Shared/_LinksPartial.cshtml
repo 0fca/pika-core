@@ -31,6 +31,39 @@
         }
     </ul>
 </div>
+<<<<<<< HEAD
+
+<div id="app-modal" class="modal bottom-sheet">
+    <div class="modal-content">
+        <div class="container">
+            <header class="teal-text">
+                <h4>Pika Cloud Apps</h4>
+            </header>
+            <div class="row">
+                <div class="col s6 m6 l6">
+                    <a class="navlink app-menu-item" href="https://player.lukas-bownik.net/" title="Pika Player">
+                        <span class="material-icons prefix">
+                            play_arrow
+                        </span>
+                        Pika Player
+                    </a>
+                </div>
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="col s6 m6 l6">
+                        <a asp-area="Core" asp-controller="Admin" asp-action="Index" class="navlink app-menu-item" title="Pika Cloud Admin">
+                            <span class="material-icons prefix">
+                                supervisor_account
+                            </span>
+                            Pika Cloud Admin
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+=======
 <div id="app-dropdown" class="card dropdown-content hide-on-small-and-down appdropdown right" tabindex="0">
     <div class="card-content center">
         <span class="card-title teal-text">Pika Cloud Apps</span>
@@ -63,3 +96,4 @@
     
  window.onresize = translateAppDropdown();
 </script>
+>>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507

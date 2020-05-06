@@ -91,7 +91,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
 
             var model = new LoginWith2FaViewModel { RememberMe = rememberMe };
-            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["ReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
 
             return View(model);
         }

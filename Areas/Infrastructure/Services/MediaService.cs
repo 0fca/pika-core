@@ -62,7 +62,7 @@ namespace PikaCore.Areas.Infrastructure.Services
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
                 Log.Information($"Creating thumb from video {absoluteHostPath} as {thumbAbsolutePath}");
                 if (File.Exists(thumbAbsolutePath)) return guid;
-                
+
                 var wScale = int.Parse(_configuration.GetSection("Images")["Width"]);
                 var hScale = int.Parse(_configuration.GetSection("Images")["Height"]);
                 
@@ -162,7 +162,6 @@ namespace PikaCore.Areas.Infrastructure.Services
                 
                 Log.Error(e, e.Message);
             }
-
         }
     }
 }
