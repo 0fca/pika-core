@@ -10,11 +10,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using AspNetCore.CustomValidation.Extensions;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Win32;
 using PikaCore.Areas.Api.v1.Services;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
@@ -49,16 +53,13 @@ namespace PikaCore
                 .WriteTo.File(path,
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
-            
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDbContext<StorageIndexContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
-            
-            services.AddDbContext<MessageContext>(options => 
-                options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
-            
+
             services.AddDbContext<SystemContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
 
@@ -81,6 +82,20 @@ namespace PikaCore
                 a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
                 a.Configuration = Configuration.GetConnectionString("RedisConnection");
             });
+            
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                services.AddDataProtection();
+            }
+            else
+            {
+                Console.WriteLine(Configuration["Security:CertificatePath"]);
+                services.AddDataProtection()
+                    .PersistKeysToFileSystem(new DirectoryInfo("/srv/fms/keys"))
+                    .ProtectKeysWithCertificate(
+                        new X509Certificate2(Configuration["Security:CertificatePath"], 
+                            Configuration["Security:Passphrase"]));
+            }
 
             services.AddAuthentication()
                 .AddGoogle(googleOpts =>
@@ -106,7 +121,6 @@ namespace PikaCore
                 });
 
             services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddScoped<IArchiveService, ArchiveService>();
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
             services.AddTransient<IStreamingService, StreamingService>();
@@ -118,6 +132,7 @@ namespace PikaCore
             services.AddScoped<IAuthService, AuthService>();
             services.AddTransient<ISystemService, SystemService>();
             services.AddTransient<IStatusService, StatusService>();
+            services.AddTransient<IJobService, JobService>();
 
             services.Configure<FormOptions>(options =>
             {

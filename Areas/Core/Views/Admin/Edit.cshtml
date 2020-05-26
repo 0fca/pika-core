@@ -12,13 +12,9 @@
     <div class="col s12 m12 l12">
         <form method="post" asp-area="Core" asp-controller="Admin" asp-action="EditConfirmation">
             <div asp-validation-summary="ModelOnly" class="red-text"></div>
-<<<<<<< HEAD:Areas/Core/Views/Admin/Edit.cshtml
-            <div class="form-group">
-                <label asp-for="Id" class="control-label"></label>
-=======
+
             <div class="input-field">
                 <label>@Html.DisplayNameFor(m => m.Id)</label>
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507:Areas/Core/Views/Admin/Edit.cshtml
                 <input asp-for="Id" class="form-control" />
                 <span asp-validation-for="Id" class="red-text"></span>
             </div>
@@ -32,11 +28,7 @@
                 <input asp-for="UserName" class="form-control" />
                 <span asp-validation-for="UserName" class="red-text"></span>
             </div>
-<<<<<<< HEAD:Areas/Core/Views/Admin/Edit.cshtml
-            <div class="form-group">
-=======
             <div class="input-field">
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507:Areas/Core/Views/Admin/Edit.cshtml
                 <label asp-for="Roles"></label>
                 <ul class="list-unstyled" id="roleList">
                     @foreach (var role in Model.Roles) {

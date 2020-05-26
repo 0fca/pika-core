@@ -8,16 +8,28 @@
 <div class="row">
     <div class="card indigo center">
         <div class="card-content white-text">
-            <form asp-area="Core" asp-controller="Storage" asp-action="Delete" method="post">
+            <form asp-controller="Storage" asp-action="DeleteConfirmation" method="post">
             <span class="card-title">@ViewData["Title"]</span>
             <div class="card-content">
                 <p>Choose files or folders to be deleted:</p>
                 <div class="input-field">
-                    @Html.DropDownListFor(m => m.ToBeDeletedItems, Model.ResourceList, "Choose resources to be deleted.")
+                    <span>
+                        <button type="button" id="select-to-delete" class="btn btn-flat prefix">
+                            <i class="material-icons white-text">
+                                search
+                            </i>
+                        </button>
+                        <input id="find-to-delete-input" class="autocomplete login-input-color"/>
+                    </span>
+                </div>
+                <div class="input-field">
+                    <select id="to-be-deleted-list" asp-for="ToBeDeletedItems" 
+                            asp-items="@Model.ResourceList" multiple="multiple">
+                    </select>
                 </div>
             </div>
             <div class="card-action">
-                <button type="submit" class="btn btn-danger" asp-controller="Storage" asp-action="DeleteConfirmation">Delete</button>
+                <button type="submit" class="btn btn-danger">Delete</button>
                 <a asp-controller="Storage" asp-action="Browse" asp-route-path="@Model.ReturnPath" class="btn btn-primary">Cancel</a>
             </div>
             </form>
@@ -27,7 +39,52 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const elems = document.querySelectorAll('select');
-        const instances = M.FormSelect.init(elems);
+        const select = document.querySelectorAll('select');
+        const instanceSelect = M.FormSelect.init(select);
+        const autocompletes = document.querySelectorAll('.autocomplete');
+        const instances = M.Autocomplete.init(autocompletes, {});
+        SetupAutocomplete();
     });
+    
+    document.getElementById("select-to-delete").addEventListener('click', () =>{
+       const findToDeleteInput = document.getElementById("find-to-delete-input");
+       const labels = document.querySelectorAll("label");
+       labels.forEach(label => {
+           const labelChildren = Array.from(label.children);
+           labelChildren.forEach(child => {
+                   let innerText = child.innerText;
+                   if(innerText === findToDeleteInput.value){
+                       label.parentElement.parentElement.click();
+                   }
+           });
+       });
+    });
+    
+   
+function SetupAutocomplete() {
+    const elem = document.getElementById("find-to-delete-input");
+    const instance = M.Autocomplete.getInstance(elem);
+    
+    const listing = prepareListing();
+    const pathObject = listing.reduce(function (result, item, index, array) {
+        result[item] = "";
+        return result;
+    }, {})
+    instance.updateData(pathObject);
+}
+
+function prepareListing() {
+    let listing = [];
+    const labels = document.querySelectorAll("label");
+    let i = 0;
+     labels.forEach(label => {
+        const labelChildren = Array.from(label.children);
+        
+        labelChildren.forEach(child => {
+             listing[i] = child.innerText;  
+             i++;
+        });
+     });
+     return listing;
+}
 </script>

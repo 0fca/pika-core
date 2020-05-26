@@ -4,6 +4,6 @@
     {
         None = -1,
         Issue = 0,
-        Info = 2
+        Info = 1
     }
 }

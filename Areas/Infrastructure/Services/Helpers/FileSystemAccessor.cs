@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
+using PikaCore.Areas.Core.Controllers.Helpers;
 
-namespace PikaCore.Areas.Core.Controllers.Helpers
+namespace PikaCore.Areas.Infrastructure.Services.Helpers
 {
     internal static class FileSystemAccessor
     {

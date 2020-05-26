@@ -3,10 +3,12 @@
 <div class="right">
     <ul class="right hide-on-med-and-down">
         <li>
-            <a class="navlink left" asp-area="Core" asp-controller="Storage" asp-action="Index" title="Pika Browser">Pika Browser</a>
+            <a class="navlink left center-align" asp-area="Core" asp-controller="Storage" asp-action="Index" title="Pika Browser">
+                Pika Browser
+            </a>
         </li>
         <li>
-            <a id="app-drop-link" class='dropdown-trigger btn btn-flat' href='#' data-target='app-dropdown'>
+            <a id="app-drop-link" class='dropdown-trigger navlink' href='#' data-target='app-dropdown' title="Pika Cloud Apps">
                 <i class="large material-icons">apps</i>
             </a>
         </li>
@@ -31,61 +33,37 @@
         }
     </ul>
 </div>
-<<<<<<< HEAD
 
-<div id="app-modal" class="modal bottom-sheet">
-    <div class="modal-content">
-        <div class="container">
-            <header class="teal-text">
-                <h4>Pika Cloud Apps</h4>
-            </header>
-            <div class="row">
-                <div class="col s6 m6 l6">
-                    <a class="navlink app-menu-item" href="https://player.lukas-bownik.net/" title="Pika Player">
-                        <span class="material-icons prefix">
-                            play_arrow
-                        </span>
-                        Pika Player
-                    </a>
-                </div>
-                @if (User.IsInRole("Admin"))
-                {
-                    <div class="col s6 m6 l6">
-                        <a asp-area="Core" asp-controller="Admin" asp-action="Index" class="navlink app-menu-item" title="Pika Cloud Admin">
-                            <span class="material-icons prefix">
-                                supervisor_account
-                            </span>
-                            Pika Cloud Admin
-                        </a>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-</div>
-=======
-<div id="app-dropdown" class="card dropdown-content hide-on-small-and-down appdropdown right" tabindex="0">
-    <div class="card-content center">
-        <span class="card-title teal-text">Pika Cloud Apps</span>
-        <div class="col m12 l12">
-            <a class="navlink app-menu-item" href="https://player.lukas-bownik.net/" title="Pika Player">
-                <span class="material-icons prefix">
+<div id="app-dropdown" class="card dropdown-content hide-on-small-and-down appdropdown right z-depth-1-half" tabindex="0">
+    <div class="card-content text-left">
+        <span class="card-title grey-text text-darken-4 center">Pika Cloud Apps</span>
+        <div class="collection borderless-collection">
+            <a class="collection-item navlink app-menu-item" href="https://player.lukas-bownik.net/" title="Pika Player">
+                <span class="material-icons secondary-content navlink">
                     play_arrow
                 </span>
                 Pika Player
             </a>
-        </div>
-        @if (User.IsInRole("Admin"))
-        {
-            <div class="col m12 l12">
-                <a asp-area="Core" asp-controller="Admin" asp-action="Index" class="navlink app-menu-item" title="Pika Cloud Admin">
-                    <span class="material-icons prefix">
-                        supervisor_account
+            <a class="collection-item navlink app-menu-item" href="https://infra.lukas-bownik.net/" title="Pika Status">
+                <span class="material-icons secondary-content navlink">
+                favorite_border
+                </span>
+                Pika Status
+            </a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-area="Core" asp-controller="Admin" asp-action="Index" class="collection-item navlink app-menu-item" title="Pika Cloud Admin">
+                    <span class="material-icons secondary-content navlink">
+                        dashboard
                     </span>
                     Pika Cloud Admin
                 </a>
-            </div>
-        }
+            }
+        </div>
+        <div class="col m12 l12">
+            
+        </div>
+        
         </div>
 </div>
 <script>
@@ -96,4 +74,3 @@
     
  window.onresize = translateAppDropdown();
 </script>
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507

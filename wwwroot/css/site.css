@@ -3,7 +3,7 @@
 }
 
 body {
-    background-color: #eee !important;
+    
     display: flex;
     min-height: 100vh;
     flex-direction: column;
@@ -35,7 +35,7 @@ hr{
 }
 
     .navlink:hover, .navlink:focus {
-        color: #009688 !important;
+        color: #303F9F !important;
     }
 
 
@@ -160,7 +160,6 @@ a, a:hover, a:focus {
     left: -99999em;
 }
 
-
 #search {
     float: right;
     margin-top: 9px;
@@ -215,12 +214,14 @@ a, a:hover, a:focus {
 }
 
 
-.browse-collection-item{
-    background-color: inherit !important;
+.browse-collection-item, .app-menu-item{
     color: rgb(12,12,12) !important;
     border-bottom: #000 !important;
-    
     border-width: 1px !important;
+}
+
+.borderless-collection{
+    border-width: 0 !important;
 }
 
 .browse-collection-item:hover{
@@ -238,25 +239,27 @@ a, a:hover, a:focus {
 .pagination li.active{
     background-color: #009688 !important;
 }
-<<<<<<< HEAD
 
 .alert-danger {
     color: red;
 }
 
-=======
-
-.alert-danger {
-    color: red;
+.app-menu-button{
+    color: #212121;
+    background-color: transparent;
 }
 
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
-.app-menu-item {
-    font-size: 24px;
+.app-menu-button:hover{
+    color: #303F9F;
+    background-color: transparent;
 }
 
 .small-text{
     font-size: small;
+}
+
+#searchBox::placeholder{
+    color: teal;
 }
 
 .login-input-color, .login-input-color::placeholder{
@@ -267,9 +270,6 @@ a, a:hover, a:focus {
 .nav-menu-colors{
     color: white !important;
     background-color: inherit !important;
-    
-<<<<<<< HEAD
-=======
 }
 
 .hand-cursor{
@@ -278,6 +278,6 @@ a, a:hover, a:focus {
 
 .appdropdown{
     width: 300px !important;
-    top: 100% !important;
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
+    top: 105% !important;
 }
+

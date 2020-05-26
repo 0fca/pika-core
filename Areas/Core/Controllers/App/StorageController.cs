@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using PikaCore.Areas.Core.Controllers.Helpers;
@@ -18,8 +19,11 @@ using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Services;
+using PikaCore.Areas.Core.Services.Jobs;
 using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Areas.Infrastructure.Services.Helpers;
 using PikaCore.Security;
+using Quartz;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
@@ -28,13 +32,13 @@ namespace PikaCore.Areas.Core.Controllers.App
     public class StorageController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IArchiveService _archiveService;
         private readonly IFileService _fileService;
         private readonly IUrlGenerator _urlGeneratorService;
         private readonly IConfiguration _configuration;
         private readonly StorageIndexContext _storageIndexContext;
         private readonly IHubContext<StatusHub> _hubContext;
         private readonly IdDataProtection _idDataProtection;
+        private readonly IJobService _jobService;
 
         #region TempDataMessages
 
@@ -47,23 +51,22 @@ namespace PikaCore.Areas.Core.Controllers.App
         #endregion
 
         public StorageController(SignInManager<ApplicationUser> signInManager,
-               IArchiveService archiveService, 
                IFileService fileService, 
                IUrlGenerator iUrlGenerator,
                StorageIndexContext storageIndexContext,
                IHubContext<StatusHub> hubContext,
                IConfiguration configuration,
-               IdDataProtection idDataProtection)
+               IdDataProtection idDataProtection,
+               IJobService jobService)
         {
             _signInManager = signInManager;
-            _archiveService = archiveService;
             _fileService = fileService;
             _urlGeneratorService = iUrlGenerator;
             _storageIndexContext = storageIndexContext;
             _hubContext = hubContext;
             _configuration = configuration;
             _idDataProtection = idDataProtection;
-            ((ArchiveService)_archiveService).PropertyChanged += PropertyChangedHandler;
+            _jobService = jobService;
         }
 
         [HttpGet]
@@ -77,66 +80,72 @@ namespace PikaCore.Areas.Core.Controllers.App
         [AllowAnonymous]
         public async Task<IActionResult> Browse(string path, int offset = 0, int count = 50)
         {
-            if (string.IsNullOrEmpty(path))
+            var osUser = _configuration.GetSection("OsUser")["OsUsername"];
+            
+            
+            if (string.IsNullOrEmpty(path)
+            || !UnixHelper.HasAccess(osUser, 
+                _fileService.RetrieveAbsoluteFromSystemPath(path)))
             {
                 path = Path.DirectorySeparatorChar.ToString();
             }
-            var osUser = _configuration.GetSection("OsUser")["OsUsername"];
+            
             var contents = GetContents(path);
 
             ViewData["path"] = path;
             ViewData["returnUrl"] =  UnixHelper.GetParent(path);
+            var lrmv = new FileResultViewModel();
 
             if (null == contents)
-                return RedirectToAction("Error", "Home",
-                    new ErrorViewModel
-                    {
-                        ErrorCode = -1,
-                        Message = "There was an error while reading directory content."
-                    });
-            var lrmv = new FileResultViewModel();
-            if (contents.Exists)
             {
-                lrmv.Contents = contents;
-                lrmv.ContentsList = contents.ToList();
-
-                await lrmv.SortContents();
-                var fileInfosList = lrmv.ContentsList;
-
-                var pageCount = fileInfosList.Count / count;
-
-                SetPagingParams(offset, count, pageCount);
-
-                Set("Offset", offset.ToString(), 3600);
-                Set("Count", count.ToString(), 3600);
-                Set("PageCount", pageCount.ToString(), 3600);
-
-                if (!HttpContext.User.IsInRole("Admin"))
-                {
-                    try
-                    {
-                        lrmv.ApplyAcl(osUser);
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        Log.Error(ex, "StorageController#Browse");
-                    }
-                }
-
-                if (fileInfosList.Count > count)
-                {
-                    lrmv.ApplyPaging(offset, count);
-                }
-
-                var fileInfo = _fileService.RetrieveFileInfoFromSystemPath(path);
-                if (fileInfo.Exists)
-                {
-                    return RedirectToAction(nameof(Download), new { @id = fileInfo.Name });
-                }
+                ReturnMessage = "Something went wrong...";
                 return View(lrmv);
             }
 
-            ReturnMessage = "The resource doesn't exist on the filesystem.";
+            if (!contents.Exists)
+            {
+                ReturnMessage = "The resource doesn't exist on the filesystem.";
+                return View(lrmv);
+            }
+            
+            lrmv.Contents = contents;
+            lrmv.ContentsList = contents.ToList();
+
+            await lrmv.SortContents();
+            var fileInfosList = lrmv.ContentsList;
+
+            var pageCount = fileInfosList.Count / count;
+
+            SetPagingParams(offset, count, pageCount);
+
+            Set("Offset", offset.ToString(), 3600);
+            Set("Count", count.ToString(), 3600);
+            Set("PageCount", pageCount.ToString(), 3600);
+                
+            if (fileInfosList.Count > count)
+            {
+                lrmv.ApplyPaging(offset, count);
+            }
+                
+            if (!HttpContext.User.IsInRole("Admin"))
+            {
+                try
+                {
+                    lrmv.ApplyAcl(osUser);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Log.Error(ex, "StorageController#Browse");
+                }
+            }
+                
+            var fileInfo = _fileService.RetrieveFileInfoFromSystemPath(path);
+            if (fileInfo.Exists 
+            && !fileInfo.IsDirectory)
+            {
+                return RedirectToAction(nameof(Download), new { @id = fileInfo.Name, @z = true });
+            }
+            
             return View(lrmv);
         }
 
@@ -146,8 +155,8 @@ namespace PikaCore.Areas.Core.Controllers.App
         public async Task<IActionResult> GenerateUrl(string name, string returnUrl)
         {
             var entryName = _idDataProtection.Decode(name);
-            int offset = int.Parse(Get("Offset"));
-            int count = int.Parse(Get("Count"));
+            var offset = int.Parse(Get("Offset"));
+            var count = int.Parse(Get("Count"));
             
             if (!string.IsNullOrEmpty(entryName))
             {
@@ -206,9 +215,6 @@ namespace PikaCore.Areas.Core.Controllers.App
         [Route("/[controller]/[action]/{id?}")]
         public ActionResult PermanentDownload(string id)
         {
-            int offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
-            int count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
-            
             if (!string.IsNullOrEmpty(id))
             {
                 StorageIndexRecord? s = null;
@@ -231,7 +237,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                                 Log.Warning(ReturnMessage);
                                 return RedirectToAction(nameof(Browse));
                         }
-                        ReturnMessage = "It seems that this url expired today, you need to generate a new one.";
+                        ReturnMessage = "It seems that this url expired, you need to generate a new one.";
                         return RedirectToAction(nameof(Browse));
                     }
                     ReturnMessage = "It seems that given token doesn't exist in the database.";
@@ -254,7 +260,8 @@ namespace PikaCore.Areas.Core.Controllers.App
         [AllowAnonymous]
         public ActionResult Download(string id,  string returnUrl, bool z = false)
         {
-            id = _idDataProtection.Decode(id);
+            
+            id = !z ? _idDataProtection.Decode(id) : id;
             int offset = int.Parse(Get("Offset"));
             int count = int.Parse(Get("Count"));
             
@@ -336,20 +343,23 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
         }
         
-        /**
-         * <remarks>
-         * Deprecated
-         * </remarks>
-         */
-        [HttpGet]
+        [HttpPost]
         [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin, FileManagerUser")]
-        public IActionResult Archive(string id)
+        [AllowAnonymous]
+        public async Task<IActionResult> Archive(string id)
         {
-            return StatusCode(501);
+            var absolutePath = _idDataProtection.Decode(id);
+            var jobDataMap = new JobDataMap
+            {
+                {"userId", _signInManager.UserManager.GetUserId(HttpContext.User)},
+                {"output", _configuration["Paths:zip-tmp"]},
+                {"absolutePath", absolutePath}
+            };
+            await _jobService.CreateJob<ArchiveJob>(jobDataMap);
+            ReturnMessage = "Your request has been accepted.";
+            return RedirectToAction("Index", "Jobs");
         }
-
-
+        
         [HttpPost]
         [AutoValidateAntiforgeryToken]
         [Authorize(Roles = "Admin, FileManagerUser")]
@@ -385,13 +395,14 @@ namespace PikaCore.Areas.Core.Controllers.App
         [Authorize(Roles = "Admin")]
         public IActionResult Delete(string currentPath)
         {
-
+            var offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
+            var count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
             var contentsList = GetContents(currentPath).ToList();
             var toBeDeletedItemsModel = new DeleteResourcesViewModel()
             {
                 ReturnPath = currentPath
             };
-            
+            toBeDeletedItemsModel.ApplyPaging(offset, count);
             toBeDeletedItemsModel.FromFileInfoList(contentsList);
 
             return View(toBeDeletedItemsModel);
@@ -399,12 +410,13 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> DeleteConfirmation(DeleteResourcesViewModel deleteResourcesViewModel)
         {
             var contents = deleteResourcesViewModel.ToBeDeletedItems;
             var returnPath = deleteResourcesViewModel.ReturnPath;
-            int offset = int.Parse(Get("Offset"));
-            int count = int.Parse(Get("Count"));
+            var offset = int.Parse(Get("Offset"));
+            var count = int.Parse(Get("Count"));
             if (contents.Count > 0)
             {
                 try
@@ -470,16 +482,53 @@ namespace PikaCore.Areas.Core.Controllers.App
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin, FileManagerUser")]
+        [Authorize(Roles = "Admin")]
         [AutoValidateAntiforgeryToken]
-        public IActionResult CancelDownloadAsync(string returnUrl)
+        [Route("Storage/Hide/{systemPath}")]
+        public IActionResult Hide(string systemPath, string returnPath)
         {
-            _archiveService.Cancel();
-            _hubContext.Clients.User(_signInManager.UserManager.GetUserId(HttpContext.User))
-                .SendAsync("ArchivingCancelled", "Cancelled by the user.");
-
-            return RedirectToAction(nameof(Browse), 
-                new { path = returnUrl });
+            var offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
+            var count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
+            systemPath = _idDataProtection.Decode(systemPath);
+            Log.Information($"{systemPath}");
+            try
+            {
+                var isHidden = _fileService.HideFile(
+                    systemPath
+                );
+                ReturnMessage = isHidden ? "Resource hidden." : "Couldn't be hidden.";
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, e.Message);
+            }
+            Log.Debug("Redirecting to Browse...");
+            return RedirectToAction(nameof(Browse), new {@path = returnPath, offset, count});
+        }
+        
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [AutoValidateAntiforgeryToken]
+        [Route("Storage/Show/{systemPath}")]
+        public IActionResult Show(string systemPath, string returnPath)
+        {
+            var offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
+            var count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
+            systemPath = _idDataProtection.Decode(systemPath);
+            Log.Information($"{systemPath}");
+            try
+            {
+                var isHidden = _fileService.ShowFile(
+                    systemPath
+                );
+                ReturnMessage = isHidden ? "Resource is visible now." : "Couldn't be set visible.";
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, e.Message);
+            }
+            Log.Debug("Redirecting to Browse...");
+            return RedirectToAction(nameof(Browse), new {@path = returnPath, offset, count});
         }
 
         #region HelperMethods

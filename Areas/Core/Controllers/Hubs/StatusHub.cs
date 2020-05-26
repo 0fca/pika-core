@@ -10,8 +10,7 @@ namespace PikaCore.Areas.Core.Controllers.Hubs
 
         public void CancelArchivingService()
         {
-            var archivingService = (ArchiveService)_statusObject;
-            archivingService.Cancel();
+            
         }
     }
 }

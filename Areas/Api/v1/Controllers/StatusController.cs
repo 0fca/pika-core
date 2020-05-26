@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using PikaCore.Areas.Api.v1.Models;
 using PikaCore.Areas.Api.v1.Models.DTO;
 using PikaCore.Areas.Api.v1.Services;
-using PikaCore.Areas.Core.Pages.Admin.DTO;
 using PikaCore.Areas.Infrastructure.Data;
 using PikaCore.Areas.Infrastructure.Services;
 
@@ -46,7 +45,7 @@ namespace PikaCore.Areas.Api.v1.Controllers
             var apiMsg = new ApiMessage<MessageDto> {Status = isAllOk};
             var overallStatusMessage = isAllOk 
                 ? "System is in graceful state." 
-                : (isAnyOk ? "System is degraded." : "System is all down.");
+                : (isAnyOk ? "System is degraded." : "All systems are down.");
             apiMsg.Messages.Push(overallStatusMessage);
 
             if (isAllOk) return Ok(apiMsg);
@@ -67,16 +66,16 @@ namespace PikaCore.Areas.Api.v1.Controllers
         {
             try
             {
-                var messages = await _messageService.GetAllMessages();
-                var dtos = new List<MessageDto>();
-                messages.Where(m => m.SystemDescriptor.SystemName.Equals(systemName))
-                    .ToList()
-                    .ForEach(m => dtos.Add(MessageDto.FromMessageEntity(m)));
+                var messages = await _messageService.GetAllMessagesForSystem(systemName);
+                
+                var messagesForSystem = messages.ToList();
                 if (order == 1)
                 {
-                    messages = messages.OrderByDescending(m => m.Id).ToList();
+                    messagesForSystem = messagesForSystem.OrderByDescending(m => m.Id).ToList();
                 }
-                _messageService.ApplyPaging(ref messages, count, offset);
+                _messageService.ApplyPaging(ref messagesForSystem, count, offset);
+                var dtos = new List<MessageDto>();
+                messagesForSystem.ForEach(m => dtos.Add(MessageDto.FromMessageEntity(m)));
                 var apiMessage = new ApiMessage<IList<MessageDto>> {Data = dtos, Status = true};
                 apiMessage.Messages.Push("Messages available for current role.");
                 return Ok(apiMessage);
@@ -84,14 +83,74 @@ namespace PikaCore.Areas.Api.v1.Controllers
             catch (Exception e)
             {
                 var apiMessage = new ApiMessage<IList<MessageDto>> { Status = false};
-                apiMessage.Messages.Push("The request couldn't be understood.");
+                apiMessage.Messages.Push($"Bad request: {e.Message}");
                 return BadRequest(apiMessage);
             }
         }
         
         [HttpGet]
-        [ActionName("messages/filter")]
-        public async Task<IActionResult> MessagesByDateCreated([FromQuery]DateTime from, [FromQuery]DateTime to, int order = 0)
+        [ActionName("{systemName}/issues")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Issues(string systemName, int order = 0, int count = 10, int offset = 0)
+        {
+            try
+            {
+                var messages = await _messageService.GetAllIssues(systemName);
+                var dtos = new List<IssueEntity>();
+                var messagesForSystem = messages.ToList();
+                if (order == 1)
+                {
+                    messagesForSystem = messagesForSystem.OrderByDescending(m => m.Id).ToList();
+                }
+                _messageService.ApplyPaging(ref messagesForSystem, count, offset);
+                messagesForSystem
+                    .ToList()
+                    .ForEach(m => dtos.Add(m));
+                var apiMessage = new ApiMessage<IList<IssueEntity>> {Data = dtos, Status = true};
+                apiMessage.Messages.Push("Issues available for current role.");
+                return Ok(apiMessage);
+            }
+            catch (Exception e)
+            {
+                var apiMessage = new ApiMessage<string>{ Status = false};
+                apiMessage.Messages.Push($"Bad request: {e.Message}");
+                return BadRequest(apiMessage);
+            }
+        }
+        
+        [HttpGet]
+        [ActionName("{systemName}/messages/{id}/issues")]
+        [AllowAnonymous]
+        public async Task<IActionResult> IssuesForMessage(int id, int order = 0, int count = 10, int offset = 0)
+        {
+            try
+            {
+                var issues = (await _messageService.GetMessageById(id)).RelatedIssues;
+                var dtos = new List<IssueEntity>();
+                var messagesForSystem = issues.ToList();
+                if (order == 1)
+                {
+                    messagesForSystem = messagesForSystem.OrderByDescending(m => m.Id).ToList();
+                }
+                _messageService.ApplyPaging(ref messagesForSystem, count, offset);
+                messagesForSystem
+                    .ToList()
+                    .ForEach(m => dtos.Add(m));
+                var apiMessage = new ApiMessage<IList<IssueEntity>> {Data = dtos, Status = true};
+                apiMessage.Messages.Push("Issues available for selected message id.");
+                return Ok(apiMessage);
+            }
+            catch (Exception e)
+            {
+                var apiMessage = new ApiMessage<string>{ Status = false};
+                apiMessage.Messages.Push($"Bad request: {e.Message}");
+                return BadRequest(apiMessage);
+            }
+        }
+        
+        [HttpGet]
+        [ActionName("messages/bydate")]
+        public IActionResult MessagesByDateCreated([FromQuery]DateTime from, [FromQuery]DateTime to, int order = 0)
         {
             return StatusCode(302, "Temporarily moved to /messages");
         }
@@ -108,7 +167,7 @@ namespace PikaCore.Areas.Api.v1.Controllers
                 apiMessage.Messages.Push($"Successfully returned a message of id {id}");
                 return Ok(apiMessage);
             }
-            catch (Exception e)
+            catch
             {
                 apiMessage.Messages.Push("The server couldn't find requested message.");
                 apiMessage.Status = false;

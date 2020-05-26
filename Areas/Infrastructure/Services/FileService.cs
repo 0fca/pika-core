@@ -76,6 +76,30 @@ namespace PikaCore.Areas.Infrastructure.Services
             return _fileProvider.GetDirectoryContents(systemPath);
         }
 
+        public bool HideFile(string absolutePath)
+        {
+            var currentName = "";
+            currentName = Directory.Exists(absolutePath) 
+                ? Path.GetDirectoryName(absolutePath) 
+                : Path.GetFileName(absolutePath);
+            var hiddenName = string.Concat("~", currentName);
+            
+            return Move(absolutePath,  
+                Path.Combine(Directory.GetParent(absolutePath).FullName, hiddenName));
+        }
+
+        public bool ShowFile(string absolutePath)
+        {
+            var currentName = "";
+            currentName = Directory.Exists(absolutePath) 
+                ? Path.GetDirectoryName(absolutePath) 
+                : Path.GetFileName(absolutePath);
+            var shownName = currentName?.Replace("~", "");
+            
+            return Move(absolutePath,  
+                Path.Combine(Directory.GetParent(absolutePath).FullName, shownName));
+        }
+
         public Stream AsStreamAsync(string absolutePath, int bufferSize = 8192, bool useAsync = true)
         {
             if (string.IsNullOrEmpty(absolutePath) || !File.Exists(absolutePath))

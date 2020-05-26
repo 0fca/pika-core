@@ -11,5 +11,7 @@ namespace PikaCore.Areas.Infrastructure.Data
 
             public DbSet<SystemDescriptor> Systems { get; set; }
             public DbSet<SystemDependency> SystemDependencies { get; set; }
+            public DbSet<MessageEntity> Messages { get; set; }
+            public DbSet<IssueEntity> Issues { get; set; }
     }
 }

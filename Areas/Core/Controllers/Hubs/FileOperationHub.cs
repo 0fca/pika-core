@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using PikaCore.Areas.Core.Controllers.Helpers;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Areas.Infrastructure.Services.Helpers;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.Hubs

@@ -11,7 +11,7 @@
         <PackageTags>cms core cloud</PackageTags>
         <AssemblyVersion>2.3.1</AssemblyVersion>
         <FileVersion>2.3.1</FileVersion>
-        <Version>2.2.2</Version>
+        <Version>2.3.1</Version>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
@@ -112,6 +112,18 @@
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
       <Content Update="Areas\Core\Views\Shared\_SystemMessagePartial.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Core\Views\Storage\Partial\_ContextMenuPartial.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Core\Views\Jobs\Index.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Core\Pages\Home\Dedication.cshtml">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>

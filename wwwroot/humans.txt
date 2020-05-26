@@ -6,7 +6,7 @@
 
 # THANKS
 
-    Dominik Drąg, Franek Łaniewski, Basia Pałyszka, Oskar Barcz, Zdzisław Goik
+    Dominik Drąg, Franek Łaniewski, Oskar Barcz, Zdzisław Goik, Monika Stępień
 
 # TECHNOLOGY COLOPHON
 

@@ -58,7 +58,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
             
             var messageViewModel = new MessageViewModel();
-            var messages = await _messageService.GetAllMessages();
+            var messages = (await _messageService.GetAllMessages()).ToList();
             const int messagesPerPageCount = 5;
             messageViewModel.OrganizeMessages(ref messages, messagesPerPageCount);
             _messageService.ApplyPaging(ref messages, messagesPerPageCount, offset);

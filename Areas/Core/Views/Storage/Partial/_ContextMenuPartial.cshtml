@@ -1,0 +1,66 @@
+﻿@using PikaCore.Security
+@model Tuple<string,Microsoft.Extensions.FileProviders.IFileInfo>
+@inject UserManager<ApplicationUser> UserManager
+@inject IdDataProtection DataProtection
+
+@{
+    var item = Model.Item2;
+    var lastPath = Model.Item1;
+    var user = await UserManager.GetUserAsync(Context.User);
+}
+<a class='dropdown-trigger grey-text text-darken-4' href='#' data-target='options-@item.Name'>
+                                <i class="material-icons">more_horiz</i>
+                            </a>
+<ul id='options-@item.Name' class='dropdown-content'>
+                                @{
+                                    var ext = System.IO.Path.GetExtension(item.Name);
+                                    if (ext.Equals(".mp3") || ext.Equals(".mp4"))
+                                    {
+                                        <li>
+                                            <a href="https://player.lukas-bownik.net/">
+                                                <i class="fas fa-play" title="Play"></i>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    if (user != null
+                                        && !(await UserManager.IsInRoleAsync(user, "User")))
+                                    {
+                                        <li>
+                                            <a asp-area="Core" 
+                                               asp-action="Rename" 
+                                               asp-route-n="@System.IO.Path.Combine(lastPath, item.Name)">
+                                                <i class="fas fa-pen"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    if (!item.IsDirectory
+                                        && user != null)
+                                    {
+                                        <li>
+                                            <a asp-area="Core" 
+                                               asp-action="GenerateUrl" 
+                                               asp-route-name="@DataProtection.Encode(item.PhysicalPath)"
+                                               asp-route-returnUrl="@lastPath">
+                                                <i class="fas fa-link" title="Generate download url"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    if (user != null
+                                        && (await UserManager.IsInRoleAsync(user, "Admin")))
+                                    {
+                                        var iconText = item.Name.StartsWith("~") ? "lock_open" : "lock";
+                                        var action = item.Name.StartsWith("~") ? "Show" : "Hide";
+                                        <li>
+                                            <form asp-area="Core" 
+                                                  asp-action="@action" 
+                                                  asp-route-systemPath="@DataProtection.Encode(item.PhysicalPath)" 
+                                                  asp-route-returnPath="@lastPath">
+                                                <button type="submit" class="btn btn-flat transparent teal-text">
+                                                    <i class="material-icons">@iconText</i>
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+                                }
+                            </ul>

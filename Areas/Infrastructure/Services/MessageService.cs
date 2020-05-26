@@ -11,20 +11,21 @@ namespace PikaCore.Areas.Infrastructure.Services
 {
     public class MessageService : IMessageService
     {
-        private readonly MessageContext _messageContext;
+        private readonly SystemContext _systemContext;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public MessageService(MessageContext messageContext,
-            SignInManager<ApplicationUser> signInManager)
+        public MessageService(SignInManager<ApplicationUser> signInManager,
+            SystemContext systemContext)
         {
-            _messageContext = messageContext;
             _signInManager = signInManager;
+            _systemContext = systemContext;
         }
 
-        public async Task<IList<MessageEntity>> GetAllMessages()
+        public async Task<IList<MessageEntity>> GetAllMessagesForSystem(string systemName)
         {
-            var messages = _messageContext.Messages
-                .Include( m => m.SystemDescriptor)
+            var messages = 
+                PrepareJoin()
+                .Where(m => m.SystemDescriptor.SystemName.Equals(systemName))
                 .AsQueryable();
             if (_signInManager.Context.User.IsInRole("Admin"))
             { 
@@ -32,22 +33,31 @@ namespace PikaCore.Areas.Infrastructure.Services
             }
             return await messages.Where(m => m.IsVisible).ToListAsync();
         }
-
-        public async Task<IList<IssueEntity>> GetAllIssues()
+        
+        public async Task<IList<MessageEntity>> GetAllMessages()
         {
-            var visibleMessagesList = await _messageContext.Messages.
+            var messages = PrepareJoin();
+            if (_signInManager.Context.User.IsInRole("Admin"))
+            { 
+                return await messages.ToListAsync();
+            }
+            return await messages.Where(m => m.IsVisible).ToListAsync();
+        }
+
+        public async Task<IList<IssueEntity>> GetAllIssues(string name)
+        {
+            var visibleMessagesList = await _systemContext.Messages.
                 Include(m => m.RelatedIssues)
-                .Where(m => m.IsVisible).ToListAsync();
+                
+                .Where(m => m.IsVisible && m.SystemDescriptor.SystemName.Equals(name)).ToListAsync();
             var issues = new List<IssueEntity>();
-            visibleMessagesList.ForEach(m => issues.AddRange(issues));
+            visibleMessagesList.ForEach(m => issues.AddRange(m.RelatedIssues));
             return issues;
         }
 
         public async Task<MessageEntity> GetMessageById(int id)
         {
-            var messages = _messageContext.Messages
-                .Include( m => m.SystemDescriptor)
-                .AsQueryable();
+            var messages = PrepareJoin();
             if (!_signInManager.Context.User.IsInRole("Admin"))
             {
                 messages = messages.Where(m => m.IsVisible);
@@ -57,25 +67,28 @@ namespace PikaCore.Areas.Infrastructure.Services
 
         public async Task<MessageEntity> GetLatestMessage()
         {
-            return await _messageContext.Messages.OrderByDescending(m => m.CreatedAt)
+            return await _systemContext.Messages.OrderByDescending(m => m.CreatedAt)
                 .FirstAsync(m => m.IsVisible);
         }
         
         public async Task<IssueEntity> GetLatestIssueByMessageId(int id)
         {
-            return (await _messageContext.Messages.FindAsync(id))
-                .RelatedIssues.OrderByDescending(i => i.CreatedAt)
-                .First();
+            var list = await _systemContext.Messages
+                .Include(m => m.RelatedIssues)
+                .ToListAsync();
+            var first = list.Find(m => m.Id == id);
+            return first != null ? first.RelatedIssues.OrderByDescending(i => i.CreatedAt)
+                    .First() : new IssueEntity();
         }
 
         public async Task<IList<IssueEntity>> GetIssuesByMessageId(int id)
         {
-            return (await _messageContext.Messages
+            return (await _systemContext.Messages
                 .Include(m => m.RelatedIssues)
                 .FirstAsync(m => m.Id == id && m.IsVisible)).RelatedIssues;
         }
 
-        public void ApplyPaging(ref IList<MessageEntity> messageEntities, int count, int offset = 0)
+        public void ApplyPaging<T>(ref List<T> messageEntities, int count, int offset = 0)
         {
             messageEntities = messageEntities.Count - offset >= count 
                 ? messageEntities.ToList().GetRange(offset, count) 
@@ -84,14 +97,14 @@ namespace PikaCore.Areas.Infrastructure.Services
 
         public async Task RemoveMessages(IList<int> ids)
         {
-            _messageContext.Messages
-                .RemoveRange(_messageContext.Messages.Where(m => ids.Contains(m.Id)));
-            await _messageContext.SaveChangesAsync();
+            _systemContext.Messages
+                .RemoveRange(_systemContext.Messages.Where(m => ids.Contains(m.Id)));
+            await _systemContext.SaveChangesAsync();
         }
 
         public async Task UpdateMessage(MessageEntity e)
         {
-            var currentMessage = await _messageContext.Messages.FindAsync(e.Id);
+            var currentMessage = await _systemContext.Messages.FindAsync(e.Id);
             if (currentMessage != null)
             {
                 currentMessage.Message = e.Message;
@@ -101,15 +114,38 @@ namespace PikaCore.Areas.Infrastructure.Services
                 currentMessage.MessageType = e.MessageType;
                 currentMessage.SystemDescriptor = e.SystemDescriptor;
                 
-                _messageContext.Update(currentMessage);
-                await _messageContext.SaveChangesAsync();
+                _systemContext.Update(currentMessage);
+                await _systemContext.SaveChangesAsync();
             }
         }
 
         public async Task CreateMessage(MessageEntity e)
         {
-            _messageContext.Messages.Update(e);
-            await _messageContext.SaveChangesAsync();
+            _systemContext.Messages.Update(e);
+            await _systemContext.SaveChangesAsync();
         }
+        
+        #region HelperMethods
+
+        private IQueryable<MessageEntity> PrepareJoin()
+        {
+            return _systemContext.Messages.Join(_systemContext.Systems,
+                m => m.SystemDescriptor.SystemId,
+                s => s.SystemId,
+                (m, s) => new MessageEntity()
+                {
+                    Message = m.Message,
+                    SystemDescriptor = s,
+                    MessageType = m.MessageType,
+                    IsVisible = m.IsVisible,
+                    Id = m.Id,
+                    CreatedAt = m.CreatedAt,
+                    UpdatedAt = m.UpdatedAt,
+                    RelatedIssues = m.RelatedIssues
+                }
+            );
+        }
+
+        #endregion
     }
 }
