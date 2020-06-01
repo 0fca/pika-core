@@ -1,5 +1,4 @@
-﻿@using PikaCore.Areas.Core.Controllers.Helpers
-@using PikaCore.Areas.Infrastructure.Services
+﻿@using PikaCore.Areas.Infrastructure.Services
 @using PikaCore.Areas.Infrastructure.Services.Helpers
 @using PikaCore.Security
 @using Microsoft.Extensions.FileProviders
@@ -70,7 +69,7 @@
             </div>
         </div>
         <div class="row">
-            <a class="collection-item browse-collection-item transparent" 
+            <a class="collection-item transparent" 
                asp-area="Core" 
                asp-controller="Storage" 
                asp-action="Browse" 
@@ -83,78 +82,14 @@
                 {
                     <div class="row">
                         <div class="col s6 m5 l5 truncate valign-wrapper">
-                            @{
-                                var viewableName = item.Name.StartsWith("~")
-                                    ? item.Name.Replace("~", "")
-                                    : item.Name;
-                                var dirIcon = item.Name.StartsWith("~") ? "folder" : "folder_shared";
-                            }
+                            
                             @if (item.IsDirectory)
                             {
-                                
-                                <a class="collection-item browse-collection-item transparent"
-                                   asp-area="Core"
-                                   asp-controller="Storage"
-                                   asp-action="Browse"
-                                   asp-route-path="@System.IO.Path.Combine(lastPath, item.Name)"
-                                   title="@viewableName">
-                                    <span class="material-icons">
-                                        @dirIcon
-                                    </span>
-                                    
-                                    @viewableName
-                                </a>
+                                @await Html.PartialAsync("Partial/_DirectoryListItemPartial", new Tuple<string, IFileInfo>(lastPath, item))
                             }
                             else
                             {
-                                var mime = "";
-                                mime = MimeAssistant.GetMimeType(item.PhysicalPath);
-                                if (!mime.StartsWith("image/")
-                                    && !mime.StartsWith("video/"))
-                                {
-                                    var type = MimeAssistant.RecognizeIconByMime(mime);
-
-                                    <a class="collection-item browse-collection-item transparent" 
-                                       asp-area="Core" 
-                                       asp-controller="Storage" 
-                                       asp-action="Download" 
-                                       asp-route-id=@DataProtection.Encode(item.PhysicalPath) 
-                                       asp-route-returnUrl=@lastPath title="@viewableName">
-                                        <i class="fas fa-@type prefix browse-icon-margin">
-                                        </i>
-                                        @viewableName
-                                        @if (item.Name.StartsWith("~"))
-                                        {
-                                            <span class="material-icons">
-                                                lock
-                                            </span>
-                                        }
-                                    </a>
-                                }
-                                else
-                                {
-                                    var id = "1." + lastPath?.Replace("/", "-") + $"-{item.Name}";
-                                    <div class="col s3 m1 l1 material-placeholder">
-                                        <img class="materialboxed" id="@id" alt="@item.Name" width="48" src="~/images/loading_icon.gif"/>
-                                    </div>
-                                    <div class="col s5 m7 l7 center-align">
-                                        <a class="collection-item browse-collection-item left-align transparent"
-                                           asp-area="Core" 
-                                           asp-controller="Storage" 
-                                           asp-action="Download" 
-                                           asp-route-returnUrl="@lastPath" 
-                                           asp-route-id=@DataProtection.Encode(item.PhysicalPath) 
-                                           title="@item.Name">
-                                            @viewableName
-                                            @if (item.Name.StartsWith("~"))
-                                            {
-                                                <span class="material-icons">
-                                                    lock
-                                                    </span>
-                                            }
-                                        </a>
-                                    </div>
-                                }
+                                @await Html.PartialAsync("Partial/FileListItemPartial", new Tuple<string, IFileInfo>(lastPath, item))
                             }
                         </div>
                         <div class="col m4 l4 hide-on-small-only">
@@ -171,10 +106,7 @@
                             }
                         </div>
                         <div class="col s2 m1 l1 opt-font">
-                                @{
-                                    var model = new Tuple<string, IFileInfo>(lastPath, item);
-                                }
-                            @await Html.PartialAsync("Partial/_ContextMenuPartial", model)
+                            @await Html.PartialAsync("Partial/_ContextMenuPartial", new Tuple<string, IFileInfo>(lastPath, item))
                         </div>
                     </div>
                 }
@@ -189,7 +121,7 @@
             }
         }
         <div class="row">
-            <a class="collection-item browse-collection-item transparent" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
+            <a class="collection-item transparent" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
         </div>
 
         <div class="fixed-action-btn">

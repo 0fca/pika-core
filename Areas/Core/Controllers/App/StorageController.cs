@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using PikaCore.Areas.Core.Controllers.Helpers;
@@ -174,19 +173,13 @@ namespace PikaCore.Areas.Core.Controllers.App
                             UserId = await IdentifyUser(),
                             Expires = true
                         };
-                        _storageIndexContext.Add(s);
-                        
-                        await _storageIndexContext.SaveChangesAsync();
                     }
-                    else
+                    else if (s.ExpireDate.Date <= DateTime.Now.Date)
                     {
-                        if (s.ExpireDate.Date <= DateTime.Now.Date)
-                        {
-                            s.ExpireDate = StorageIndexRecord.ComputeDateTime();
-                            _storageIndexContext.Update(s);
-                            await _storageIndexContext.SaveChangesAsync();
-                        }
+                        s.ExpireDate = StorageIndexRecord.ComputeDateTime();
                     }
+                    _storageIndexContext.Update(s);
+                    await _storageIndexContext.SaveChangesAsync();
 
                     TempData["urlhash"] = s.Urlhash;
                     ShowGenerateUrlPartial = true;
@@ -355,9 +348,9 @@ namespace PikaCore.Areas.Core.Controllers.App
                 {"output", _configuration["Paths:zip-tmp"]},
                 {"absolutePath", absolutePath}
             };
-            await _jobService.CreateJob<ArchiveJob>(jobDataMap);
+            var name = await _jobService.CreateJob<ArchiveJob>(jobDataMap);
             ReturnMessage = "Your request has been accepted.";
-            return RedirectToAction("Index", "Jobs");
+            return RedirectPermanent($"/Core/Jobs/Submit?name={name}");
         }
         
         [HttpPost]

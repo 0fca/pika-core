@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
 using Quartz;
 
-namespace PikaCore.Areas.Core.Services
+namespace PikaCore.Areas.Infrastructure.Services
 {
     public class JobService : IJobService
     {
@@ -52,6 +52,14 @@ namespace PikaCore.Areas.Core.Services
                 });
                 return r;
             });
+        }
+
+        public async Task<IJobDetail> GetByName(string name)
+        {
+            return await Task.Factory.StartNew(() => 
+                JsonConvert.DeserializeObject<IJobDetail>(
+                    System.Text.Encoding.UTF8.GetString(_distributedCache.Get(name)))
+                );
         }
 
         public async Task<IList<IJobDetail>> GetAll()

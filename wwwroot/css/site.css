@@ -167,6 +167,7 @@ a, a:hover, a:focus {
 }
 
 .brand-margin {
+    margin-top: 5px !important;
     margin-left: 10px !important;
     color: #303F9F  !important;
 }
@@ -216,6 +217,7 @@ a, a:hover, a:focus {
 
 .browse-collection-item, .app-menu-item{
     color: rgb(12,12,12) !important;
+    background-color: inherit !important;
     border-bottom: #000 !important;
     border-width: 1px !important;
 }
@@ -225,7 +227,7 @@ a, a:hover, a:focus {
 }
 
 .browse-collection-item:hover{
-    color: #303F9F !important;
+    color: teal !important;
 }
 
 .browse-icon-margin{
@@ -279,5 +281,9 @@ a, a:hover, a:focus {
 .appdropdown{
     width: 300px !important;
     top: 105% !important;
+}
+
+.brand-text{
+    text-align: center !important;
 }
 

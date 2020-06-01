@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Quartz;
 
-namespace PikaCore.Areas.Core.Services
+namespace PikaCore.Areas.Infrastructure.Services
 {
     public interface IJobService
     {
@@ -11,5 +11,6 @@ namespace PikaCore.Areas.Core.Services
         Task<IList<IJobDetail>> FindJobsByUser(string id);
         Task<IList<IJobDetail>> GetAll();
         Task PurgeJobs();
+        Task<IJobDetail> GetByName(string name);
     }
 }

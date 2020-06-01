@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
+using PikaCore.Areas.Core.Services;
 using Quartz;
 using Quartz.Impl;
 
@@ -8,16 +9,19 @@ namespace PikaCore.Areas.Infrastructure.Services
 {
     public class SchedulerService : ISchedulerService
     {
-        private StdScheduler scheduler;
-
-        public IJobDetail CreateJob(Type jobType)
+        private StdScheduler? _scheduler;
+        private IJobService _jobService;
+        
+        public SchedulerService(IJobService jobService)
         {
-            return JobBuilder.Create(jobType).Build();
+            _jobService = jobService;
         }
-
+        
         public void Dispose()
         {
-            scheduler.Clear();
+            if(_scheduler == null)
+                throw new ApplicationException("Invalid state: Not initialized.");
+            _scheduler.Clear();
         }
 
         public async Task Init()
@@ -31,12 +35,15 @@ namespace PikaCore.Areas.Infrastructure.Services
 
             IScheduler sched = await factory.GetScheduler();
             await sched.Start();
-            scheduler = (StdScheduler)sched;
+            _scheduler = (StdScheduler)sched;
         }
 
-        public void StartJob(IJobDetail job, ITrigger trigger)
+        public async Task StartJob(string name, ITrigger trigger)
         {
-            scheduler.ScheduleJob(job, trigger);
+            if(_scheduler == null)
+                throw new ApplicationException("Invalid state: Not initialized.");
+            var job = await _jobService.GetByName(name);
+            await _scheduler.ScheduleJob(job, trigger);
         }
     }
 }
