@@ -39,7 +39,6 @@ namespace PikaCore.Areas.Infrastructure.Services
         {
 	        var physicalPath = _fileService.RetrieveAbsoluteFromSystemPath(path);
             var mime = MimeAssistant.GetMimeType(physicalPath);
-	        Log.Information($"Creating thumb for {path}");
             var mediaType = DetectType(mime);
             return mediaType switch
             {
@@ -60,18 +59,7 @@ namespace PikaCore.Areas.Infrastructure.Services
         {
             var thumbAbsolutePath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
-                Log.Information($"Creating thumb from video {absoluteHostPath} as {thumbAbsolutePath}");
-                if (File.Exists(thumbAbsolutePath)) return guid;
-<<<<<<< HEAD
-
-                var options = new ConversionOptions()
-                {
-                    Seek = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("ConversionOptions")["Seek"])),
-                    CustomWidth = 128,
-                    CustomHeight = 128
-=======
-                
-                var wScale = int.Parse(_configuration.GetSection("Images")["Width"]);
+            var wScale = int.Parse(_configuration.GetSection("Images")["Width"]);
                 var hScale = int.Parse(_configuration.GetSection("Images")["Height"]);
                 
                 if (size == 1) 
@@ -85,21 +73,26 @@ namespace PikaCore.Areas.Infrastructure.Services
                     Seek = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("ConversionOptions")["Seek"])),
                     CustomWidth = wScale,
                     CustomHeight = hScale
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
                 };
-                await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options);
+                
+                if (!File.Exists(thumbAbsolutePath))
+                {
+                    Log.Information($"Not found thumb from image {absoluteHostPath} as {thumbAbsolutePath}");
+                    await GrabFromVideo(absoluteHostPath, thumbAbsolutePath, options);
+                }
+                Log.Information($"Returning thumb: {thumbAbsolutePath}");
                 return guid;
         }
 
         private async Task<string> CreateThumbFromImageAsync(string absoluteHostPath, string guid, int size)
         {
-            //0 is small, 1 is big as in configuration: Images/Width, Images/Height, Images/BigHeigth, Images/BigWidth
+            //0 is small, 1 is big as in configuration: Images/Width, Images/Height, Images/BigHeight, Images/BigWidth
             var wScale = int.Parse(_configuration.GetSection("Images")["Width"]);
             var hScale = int.Parse(_configuration.GetSection("Images")["Height"]);
 
             var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
-            Log.Information($"Creating thumb from video {absoluteHostPath} as {absoluteThumbPath}");
+            
             if (size == 1) 
             {
                 hScale = int.Parse(_configuration.GetSection("Images")["HeightBig"]);
@@ -108,8 +101,10 @@ namespace PikaCore.Areas.Infrastructure.Services
 
             if (!File.Exists(absoluteThumbPath))
             {
+                Log.Information($"Not found thumb from image {absoluteHostPath} as {absoluteThumbPath}");
                 return await GrabFromImage(absoluteHostPath, guid, hScale, wScale);
             }
+            Log.Information($" Returning thumb: {absoluteThumbPath}");
             return guid;
         }
 
@@ -136,12 +131,12 @@ namespace PikaCore.Areas.Infrastructure.Services
                         .GetProperties()
                         .First(f =>
                             f.Name.Equals(_configuration.GetSection("Images")["Format"]));
-                    var imageFormat = (ImageFormat)field.GetValue(field);
+                    var imageFormat = field.GetValue(field);
 
                     if (imageFormat != null)
                     {
                         var name = $"{Path.Combine(whereToSave,id)}.{imageFormat.ToString().ToLower()}";
-                        resized.Save(name, imageFormat);
+                        resized.Save(name, (ImageFormat)imageFormat);
                         Log.Information($"Thumb saved: {name}");
                     }
                     resized.Dispose();
@@ -157,13 +152,6 @@ namespace PikaCore.Areas.Infrastructure.Services
 
         public async Task GrabFromVideo(string absoluteSystemVideoPath, string absoluteSystemOutputPath, ConversionOptions conversionOptions)
         {
-<<<<<<< HEAD
-            var inputFile = new MediaFile(absoluteSystemVideoPath);
-            var outputFile = new MediaFile(absoluteSystemOutputPath);
-
-            var ffmpeg = new Engine(_configuration.GetSection("Images")["Ffmpeg"]);
-            await ffmpeg.GetThumbnailAsync(inputFile, outputFile, conversionOptions);
-=======
             try
             {
                 var inputFile = new MediaFile(absoluteSystemVideoPath);
@@ -175,11 +163,8 @@ namespace PikaCore.Areas.Infrastructure.Services
             }
             catch (Exception e)
             {
-                
                 Log.Error(e, e.Message);
             }
-
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
         }
     }
 }

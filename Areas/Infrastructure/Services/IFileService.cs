@@ -38,5 +38,9 @@ namespace PikaCore.Areas.Infrastructure.Services
         IFileInfo RetrieveFileInfoFromAbsolutePath(string path);
 
         IDirectoryContents GetDirectoryContents(string systemPath);
+
+        bool HideFile(string absolutePath);
+
+        bool ShowFile(string absolutePath);
     }
 }

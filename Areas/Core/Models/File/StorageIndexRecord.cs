@@ -7,16 +7,19 @@ namespace PikaCore.Areas.Core.Models.File
 {
     public class StorageIndexRecord
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         [Required]
         public int Urlid { get; set; }
-        [Required]
-        public string Urlhash { get; set; }
-        [Required]
-        public string AbsolutePath { get; set; }
-        [Required]
-        public string UserId { get; set; }
+
+        [Required] 
+        public string Urlhash { get; set; } = "";
+
+        [Required] 
+        public string AbsolutePath { get; set; } = "";
+
+        [Required] 
+        public string UserId { get; set; } = "";
 
         [Required]
         public bool Expires { get; set; }

@@ -4,8 +4,9 @@ using System.Linq;
 using Mono.Unix;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Exceptions;
+using Serilog;
 
-namespace PikaCore.Areas.Core.Controllers.Helpers
+namespace PikaCore.Areas.Infrastructure.Services.Helpers
 {
     public static class UnixHelper
     {
@@ -73,9 +74,10 @@ namespace PikaCore.Areas.Core.Controllers.Helpers
         internal static bool HasAccess(string username, string absolutePath)
         {
             if (Environment.OSVersion.Platform != PlatformID.Unix)
-                throw new InvalidOperationException("This method cannot be ran on non-Unix OS.");
+                return true;
             var userInfo = new UnixUserInfo(username);
             var oid = FileSystemAccessor.owner(absolutePath);
+            Log.Information($"{userInfo.UserId} : {oid}");
             return userInfo.UserId == oid;
         }
     }

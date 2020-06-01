@@ -9,13 +9,6 @@
         <div class="card-content grey-text text-lighten-4 center">
             <span class="card-title">Register</span>
             <hr/>
-<<<<<<< HEAD
-        <section>
-        <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
-                    <div class="row">
-                        <div class="col s12 m12 l12">
-                            <div class="input-field">
-=======
             <section>
                 <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
                     <div class="row">
@@ -30,7 +23,6 @@
                                 <span asp-validation-for="Username" class="red-text"></span>
                                 </div>
                             <div class="input-field">
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
                                 <label class="left">@Html.DisplayNameFor(m => m.Email)</label>
                                 <input asp-for="Email" class="validate login-input-color"/>
                                 <span asp-validation-for="Email" class="red-text"></span>
@@ -42,15 +34,9 @@
                             </div>
                             <div class="input-field">
                                 <label class="left">@Html.DisplayNameFor(m => m.ConfirmPassword)</label>
-<<<<<<< HEAD
-                                <input asp-for="ConfirmPassword" class="validate login-input-color" />
-                                <span asp-validation-for="ConfirmPassword" class="red-text"></span>
-                                </div>
-=======
                                 <input asp-for="ConfirmPassword" class="validate login-input-color"/>
                                 <span asp-validation-for="ConfirmPassword" class="red-text"></span>
                             </div>
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
                         </div>
                     </div>
                     <div class="row">
@@ -59,14 +45,10 @@
                         </div>
                     </div>
                     <div class="card-action">
-                        <a class="grey-text text-lighten-4 left small-text" asp-action="Login">Already has an account? Sign in!</a>
+                        <a class="grey-text text-lighten-4 left small-text" asp-action="Login">Have an account? Sign in!</a>
                     </div>
                 </form>
-<<<<<<< HEAD
-        </section>
-=======
             </section>
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
         </div>
     </div>
 </div>

@@ -10,24 +10,22 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-<<<<<<< HEAD
-using Microsoft.AspNetCore.Http.Connections;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.Hosting;
-=======
 using AspNetCore.CustomValidation.Extensions;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
-using PikaCore.Areas.Api.v1.Data;
+using Microsoft.Win32;
 using PikaCore.Areas.Api.v1.Services;
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Services;
+using PikaCore.Areas.Infrastructure.Data;
 using PikaCore.Areas.Infrastructure.Services;
 using PikaCore.Properties;
 using PikaCore.Security;
@@ -55,18 +53,15 @@ namespace PikaCore
                 .WriteTo.File(path,
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
-            
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDbContext<StorageIndexContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
-<<<<<<< HEAD
-=======
-            
-            services.AddDbContext<MessageContext>(options => 
+
+            services.AddDbContext<SystemContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
 
             services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
                 {
@@ -87,6 +82,20 @@ namespace PikaCore
                 a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
                 a.Configuration = Configuration.GetConnectionString("RedisConnection");
             });
+            
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                services.AddDataProtection();
+            }
+            else
+            {
+                Console.WriteLine(Configuration["Security:CertificatePath"]);
+                services.AddDataProtection()
+                    .PersistKeysToFileSystem(new DirectoryInfo("/srv/fms/keys"))
+                    .ProtectKeysWithCertificate(
+                        new X509Certificate2(Configuration["Security:CertificatePath"], 
+                            Configuration["Security:Passphrase"]));
+            }
 
             services.AddAuthentication()
                 .AddGoogle(googleOpts =>
@@ -112,7 +121,6 @@ namespace PikaCore
                 });
 
             services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddScoped<IArchiveService, ArchiveService>();
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
             services.AddTransient<IStreamingService, StreamingService>();
@@ -120,22 +128,18 @@ namespace PikaCore
             services.AddSingleton<ISchedulerService, SchedulerService>();
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
-<<<<<<< HEAD
-            
-=======
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddTransient<ISystemService, SystemService>();
+            services.AddTransient<IStatusService, StatusService>();
+            services.AddTransient<IJobService, JobService>();
 
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
             services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 268435456; //256MB
             });
             
-<<<<<<< HEAD
-=======
             services.AddAspNetCoreCustomValidation();
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
             
             Log.Information(Resources.Startup_ConfigureServices_Logger_output___0_, path);
             
@@ -183,18 +187,12 @@ namespace PikaCore
                     options.SuppressInferBindingSourcesForParameters = true;
                     options.SuppressModelStateInvalidFilter = true;
                     options.SuppressMapClientErrors = true;
-<<<<<<< HEAD
-                    options.ClientErrorMapping[404].Link = "/api/v1/notfoundhandler";
-                });
-               
-=======
                 });
             services.AddRazorPages()
                 .AddRazorPagesOptions(options =>
                 {
                     options.Conventions.AuthorizeAreaFolder("Core", "/Admin");
                 });
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
             
             services.AddMvc()
                 .AddMvcOptions(options =>
@@ -250,10 +248,7 @@ namespace PikaCore
 	        app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseRouting();
-<<<<<<< HEAD
-=======
             
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
             app.UseAuthorization();
             
             app.UseEndpoints(endpoints =>

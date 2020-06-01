@@ -7,8 +7,7 @@ namespace PikaCore.Areas.Infrastructure.Services
     public interface ISchedulerService
     {
         Task Init();
-        IJobDetail CreateJob(Type jobType);
-        void StartJob(IJobDetail job, ITrigger trigger);
+        Task StartJob(string name, ITrigger trigger);
         void Dispose();
     }
 }

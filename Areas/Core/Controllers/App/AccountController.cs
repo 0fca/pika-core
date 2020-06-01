@@ -43,9 +43,18 @@ namespace PikaCore.Areas.Core.Controllers.App
         public async Task<IActionResult> Login(string returnUrl = "/")
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            var message = "";
+            try
+            {
+                message = (await _messageService.GetMessageById(3)).Message;
+            }
+            catch 
+            {
+                // ignore
+            }
 
             ViewData["ReturnUrl"] = returnUrl;
-            ViewData["Message"] = (await _messageService.GetMessageById(3)).Message;
+            ViewData["Message"] = message;
             return View();
         }
 
@@ -290,7 +299,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
 
-                var user = new ApplicationUser {UserName = model.Email, Email = model.Email};
+                var user = new ApplicationUser {UserName = model.Username, Email = model.Email};
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)

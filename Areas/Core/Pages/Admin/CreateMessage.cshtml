@@ -1,5 +1,6 @@
 ﻿@page
-@using PikaCore.Areas.Api.v1.Data
+@using PikaCore.Areas.Infrastructure.Data
+@using PikaCore.Areas.Infrastructure.Models
 @model PikaCore.Areas.Core.Pages.Admin.CreateMessage
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
@@ -38,6 +39,15 @@
                         }
                     </select>
                     <label>@Html.DisplayNameFor(m => m.Message.MessageType)</label>
+                </div>
+                <div class="input-field">
+                    <select asp-for="Message.SystemName" class="validate login-input-color">
+                        @foreach (var system in Model.Message.Systems)
+                        {
+                            <option value="@system.SystemName">@system.SystemName</option>
+                        }
+                    </select>
+                    <label>@Html.DisplayNameFor(m => m.Message.Systems)</label>
                 </div>
             </div>
             <div class="card-action">

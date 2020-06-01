@@ -2,12 +2,9 @@
 @if (!string.IsNullOrEmpty(Model))
 {
     var type = Model.StartsWith("Error") ? "times" : "check";
-<<<<<<< HEAD
-    <div class="row">
-=======
     var color = Model.StartsWith("Error") ? "red" : "teal";
     <div class="row card-panel @color">
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
+
         <div class="col s1 m1">
             <i class="fas fa-@type"></i>
         </div>

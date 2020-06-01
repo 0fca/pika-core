@@ -1,0 +1,24 @@
+﻿@model JobsListViewModel
+
+@{
+    ViewData["Title"] = "Jobs";
+    var returnMessage = TempData["returnMessage"];
+    Layout = "_Layout";
+}
+<div class="row">
+<div class="card indigo center">
+    <div class="card-content white-text">
+        <form method="post">
+            <span class="card-title">@ViewData["Title"]</span>
+            @if (returnMessage != null 
+                 && !string.IsNullOrEmpty(returnMessage.ToString()))
+            {
+                @await Html.PartialAsync("_SystemMessagePartial", returnMessage)
+            }
+            <div class="card-content">
+                Here will be running jobs visible.
+            </div>
+        </form>
+    </div>
+</div>
+</div>

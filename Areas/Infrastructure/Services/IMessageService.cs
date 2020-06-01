@@ -1,14 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using PikaCore.Areas.Api.v1.Data;
+using PikaCore.Areas.Infrastructure.Data;
 
 namespace PikaCore.Areas.Infrastructure.Services
 {
     public interface IMessageService
     {
+        public Task<IList<MessageEntity>> GetAllMessagesForSystem(string systemName);
+        
         public Task<IList<MessageEntity>> GetAllMessages();
-
-        public Task<IList<IssueEntity>> GetAllIssues();
+        
+        public Task<IList<IssueEntity>> GetAllIssues(string systemName);
 
         public Task<MessageEntity> GetMessageById(int id);
 
@@ -18,7 +20,7 @@ namespace PikaCore.Areas.Infrastructure.Services
 
         public Task<IssueEntity> GetLatestIssueByMessageId(int id);
 
-        public void ApplyPaging(ref IList<MessageEntity> messageEntities, int count, int offset = 0);
+        public void ApplyPaging<T>(ref List<T> messageEntities, int count, int offset = 0);
 
         public Task RemoveMessages(IList<int> ids);
 

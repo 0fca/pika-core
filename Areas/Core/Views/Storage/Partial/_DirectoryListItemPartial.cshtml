@@ -1,0 +1,28 @@
+﻿@model Tuple<string, Microsoft.Extensions.FileProviders.IFileInfo>
+@{
+    var item = Model.Item2;
+    var viewableName = item.Name.StartsWith("~")
+        ? item.Name.Replace("~", "")
+        : item.Name;
+    var dirIcon = item.Name.StartsWith("~") ? "folder" : "folder_shared";
+}
+
+
+<div class="row collection-item">
+    <div class="col s1 m1 l1 center center-align">
+        <i class="material-icons">
+            @dirIcon
+        </i>
+    </div>
+    <div class="col s11 m11 l11">
+        <a class="browse-collection-item" 
+           asp-area="Core"
+           asp-controller="Storage"
+           asp-action="Browse"
+           asp-route-path="@System.IO.Path.Combine(Model.Item1, item.Name)"
+           title="@viewableName">
+            @viewableName
+        </a>
+    </div>
+</div>
+

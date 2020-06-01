@@ -12,22 +12,13 @@
                 <span class="card-title">Log in using a local account.</span>
                 <hr/>
                 <section id="local_account_login">
-                    <div class="card-panel teal">
-<<<<<<< HEAD
-                        Due to migration of data sources to new RDBMS system, all user accounts have become unavailable permanently.
-                    </div>
-                    <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
-                        <div class="row">
-=======
-                        @ViewData["Message"]
-                    </div>
+                    @await Html.PartialAsync("_SystemMessagePartial", ViewData["Message"])
                     <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
                         <div class="row">
                             @if (!ViewData.ModelState.IsValid)
                             {
                                 @Html.ValidationSummary(true,"", new {@class = "card-panel red white-text"})
                             }
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
                             <div class="col s12 m12 l12">
                                 <div class="input-field">
                                     <label class="left">@Html.DisplayNameFor(m => m.Email)</label>
@@ -46,10 +37,7 @@
                                 <button type="submit" class="btn btn-default center">Log in</button>
                             </div>
                         </div>
-<<<<<<< HEAD
-=======
                     </form>
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
                          <section id="external_account_login">
                              <div class="row">
                                  <p>OR</p>
@@ -81,11 +69,7 @@
                             <a class="grey-text text-lighten-4 left small-text" asp-action="ForgotPassword">Forgot your password?</a>
                             <a class="grey-text text-lighten-4 left small-text" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register as a new user?</a>
                         </div>
-<<<<<<< HEAD
-                    </form>
-=======
                     
->>>>>>> 9e40e3e1a041a24c936619b4a822171e76cdd507
                 </section>
             </div>
         </div>
