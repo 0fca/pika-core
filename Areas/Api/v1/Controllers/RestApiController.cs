@@ -18,7 +18,11 @@ namespace PikaCore.Areas.Api.v1.Controllers
         [Route("[action]")]
         public IActionResult Index()
         {
-            var data = new List<string> {"Welcome to PikaCore REST API."};
+            var data = new List<string>
+            {
+                "Welcome to PikaCore REST API.",
+                "https://music.youtube.com/watch?v=AckG0JVrYDA"
+            };
             var apiMessage = new ApiMessage<IList<string>>()
             {
                 Data = data

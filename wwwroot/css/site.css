@@ -287,3 +287,7 @@ a, a:hover, a:focus {
     text-align: center !important;
 }
 
+.fit-image{
+    object-fit: fill;
+}
+

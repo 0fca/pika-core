@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Win32;
 using PikaCore.Areas.Api.v1.Services;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
@@ -81,6 +80,12 @@ namespace PikaCore
             services.AddStackExchangeRedisCache(a => { 
                 a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
                 a.Configuration = Configuration.GetConnectionString("RedisConnection");
+            });
+            
+            services.AddResponseCaching(options =>
+            {
+                options.MaximumBodySize = 4096;
+                options.UseCaseSensitivePaths = true;
             });
             
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -194,9 +199,28 @@ namespace PikaCore
                     options.Conventions.AuthorizeAreaFolder("Core", "/Admin");
                 });
             
+            services.AddResponseCaching(opt =>
+            {
+                opt.UseCaseSensitivePaths = true;
+                opt.SizeLimit = 819200;
+            });
+
+            services.AddResponseCompression(opt =>
+            {
+                opt.EnableForHttps = true;
+                opt.MimeTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+            });
+            
             services.AddMvc()
                 .AddMvcOptions(options =>
             {
+                options.CacheProfiles.Add("Default",
+                    new CacheProfile()
+                    {
+                        Duration = 60,
+                        Location = ResponseCacheLocation.Client,
+                        NoStore = false
+                    });
                 options.MaxModelValidationErrors = 50;
                 options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
                     _ => "The field is required.");
@@ -244,11 +268,11 @@ namespace PikaCore
             });
 
             app.UseWebSockets();
-            app.UseResponseCaching();
 	        app.UseCors("CorsPolicy");
+            app.UseResponseCaching();
             app.UseAuthentication();
             app.UseRouting();
-            
+            app.UseResponseCompression();
             app.UseAuthorization();
             
             app.UseEndpoints(endpoints =>

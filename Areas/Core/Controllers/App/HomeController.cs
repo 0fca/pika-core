@@ -4,6 +4,7 @@ using PikaCore.Areas.Core.Models;
 namespace PikaCore.Areas.Core.Controllers.App
 {
     [Area("Core")]
+    [ResponseCache(CacheProfileName = "Default")]
     public class HomeController : Controller
     {
         public IActionResult Index()

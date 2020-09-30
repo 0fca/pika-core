@@ -11,26 +11,30 @@
     }
 
 }
-<html lang="en" xmlns="http://www.w3.org/1999/html">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] @roleName Hannah</title>
+    <meta property="og:title" content="Pika Core" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://core.lukas-bownik.net/" />
+    <meta property="og:description" content="Welcome to Pika Core - a core of Pika Cloud. Enter to find a lot of interesting stuff!" />
+    <meta property="og:image" content="https://core.lukas-bownik.net/images/pika-logos/pikacloud_brand.png" />
+    <meta name="theme-color" content="#009688" />
     <link rel="stylesheet" href="~/css/site.css" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="icon" type="image/ico" href="~/images/logooftheyear2018.png" >
-    <script src="~/lib/jquery/dist/jquery.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="~/lib/fontawesome-free-5.14.0-web/css/all.min.css">
+    <link rel="stylesheet" href="~/css/materialize.min.css">
+    <script src="~/lib/materializejs/materialize.min.js"></script>
+    <link rel="stylesheet" href="~/css/material-icons.css">
+    <link rel="icon" type="image/ico" href="~/images/pika-logos/pikacloud_48.png" >
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="~/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/typewriter.js" asp-append-version="true"></script>
     <script src="~/js/file.js" asp-append-version="true"></script>
     <script src="~/lib/aspnetcore-custom-validation/aspnetcore-custom-validation.min.js"></script>
-
 </head>
 <body>
 <main>
@@ -40,7 +44,7 @@
                 <div class="nav-wrapper navbar-color">
                     <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="fas fa-bars indigo-text"></i></a>
                     <a asp-area="Core" asp-controller="Home" asp-action="Index" class="brand-logo brand-margin brand-text">
-                        <img src="~/images/pika-logos/pikacloud_large.png" width="137" height="48" alt="Pika Cloud"/>
+                        <img src="~/images/pika-logos/pikacloud_brand.png" class="responsive-img" width="137" height="48" alt="Pika Cloud"/>
                     </a>
                     @await Html.PartialAsync("_LinksPartial")
                 </div>

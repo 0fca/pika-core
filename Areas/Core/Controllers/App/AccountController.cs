@@ -65,10 +65,13 @@ namespace PikaCore.Areas.Core.Controllers.App
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid) return View(model);
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
+            var result = await _signInManager.PasswordSignInAsync(model.Username, 
+                model.Password, 
+                model.RememberMe, 
+                lockoutOnFailure: true);
             if (result.Succeeded)
             {
-                _logger.LogInformation($"User of email: {model.Email} logged in.");
+                _logger.LogInformation($"User of email: {model.Username} logged in.");
                 return RedirectPermanent(returnUrl);
             }
             if (result.RequiresTwoFactor)
@@ -77,12 +80,12 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
             if (result.IsLockedOut)
             {
-                _logger.LogWarning($"User account of email: {model.Email} locked out.");
+                _logger.LogWarning($"User account of username: {model.Username} locked out.");
                 TempData["LockoutMessage"] = "Account has been locked out.";
                 return RedirectToAction(nameof(Lockout));
             }
             
-            ModelState.AddModelError(string.Empty, $"Invalid login attempt. Email: {model.Email}");
+            ModelState.AddModelError(string.Empty, $"Invalid login attempt. Username: {model.Username}");
             return View(model);
             
         }
@@ -91,7 +94,6 @@ namespace PikaCore.Areas.Core.Controllers.App
         [AllowAnonymous]
         public async Task<IActionResult> LoginWith2Fa(bool rememberMe, string returnUrl = "/")
         {
-            // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
 
             if (user == null)
@@ -244,7 +246,6 @@ namespace PikaCore.Areas.Core.Controllers.App
         [AutoValidateAntiforgeryToken]
         public IActionResult ExternalLogin(string provider, string returnUrl = "/")
         {
-            // Request a redirect to the external login provider.
             var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
@@ -357,7 +358,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ResetPassword(string code = null)
+        public IActionResult ResetPassword(string? code = null)
         {
             if (code == null)
             {

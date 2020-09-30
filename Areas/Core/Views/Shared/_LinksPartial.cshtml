@@ -36,7 +36,9 @@
 
 <div id="app-dropdown" class="card dropdown-content hide-on-small-and-down appdropdown right z-depth-1-half" tabindex="0">
     <div class="card-content text-left">
-        <span class="card-title grey-text text-darken-4 center">Pika Cloud Apps</span>
+        <span class="card-title grey-text text-darken-4 center">
+            <img src="~/images/pika-logos/pikacloud_apps.svg" alt="Pika"/>
+        </span>
         <div class="collection borderless-collection">
             <a class="collection-item navlink app-menu-item" href="https://player.lukas-bownik.net/" title="Pika Player">
                 <span class="material-icons secondary-content navlink">
@@ -44,12 +46,19 @@
                 </span>
                 Pika Player
             </a>
+            <a class="collection-item navlink app-menu-item" href="https://note.lukas-bownik.net/" title="Pika Note">
+                <span class="material-icons secondary-content navlink">
+                    sticky_note_2
+                </span>
+                Pika Note
+            </a>
             <a class="collection-item navlink app-menu-item" href="https://infra.lukas-bownik.net/" title="Pika Status">
                 <span class="material-icons secondary-content navlink">
-                favorite_border
+                    favorite_border
                 </span>
                 Pika Status
             </a>
+            
             @if (User.IsInRole("Admin"))
             {
                 <a asp-area="Core" asp-controller="Admin" asp-action="Index" class="collection-item navlink app-menu-item" title="Pika Cloud Admin">
@@ -60,11 +69,7 @@
                 </a>
             }
         </div>
-        <div class="col m12 l12">
-            
-        </div>
-        
-        </div>
+    </div>
 </div>
 <script>
  function translateAppDropdown() {

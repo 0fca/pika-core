@@ -2,7 +2,7 @@
                         .withUrl("/hubs/media", {
                             transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.LongPolling
                         })
-	            		.configureLogging(signalR.LogLevel.Information)
+                .configureLogging(signalR.LogLevel.None)
 				.build();
 
 mediaHubconnection.onclose(async () => {
@@ -35,14 +35,14 @@ function setErrorIcon(guid, err) {
 }
 
 function loadThumb(path, s) {
-    const imgs = document.getElementById("file-list").querySelectorAll("img");
+    const imgs = document.getElementById("file-list").querySelectorAll("source");
 
     for (let i = 0; i < imgs.length; i++) {
         const img = imgs[i];
 
         if (img.hasAttribute("id")) {
             const guid = img.getAttribute("id");
-            const text = img.getAttribute("alt");
+            const text = img.getAttribute("data-name");
             const systemPath = path.toString() + directorySeparator +text;
 
             mediaHubconnection.invoke("CreateThumb", systemPath, guid, 1).catch(err => {
@@ -55,7 +55,7 @@ function loadThumb(path, s) {
 function ReceiveThumb(isSuccess, thumbId) {
     if (isSuccess) {
         const url = "/Core/Storage/Thumb?id=" + thumbId;
-        document.getElementById(thumbId).setAttribute("src", url);
+        document.getElementById(thumbId).setAttribute("srcset", url);
     }else{
         setErrorIcon(thumbId, "Error receiving thumb for: "+thumbId);
     }

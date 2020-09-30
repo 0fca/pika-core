@@ -10,7 +10,7 @@
 @{
     var msg = TempData["returnMessage"];
 }
-
+<!-- TODO Part this file to partials -->
 @if(Model?.Contents != null && !Model.Contents.GetType().IsInstanceOfType(typeof(NotFoundDirectoryContents)))
 {
 
@@ -25,7 +25,8 @@
     var paginationData = new Dictionary<string, object> {{"Offset", offset}, {"Count", count}, {"PageCount", pageCount}, {"Last", lastPath}};
 
     <div class="row">
-        <div class="s10 m12 l12 input-field">
+        <div class="col s12 m12 l12">
+            
             @{
                 var splitted = lastPath?.Split(System.IO.Path.DirectorySeparatorChar);
                 var last = "";
@@ -44,14 +45,25 @@
                 }
             }
             <button class="waves-effect waves-teal btn-flat" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
-            <input id="helperInput" value="@Context.Request.Host@tmp" class="offscreen" aria-hidden="true"/>
-            <input type="text" id="pathField" placeholder="Enter the absolute system path..." class="autocomplete" value="@lastPath" autofocus/>
+            <input id="helperInput" value="https://@Context.Request.Host@tmp" class="offscreen" aria-hidden="true"/>
+        </div>
+        <div class="col s12 m12 l12">
+            <div class="input-field">
+                <input type="text" id="pathField" placeholder="Enter the absolute system path..." class="autocomplete" value="@lastPath" autofocus/>
+            </div>
+        </div>
+        <div class="col s12 hide-on-med-and-up center">
+            <button class="btn btn-large" id="mobile-search-button">
+                <span class="material-icons">
+                    search
+                </span>
+            </button>
         </div>
     </div>
 
     @await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
 
-    <div id="file-list" class="collection">
+    <div id="file-list">
         <div class="row">
             <div class="col s12 l7 m8">
                 @{
@@ -69,7 +81,7 @@
             </div>
         </div>
         <div class="row">
-            <a class="collection-item transparent" 
+            <a class="transparent flow-text" 
                asp-area="Core" 
                asp-controller="Storage" 
                asp-action="Browse" 
@@ -78,50 +90,33 @@
         @{
             if (Model.ContentsList.Count > 0)
             {
-                foreach (var item in Model.ContentsList)
+                <div class="row transparent">
+                @foreach (var item in Model.ContentsList)
                 {
-                    <div class="row">
-                        <div class="col s6 m5 l5 truncate valign-wrapper">
-                            
-                            @if (item.IsDirectory)
-                            {
-                                @await Html.PartialAsync("Partial/_DirectoryListItemPartial", new Tuple<string, IFileInfo>(lastPath, item))
-                            }
-                            else
-                            {
-                                @await Html.PartialAsync("Partial/FileListItemPartial", new Tuple<string, IFileInfo>(lastPath, item))
-                            }
-                        </div>
-                        <div class="col m4 l4 hide-on-small-only">
-                            <p>@item.LastModified.Date.ToLongDateString()</p>
-                        </div>
-                        <div class="col s4 m2 l2">
-                            @if (!item.IsDirectory)
-                            {
-                                <p>@UnixHelper.DetectUnitBySize(item.Length)</p>
-                            }
-                            else
-                            {
-                                <p>---</p>
-                            }
-                        </div>
-                        <div class="col s2 m1 l1 opt-font">
-                            @await Html.PartialAsync("Partial/_ContextMenuPartial", new Tuple<string, IFileInfo>(lastPath, item))
-                        </div>
+                    <div class="col s12 m6 l4 truncate valign-wrapper">
+                        @if (item.IsDirectory)
+                        {
+                            @await Html.PartialAsync("Partial/_DirectoryListItemPartial", new Tuple<string, IFileInfo>(lastPath, item))
+                        }
+                        else
+                        {
+                            @await Html.PartialAsync("Partial/FileListItemPartial", new Tuple<string, IFileInfo>(lastPath, item))
+                        }
                     </div>
                 }
+                 </div>
             }
             else
             {
                 <div class="row">
                     <div class="s10 m10 l10">
-                        <h4 class="center-align">It is empty in here...</h4>
+                        <p class="flow-text center-align">It is empty in here...</p>
                     </div>
                 </div>
             }
         }
         <div class="row">
-            <a class="collection-item transparent" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
+            <a class="collection-item flow-text transparent" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
         </div>
 
         <div class="fixed-action-btn">
@@ -164,11 +159,14 @@
             searchFileList();
         }
     });
-
+    
+    document.getElementById("mobile-search-button").addEventListener("click", function (e) {
+        toPath();
+    });
+    
     document.getElementById("pathField").addEventListener("keydown", (key) => {
         if (key.code === "Enter") {
-            const path = document.getElementById("pathField").value;
-            window.location = `/Core/Storage/Browse?path=${path}`;
+            toPath();
         }
     });
 
@@ -182,7 +180,11 @@
     document.addEventListener('DOMContentLoaded', function () {
         const elems = document.querySelectorAll('.autocomplete');
         const instances = M.Autocomplete.init(elems, {});
-    })
+    });
+    
+    function toPath(){
+        window.location = `/Core/Storage/Browse?path=${document.getElementById("pathField").value}`;
+    }
 </script>
     <script src="~/js/media.js" asp-append-version="true"></script>
 }
@@ -190,6 +192,6 @@ else
 {
     ViewData["Title"] = "Browse - Error";
     <div class="card-panel red darken-3">
-        Błąd.
+        Unexpected error ocurred.
     </div>
 }

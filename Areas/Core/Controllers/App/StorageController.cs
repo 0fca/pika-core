@@ -77,10 +77,9 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Browse(string path, int offset = 0, int count = 50)
+        public async Task<IActionResult> Browse(string? path, int offset = 0, int count = 50)
         {
             var osUser = _configuration.GetSection("OsUser")["OsUsername"];
-            
             
             if (string.IsNullOrEmpty(path)
             || !UnixHelper.HasAccess(osUser, 
