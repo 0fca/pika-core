@@ -1,16 +1,16 @@
 ﻿
 function searchFileList(){
     let searchParam = document.getElementById("searchBox").value;
-    let fileList = document.getElementById("file-list").querySelectorAll(".row");
+    let fileList = document.getElementById("file-list").querySelectorAll(".card .card-content");
 
     if(searchParam !== ""){
-        for(let i = 2; i < fileList.length - 1; i ++){
+        for(let i = 0; i < fileList.length; i ++){
             if (!fileList[i].children[0].textContent.toLowerCase().includes(searchParam.toLowerCase())) {
-                fileList[i].setAttribute("hidden", true);
+                fileList[i].parentElement.setAttribute("hidden", true);
                 
-            }else if(fileList[i].hasAttribute("hidden")){
-                fileList[i].removeAttribute("hidden");
-                let sibling = fileList[i].nextElementSibling;
+            }else if(fileList[i].parentElement.hasAttribute("hidden")){
+                fileList[i].parentElement.removeAttribute("hidden");
+                let sibling = fileList[i].parentElement.nextElementSibling;
                 if (sibling !== null) {
                     sibling.removeAttribute("hidden");
                 }

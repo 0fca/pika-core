@@ -59,7 +59,7 @@ namespace PikaCore.Areas.Infrastructure.Services
         {
             var thumbAbsolutePath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
                                                 $"{guid}.{_configuration.GetSection("Images")["Format"].ToLower()}");
-            var wScale = int.Parse(_configuration.GetSection("Images")["Width"]);
+                var wScale = int.Parse(_configuration.GetSection("Images")["Width"]);
                 var hScale = int.Parse(_configuration.GetSection("Images")["Height"]);
                 
                 if (size == 1) 

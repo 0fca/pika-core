@@ -1,18 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using AspNetCore.CustomValidation.Attributes;
 
 namespace PikaCore.Areas.Core.Models.AccountViewModels
 {
     public class LoginViewModel
     {
         [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        public string Username { get; set; } = "";
 
         [Required]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string Password { get; set; } = "";
 
-        [Display(Name = "Remember me?")]
-        public bool RememberMe { get; set; }
+        [Display(Name = "Remember me?")] 
+        public bool RememberMe { get; set; } 
     }
 }

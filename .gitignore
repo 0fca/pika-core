@@ -292,3 +292,5 @@ appsettings.Development.json
 
 *.db
 *.sln
+
+lib/

@@ -2,7 +2,7 @@
 # The humans responsible & technology colophon
 
 # TEAM
-    Dev: Łukasz Bownik -- https://www.facebook.com/obsidiam
+    Dev: Łukasz Bownik -- https://me.lukas-bownik.net/
 
 # THANKS
 

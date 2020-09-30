@@ -8,45 +8,44 @@
     var lastPath = Model.Item1;
     var user = await UserManager.GetUserAsync(Context.User);
 }
-<a class="dropdown-trigger grey-text text-darken-4" href="#" data-target="options-@item.Name">
-                                <i class="material-icons">more_horiz</i>
-                            </a>
-<ul id="options-@item.Name" class="dropdown-content">
+
     @{
         var ext = System.IO.Path.GetExtension(item.Name);
         if (ext.Equals(".mp3") || ext.Equals(".mp4"))
         {
-            <li>
-                <a href="https://player.lukas-bownik.net/">
-                    <i class="fas fa-play" title="Play"></i>
-                </a>
-            </li>
+            <a class="teal-text" href="https://player.lukas-bownik.net/">
+                <span class="material-icons" title="Play">
+                    play_arrow
+                </span>
+            </a>
         }
 
         if (user != null
             && !(await UserManager.IsInRoleAsync(user, "User")))
         {
-            <li>
-                <a asp-area="Core" 
-                   asp-action="Rename" 
-                   asp-route-n="@System.IO.Path.Combine(lastPath, item.Name)">
-                    <i class="fas fa-pen"></i>
-                </a>
-            </li>
+            <a class="teal-text" 
+               asp-area="Core" 
+               asp-action="Rename" 
+               asp-route-n="@System.IO.Path.Combine(lastPath, item.Name)">
+                <span class="material-icons">create</span>
+            </a>
         }
         if (!item.IsDirectory
             && user != null)
         {
-            <li>
-                <a asp-area="Core" 
-                   asp-action="GenerateUrl" 
-                   asp-route-name="@DataProtection.Encode(item.PhysicalPath)"
-                   asp-route-returnUrl="@lastPath">
-                    <i class="fas fa-link" title="Generate download url"></i>
-                </a>
-            </li>
+            <a class="teal-text" 
+               asp-area="Core" 
+               asp-action="GenerateUrl" 
+               asp-route-name="@DataProtection.Encode(item.PhysicalPath)"
+               asp-route-returnUrl="@lastPath">
+                <span class="material-icons" title="Generate download url">link</span>
+            </a>
         }
-        if (user != null
+        <a class="dropdown-trigger teal-text" href="#" data-target="options-@item.Name">
+            <i class="material-icons">more_horiz</i>
+        </a>
+        <ul id="options-@item.Name" class="dropdown-content">
+        @if (user != null
             && (await UserManager.IsInRoleAsync(user, "Admin")))
         {
             var iconText = item.Name.StartsWith("~") ? "lock_open" : "lock";
@@ -57,23 +56,23 @@
                       asp-route-systemPath="@DataProtection.Encode(item.PhysicalPath)"
                       asp-route-returnPath="@lastPath">
                     <button type="submit" class="btn btn-flat transparent teal-text">
-                        <i class="material-icons">@iconText</i>
+                        <span class="material-icons">@iconText</span>
                     </button>
                 </form>
             </li>
+
         }
-        if (item.IsDirectory)
+        @if (item.IsDirectory)
         {
             <li>
                 <form asp-area="Core" 
                       asp-action="Archive" 
                       asp-route-id="@DataProtection.Encode(item.PhysicalPath)" method="post">
                     <button type="submit" class="btn btn-flat transparent teal-text">
-                        <i class="material-icons">archive</i>
+                        <span class="material-icons">archive</span>
                     </button>
                 </form>
             </li>
         }
+        </ul>
     }
-    
-</ul>

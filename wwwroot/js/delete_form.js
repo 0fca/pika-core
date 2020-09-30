@@ -13,27 +13,28 @@
 document.getElementById("delete-button").addEventListener("click", async () => {
     try {
         let idListString = "";
-        document.querySelectorAll("span.secondary-content").forEach(el => {
-            let iconText = el.querySelector("i").innerText;
+        document.querySelectorAll("span[id]").forEach(el => {
+            let iconText = el.querySelector("i").textContent;
             if(iconText === "check"){
                 idListString += el.getAttribute("id")+",";
             }
         });
-
+        
         const response = await fetch("/Admin/RemoveMessagesExecute/"+idListString, {
-            method: 'POST'
+            method: 'POST',
         });
-
+        
         response.text()
             .then(function(text) {
-                document.querySelector("#output").innerText = text;
                 if(response.status === 202){
                     window.location = response.headers.get("Location");
-                    document.querySelector("#output").setAttribute("class", "card-panel teal white-text");
                 }
+                
                 if(response.status === 400
-                    || response.status === 500){
+                    || response.status === 500
+                    || response.status === 200){
                     document.querySelector("#output").setAttribute("class", "card-panel red white-text");
+                    document.querySelector("#output").innerText = "Couldn't delete, bad request.";
                 }
             });
     }catch(e){
