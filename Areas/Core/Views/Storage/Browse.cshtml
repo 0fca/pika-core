@@ -171,10 +171,15 @@
     });
 
     document.getElementById("pathField").addEventListener("keyup", (key) => {
-        if (key.code === "Slash") {
-            const currentPath = document.getElementById("pathField").value;
+        let currentPath = document.getElementById("pathField").value;
+        if(currentPath.toString().endsWith(directorySeparator)){
             requestListing(currentPath);
+            return;
         }
+        let lastIndex = currentPath.toString().lastIndexOf(directorySeparator);
+            
+        currentPath = currentPath.toString().slice(lastIndex, currentPath.toString().length)
+        requestListing(currentPath);
     });
 
     document.addEventListener('DOMContentLoaded', function () {

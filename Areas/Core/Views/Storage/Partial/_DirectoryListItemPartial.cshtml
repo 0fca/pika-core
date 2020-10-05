@@ -14,23 +14,30 @@
     var dateString = @item.LastModified.Date.ToLongDateString();
 }
 
-<div class="card small">
-    <div class="card-content">
-        <span class="card-title truncate activator">
-            <i class="material-icons">
-                @dirIcon
-            </i>
-            <a class="teal-text" asp-area="Core"
-               asp-controller="Storage"
-               asp-action="Browse"
-               asp-route-path="@System.IO.Path.Combine(Model.Item1, item.Name)"
-               title="@viewableName">
-                @viewableName
-            </a>
-            <i class="material-icons right">more_vert</i>
-        </span>
+<div class="card grey lighten-4 z-depth-0 small">
+    <div class="card-content activator">
+        <div class="card-title truncate activator">
+            <div class="row">
+                <div class="col s10 m10 l10">
+                    <a class="teal-text truncate" asp-area="Core"
+                       asp-controller="Storage"
+                       asp-action="Browse"
+                       asp-route-path="@System.IO.Path.Combine(Model.Item1, item.Name)"
+                       title="@viewableName">
+                        <span class="material-icons">
+                            @dirIcon
+                        </span>
+                        @viewableName
+                    </a>
+                </div>
+                <div class="col s2 m2 l2">
+                    <span class="material-icons right activator">more_vert</span>
+                </div>
+            </div>
+            
+        </div>
     </div>
-    <div class="card-reveal">
+    <div class="card-reveal grey lighten-4 ">
         <span class="card-title grey-text text-darken-4">Information<i class="material-icons right">close</i></span>
         <div>
             @if (!item.IsDirectory)
