@@ -38,7 +38,7 @@ function getSummarySize() {
 
 function requestListing(path) {
     fileHubconnection.invoke("List", path).catch(function (err) {
-        return M.toast({ html: "<p class='text-danger'>" + err.toString()+"</p>" });
+        return err.toString();
     }); 
 }
 

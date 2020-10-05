@@ -55,7 +55,7 @@ function loadThumb(path, s) {
 function ReceiveThumb(isSuccess, thumbId) {
     if (isSuccess) {
         const url = "/Core/Storage/Thumb?id=" + thumbId;
-        document.getElementById(thumbId).setAttribute("srcset", url);
+        document.getElementById(thumbId).setAttribute("srcset", encodeURI(url));
     }else{
         setErrorIcon(thumbId, "Error receiving thumb for: "+thumbId);
     }

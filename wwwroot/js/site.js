@@ -27,17 +27,6 @@ function resetFileList(qualifiedName){
     for(let i = 0; i < fileList.length; i++){
         fileList[i].removeAttribute("hidden");  
     }
-}
-
-function showDownloadBox() {
-    console.log(getBrowser());
-    if (getBrowser() !== "Firefox") {
-        document.getElementById("info").innerText = "You have about 10s to cancel archiving process.";
-        document.getElementById("download-panel").removeAttribute("hidden");
-        document.getElementById("cancelArchivingButton").removeAttribute("disabled");
-    } else {
-        document.getElementById("info").innerText = "Firefox is not supported, you little shit.";
-    }
 } 
 
 function hideDownloadBox() {
@@ -69,39 +58,6 @@ function copyToClipboard(id) {
     document.execCommand('copy');
 }
 
-function onPathSpanOut() {
-    let promptLbl = document.getElementById("pathOutput");
-    promptLbl.setAttribute("hidden", "true");
-}
-
-function scrollLogAreaToEnd() {
-    const textarea = document.getElementById('log-area');
-    textarea.scrollTop = textarea.scrollHeight;
-}
-
-function changeVisibleTab(controlName) {
-    let contentId = controlName.textContent.toLowerCase().replace(" ", "-");
-    //controlName.getAttribute("class").concat(" active");
-    let targetDiv = document.getElementById("container");
-    if (targetDiv.children.length > 0) {
-        for (let childIndex = 0; childIndex < targetDiv.children.length; childIndex++) {
-            if (targetDiv.children[childIndex].getAttribute("id") !== contentId) {
-                targetDiv.children[childIndex].setAttribute("hidden", true);
-            } else {
-                targetDiv.children[childIndex].removeAttribute("hidden");
-            }
-        }
-    }
-    if (contentId === "logs") {
-        scrollLogAreaToEnd();
-    }
-}
-
-function hideDownloadPartial() {
-    let downloadPartial = document.getElementById("downloadPartialDiv");
-    downloadPartial.setAttribute("hidden","true");
-}
-
 function resetListOnView() {
     let uploadButton = document.getElementById("upload-submit");
     let filesList = document.getElementById("filesList");
@@ -109,20 +65,6 @@ function resetListOnView() {
         filesList.removeChild(listItem);
     }
     uploadButton.setAttribute("disabled", "true");
-}
-
-function validateDirectoryName(text){
-    let isValid = false;
-    for(let i = 0; i < text.toString().length; i++) {
-        let letter = text.toString().charCodeAt(i);
-       
-        if (letter >= 48 && letter <= 57 ||
-            letter >= 65 && letter <= 90 ||
-            letter >= 97 && letter <= 122) {
-            isValid = true;
-        }
-    }
-    return isValid;
 }
 
 document.addEventListener('DOMContentLoaded', function () {
