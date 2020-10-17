@@ -14,8 +14,8 @@ Production Instance: https://core.lukas-bownik.net/
 * Downloading folder as zip files, (actually not accessible now due to major refactor)
 * Easy to use file view with on-write searching and interactive navigation path on the top, sorting by type: folders and files.
 * Partially addedd icons in file view,
-* Uploading files to public part of the filesystem,
-* Other registration forms(there is no possibility to log in via Google at the moment),
+* Uploading files (up to 256MB) to public part of the filesystem,
+* Other registration forms,
 
 *Planned changes*
 * Downloading whole folders as Archives formats(zip, possibly 7-zip, tar.gz),
