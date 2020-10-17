@@ -41,13 +41,16 @@ Production Instance: https://core.lukas-bownik.net/
 * Redis cache,
 * PostgreSQL RDBMS,
 * Docker
+* Filebeat, Elasticsearch and Kibana for logs management & searching.
 
 *Deployment*
+
 Server OS: Debian 10
 
 WWW: Apache 2 as HTTP Proxy
 
 Core is deployed on localhost.
+Some services are deployed as Docker containers.
 
 
 __Docs__ 
