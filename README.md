@@ -34,14 +34,18 @@ Production Instance: https://core.lukas-bownik.net/
 * HTML5 with Materialize and JS,
 * Entity Framework Core.
 
-Frameworks&libs:
+3rd party software:
 * Newtonsoft,
-* Microsoft Npgsql.
+* Microsoft Npgsql,
+* FFmpeg.NET amd ffmpeg,
+* Redis cache,
+* PostgreSQL RDBMS,
+* Docker
 
 *Deployment*
 Server OS: Debian 10
 
-WWW: Apache 2
+WWW: Apache 2 as HTTP Proxy
 
 Core is deployed on localhost.
 
