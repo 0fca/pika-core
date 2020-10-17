@@ -1,6 +1,6 @@
 # Pika Core
 
-__Pika Core__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem(but only for download purposes) to all registered users.
+__Pika Core__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem to all registered users.
 
 Developer Instance: https://dev-core.lukas-bownik.net/
 
@@ -17,10 +17,11 @@ Production Instance: https://core.lukas-bownik.net/
 * Uploading files to public part of the filesystem,
 * Other registration forms(there is no possibility to log in via Google at the moment),
 
-*Planned features*
-* Online video watching(another system will be responsible for that),
-* Other archive formats(possibly 7-zip, tar.gz),
-* Bookmarks - so you will be able to easily find the same resource in Pika Cloud any time.
+*Planned changes*
+* Downloading whole folders as Archives formats(zip, possibly 7-zip, tar.gz),
+* Redesign it to be a core of whole PikaCloud system (Federation pattern),
+* Removing log in page(to be moved as SSO)
+* Redirect to view all resources on-demand just after PikaPlayer goes live.
 
 ### Technical information ###
 *Technology stack*
