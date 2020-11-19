@@ -2,16 +2,16 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>2.5.2</PackageVersion>
+        <PackageVersion>2.5.3</PackageVersion>
         <Authors>Arkasian</Authors>
         <Description>Pika Core Cloud</Description>
         <PackageProjectUrl>https://core.lukas-bownik.net</PackageProjectUrl>
         <RepositoryUrl>https://www.github.com/Arkasian/pika-core</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>cms core cloud</PackageTags>
-        <AssemblyVersion>2.5.2</AssemblyVersion>
-        <FileVersion>2.5.2</FileVersion>
-        <Version>2.5.2</Version>
+        <AssemblyVersion>2.5.3</AssemblyVersion>
+        <FileVersion>2.5.3</FileVersion>
+        <Version>2.5.3</Version>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
