@@ -20,6 +20,7 @@ namespace PikaCore.Areas.Core.Controllers.App
     [Area("Core")]
     [Route("/{controller}/{action}")]
     [Authorize(Roles = "Admin")]
+    [ResponseCache(CacheProfileName = "Default")]
     public class AdminController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;

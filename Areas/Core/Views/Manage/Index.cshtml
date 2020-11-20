@@ -4,7 +4,7 @@
     ViewData.AddActivePage(ManageNavPages.Index);
 }
 <div class="row">
-    <h3>@ViewData["Title"]</h3>
+    <h4>@ViewData["Title"]</h4>
     @(await Html.PartialAsync("_StatusMessage", TempData["StatusMessage"]))
     <div class="col s12 m12 l12">
         <form method="post">
@@ -25,6 +25,22 @@
             </div>
             <button type="submit" class="btn btn-default">Save</button>
         </form>
+    </div>
+</div>
+<div class="row">
+    <h5>Account Data</h5>
+    <p>From here, you can request export of your data to CSV file or just delete your account</p>
+    <div class="col s12 m6 l6">
+        <div class="input-field">
+            <strong>
+                <a class="btn btn-primary teal" onclick="M.toast({html: 'This feature is not available at the moment'})">Export</a>
+            </strong>
+        </div>
+    </div>
+    <div class="col s12 m6 l6">
+        <div class="input-field">
+            <a class="btn btn-danger" asp-area="Core" asp-controller="Account" asp-action="Delete">Delete</a>
+        </div>
     </div>
 </div>
 

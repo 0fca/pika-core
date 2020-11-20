@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -367,6 +371,77 @@ namespace PikaCore.Areas.Core.Controllers.App
             var model = new ResetPasswordViewModel { Code = code };
             return View(model);
         }
+        
+        [HttpGet]
+        [ActionName("ExportData")]
+        [Route("[area]/[controller]/[action]")]
+        public IActionResult ExportUserData()
+        {
+            var userExportData = new ExportDataViewModel()
+            {
+                DataCollections = new List<string>(){ "User Data" }
+            };
+
+            var propertyInfos = typeof(ApplicationUser).GetProperties();
+            var userRelatedComplexCollections = propertyInfos
+                .ToList()
+                .Where(prop => !prop.GetType().IsPrimitive);
+            var relatedComplexCollections = userRelatedComplexCollections 
+                as PropertyInfo[] ?? userRelatedComplexCollections.ToArray();
+            if (relatedComplexCollections.ToList().Count == 0)
+            {
+                relatedComplexCollections.ToList().ForEach(p => 
+                    userExportData.DataCollections.Add(p.Name));
+            }
+            return View(userExportData);
+        }
+        
+        
+        [HttpPost]
+        [ActionName("ExportData")]
+        [Route("[area]/[controller]/[action]")]
+        public async Task<IActionResult> ExportUserDataConfirmation(ExportDataViewModel exportDataViewModel)
+        {
+            //TODO: Add analyzing request data and gathering requested data here, in a service ofc
+            ViewData["returnMessage"] = "Your data are gathered from whole system, it can take a while. " +
+                                        "Your data will be accessible for download in CSV format as soon as they are ready";
+            
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Delete()
+        {
+            var code = Guid.NewGuid().ToString().Split("-")[0];
+            var deleteViewModel = new DeleteAccountViewModel()
+            {
+                ConfirmationCode = code
+            };
+
+            return View(deleteViewModel);
+        }
+
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        public async Task<IActionResult> Delete(DeleteAccountViewModel deleteAccountViewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(deleteAccountViewModel);
+            }
+
+            await _signInManager.SignOutAsync();
+            var identityResult = await _userManager.DeleteAsync(await _userManager.GetUserAsync(this.User));
+
+            if (identityResult.Succeeded)
+            {
+                TempData["returnMessage"] = "Your account has been successfully deleted";
+                return RedirectToAction("Index", "Home");
+            }
+            
+            TempData["returnMessage"] = "There was a problem during deleting your account";
+            return RedirectToAction("Index", "Home");
+        }
 
         [HttpPost]
         [AllowAnonymous]
@@ -391,7 +466,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             AddErrors(result);
             return View();
         }
-
+        
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ResetPasswordConfirmation()

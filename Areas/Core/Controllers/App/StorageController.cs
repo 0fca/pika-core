@@ -28,6 +28,7 @@ using Serilog;
 namespace PikaCore.Areas.Core.Controllers.App
 {
     [Area("Core")]
+    [ResponseCache(CacheProfileName = "Default")]
     public class StorageController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -77,7 +78,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Browse(string? path, int offset = 0, int count = 50)
+        public async Task<IActionResult> Browse(string? path, int offset = 0, int count = 10)
         {
             var osUser = _configuration.GetSection("OsUser")["OsUsername"];
             
@@ -102,7 +103,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
             if (!contents.Exists)
             {
-                ReturnMessage = "The resource doesn't exist on the filesystem.";
+                ReturnMessage = "The resource doesn't exist on the filesystem";
                 return View(lrmv);
             }
             
@@ -111,8 +112,8 @@ namespace PikaCore.Areas.Core.Controllers.App
 
             await lrmv.SortContents();
             var fileInfosList = lrmv.ContentsList;
-
-            var pageCount = fileInfosList.Count / count;
+            Log.Information("Browser List Count: " + fileInfosList.Count.ToString());
+            var pageCount = (int)Math.Ceiling((float)fileInfosList.Count / count);
 
             SetPagingParams(offset, count, pageCount);
 
@@ -250,41 +251,44 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult Download(string id,  string returnUrl, bool z = false)
+        public ActionResult Download(string id, string returnUrl, bool z = false)
         {
-            
             id = !z ? _idDataProtection.Decode(id) : id;
             int offset = int.Parse(Get("Offset"));
             int count = int.Parse(Get("Count"));
-            
-            try{
+
+            try
+            {
                 if (!string.IsNullOrEmpty(id))
                 {
-                    var fileInfo = _fileService.RetrieveFileInfoFromAbsolutePath(id); 
+                    var fileInfo = _fileService.RetrieveFileInfoFromAbsolutePath(id);
                     var path = fileInfo.PhysicalPath;
                     Log.Information($"Decoded path: {path}");
                     if (!fileInfo.Exists)
                     {
                         ReturnMessage = "File doesn't exist on server's filesystem.";
-                        return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+                        return RedirectToAction(nameof(Browse), new {@path = returnUrl});
                     }
-                    
+
                     if (Directory.Exists(path))
                     {
                         ReturnMessage = "This is a folder, cannot download it directly.";
-                        return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+                        return RedirectToAction(nameof(Browse), new {@path = returnUrl});
                     }
-                    
-                    var fs =  _fileService.AsStreamAsync(path);
+
+
+                    var fs = _fileService.AsStreamAsync(path);
                     var mime = MimeAssistant.GetMimeType(path);
-                    return File(fs, mime, fileInfo.Name);
+                    return File(fs, mime, fileInfo.Name, true);
                 }
-            }catch(Exception e){
+            }
+            catch (Exception e)
+            {
                 Log.Error(e, "StorageController#Download");
             }
-            ReturnMessage = "Resource id cannot be null.";
-            return RedirectToAction(nameof(Browse), new { @path = returnUrl, offset, count });
 
+            ReturnMessage = "Resource id cannot be null.";
+            return RedirectToAction(nameof(Browse), new {@path = returnUrl, offset, count});
         }
 
         [HttpGet]

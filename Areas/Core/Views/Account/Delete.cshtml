@@ -1,0 +1,31 @@
+﻿@model DeleteAccountViewModel
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    ViewData["Title"] = "Delete Your Account";
+}
+
+<div class="container">
+<div class="col s12 m6 l6 offset-2">
+    <div class="card indigo">
+        <h3 class="card-title center white-text">@ViewData["Title"]</h3>
+        <div class="card-content">
+            <strong class="white-text">You are about to delete your account.
+            <p>To confirm that you really want to delete your account, retype the following code <b>@Model.ConfirmationCode</b> below.</p>
+            This action <b>cannot be</b> undone. After proceeding, there will be no return, choose wisely.</strong>
+            <form asp-area="Core" asp-controller="Account" asp-action="Delete" method="post">
+                <input asp-for="ConfirmationCode" class="validate login-input-color" hidden=""/>
+                <div class="input-field">
+                    <label>@Html.DisplayNameFor(m => m.ConfirmationCodeReply)</label>
+                    <input asp-for="ConfirmationCodeReply" class="validate grey-text text-lighten-4" value=""/>
+                    <span asp-validation-for="ConfirmationCodeReply" class="red-text"></span>
+                </div>
+                <div class="input-field center">
+                    <button type="submit" class="btn btn-danger">Confirm</button>
+                    <a asp-area="Core" asp-controller="Manage" asp-action="Index" class="btn btn-primary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>

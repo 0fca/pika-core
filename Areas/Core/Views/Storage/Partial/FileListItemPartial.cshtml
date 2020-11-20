@@ -12,6 +12,7 @@
         ? item.Name.Replace("~", "")
         : item.Name;
     var dateString = @item.LastModified.Date.ToLongDateString();
+    var did = Guid.NewGuid().ToString();
 }
 @{
     var mime = "";
@@ -20,18 +21,34 @@
         && !mime.StartsWith("video/"))
     {
         var type = MimeAssistant.RecognizeIconByMime(mime);
-        <div class="card grey lighten-4 z-depth-0 small activator">
-            <div class="card-content">
-                <div class="card-title activator">
+        <div class="card grey lighten-4 z-depth-0 small">
+            <div class="card-content" id="@did">
+                <div class="card-title">
                     <div class="row">
                         <div class="col s10 m10 l10">
-                            <p class="flow-text truncate">
-                                <span class="fas fa-@type prefix browse-icon-margin"></span>
-                                @viewableName
-                            </p>
+                            @if (item.Length <= 100000000)
+                            {
+                                <a class="teal-text truncate flow-text"
+                                   asp-area="Core"
+                                   asp-controller="Content"
+                                   asp-action="Index"
+                                   asp-route-fileId=@DataProtection.Encode(item.PhysicalPath)
+                                   asp-route-returnUrl="@lastPath"
+                                   title="@viewableName">
+                                    <span class="fas fa-@type prefix browse-icon-margin"></span>
+                                    @viewableName
+                                </a>
+                            }
+                            else
+                            {
+                                <p class="teal-text truncate flow-text">
+                                    <span class="fas fa-@type prefix browse-icon-margin"></span>
+                                    @viewableName
+                                </p>
+                            }
                         </div>
                         <div class="col s2 m2 l2">
-                            <i class="material-icons right activator">more_vert</i>
+                            <i class="material-icons right activator">info</i>
                         </div>
                     </div>
                 </div>
@@ -39,6 +56,8 @@
             <div class="card-reveal grey lighten-4">
                 <span class="card-title grey-text text-darken-4">Information<i class="material-icons right">close</i></span>
                 <div>
+                    <p>Full name: @item.Name</p>
+                    <p>MIME: @mime</p>
                     @if (!item.IsDirectory)
                     {
                         <p>Size: @UnixHelper.DetectUnitBySize(item.Length)</p>
@@ -54,26 +73,13 @@
                     </span>
                 }
             </div>
-            <div class="card-action">
-                <a class="teal-text"
-                   asp-area="Core"
-                   asp-controller="Storage"
-                   asp-action="Download"
-                   asp-route-id=@DataProtection.Encode(item.PhysicalPath)
-                   asp-route-returnUrl=@Model.Item1 title="@viewableName">
-                    <span class="material-icons">
-                        cloud_download
-                    </span>
-                </a>
-                @await Html.PartialAsync("Partial/_ContextMenuPartial", new Tuple<string, IFileInfo>(lastPath, item))
-            </div>
         </div>
     }
     else
     {
         var id = "0." + Model.Item1?.Replace("/", "-") + $"-{item.Name}";
 
-        <div class="card small grey lighten-4 z-depth-0 activator">
+        <div class="card small grey lighten-4 z-depth-0" data-target='@DataProtection.Encode(item.PhysicalPath)'>
             <div class="card-image">
                 <picture class="fit-image activator">
                     <source id="@id" srcset="~/images/loading_icon.gif" data-name="@item.Name"/>
@@ -83,14 +89,32 @@
                          src="https://www.lukas-bownik.net/img/logos/pikacloud_core.svg"/>
                 </picture>
             </div>
-            <div class="card-content">
-                <div class="card-title truncate activator">
+            <div class="card-content" id="@did">
+                <div class="card-title truncate">
                     <div class="row">
                         <div class="col s10 m10 l10">
-                            <p class="flow-text  truncate">@viewableName</p>
+                            @if (item.Length <= 100000000)
+                            {
+                                <a class="teal-text truncate flow-text"
+                                   asp-area="Core"
+                                   asp-controller="Content"
+                                   asp-action="Index"
+                                   asp-route-fileId=@DataProtection.Encode(item.PhysicalPath)
+                                   asp-route-returnUrl="@lastPath"
+                                   title="@viewableName">
+                                    <span class="fas fa-image prefix browse-icon-margin"></span>
+                                    @viewableName
+                                </a>
+                            }
+                            else
+                            {
+                                <p class="black-text truncate flow-text" title="@viewableName">
+                                    @viewableName
+                                </p>
+                            }
                         </div>
                         <div class="col s2 m2 l2">
-                            <i class="material-icons right activator">more_vert</i>
+                            <i class="material-icons right activator">info</i>
                         </div>
                     </div>
                 </div>
@@ -98,6 +122,8 @@
             <div class="card-reveal">
                 <span class="card-title grey-text text-darken-4">Information<i class="material-icons right">close</i></span>
                 <div>
+                    <p>Full name: @item.Name</p>
+                    <p>MIME: @mime</p>
                     @if (!item.IsDirectory)
                     {
                         <p>Size: @UnixHelper.DetectUnitBySize(item.Length)</p>
@@ -113,20 +139,6 @@
                     </span>
                 }
             </div>
-            <div class="card-action">
-                <a class="teal-text"
-                   asp-area="Core"
-                   asp-controller="Storage"
-                   asp-action="Download"
-                   asp-route-id=@DataProtection.Encode(item.PhysicalPath)
-                   asp-route-returnUrl=@Model.Item1 title="@viewableName">
-                    <span class="material-icons">
-                        cloud_download
-                    </span>
-                </a>
-                @await Html.PartialAsync("Partial/_ContextMenuPartial", new Tuple<string, IFileInfo>(lastPath, item))
-            </div>
         </div>
     }
-
 }

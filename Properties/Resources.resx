@@ -99,9 +99,12 @@
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
 	<data name="Startup_ConfigureServices_Logger_output___0_" xml:space="preserve">
-		<value>Logger output: {0}</value>
+		<value>System is booting, setting the logger output: {0}</value>
 	</data>
-	<data name="Startup_OnStart_System_is_starting___" xml:space="preserve">
-		<value>System is starting...</value>
+	<data name="Startup_ConfigureServices_Using_Redis_keystore_with_key_name___0_" xml:space="preserve">
+		<value>Using Redis keystore with key name: {0}</value>
+	</data>
+	<data name="Startup_ConfigureServices_Using_filesystem_keystore" xml:space="preserve">
+		<value>Using filesystem keystore</value>
 	</data>
 </root>

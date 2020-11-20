@@ -11,12 +11,12 @@
         <form method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]">
             <input asp-for="RememberMe" type="hidden" />
             <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group">
+            <div class="input-field">
                 <label asp-for="TwoFactorCode"></label>
-                <input asp-for="TwoFactorCode" class="form-control" autocomplete="off" />
+                <input asp-for="TwoFactorCode" class="validate grey-text text-lighten-4" autocomplete="off" />
                 <span asp-validation-for="TwoFactorCode" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="input-field">
                 <div class="checkbox">
                     <label asp-for="RememberMachine">
                         <input asp-for="RememberMachine" />

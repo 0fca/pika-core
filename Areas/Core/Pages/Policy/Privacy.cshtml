@@ -1,0 +1,22 @@
+﻿@page
+@model PikaCore.Areas.Core.Pages.Policy.Privacy
+@{
+    ViewData["Title"] = "Policy - Privacy Policy";
+}
+<script src="~/js/showdown.min.js" asp-append-version="true"></script>
+
+<div class="container">
+    <div class="row">
+        <div id="privacy_content">
+            
+        </div>
+    </div>
+</div>
+<textarea id="privacy_markdown_holder" hidden aria-hidden="True">@Model.PrivacyPolicyMarkdown</textarea>
+<script>
+document.addEventListener('DOMContentLoaded', () =>{
+  const converter = new showdown.Converter();
+   document.getElementById("privacy_content")
+   .innerHTML = converter.makeHtml(document.getElementById("privacy_markdown_holder").textContent); 
+});
+</script>

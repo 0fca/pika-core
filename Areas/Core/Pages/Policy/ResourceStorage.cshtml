@@ -1,0 +1,25 @@
+﻿@page
+@model PikaCore.Areas.Core.Pages.Policy.ResourceStorage
+
+@{
+    ViewData["Title"] = "Policy - Resource Storage Policy";
+}
+
+<script src="~/js/showdown.min.js" asp-append-version="true"></script>
+
+<div class="container">
+    <div class="row">
+        <div id="data_policy_content">
+            
+        </div>
+    </div>
+</div>
+<textarea id="data_policy_markdown_holder" hidden aria-hidden="True">@Model.DataPolicyMarkdown</textarea>
+<script>
+document.addEventListener('DOMContentLoaded', () =>{
+    const converter = new showdown.Converter();      
+        let dataPolicyMarkdown = document.getElementById("data_policy_markdown_holder").textContent;
+        document.getElementById("data_policy_content").innerHTML =  converter.makeHtml(dataPolicyMarkdown);
+});
+
+</script>

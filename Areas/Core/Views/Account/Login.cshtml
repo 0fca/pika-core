@@ -9,10 +9,11 @@
     <div class="col s12 m6 l6 offset-2">
         <div class="card indigo">
             <div class="card-content grey-text text-lighten-4 center">
-                <span class="card-title">Log in using a local account.</span>
-                <hr/>
+                <span class="card-title">PikaCloud Gateway</span>
                 <section id="local_account_login">
                     @await Html.PartialAsync("_SystemMessagePartial", ViewData["Message"])
+                    <br/>
+                    <h6>Log in using PikaCloud Account</h6>
                     <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
                         <div class="row">
                             @if (!ViewData.ModelState.IsValid)
@@ -22,12 +23,12 @@
                             <div class="col s12 m12 l12">
                                 <div class="input-field">
                                     <label class="left">@Html.DisplayNameFor(m => m.Username)</label>
-                                    <input asp-for="Username" class="validate login-input-color"/>
+                                    <input asp-for="Username" class="validate grey-text text-lighten-4"/>
                                     <span asp-validation-for="Username" class="red-text"></span>
                                 </div>
                                 <div class="input-field">
                                     <label class="left">@Html.DisplayNameFor(m => m.Password)</label>
-                                    <input asp-for="Password" class="validate login-input-color"/>
+                                    <input asp-for="Password" class="validate grey-text text-lighten-4"/>
                                     <span asp-validation-for="Password" class="red-text"></span>
                                 </div>
                             </div>
@@ -41,6 +42,8 @@
                          <section id="external_account_login">
                              <div class="row">
                                  <p>OR</p>
+                                 <h6>Log in using third party account</h6>
+                                 <p></p>
                                  @{
                                      var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
                                      if (loginProviders.Count == 0)

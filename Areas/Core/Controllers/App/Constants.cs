@@ -27,6 +27,8 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         public const int MaxLogFileSize = 100 * 1024 * 1024;
 
+        public static string Instance { get; set; }
+
         private static void RecognizeOs()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) OsName = OSPlatform.Windows.ToString();

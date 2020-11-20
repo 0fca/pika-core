@@ -1,14 +1,13 @@
 ﻿@model RegisterViewModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Register a PikaCloud Account";
 }
 
 <div class="container">
 <div class="col s12 m12 offset-2">
     <div class="card indigo">
         <div class="card-content grey-text text-lighten-4 center">
-            <span class="card-title">Register</span>
-            <hr/>
+            <span class="card-title">@ViewData["Title"]</span>
             <section>
                 <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
                     <div class="row">
@@ -19,22 +18,22 @@
                         <div class="col s12 m12 l12">
                             <div class="input-field">
                                 <label class="left">@Html.DisplayNameFor(m => m.Username)</label>
-                                <input asp-for="Username" class="validate login-input-color"/>
+                                <input asp-for="Username" class="validate grey-text text-lighten-4"/>
                                 <span asp-validation-for="Username" class="red-text"></span>
                                 </div>
                             <div class="input-field">
                                 <label class="left">@Html.DisplayNameFor(m => m.Email)</label>
-                                <input asp-for="Email" class="validate login-input-color"/>
+                                <input asp-for="Email" class="validate grey-text text-lighten-4"/>
                                 <span asp-validation-for="Email" class="red-text"></span>
                             </div>
                             <div class="input-field">
                                 <label class="left">@Html.DisplayNameFor(m => m.Password)</label>
-                                <input asp-for="Password" class="validate login-input-color"/>
+                                <input asp-for="Password" class="validate grey-text text-lighten-4"/>
                                 <span asp-validation-for="Password" class="red-text"></span>
                             </div>
                             <div class="input-field">
                                 <label class="left">@Html.DisplayNameFor(m => m.ConfirmPassword)</label>
-                                <input asp-for="ConfirmPassword" class="validate login-input-color"/>
+                                <input asp-for="ConfirmPassword" class="validate grey-text text-lighten-4"/>
                                 <span asp-validation-for="ConfirmPassword" class="red-text"></span>
                             </div>
                         </div>

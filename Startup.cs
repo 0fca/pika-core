@@ -28,7 +28,9 @@ using PikaCore.Areas.Infrastructure.Data;
 using PikaCore.Areas.Infrastructure.Services;
 using PikaCore.Properties;
 using PikaCore.Security;
+using Quartz;
 using Serilog;
+using StackExchange.Redis;
 
 namespace PikaCore
 {
@@ -44,9 +46,11 @@ namespace PikaCore
 
         public void ConfigureServices(IServiceCollection services)
         {
+            Constants.Instance = Configuration.GetSection("Name:Instance").Value ?? "Default";
             var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
-                $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
+                $"pika_core_{Constants.Instance}.{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
             Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
                 .MinimumLevel.Information()
                 .WriteTo.Console()
                 .WriteTo.File(path,
@@ -76,11 +80,12 @@ namespace PikaCore
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             
-            services.AddMemoryCache();
-            services.AddStackExchangeRedisCache(a => { 
+            services.AddDistributedMemoryCache();
+            services.AddStackExchangeRedisCache(a => {
                 a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
                 a.Configuration = Configuration.GetConnectionString("RedisConnection");
             });
+            ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(Configuration.GetConnectionString("RedisConnection"));
             
             services.AddResponseCaching(options =>
             {
@@ -90,18 +95,29 @@ namespace PikaCore
             
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                services.AddDataProtection();
+                services.AddDataProtection()
+                    .ProtectKeysWithDpapi();
             }
-            else
+            else if(redis.IsConnected)
             {
-                Console.WriteLine(Configuration["Security:CertificatePath"]);
+                var key = string.Concat("CoreKeys-", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
+                Console.WriteLine(Resources.Startup_ConfigureServices_Using_Redis_keystore_with_key_name___0_, key);
+                services.AddDataProtection()
+                    .PersistKeysToStackExchangeRedis(redis, key)
+                    .ProtectKeysWithCertificate(
+                        new X509Certificate2(Configuration["Security:CertificatePath"], 
+                        Configuration["Security:Passphrase"]))
+                    .SetApplicationName("ShrCkApp");
+            }else
+            {
+                Console.WriteLine(Resources.Startup_ConfigureServices_Using_filesystem_keystore);
                 services.AddDataProtection()
                     .PersistKeysToFileSystem(new DirectoryInfo("/srv/fms/keys"))
                     .ProtectKeysWithCertificate(
                         new X509Certificate2(Configuration["Security:CertificatePath"], 
-                            Configuration["Security:Passphrase"]));
+                        Configuration["Security:Passphrase"]))
+                    .SetApplicationName("ShrCkApp");
             }
-
             services.AddAuthentication()
                 .AddGoogle(googleOpts =>
                 {
@@ -138,16 +154,15 @@ namespace PikaCore
             services.AddTransient<ISystemService, SystemService>();
             services.AddTransient<IStatusService, StatusService>();
             services.AddTransient<IJobService, JobService>();
-
+            services.AddTransient<IStaticContentService, StaticContentService>();
+            services.AddTransient<IDataExportService, DataExportService>();
+            
             services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 268435456; //256MB
             });
             
             services.AddAspNetCoreCustomValidation();
-            
-            Log.Information(Resources.Startup_ConfigureServices_Logger_output___0_, path);
-            
             services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;
@@ -160,6 +175,7 @@ namespace PikaCore
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
                 options.SlidingExpiration = true;
                 options.LoginPath = "/Core/Account/Login";
+                options.Cookie.Name = ".AspNet.ShrCk";
             });
             
     	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
@@ -169,11 +185,17 @@ namespace PikaCore
                     .WithOrigins("https://dev-core.lukas-bownik.net", 
                         "https://core.lukas-bownik.net", 
                         "https://me.lukas-bownik.net", 
+                        "https://www.lukas-bownik.net",
                         "http://localhost:5000")
                     .AllowAnyHeader();
             }));
+
+            services.AddSignalR().AddStackExchangeRedis(o =>
+            {
+                o.Configuration.ClientName = "PikaCore";
+                o.Configuration.ChannelPrefix = "PikaCoreHub";
+            });
             
-            services.AddSignalR();
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(120);
@@ -211,6 +233,13 @@ namespace PikaCore
                 opt.MimeTypes = new[] { "image/jpeg", "image/png", "image/gif" };
             });
             
+            
+            services.AddQuartz();
+            services.AddQuartzServer(options =>
+            {
+                options.WaitForJobsToComplete = true;
+            });
+            
             services.AddMvc()
                 .AddMvcOptions(options =>
             {
@@ -240,6 +269,8 @@ namespace PikaCore
                               IHostApplicationLifetime lifetime
                              )
         {
+            lifetime.ApplicationStopping.Register(OnShutdown);
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -247,18 +278,13 @@ namespace PikaCore
             else
             {
                 app.UseExceptionHandler("/Core/Home/Error");
+                app.UseHsts();
             }
-            
-            lifetime.ApplicationStopping.Register(OnStart);
-            lifetime.ApplicationStopping.Register(OnShutdown);
-
             Constants.RootPath = Configuration.GetSection("Paths")["storage"];
             Constants.FileSystemRoot = Configuration.GetSection("Paths")[OsName + "-root"];
             Constants.Tmp = Configuration.GetSection("Paths")[OsName + "-tmp"];
             Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
-
-            app.UseStaticFiles();
-            app.UseFileServer("/wwwroot/files");
+            
             app.UseStatusCodePagesWithRedirects("/Core/Home/ErrorByCode/{0}");
             app.UseSession();
 
@@ -267,13 +293,34 @@ namespace PikaCore
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
+            var cacheMaxAge = Configuration.GetSection("Storage")["cacheMaxAge"];
+            app.UseStaticFiles(new StaticFileOptions
+                {
+                    OnPrepareResponse = ctx =>
+                    {
+                        ctx.Context.Response.Headers.Append(
+                            "Cache-Control", $"public, max-age={cacheMaxAge}");
+                        ctx.Context.Response.Headers.Append("Pragma", "no-cache, no-store");
+                    }
+                }
+            );
+
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(Configuration.GetSection("Storage")["staticFiles"]),
+                RequestPath = "/Static",
+                EnableDirectoryBrowsing = false
+            });
+            
             app.UseWebSockets();
 	        app.UseCors("CorsPolicy");
             app.UseResponseCaching();
             app.UseAuthentication();
             app.UseRouting();
+
             app.UseResponseCompression();
             app.UseAuthorization();
+            
             
             app.UseEndpoints(endpoints =>
             {
@@ -300,7 +347,7 @@ namespace PikaCore
                 {
                     options.Transports =
                         HttpTransportType.ServerSentEvents |
-                        HttpTransportType.WebSockets;
+                        HttpTransportType.LongPolling;
                 });
             });
             
@@ -348,10 +395,6 @@ namespace PikaCore
         
         #region LifetimeHelpers
         
-        private static void OnStart()
-        {
-            Console.WriteLine(Resources.Startup_OnStart_System_is_starting___);
-        }
         private static void OnShutdown()
         {
             Log.Information("System is stopping... Good bye.");

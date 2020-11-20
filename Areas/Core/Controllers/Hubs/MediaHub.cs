@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Infrastructure.Services;
+using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.Hubs
 {
@@ -23,7 +24,8 @@ namespace PikaCore.Areas.Core.Controllers.Hubs
         public async Task CreateThumb(string systemPath, string guid, int s)
         {
             var thumbId = await _mediaService.CreateThumb(systemPath, guid, s);
-            await Clients.User(_userManager.GetUserId(Context.User)).SendAsync("ReceiveThumb", !string.IsNullOrEmpty(thumbId), guid);
+            Log.Information("CreateThumb: " + systemPath);
+            await Clients.All.SendAsync("ReceiveThumb", !string.IsNullOrEmpty(thumbId), guid);
         }
     }
 }

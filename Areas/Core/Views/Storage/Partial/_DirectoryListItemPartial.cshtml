@@ -1,7 +1,9 @@
 ﻿@using PikaCore.Areas.Infrastructure.Services.Helpers
 @using Microsoft.Extensions.FileProviders
+@using PikaCore.Security
 @inject SignInManager<ApplicationUser> SignInManager
 @model Tuple<string, Microsoft.Extensions.FileProviders.IFileInfo>
+@inject IdDataProtection DataProtection
 
 
 @{
@@ -12,11 +14,12 @@
         : item.Name;
     var dirIcon = item.Name.StartsWith("~") ? "folder" : "folder_shared";
     var dateString = @item.LastModified.Date.ToLongDateString();
+    var id = Guid.NewGuid().ToString();
 }
 
-<div class="card grey lighten-4 z-depth-0 small">
-    <div class="card-content activator">
-        <div class="card-title truncate activator">
+<div class="card grey lighten-4 z-depth-0 small" id="@id">
+    <div class="card-content">
+        <div class="card-title truncate">
             <div class="row">
                 <div class="col s10 m10 l10">
                     <a class="teal-text truncate" asp-area="Core"
@@ -31,7 +34,7 @@
                     </a>
                 </div>
                 <div class="col s2 m2 l2">
-                    <span class="material-icons right activator">more_vert</span>
+                    <span class="material-icons right activator">info</span>
                 </div>
             </div>
             
@@ -40,16 +43,17 @@
     <div class="card-reveal grey lighten-4 ">
         <span class="card-title grey-text text-darken-4">Information<i class="material-icons right">close</i></span>
         <div>
+            <p>Full name: @item.Name</p>
+            <p>MIME: inode/directory</p>
             @if (!item.IsDirectory)
             {
                 <p>Size: @UnixHelper.DetectUnitBySize(item.Length)</p>
             }
+            <div>
+                <p>Last Modified: @dateString</p>
+            </div>
         </div>
-
-        <div>
-            <p>Last Modified: @dateString</p>
-        </div>
-
+        
         @if (item.Name.StartsWith("~"))
         {
             <span class="material-icons">
@@ -57,11 +61,6 @@
             </span>
         }
     </div>
-    @if (SignInManager.IsSignedIn(User))
-    {
-        <div class="card-action">
-            @await Html.PartialAsync("Partial/_ContextMenuPartial", new Tuple<string, IFileInfo>(lastPath, item))
-        </div>
-    }
+    
 </div>
 

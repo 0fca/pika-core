@@ -61,7 +61,7 @@ namespace PikaCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Logger output: {0}.
+        ///   Looks up a localized string similar to System is booting, setting the logger output: {0}.
         /// </summary>
         public static string Startup_ConfigureServices_Logger_output___0_ {
             get {
@@ -70,11 +70,20 @@ namespace PikaCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to System is starting....
+        ///   Looks up a localized string similar to Using filesystem keystore.
         /// </summary>
-        public static string Startup_OnStart_System_is_starting___ {
+        public static string Startup_ConfigureServices_Using_filesystem_keystore {
             get {
-                return ResourceManager.GetString("Startup_OnStart_System_is_starting___", resourceCulture);
+                return ResourceManager.GetString("Startup_ConfigureServices_Using_filesystem_keystore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Using Redis keystore with key name: {0}.
+        /// </summary>
+        public static string Startup_ConfigureServices_Using_Redis_keystore_with_key_name___0_ {
+            get {
+                return ResourceManager.GetString("Startup_ConfigureServices_Using_Redis_keystore_with_key_name___0_", resourceCulture);
             }
         }
     }

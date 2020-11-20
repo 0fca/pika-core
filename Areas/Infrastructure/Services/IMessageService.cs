@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using PikaCore.Areas.Infrastructure.Data;
 
@@ -21,7 +22,9 @@ namespace PikaCore.Areas.Infrastructure.Services
         public Task<IssueEntity> GetLatestIssueByMessageId(int id);
 
         public void ApplyPaging<T>(ref List<T> messageEntities, int count, int offset = 0);
-
+        
+        public void ApplyPagingByDate(ref List<MessageEntity> messageEntities, int count, DateTime start, DateTime end);
+        
         public Task RemoveMessages(IList<int> ids);
 
         public Task UpdateMessage(MessageEntity e);

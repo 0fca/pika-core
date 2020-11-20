@@ -1,16 +1,21 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
     var msg = TempData["returnMessage"];
+    var infoMessage = ViewData["InfoMessage"];
 }
 <div class="row">
     <div class="main-page-content col s12 m12 l12">
         <h1 class="center">Welcome to <strong class="indigo-text">Pika Cloud</strong>!</h1>
         <p class="flow-text center">
-            This is landing page of PikaCloud. You can <a class="teal-text" asp-area="Core" asp-controller="Storage" asp-action="Browse">
+            This is landing page of PikaCloud. You can
+            <a class="teal-text" asp-area="Core" asp-controller="Storage" asp-action="Browse">
                 start browsing
             </a> or <a class="teal-text" asp-page="/Home/About">just read about this project</a>.
         </p>
     </div>
 </div>
 
-@await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)   
+@await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)
+@await Html.PartialAsync("_DismissableMessagePartial", infoMessage)
+
+

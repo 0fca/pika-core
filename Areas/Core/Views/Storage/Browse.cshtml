@@ -1,5 +1,4 @@
 ﻿@using PikaCore.Areas.Infrastructure.Services
-@using PikaCore.Areas.Infrastructure.Services.Helpers
 @using PikaCore.Security
 @using Microsoft.Extensions.FileProviders
 @model FileResultViewModel
@@ -11,6 +10,7 @@
     var msg = TempData["returnMessage"];
 }
 <!-- TODO Part this file to partials -->
+<!-- TODO Add detailed list view -->
 @if(Model?.Contents != null && !Model.Contents.GetType().IsInstanceOfType(typeof(NotFoundDirectoryContents)))
 {
 
@@ -23,10 +23,10 @@
     var count = int.Parse(TempData["Count"].ToString() ?? "0");
     var directorySeparator = System.IO.Path.DirectorySeparatorChar;
     var paginationData = new Dictionary<string, object> {{"Offset", offset}, {"Count", count}, {"PageCount", pageCount}, {"Last", lastPath}};
-
+    
+    @await Html.PartialAsync("Partial/_NavMenu.cshtml", Model)
     <div class="row">
         <div class="col s12 m12 l12">
-            
             @{
                 var splitted = lastPath?.Split(System.IO.Path.DirectorySeparatorChar);
                 var last = "";
@@ -80,12 +80,16 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <a class="transparent flow-text" 
-               asp-area="Core" 
-               asp-controller="Storage" 
-               asp-action="Browse" 
-               asp-route-path="@returnUrl">..</a>
+        <div class="row card-panel grey lighten-4 z-depth-0">
+            <a class="transparent flow-text"
+               asp-area="Core"
+               asp-controller="Storage"
+               asp-action="Browse"
+               asp-route-path="@returnUrl">
+                <span class="material-icons">
+                    arrow_back
+                </span>
+            </a>
         </div>
         @{
             if (Model.ContentsList.Count > 0)
@@ -115,13 +119,21 @@
                 </div>
             }
         }
-        <div class="row">
-            <a class="collection-item flow-text transparent" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
+        <div class="row card-panel grey lighten-4 z-depth-0">
+            <a class="transparent flow-text"
+               asp-area="Core"
+               asp-controller="Storage"
+               asp-action="Browse"
+               asp-route-path="@returnUrl">
+                <span class="material-icons">
+                    arrow_back
+                </span>
+            </a>
         </div>
 
         <div class="fixed-action-btn">
             <a class="btn-floating btn-large teal-accent">
-                <i class="large material-icons">mode_edit</i>
+                <i class="large material-icons">menu</i>
             </a>
             <ul>
                 @if (user != null
@@ -130,11 +142,13 @@
                     <li><a data-target="file-editor" class="btn btn-floating modal-trigger"><i class="fas fa-folder-plus"></i></a></li>
                     <li><a class="btn btn-floating" asp-controller="Storage" asp-action="Delete" asp-route-currentPath="@lastPath"><i class="fas fa-trash-alt"></i></a></li>
                 }
-                <li><a class="btn btn-floating modal-trigger" data-target="upload-modal"><i class="fas fa-upload"></i></a></li>
+                <li><a class="btn btn-floating modal-trigger" data-target="upload-modal"><i class="material-icons">cloud_upload</i></a></li>
             </ul>
         </div>
 
     </div>
+    @await Html.PartialAsync("Partial/_ContextMenuPartial", new Tuple<string>(lastPath))
+
     @await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
 
     @await Html.PartialAsync("Partial/_AddDirectoryPartial.cshtml", lastPath)
@@ -185,18 +199,57 @@
     document.addEventListener('DOMContentLoaded', function () {
         const elems = document.querySelectorAll('.autocomplete');
         const instances = M.Autocomplete.init(elems, {});
+        
+        const dropdown = document.querySelectorAll('.dropdown-trigger');
+        const dropdowns = M.Dropdown.init(elems, {});
     });
     
     function toPath(){
         window.location = `/Core/Storage/Browse?path=${document.getElementById("pathField").value}`;
     }
+    
 </script>
-    <script src="~/js/media.js" asp-append-version="true"></script>
+
+    <script>
+        document.querySelectorAll('.card').forEach(card =>{
+            card.addEventListener('contextmenu', function(e) {
+                 e.preventDefault();
+                 $('#menu').css({left: $('.card').offset().left, top: $('.card').offset().top})
+                 $('#menu').show();
+                 return false;
+            });
+        }, false);
+        document.addEventListener('click', () => {
+            $('#menu').hide();
+        });
+    </script>
+    
+    <div id="loader" class="card-content hide">
+        @await Html.PartialAsync("Partial/_Loader")
+    </div>
+    <script>
+    document.querySelectorAll('.card').forEach(el => {
+        let a = el.querySelector('a');
+        a.addEventListener('click', () => {
+           while(el.lastChild){
+               el.removeChild(el.firstChild);
+           } 
+           let loaderDiv = document.getElementById("loader");
+           loaderDiv.removeAttribute("class");
+           loaderDiv.setAttribute("class", "card-content center");
+           el.appendChild(loaderDiv);
+        });
+    });
+     
+</script>
+    <script src="~/js/media.js" asp-append-version="true" defer=""></script>
+    <script src="~/lib/jquery-ui-1.12.1/jquery-ui.min.js" asp-append-version="true" defer=""></script>
+    <link rel="stylesheet" href="~/lib/jquery-ui-1.12.1/jquery-ui.min.css" asp-append-version="true" />                                                                                     
 }
 else
 {
     ViewData["Title"] = "Browse - Error";
     <div class="card-panel red darken-3">
-        Unexpected error ocurred.
+        Well, the fact you see this message just means that I have totally fucked up something
     </div>
 }

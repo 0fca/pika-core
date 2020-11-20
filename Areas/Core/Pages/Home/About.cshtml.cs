@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using PikaCore.Areas.Core.Controllers.App;
 
 namespace PikaCore.Areas.Core.Pages.Home
 {
@@ -9,6 +10,7 @@ namespace PikaCore.Areas.Core.Pages.Home
         public string? Version;
         public string? Os;
         public string? FrameworkVer;
+        public string? Instance { get; set; }
 
         public void OnGet()
         {
@@ -31,6 +33,8 @@ namespace PikaCore.Areas.Core.Pages.Home
             {
                 Os = Environment.OSVersion.Platform.ToString();
             }
+
+            Instance = Constants.Instance;
             FrameworkVer = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
             Version = (Assembly.GetEntryAssembly() ?? throw new InvalidOperationException()).GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
         }

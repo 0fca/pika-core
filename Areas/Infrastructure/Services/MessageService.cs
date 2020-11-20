@@ -92,7 +92,16 @@ namespace PikaCore.Areas.Infrastructure.Services
         {
             messageEntities = messageEntities.Count - offset >= count 
                 ? messageEntities.ToList().GetRange(offset, count) 
-                : messageEntities.ToList().GetRange(offset, messageEntities.Count);
+                : messageEntities.ToList().GetRange(offset, messageEntities.Count - offset);
+        }
+
+        public void ApplyPagingByDate(ref List<MessageEntity> messageEntities, int count, DateTime start, DateTime end)
+        {
+            messageEntities = messageEntities.FindAll(me => 
+                                                            me.IsVisible 
+                                                            && (me.UpdatedAt.Date >= start && me.UpdatedAt.Date <= end)
+                                                            );
+            ApplyPaging(ref messageEntities, count);
         }
 
         public async Task RemoveMessages(IList<int> ids)

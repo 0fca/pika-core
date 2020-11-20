@@ -31,7 +31,9 @@ namespace PikaCore.Areas.Core.Models.File
 
         public void ApplyPaging(int offset, int count)
         {
-            this.ContentsList = this.ContentsList.GetRange(offset, count);
+            this.ContentsList = this.ContentsList.Count - offset >= count 
+                ? this.ContentsList.GetRange(offset, count) 
+                : this.ContentsList.GetRange(offset, this.ContentsList.Count - offset);
         }
     }
 }

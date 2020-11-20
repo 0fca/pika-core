@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -98,6 +99,20 @@ namespace PikaCore.Areas.Infrastructure.Services
             
             return Move(absolutePath,  
                 Path.Combine(Directory.GetParent(absolutePath).FullName, shownName));
+        }
+
+        public bool IsSameFile(string original, string copy)
+        {
+            byte[] origHash, copyHash;
+            using (var md5 = MD5.Create())
+            using (var stream = File.OpenRead(original))
+                origHash = md5.ComputeHash(stream);
+            
+            using (var md5 = MD5.Create())
+            using (var stream = File.OpenRead(copy))
+                copyHash = md5.ComputeHash(stream);
+            
+            return origHash.SequenceEqual(copyHash);
         }
 
         public Stream AsStreamAsync(string absolutePath, int bufferSize = 8192, bool useAsync = true)

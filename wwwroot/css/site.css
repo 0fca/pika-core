@@ -129,12 +129,14 @@ a, a:hover, a:focus {
 
 
 .container-padding {
-    margin-top: 5% !important;
-    padding-bottom: 20px !important;
+    margin-top: 5vh !important;
+    padding-bottom: 5vh !important;
 }
 
 .main-page-content {
-    margin-top: 15%;
+    height: 60vh;
+    align-content: center;
+    display: grid;
 }
 
 .main-page.path-button {
@@ -264,9 +266,13 @@ a, a:hover, a:focus {
     color: teal;
 }
 
-.login-input-color, .login-input-color::placeholder{
-    border-bottom-color: #f5f5f5 !important;
-    color: white !important;
+input[type="text"]:not(.browser-default){
+    border-bottom-color: #f5f5f5;
+    color: teal;
+}
+
+input[type="text"]:not(.browser-default):focus{
+    color: teal;
 }
 
 .nav-menu-colors{
@@ -289,4 +295,8 @@ a, a:hover, a:focus {
 
 .fit-image{
     object-fit: fill;
+}
+
+.ui-menu { 
+    width: 150px;
 }
