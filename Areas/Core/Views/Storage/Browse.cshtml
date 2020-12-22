@@ -24,7 +24,6 @@
     var directorySeparator = System.IO.Path.DirectorySeparatorChar;
     var paginationData = new Dictionary<string, object> {{"Offset", offset}, {"Count", count}, {"PageCount", pageCount}, {"Last", lastPath}};
     
-    @await Html.PartialAsync("Partial/_NavMenu.cshtml", Model)
     <div class="row">
         <div class="col s12 m12 l12">
             @{
@@ -81,16 +80,21 @@
             </div>
         </div>
         <div class="row card-panel grey lighten-4 z-depth-0">
-            <a class="transparent flow-text"
-               asp-area="Core"
-               asp-controller="Storage"
-               asp-action="Browse"
-               asp-route-path="@returnUrl">
-                <span class="material-icons">
-                    arrow_back
-                </span>
-            </a>
-        </div>
+            <div class="col s1 m1 l1">
+                <a class="transparent flow-text"
+                   asp-area="Core"
+                   asp-controller="Storage"
+                   asp-action="Browse"
+                   asp-route-path="@returnUrl">
+                    <span class="material-icons">
+                        arrow_back
+                    </span>
+                </a>
+            </div>
+            <div class="col s11 m11 l11">
+                    @await Html.PartialAsync("Partial/_NavMenu.cshtml")
+            </div>
+            </div>
         @{
             if (Model.ContentsList.Count > 0)
             {
@@ -147,7 +151,7 @@
         </div>
 
     </div>
-    @await Html.PartialAsync("Partial/_ContextMenuPartial", new Tuple<string>(lastPath))
+ 
 
     @await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
 
@@ -211,17 +215,25 @@
 </script>
 
     <script>
-        document.querySelectorAll('.card').forEach(card =>{
-            card.addEventListener('contextmenu', function(e) {
-                 e.preventDefault();
-                 $('#menu').css({left: $('.card').offset().left, top: $('.card').offset().top})
-                 $('#menu').show();
-                 return false;
-            });
-        }, false);
-        document.addEventListener('click', () => {
-            $('#menu').hide();
+    $('document').ready(() => {
+        $('.card, .card-content').click((e) => { 
+            setCurrentCardId(e);    
         });
+        
+        $('main').click((e) => {
+            if($('#menu').is(':visible')){
+                $('#menu').hide();
+                e.stopPropagation()
+            }
+        });
+    });
+    
+    function setCurrentCardId(e){
+        console.log(e.target.id);
+        localStorage.setItem('selectedCardId', e.target.id);
+        $('#menu').show();
+        e.stopPropagation();
+    }
     </script>
     
     <div id="loader" class="card-content hide">

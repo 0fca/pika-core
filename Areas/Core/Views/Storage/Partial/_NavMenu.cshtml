@@ -1,1 +1,19 @@
-﻿
+﻿@using PikaCore.Security
+@inject UserManager<ApplicationUser> UserManager
+@inject IdDataProtection DataProtection
+
+@{
+    var user = await UserManager.GetUserAsync(Context.User);
+}
+<ul id="menu" style="display: none;" class="nav-context-menu">
+    <li id="download"><span class="material-icons">cloud_download</span></li>
+</ul>
+<script>
+    
+    $('#download').on('click', () => {
+       const id = localStorage.getItem('selectedCardId');
+       if(id !== null){
+           window.location = `/Core/Storage/Download/${id}`;
+       }
+    })
+</script>

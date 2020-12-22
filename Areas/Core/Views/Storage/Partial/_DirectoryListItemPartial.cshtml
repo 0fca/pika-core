@@ -1,5 +1,4 @@
 ﻿@using PikaCore.Areas.Infrastructure.Services.Helpers
-@using Microsoft.Extensions.FileProviders
 @using PikaCore.Security
 @inject SignInManager<ApplicationUser> SignInManager
 @model Tuple<string, Microsoft.Extensions.FileProviders.IFileInfo>
@@ -14,10 +13,10 @@
         : item.Name;
     var dirIcon = item.Name.StartsWith("~") ? "folder" : "folder_shared";
     var dateString = @item.LastModified.Date.ToLongDateString();
-    var id = Guid.NewGuid().ToString();
+    var did = @DataProtection.Encode(item.PhysicalPath);
 }
 
-<div class="card grey lighten-4 z-depth-0 small" id="@id">
+<div class="card grey lighten-4 z-depth-0 small" id="@did">
     <div class="card-content">
         <div class="card-title truncate">
             <div class="row">

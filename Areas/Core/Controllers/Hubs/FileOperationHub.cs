@@ -81,5 +81,6 @@ namespace PikaCore.Areas.Core.Controllers.Hubs
                 await this.Clients.All.SendAsync("ReceiveListing", listing);
             }
         }
+
     }
 }

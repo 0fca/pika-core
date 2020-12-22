@@ -1,17 +1,1 @@
-﻿@using PikaCore.Security
-@model Tuple<string>
-@inject UserManager<ApplicationUser> UserManager
-@inject IdDataProtection DataProtection
-
-@{
-    var lastPath = Model.Item1;
-    var user = await UserManager.GetUserAsync(Context.User);
-}
-<ul id="menu">
-    
-</ul>
-<script>
-$( function() {
-       $( "#menu" ).menu().hide();
-});
-</script>
+﻿

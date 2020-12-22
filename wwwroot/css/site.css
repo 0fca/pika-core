@@ -297,6 +297,8 @@ input[type="text"]:not(.browser-default):focus{
     object-fit: fill;
 }
 
-.ui-menu { 
-    width: 150px;
+.nav-context-menu{
+    list-style-position: inside; 
+    margin: 5px 0 0 0; 
+    color:  teal;
 }
