@@ -271,6 +271,25 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
+      <Compile Update="Areas\Core\Resources\Controllers.App.HomeController.en-US.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Controllers.HomeController.en-US.resx</DependentUpon>
+      </Compile>
+      <Compile Update="Areas\Core\Resources\Controllers.App.HomeController.pl-PL.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Controllers.HomeController.pl-PL.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas.Core.Views.Home.Index.en.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Areas.Core.Views.Home.Index.en.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas.Core.Views.Home.Index.en.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Areas.Core.Views.Home.en.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
     <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="3.0.0" />
@@ -278,6 +297,7 @@
     <PackageReference Include="AspNet.Security.OAuth.Reddit" Version="3.0.0" />
     <PackageReference Include="AspNetCore.CustomValidation" Version="2.0.0" />
     <PackageReference Include="Google.Apis" Version="1.40.3" />
+    <PackageReference Include="Localization.AspNetCore.TagHelpers" Version="0.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="3.1.1" />
@@ -324,7 +344,6 @@
 
     <ItemGroup>
       <Folder Include="Areas\Api\v1\Data" />
-      <Folder Include="Areas\Core" />
       <Folder Include="wwwroot\images\github\" />
     </ItemGroup>
 

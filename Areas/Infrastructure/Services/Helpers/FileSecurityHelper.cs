@@ -7,7 +7,7 @@ namespace PikaCore.Areas.Infrastructure.Services.Helpers
 {
     public static class FileSecurityHelper
     {
-        public static string? ProcessTemporaryStoredFile(string originalEncodedName,
+        public static string ProcessTemporaryStoredFile(string originalEncodedName,
             FileStream? fileStream, 
             List<string> permittedExtensions,
             List<string> permittedMimes,
@@ -39,7 +39,7 @@ namespace PikaCore.Areas.Infrastructure.Services.Helpers
                 {
                     return "The file type isn't permitted or the file's MIME type doesn't match the file's extension.";
                 }
-                return null;
+                return "";
             }
             catch (Exception ex)
             {

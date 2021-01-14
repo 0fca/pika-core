@@ -331,7 +331,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
                 await _fileService.PostSanitizeUpload(tmpFilesList);
                 Log.Warning($"Accepted to be created at path: /Core/Storage/Browse?path={returnPath}");
-                return Accepted($"/Core/Storage/Browse?path={returnPath}", returnMessage);
+                return Accepted(Url.Action("Browse", "Storage", new {path = returnPath}), returnMessage);
             }
             catch (Exception e)
             {
@@ -353,7 +353,8 @@ namespace PikaCore.Areas.Core.Controllers.App
             };
             var name = await _jobService.CreateJob<ArchiveJob>(jobDataMap);
             ReturnMessage = "Your request has been accepted.";
-            return RedirectPermanent($"/Core/Jobs/Submit?name={name}");
+            // /Core/Jobs/Submit?name={name}
+            return RedirectPermanent(Url.Action("Submit","Jobs", new {name}));
         }
         
         [HttpPost]

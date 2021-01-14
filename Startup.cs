@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
@@ -17,7 +18,10 @@ using AspNetCore.CustomValidation.Extensions;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using PikaCore.Areas.Api.v1.Services;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
@@ -157,6 +161,24 @@ namespace PikaCore
             services.AddTransient<IStaticContentService, StaticContentService>();
             services.AddTransient<IDataExportService, DataExportService>();
             
+           services.AddLocalization();  
+             
+               services.Configure<RequestLocalizationOptions>(options =>  
+               {  
+                   var supportedCultures = new[]  
+                   {  
+                           new CultureInfo("en"),  
+                           new CultureInfo("pl")  
+                   };  
+             
+                   options.DefaultRequestCulture = new RequestCulture(culture: "en", uiCulture: "en");  
+                   options.SupportedCultures = supportedCultures;  
+                   options.SupportedUICultures = supportedCultures;  
+               }); 
+            services.AddMvc()
+                .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+                .AddDataAnnotationsLocalization(); 
+            
             services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 268435456; //256MB
@@ -269,6 +291,8 @@ namespace PikaCore
                               IHostApplicationLifetime lifetime
                              )
         {
+            var localizationOption = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>();  
+            app.UseRequestLocalization(localizationOption.Value);  
             lifetime.ApplicationStopping.Register(OnShutdown);
             
             if (env.IsDevelopment())
@@ -287,6 +311,7 @@ namespace PikaCore
             
             app.UseStatusCodePagesWithRedirects("/Core/Home/ErrorByCode/{0}");
             app.UseSession();
+            
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
@@ -321,6 +346,13 @@ namespace PikaCore
             app.UseResponseCompression();
             app.UseAuthorization();
             
+           
+            var supportedCultures = new[] { "en", "pl" };
+            var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
+            
+            app.UseRequestLocalization(localizationOptions);
             
             app.UseEndpoints(endpoints =>
             {

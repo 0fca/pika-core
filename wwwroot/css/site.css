@@ -299,6 +299,6 @@ input[type="text"]:not(.browser-default):focus{
 
 .nav-context-menu{
     list-style-position: inside; 
-    margin: 5px 0 0 0; 
+    margin: 2px 0 0 0; 
     color:  teal;
 }

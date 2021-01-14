@@ -15,7 +15,7 @@ namespace PikaCore.Areas.Infrastructure.Services
 
         Task<string?> DumpFileStreamAsync(FileStream? physicalAbsolutePath);
 
-        Task<Tuple<string?, Dictionary<string, string>>> SanitizeFileUpload(List<IFormFile> formFileList, string destinationDirectoryPath, bool isAdmin);
+        Task<Tuple<string, Dictionary<string, string>>> SanitizeFileUpload(List<IFormFile> formFileList, string destinationDirectoryPath, bool isAdmin);
 
         Task PostSanitizeUpload(Dictionary<string, string> files);
         

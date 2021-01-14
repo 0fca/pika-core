@@ -169,7 +169,7 @@ namespace PikaCore.Areas.Infrastructure.Services
             return physicalAbsolutePath.Name;
         }
 
-        public async Task<Tuple<string?, Dictionary<string, string>>> SanitizeFileUpload(List<IFormFile> formFileList,
+        public async Task<Tuple<string, Dictionary<string, string>>> SanitizeFileUpload(List<IFormFile> formFileList,
             string destinationPath,
             bool isAdmin = false)
         {
