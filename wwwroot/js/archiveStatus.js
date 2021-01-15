@@ -1,5 +1,5 @@
 ﻿const connection = new signalR.HubConnectionBuilder().withUrl("/hubs/status",{
-    transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.LongPolling
+    transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.WebSockets
 })
     .configureLogging(signalR.LogLevel.None)
     .build();

@@ -366,20 +366,20 @@ namespace PikaCore
                 endpoints.MapHub<StatusHub>("/hubs/status", options =>
                 {
                     options.Transports =
-                        HttpTransportType.LongPolling |
+                        HttpTransportType.WebSockets |
                         HttpTransportType.ServerSentEvents;
                 });
                 endpoints.MapHub<FileOperationHub>("/hubs/files", options =>
                 {
                     options.Transports =
-                        HttpTransportType.LongPolling |
+                        HttpTransportType.WebSockets |
                         HttpTransportType.ServerSentEvents;
                 });
                 endpoints.MapHub<MediaHub>("/hubs/media", options =>
                 {
                     options.Transports =
                         HttpTransportType.ServerSentEvents |
-                        HttpTransportType.LongPolling;
+                        HttpTransportType.WebSockets;
                 });
             });
             
