@@ -346,7 +346,6 @@ namespace PikaCore
             app.UseResponseCompression();
             app.UseAuthorization();
             
-           
             var supportedCultures = new[] { "en", "pl" };
             var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
                 .AddSupportedCultures(supportedCultures)
