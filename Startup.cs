@@ -35,6 +35,7 @@ using PikaCore.Security;
 using Quartz;
 using Serilog;
 using StackExchange.Redis;
+using WebSocketOptions = Microsoft.AspNetCore.Builder.WebSocketOptions;
 
 namespace PikaCore
 {
@@ -212,7 +213,8 @@ namespace PikaCore
                     .AllowAnyHeader();
             }));
 
-            services.AddSignalR().AddStackExchangeRedis(o =>
+            services.AddSignalR()
+                .AddStackExchangeRedis(o =>
             {
                 o.Configuration.ClientName = "PikaCore";
                 o.Configuration.ChannelPrefix = "PikaCoreHub";
@@ -291,8 +293,13 @@ namespace PikaCore
                               IHostApplicationLifetime lifetime
                              )
         {
-            var localizationOption = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>();  
-            app.UseRequestLocalization(localizationOption.Value);  
+            var supportedCultures = new[] { "en", "pl" };
+            var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
+                        
+            app.UseRequestLocalization(localizationOptions);
+
             lifetime.ApplicationStopping.Register(OnShutdown);
             
             if (env.IsDevelopment())
@@ -336,8 +343,13 @@ namespace PikaCore
                 RequestPath = "/Static",
                 EnableDirectoryBrowsing = false
             });
+            var webSocketOptions = new WebSocketOptions()
+            {
+                KeepAliveInterval = TimeSpan.FromSeconds(120),
+            };
+            webSocketOptions.AllowedOrigins.Add("https://dev-core.lukas-bownik.net");
+            app.UseWebSockets(webSocketOptions);
             
-            app.UseWebSockets();
 	        app.UseCors("CorsPolicy");
             app.UseResponseCaching();
             app.UseAuthentication();
@@ -346,12 +358,7 @@ namespace PikaCore
             app.UseResponseCompression();
             app.UseAuthorization();
             
-            var supportedCultures = new[] { "en", "pl" };
-            var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
-                .AddSupportedCultures(supportedCultures)
-                .AddSupportedUICultures(supportedCultures);
             
-            app.UseRequestLocalization(localizationOptions);
             
             app.UseEndpoints(endpoints =>
             {
