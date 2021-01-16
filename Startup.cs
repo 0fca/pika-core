@@ -162,7 +162,7 @@ namespace PikaCore
             services.AddTransient<IStaticContentService, StaticContentService>();
             services.AddTransient<IDataExportService, DataExportService>();
             
-           services.AddLocalization();  
+           services.AddLocalization(options => options.ResourcesPath = "Resources"); 
              
                services.Configure<RequestLocalizationOptions>(options =>  
                {  
@@ -306,6 +306,7 @@ namespace PikaCore
 
             lifetime.ApplicationStopping.Register(OnShutdown); 
  
+            app.UseHealthChecks("/core/health");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -314,6 +315,7 @@ namespace PikaCore
             {
                 app.UseExceptionHandler("/Core/Home/Error");
                 app.UseHsts();
+                app.UseCertificateForwarding();
             }
             Constants.RootPath = Configuration.GetSection("Paths")["storage"];
             Constants.FileSystemRoot = Configuration.GetSection("Paths")[OsName + "-root"];
