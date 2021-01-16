@@ -213,7 +213,11 @@ namespace PikaCore
                     .AllowAnyHeader();
             }));
 
-            services.AddSignalR()
+            services.AddSignalR(hubOptions =>
+                                    {
+                                        hubOptions.EnableDetailedErrors = true;
+                                        hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
+                                    })
                 .AddStackExchangeRedis(o =>
             {
                 o.Configuration.ClientName = "PikaCore";
