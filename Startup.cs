@@ -305,7 +305,6 @@ namespace PikaCore
             app.UseRequestLocalization(localizationOptions);
 
             lifetime.ApplicationStopping.Register(OnShutdown); 
-            app.UseHttpsRedirection();
  
             if (env.IsDevelopment())
             {
