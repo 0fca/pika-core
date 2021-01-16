@@ -137,4 +137,8 @@
     <value>lub</value>
     <comment/>
   </data>
+  <data name="MainHeaderWelcomeText" xml:space="preserve">
+    <value>Witaj w</value>
+    <comment/>
+  </data>
 </root>

@@ -19,18 +19,16 @@ namespace PikaCore.Areas.Api.v1.Services
         {
             var systemDescriptors = await _systemService.GetAll();
             var resultDictionary = new Dictionary<string, bool>();
-            systemDescriptors.ForEach(d =>
+            systemDescriptors.ForEach(async d =>
             {
-                resultDictionary.Add(d.SystemName, Pinger.Ping($"{d.Address}", d.Port));
+                resultDictionary.Add(d.SystemName, await Pinger.Ping($"{d.Address}", d.Port));
             });
             return resultDictionary;
         }
 
         public async Task<bool> CheckSpecificSystem(SystemDescriptor descriptor)
         {
-            return await Task.Factory.StartNew(() => 
-                Pinger.Ping($"{descriptor.Address}", descriptor.Port)
-                );
+            return await Pinger.Ping($"{descriptor.Address}", descriptor.Port);
         }
     }
 }

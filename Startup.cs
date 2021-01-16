@@ -178,7 +178,8 @@ namespace PikaCore
                }); 
             services.AddMvc()
                 .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
-                .AddDataAnnotationsLocalization(); 
+                .AddDataAnnotationsLocalization();
+            services.AddHealthChecks();
             
             services.Configure<FormOptions>(options =>
             {
@@ -306,7 +307,6 @@ namespace PikaCore
 
             lifetime.ApplicationStopping.Register(OnShutdown); 
  
-            app.UseHealthChecks("/core/health");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -364,8 +364,6 @@ namespace PikaCore
             app.UseResponseCompression();
             app.UseAuthorization();
             
-            
-            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -393,6 +391,9 @@ namespace PikaCore
                         HttpTransportType.ServerSentEvents |
                         HttpTransportType.WebSockets;
                 });
+                endpoints.MapHealthChecks("/core/health")
+                    .RequireCors("CorsPolicy")
+                    .RequireHost("localhost"); 
             });
             
             CreateRoles(serviceProvider).Wait();

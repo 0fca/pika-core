@@ -137,4 +137,8 @@
     <value>or</value>
     <comment/>
   </data>
+  <data name="MainHeaderWelcomeText" xml:space="preserve">
+    <value>Welcome to</value>
+    <comment/>
+  </data>
 </root>
