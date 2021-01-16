@@ -1,6 +1,6 @@
-﻿@using System.Net
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 @inject UserManager<ApplicationUser> UserManager
+@inject IViewLocalizer Localizer  
 @{ 
     var role = "";
     var roleName = "";
@@ -66,8 +66,14 @@
     <div class="container">
         <div class="row">
             <div class="col s12 m6 l6">
-                <p class="white-text left small-text">Interested in this app? See <a class="teal-text" asp-page="/Home/About">About</a> page to take a better look at it!</p>
-                <p class="white-text left small-text">PikaCloud uses cookies, by using all apps in PikaCloud, you accept our <a class="teal-text" asp-page="/Policy/Index">policies</a>.</p>
+                <p class="white-text left small-text">@Localizer["FooterInterestedInAppText"]?
+                    @{
+                        var msg = Localizer["FooterSeeAboutText"];
+                        var link = "<a href=\"@Url.PageLink(\"/Core//Home/About\")\"></a>";
+                    }
+                    @(Html.Raw(string.Format(msg.Value, link))) 
+                    </p>
+                <p class="white-text left small-text">@Localizer["FooterCookieText"] <a href="@Url.PageLink("/Core/Policy/Index")">@Localizer["FooterPolicies"]</a> .</p>
             </div>
             <environment include="Development">
                 <div class="col s12 m6 l6">

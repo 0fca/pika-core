@@ -141,4 +141,24 @@
     <value>Witaj w</value>
     <comment/>
   </data>
+  <data name="FooterInterestedInAppText" xml:space="preserve">
+    <value>Zainteresowany aplikacją</value>
+    <comment/>
+  </data>
+  <data name="FooterSeeAboutText" xml:space="preserve">
+    <value>Zobacz stronę {0} po więcej szczegółów!</value>
+    <comment/>
+  </data>
+  <data name="AboutText" xml:space="preserve">
+    <value>O aplikacji</value>
+    <comment/>
+  </data>
+  <data name="FooterCookieText" xml:space="preserve">
+    <value>PikaCloud używa cookies, używając go, akceptujesz nasze</value>
+    <comment/>
+  </data>
+  <data name="PoliciesText" xml:space="preserve">
+    <value>polityki</value>
+    <comment/>
+  </data>
 </root>

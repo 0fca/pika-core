@@ -179,7 +179,7 @@ namespace PikaCore
             services.AddMvc()
                 .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
                 .AddDataAnnotationsLocalization();
-            services.AddHealthChecks();
+            
             
             services.Configure<FormOptions>(options =>
             {
@@ -213,6 +213,7 @@ namespace PikaCore
                         "http://localhost:5000")
                     .AllowAnyHeader();
             }));
+            services.AddHealthChecks();
 
             services.AddSignalR(hubOptions =>
                                     {
@@ -355,11 +356,11 @@ namespace PikaCore
             };
             webSocketOptions.AllowedOrigins.Add("https://dev-core.lukas-bownik.net");
             app.UseWebSockets(webSocketOptions);
-            
+            app.UseRouting();
 	        app.UseCors("CorsPolicy");
             app.UseResponseCaching();
             app.UseAuthentication();
-            app.UseRouting();
+            
 
             app.UseResponseCompression();
             app.UseAuthorization();

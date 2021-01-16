@@ -302,3 +302,7 @@ input[type="text"]:not(.browser-default):focus{
     margin: 2px 0 0 0; 
     color:  teal;
 }
+
+.page-footer .container .row a{
+    color: teal;
+}
