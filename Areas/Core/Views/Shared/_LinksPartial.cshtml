@@ -1,5 +1,6 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@inject IViewLocalizer Localizer  
 <div class="right">
     <ul class="right hide-on-med-and-down">
         <li>
@@ -8,14 +9,14 @@
             </a>
         </li>
         <li>
-            <a id="app-drop-link" class='dropdown-trigger navlink' href='#' data-target='app-dropdown' title="Pika Cloud Apps">
+            <a id="app-drop-link" class='dropdown-trigger navlink' href='#' data-target='app-dropdown' title="@Localizer["PikaCloudApps"]">
                 <i class="large material-icons">apps</i>
             </a>
         </li>
         @if (SignInManager.IsSignedIn(User))
         {
             <li>
-                <a asp-area="Core" class="navlink" asp-controller="Manage" asp-action="Index" title="Manage">
+                <a asp-area="Core" class="navlink" asp-controller="Manage" asp-action="Index" title="@Localizer["Manage"]">
                     <i class="material-icons">
                         account_box
                     </i>
@@ -28,8 +29,8 @@
         }
         else
         {
-            <li><a asp-area="Core" class="navlink" asp-controller="Account" asp-action="Register">Register</a></li>
-            <li><a asp-area="Core" class="navlink" asp-controller="Account" asp-action="Login">Log in</a></li>
+            <li><a asp-area="Core" class="navlink" asp-controller="Account" asp-action="Register">@Localizer["Register"]</a></li>
+            <li><a asp-area="Core" class="navlink" asp-controller="Account" asp-action="Login">@Localizer["Login"]</a></li>
         }
     </ul>
 </div>

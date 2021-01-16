@@ -69,11 +69,12 @@
                 <p class="white-text left small-text">@Localizer["FooterInterestedInAppText"]?
                     @{
                         var msg = Localizer["FooterSeeAboutText"];
-                        var link = "<a href=\"@Url.PageLink(\"/Core//Home/About\")\"></a>";
+                        var link = $"<a href=\"/Core/Home/About\">{Localizer["AboutText"].Value}</a>";
                     }
                     @(Html.Raw(string.Format(msg.Value, link))) 
-                    </p>
-                <p class="white-text left small-text">@Localizer["FooterCookieText"] <a href="@Url.PageLink("/Core/Policy/Index")">@Localizer["FooterPolicies"]</a> .</p>
+                </p>
+                
+                <p class="white-text left small-text">@Localizer["FooterCookieText"] <a asp-page="/Policy/Index">@Localizer["PoliciesText"]</a> .</p>
             </div>
             <environment include="Development">
                 <div class="col s12 m6 l6">
