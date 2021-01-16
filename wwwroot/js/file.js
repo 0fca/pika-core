@@ -1,7 +1,7 @@
 ﻿const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/hubs/files",{
     transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.WebSockets
 })
-    .configureLogging(signalR.LogLevel.None)
+    .configureLogging(signalR.LogLevel.Debug)
     .build();
 
 
