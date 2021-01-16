@@ -28,9 +28,8 @@ namespace PikaCore
                 })
                 .UseStartup<Startup>()
                 .UseConfiguration(configuration)
-                .UseUrls($"http://localhost:{port}")
+                .UseUrls($"https://localhost:{port}")
                 .UseKestrel()
-                .UseSockets(opts => { opts.NoDelay = true; })
                 .Build();
             host.Run();
         }

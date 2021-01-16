@@ -281,14 +281,23 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>Controllers.HomeController.pl-PL.resx</DependentUpon>
       </Compile>
-      <EmbeddedResource Update="Resources\Areas.Core.Views.Home.Index.en.resx">
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Home\Index.en.resx">
         <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>Areas.Core.Views.Home.Index.en.Designer.cs</LastGenOutput>
+        <LastGenOutput>Index.en.Designer.cs</LastGenOutput>
       </EmbeddedResource>
-      <Compile Update="Resources\Areas.Core.Views.Home.Index.en.Designer.cs">
+      <Compile Update="Resources\Areas\Core\Views\Home\Index.en.Designer.cs">
         <DesignTime>True</DesignTime>
         <AutoGen>True</AutoGen>
         <DependentUpon>Areas.Core.Views.Home.en.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Home\Index.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Areas.Core.Views.Home.Index.en.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Home\Index.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Index.pl.resx</DependentUpon>
       </Compile>
     </ItemGroup>
     <ItemGroup>
