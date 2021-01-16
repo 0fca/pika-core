@@ -118,7 +118,23 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="MainHeaderText" xml:space="preserve">
-    <value>Text</value>
+    <value>This is landing page of PikaCloud</value>
+    <comment/>
+  </data>
+  <data name="MainHeaderYou" xml:space="preserve">
+    <value>You can</value>
+    <comment/>
+  </data>
+  <data name="MainHeaderBrowserLinkText" xml:space="preserve">
+    <value>start browsing</value>
+    <comment/>
+  </data>
+  <data name="MainHeaderAboutLinkText" xml:space="preserve">
+    <value>just read about this project</value>
+    <comment/>
+  </data>
+  <data name="MainHeaderOr" xml:space="preserve">
+    <value>or</value>
     <comment/>
   </data>
 </root>
