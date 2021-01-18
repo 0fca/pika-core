@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using PikaCore.Areas.Api.v1.Models;
 using PikaCore.Areas.Api.v1.Models.DTO;
 using PikaCore.Areas.Api.v1.Services;
-using PikaCore.Areas.Infrastructure.Data;
-using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Infrastructure.Data;
+using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Api.v1.Controllers
 {

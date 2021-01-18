@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
-using PikaCore.Areas.Infrastructure.Services;
-using PikaCore.Areas.Infrastructure.Services.Helpers;
+using PikaCore.Infrastructure.Services;
+using PikaCore.Infrastructure.Services.Helpers;
 using Quartz;
 
 namespace PikaCore.Areas.Core.Services

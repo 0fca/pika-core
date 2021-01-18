@@ -87,22 +87,6 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
-      <Content Update="Areas\Core\Pages\Admin\EditIssues.cshtml">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Update="Areas\Core\Pages\Admin\MessageEdit.cshtml">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Update="Areas\Core\Pages\Admin\CreateMessage.cshtml">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Update="Areas\Core\Views\Admin\RemoveMessages.cshtml">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
       <Content Update="wwwroot\js\delete_form.js">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -132,10 +116,6 @@
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
       <Content Update="wwwroot\images\pika-logos\pikacloud.svg">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Update="Areas\Core\Pages\Admin\CreateSystem.cshtml">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
@@ -335,12 +315,217 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>_LinksPartial.pl.resx</DependentUpon>
       </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Account\Login.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Login.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Account\Login.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Login.en.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Models\AccountViewModels\LoginViewModel.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>LoginViewModel.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Models\AccountViewModels\LoginViewModel.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>LoginViewModel.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Controllers\App\AccountController.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>AccountController.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Controllers\App\AccountController.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>AccountController.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Models\AccountViewModels\RegisterViewModel.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>RegisterViewModel.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Models\AccountViewModels\RegisterViewModel.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>RegisterViewModel.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Account\Register.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Register.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Account\Register.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Register.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Account\Lockout.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Lockout.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Account\Lockout.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Lockout.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Models\AccountViewModels\ForgotPasswordViewModel.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>ForgotPasswordViewModel.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Models\AccountViewModels\ForgotPasswordViewModel.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ForgotPasswordViewModel.pl.resx</DependentUpon>
+      </Compile>
+      <Content Update="Areas\Core\Views\Shared\AccessDenied.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Shared\AccessDenied.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>AccessDenied.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Shared\AccessDenied.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>AccessDenied.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Account\Delete.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Delete.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Account\Delete.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Delete.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Account\ExportData.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>ExportData.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Account\ExportData.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ExportData.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Models\AccountViewModels\ExternalLoginViewModel.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>ExternalLoginViewModel.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Models\AccountViewModels\ExternalLoginViewModel.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ExternalLoginViewModel.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Account\ExternalLogin.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>ExternalLogin.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Account\ExternalLogin.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ExternalLogin.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Account\ForgotPasswordConfirmation.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>ForgotPasswordConfirmation.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Account\ForgotPasswordConfirmation.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ForgotPasswordConfirmation.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Models\AccountViewModels\ResetPasswordViewModel.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>ResetPasswordViewModel.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Models\AccountViewModels\ResetPasswordViewModel.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ResetPasswordViewModel.pl.resx</DependentUpon>
+      </Compile>
+      <Content Update="Areas\Admin\Views\Partials\_StatusMessage.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Partials\_GeneratePasswordViewPartial.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Index\Delete.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Index\Edit.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Index\Index.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Index\RemoveMessages.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Pages\Index\CreateMessage.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Pages\Index\CreateSystem.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Pages\Index\EditIssues.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Pages\Index\MessageEdit.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Pages\_ViewStart.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Shared\AccessDenied.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Shared\Error.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Shared\_Layout.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\_ViewImports.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\_ViewStart.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Shared\_LinksPartial.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Shared\_Sidenav.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Areas\Admin\Views\Shared\_ValidationScriptsPartial.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
     </ItemGroup>
     <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="3.0.0" />
     <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="3.0.0" />
     <PackageReference Include="AspNet.Security.OAuth.Reddit" Version="3.0.0" />
-    <PackageReference Include="AspNetCore.CustomValidation" Version="2.0.0" />
     <PackageReference Include="Google.Apis" Version="1.40.3" />
     <PackageReference Include="Localization.AspNetCore.TagHelpers" Version="0.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.1" />
@@ -381,6 +566,7 @@
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.5.1" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="4.7.0" />
+    <PackageReference Include="TanvirArjel.CustomValidation.AspNetCore" Version="1.0.1" />
     <PackageReference Include="xFFmpeg.NET" Version="3.4.0" />
   </ItemGroup>
 
@@ -390,6 +576,7 @@
 
     <ItemGroup>
       <Folder Include="Areas\Api\v1\Data" />
+      <Folder Include="Resources\Areas\Admin\Views" />
       <Folder Include="wwwroot\images\github\" />
     </ItemGroup>
 

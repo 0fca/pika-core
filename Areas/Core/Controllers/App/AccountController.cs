@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.AccountViewModels;
-using PikaCore.Areas.Core.Security;
-using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Infrastructure.Security;
+using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {
@@ -25,19 +25,20 @@ namespace PikaCore.Areas.Core.Controllers.App
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
-        private readonly IMessageService _messageService;
+        private readonly IStringLocalizer<AccountController> _localizer;
 
         public AccountController(UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager, 
             IEmailSender emailSender,
             ILogger<AccountController> logger,
-            IMessageService messageService)
+            IMessageService messageService,
+            IStringLocalizer<AccountController> stringLocalizer)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
-            _messageService = messageService;
+            _localizer = stringLocalizer;
         }
 
         [TempData] private string ErrorMessage { get; set; }
@@ -47,18 +48,8 @@ namespace PikaCore.Areas.Core.Controllers.App
         public async Task<IActionResult> Login(string returnUrl = "/")
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            var message = "";
-            try
-            {
-                message = (await _messageService.GetMessageById(3)).Message;
-            }
-            catch 
-            {
-                // ignore
-            }
-
             ViewData["ReturnUrl"] = returnUrl;
-            ViewData["Message"] = message;
+            ViewData["Message"] = null;
             return View();
         }
 
@@ -85,11 +76,13 @@ namespace PikaCore.Areas.Core.Controllers.App
             if (result.IsLockedOut)
             {
                 _logger.LogWarning($"User account of username: {model.Username} locked out.");
-                TempData["LockoutMessage"] = "Account has been locked out.";
+                TempData["LockoutMessage"] = _localizer.GetString( "Account has been locked out").Value;
                 return RedirectToAction(nameof(Lockout));
             }
             
-            ModelState.AddModelError(string.Empty, $"Invalid login attempt. Username: {model.Username}");
+            ModelState.AddModelError(string.Empty, string.Format(
+                _localizer.GetString("Invalid login attempt. Username: {0}").Value, 
+                    model.Username));
             return View(model);
             
         }
@@ -102,7 +95,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                throw new ApplicationException(_localizer.GetString("Unable to load two-factor authentication user.").Value);
             }
 
             var model = new LoginWith2FaViewModel { RememberMe = rememberMe };
@@ -143,7 +136,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 return RedirectToAction(nameof(Lockout));
             }
             _logger.LogWarning("Invalid authenticator code entered for user with ID {UserId}.", user.Id);
-            ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
+            ModelState.AddModelError(string.Empty, _localizer.GetString("Invalid authenticator code").Value);
             return View();
         }
 
@@ -154,7 +147,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                throw new ApplicationException(_localizer.GetString("Unable to load two-factor authentication user").Value);
             }
 
             ViewData["ReturnUrl"] = returnUrl;
@@ -174,7 +167,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                throw new ApplicationException(_localizer.GetString("Unable to load two-factor authentication user").Value);
             }
 
             var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty);
@@ -194,7 +187,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             else
             {
                 _logger.LogWarning("Invalid recovery code entered for user with ID {UserId}", user.Id);
-                ModelState.AddModelError(string.Empty, "Invalid recovery code entered.");
+                ModelState.AddModelError(string.Empty, _localizer.GetString("Invalid recovery code entered").Value);
                 return View();
             }
         }
@@ -262,7 +255,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         {
             if (remoteError != null)
             {
-                ErrorMessage = $"Error from external provider: {remoteError}";
+                ErrorMessage = string.Format(_localizer.GetString("Error from external provider: {0}").Value, remoteError);
                 return RedirectToAction(nameof(Login));
             }
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -301,7 +294,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 var info = await _signInManager.GetExternalLoginInfoAsync();
                 if (info == null)
                 {
-                    throw new ApplicationException("Error loading external login information during confirmation.");
+                    throw new ApplicationException(_localizer.GetString("Error loading external login information during confirmation."));
                 }
 
                 var user = new ApplicationUser {UserName = model.Username, Email = model.Email};
@@ -403,8 +396,8 @@ namespace PikaCore.Areas.Core.Controllers.App
         public async Task<IActionResult> ExportUserDataConfirmation(ExportDataViewModel exportDataViewModel)
         {
             //TODO: Add analyzing request data and gathering requested data here, in a service ofc
-            ViewData["returnMessage"] = "Your data are gathered from whole system, it can take a while. " +
-                                        "Your data will be accessible for download in CSV format as soon as they are ready";
+            ViewData["returnMessage"] = _localizer.GetString("Your data is gathered from whole system, it can take a while. " +
+                                        "Your data will be accessible for download in CSV format as soon as they are ready").Value;
             
             return View();
         }
@@ -435,11 +428,11 @@ namespace PikaCore.Areas.Core.Controllers.App
 
             if (identityResult.Succeeded)
             {
-                TempData["returnMessage"] = "Your account has been successfully deleted";
+                TempData["returnMessage"] = _localizer.GetString("Your account has been successfully deleted").Value;
                 return RedirectToAction("Index", "Home");
             }
             
-            TempData["returnMessage"] = "There was a problem during deleting your account";
+            TempData["returnMessage"] = _localizer.GetString("There was a problem during deleting your account").Value;
             return RedirectToAction("Index", "Home");
         }
 
@@ -456,21 +449,16 @@ namespace PikaCore.Areas.Core.Controllers.App
             if (user == null)
             {
                 // Don't reveal that the user does not exist
-                return RedirectToAction(nameof(ResetPasswordConfirmation));
+                TempData["Message"] = _localizer.GetString("Your password has been successfully reset").Value;
+                return RedirectToAction("Login", "Account");
             }
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
-                return RedirectToAction(nameof(ResetPasswordConfirmation));
+                this.ErrorMessage = _localizer.GetString("Your password has been successfully reset").Value;
+                return RedirectToAction("Login", "Account");
             }
             AddErrors(result);
-            return View();
-        }
-        
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult ResetPasswordConfirmation()
-        {
             return View();
         }
 

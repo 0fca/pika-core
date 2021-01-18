@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using PikaCore.Areas.Api.v1.Services.Utils;
-using PikaCore.Areas.Infrastructure.Data;
-using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Infrastructure.Data;
+using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Api.v1.Services
 {

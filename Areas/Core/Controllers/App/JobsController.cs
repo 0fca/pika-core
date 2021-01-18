@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Infrastructure.Services;
 using Quartz;
 
 namespace PikaCore.Areas.Core.Controllers.App

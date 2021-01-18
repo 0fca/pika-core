@@ -1,15 +1,17 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using AspNetCore.CustomValidation.Attributes;
+using TanvirArjel.CustomValidation.Attributes;
 
 namespace PikaCore.Areas.Core.Models.AccountViewModels
 {
     public class DeleteAccountViewModel
     {
+        [Required(ErrorMessage = "This field is required")]
+        [Display(Name = "Confirmation Code")]
         [StringLength(maximumLength: 12, MinimumLength = 4)]
         public string ConfirmationCode { get; set; }
         
-        [DisplayName("Confirmation code")]
+        [DisplayName("Repeat Confirmation Code")]
         [StringLength(maximumLength: 12, MinimumLength = 4)]
         [CompareTo("ConfirmationCode", ComparisonType.Equal, ErrorMessage = "Confirmation code doesn't match")]
         public string ConfirmationCodeReply { get; set; }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Infrastructure.Services;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.Hubs

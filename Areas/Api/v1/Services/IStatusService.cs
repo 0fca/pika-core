@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using PikaCore.Areas.Infrastructure.Data;
+using PikaCore.Infrastructure.Data;
 
 namespace PikaCore.Areas.Api.v1.Services
 {

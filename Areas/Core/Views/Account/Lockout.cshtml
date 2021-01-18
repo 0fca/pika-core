@@ -1,5 +1,6 @@
-﻿@{
-    ViewData["Title"] = "Locked out";
+﻿@inject IViewLocalizer Localizer  
+@{
+    ViewData["Title"] = Localizer["Locked out"];
 }
 
 <div class="container">
@@ -9,7 +10,7 @@
                 <p class="white-text">@TempData["LockoutMessage"]</p>
             </div>
             <div class="card-action white-text">
-                <a href="/">Home Page</a>
+                <a href="/">@Localizer["Home Page"]</a>
             </div>
     </div>
 </div>

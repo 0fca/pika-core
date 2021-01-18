@@ -1,0 +1,39 @@
+﻿@using PikaCore.Areas.Core.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var userName = UserManager.GetUserName(User);
+}
+
+<li>
+    <div class="user-view">
+        <a asp-controller="Manage" asp-action="Index"><span class="name">@userName</span></a>
+    </div>
+</li>
+
+<li><a asp-area="Core" asp-controller="Storage" asp-action="Browse">Pika Core Browser</a></li>
+<li><a href="https://player.lukas-bownik.net">Pika Player</a></li>
+@if (User.IsInRole("Admin"))
+{
+    <li>
+        <a asp-area="Admin" asp-controller="Index" asp-action="Index" class="navlink app-menu-item" title="Pika Cloud Admin">
+            Pika Cloud Admin
+        </a>
+    </li>
+}
+
+<li><a class="navlink" asp-area="Core" asp-page="/Home/About">About</a></li>
+@if (SignInManager.IsSignedIn(User))
+{
+    <li>
+        <button type="submit" class="waves-effect waves-teal btn-flat">Log out</button>
+    </li>
+
+}
+else
+{
+    <li><a asp-area="Core" class="navlink" asp-controller="Account" asp-action="Register">Register</a></li>
+    <li><a asp-area="Core" class="navlink" asp-controller="Account" asp-action="Login">Log in</a></li>
+}
+

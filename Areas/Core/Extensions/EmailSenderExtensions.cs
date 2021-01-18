@@ -1,7 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Extensions
 {

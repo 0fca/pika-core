@@ -14,27 +14,26 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using AspNetCore.CustomValidation.Extensions;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using PikaCore.Areas.Api.v1.Services;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Areas.Infrastructure.Data;
-using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Infrastructure.Data;
+using PikaCore.Infrastructure.Security;
+using PikaCore.Infrastructure.Services;
 using PikaCore.Properties;
-using PikaCore.Security;
 using Quartz;
 using Serilog;
 using StackExchange.Redis;
+using TanvirArjel.CustomValidation.AspNetCore.Extensions;
 using WebSocketOptions = Microsoft.AspNetCore.Builder.WebSocketOptions;
 
 namespace PikaCore
@@ -145,7 +144,8 @@ namespace PikaCore
                     discordOptions.ClientId = Configuration["Authentication:Discord:ClientId"];
                     discordOptions.ClientSecret = Configuration["Authentication:Discord:ClientSecret"];
                 });
-
+            
+            services.AddAspNetCoreCustomValidation();
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
@@ -175,7 +175,8 @@ namespace PikaCore
                    options.DefaultRequestCulture = new RequestCulture(culture: "en", uiCulture: "en");  
                    options.SupportedCultures = supportedCultures;  
                    options.SupportedUICultures = supportedCultures;  
-               }); 
+               });
+               
             services.AddMvc()
                 .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
                 .AddDataAnnotationsLocalization();
@@ -186,7 +187,6 @@ namespace PikaCore
                 options.MultipartBodyLengthLimit = 268435456; //256MB
             });
             
-            services.AddAspNetCoreCustomValidation();
             services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;
@@ -355,6 +355,7 @@ namespace PikaCore
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
             };
             webSocketOptions.AllowedOrigins.Add("https://dev-core.lukas-bownik.net");
+            webSocketOptions.AllowedOrigins.Add("https://core.lukas-bownik.net");
             app.UseWebSockets(webSocketOptions);
             app.UseRouting();
 	        app.UseCors("CorsPolicy");

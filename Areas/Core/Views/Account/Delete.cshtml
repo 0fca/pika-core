@@ -1,8 +1,9 @@
 ﻿@model DeleteAccountViewModel
 @inject SignInManager<ApplicationUser> SignInManager
+@inject IViewLocalizer Localizer  
 
 @{
-    ViewData["Title"] = "Delete Your Account";
+    ViewData["Title"] = Localizer["Delete Your Account"];
 }
 
 <div class="container">
@@ -11,8 +12,8 @@
         <h3 class="card-title center white-text">@ViewData["Title"]</h3>
         <div class="card-content">
             <strong class="white-text">You are about to delete your account.
-            <p>To confirm that you really want to delete your account, retype the following code <b>@Model.ConfirmationCode</b> below.</p>
-            This action <b>cannot be</b> undone. After proceeding, there will be no return, choose wisely.</strong>
+            <p>@Html.Raw(string.Format(Localizer["To confirm that you really want to delete your account, retype the following code <b>{0}</b> below"].Value, @Model.ConfirmationCode)).</p>
+            @Html.Raw(Localizer["This action <b>cannot be</b> undone. After proceeding, there will be no return, choose wisely"]).</strong>
             <form asp-area="Core" asp-controller="Account" asp-action="Delete" method="post">
                 <input asp-for="ConfirmationCode" class="validate login-input-color" hidden=""/>
                 <div class="input-field">
@@ -21,8 +22,8 @@
                     <span asp-validation-for="ConfirmationCodeReply" class="red-text"></span>
                 </div>
                 <div class="input-field center">
-                    <button type="submit" class="btn btn-danger">Confirm</button>
-                    <a asp-area="Core" asp-controller="Manage" asp-action="Index" class="btn btn-primary">Cancel</a>
+                    <button type="submit" class="btn btn-danger">@Localizer["Confirm"]</button>
+                    <a asp-area="Core" asp-controller="Manage" asp-action="Index" class="btn btn-primary">@Localizer["Cancel"]</a>
                 </div>
             </form>
         </div>

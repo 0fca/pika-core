@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
-using PikaCore.Areas.Core.Controllers.Helpers;
 using PikaCore.Areas.Core.Models;
-using PikaCore.Areas.Infrastructure.Services;
-using PikaCore.Areas.Infrastructure.Services.Helpers;
+using PikaCore.Infrastructure.Services;
+using PikaCore.Infrastructure.Services.Helpers;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.Hubs

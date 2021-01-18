@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using PikaCore.Areas.Core.Controllers.Helpers;
 using PikaCore.Areas.Core.Models.ContentViewModels;
-using PikaCore.Areas.Infrastructure.Services;
-using PikaCore.Security;
+using PikaCore.Infrastructure.Security;
+using PikaCore.Infrastructure.Services;
+using PikaCore.Infrastructure.Services.Helpers;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {

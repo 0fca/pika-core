@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PikaCore.Areas.Core.Models;
-using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {
