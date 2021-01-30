@@ -521,6 +521,33 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Manage\_Layout.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>_Layout.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Manage\_Layout.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>_Layout.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Manage\_ManageNav.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>_ManageNav.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Manage\_ManageNav.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>_ManageNac.pl.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Models\ManageViewModels\IndexViewModel.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>IndexViewModel.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Models\ManageViewModels\IndexViewModel.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>IndexViewModel.pl.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
     <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="3.0.0" />

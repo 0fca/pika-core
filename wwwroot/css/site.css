@@ -266,13 +266,24 @@ a, a:hover, a:focus {
     color: teal;
 }
 
-input[type="text"]:not(.browser-default){
+input[type="text"]:not(.browser-default), 
+input[type="email"]:not(.browser-default),
+input[type="tel"]:not(.browser-default),
+input[type="password"]:not(.browser-default)
+{
     border-bottom-color: #f5f5f5;
-    color: teal;
+    color: white;
 }
 
-input[type="text"]:not(.browser-default):focus{
-    color: teal;
+
+input[type="text"]:not(.browser-default):focus,
+input[type="tel"]:not(.browser-default):focus,
+input[type="email"]:not(.browser-default):focus,
+input[type="password"]:not(.browser-default):focus
+ {
+    color: white;
+    box-shadow: 0 1px 0 0 teal;
+    border-bottom: 1px solid teal;
 }
 
 .nav-menu-colors{
@@ -305,4 +316,16 @@ input[type="text"]:not(.browser-default):focus{
 
 .page-footer .container .row a{
     color: teal;
+}
+
+.tabs .tab a {
+    color: white;
+}
+
+.tabs .tab a:hover, .tabs .tab a.active {
+    color: teal;
+}
+
+.tabs .indicator {
+    background-color: teal !important;
 }

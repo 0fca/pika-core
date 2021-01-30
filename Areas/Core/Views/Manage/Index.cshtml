@@ -1,6 +1,7 @@
 ﻿@model IndexViewModel
+@inject IViewLocalizer Localizer  
 @{
-    ViewData["Title"] = "Profile";
+    ViewData["Title"] = Localizer["Profile"];
     ViewData.AddActivePage(ManageNavPages.Index);
 }
 <div class="row">
@@ -28,18 +29,20 @@
     </div>
 </div>
 <div class="row">
-    <h5>Account Data</h5>
-    <p>From here, you can request export of your data to CSV file or just delete your account</p>
+    <h5>@Localizer["Account Data"]</h5>
+    <p>@Localizer["From here, you can request export of your data to CSV file or just delete your account"]</p>
     <div class="col s12 m6 l6">
         <div class="input-field">
             <strong>
-                <a class="btn btn-primary teal" onclick="M.toast({html: 'This feature is not available at the moment'})">Export</a>
+                <a class="btn btn-primary teal" onclick="M.toast({html: '@Localizer["This feature is not available at the moment"]'})">
+                    @Localizer["Export"]
+                </a>
             </strong>
         </div>
     </div>
     <div class="col s12 m6 l6">
         <div class="input-field">
-            <a class="btn btn-danger" asp-area="Core" asp-controller="Account" asp-action="Delete">Delete</a>
+            <a class="btn btn-danger" asp-area="Core" asp-controller="Account" asp-action="Delete">@Localizer["Delete"]</a>
         </div>
     </div>
 </div>

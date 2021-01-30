@@ -1,15 +1,17 @@
-﻿@{ 
+﻿@inject IViewLocalizer Localizer  
+
+@{ 
     Layout = "/Areas/Core/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container">
     <div class="col s12 m12 offset-2">
         <div class="card indigo darken-1 center white-text">
-            <h3>Manage your account</h3>
+            <h3>@Localizer["Manage your account"]</h3>
             <div class="card-content white-text">
                 <header>
                     <div class="col m3 l3">
-                                    @await Html.PartialAsync("_ManageNav")
+                        @await Html.PartialAsync("_ManageNav")
                         </div>
                 </header>
                 @RenderBody()
@@ -19,6 +21,6 @@
 </div>
 
 @section Scripts {
-    @RenderSection("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 }
         
