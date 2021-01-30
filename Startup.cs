@@ -105,7 +105,6 @@ namespace PikaCore
             else if(redis.IsConnected)
             {
                 var key = string.Concat("CoreKeys-", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
-                Console.WriteLine(Resources.Startup_ConfigureServices_Using_Redis_keystore_with_key_name___0_, key);
                 services.AddDataProtection()
                     .PersistKeysToStackExchangeRedis(redis, key)
                     .ProtectKeysWithCertificate(
@@ -114,7 +113,6 @@ namespace PikaCore
                     .SetApplicationName("ShrCkApp");
             }else
             {
-                Console.WriteLine(Resources.Startup_ConfigureServices_Using_filesystem_keystore);
                 services.AddDataProtection()
                     .PersistKeysToFileSystem(new DirectoryInfo("/srv/fms/keys"))
                     .ProtectKeysWithCertificate(
