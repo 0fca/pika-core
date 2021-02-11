@@ -15,17 +15,20 @@
 
 <div class="right">
     <ul class="right hide-on-med-and-down">
-        <li>
-            <div title="@Localizer["Change display language"]">
-                 <a class='dropdown-trigger btn btn-flat' href='#' data-target='cl'></a>
-                <ul id='cl' class='dropdown-content'>
-                    @foreach (var item in cultureItems)
-                    {
-                        <li><a asp-controller="Manage" asp-action="SetLanguage" asp-route-culture="@item.Value">@item.Text</a></li>
-                    }
-                </ul>
-            </div>
-        </li>
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <li>
+                <div title="@Localizer["Change display language"]">
+                    <a class='dropdown-trigger btn btn-flat' href='#' data-target='cl'>@requestCulture.RequestCulture.UICulture.Name</a>
+                    <ul id='cl' class='dropdown-content'>
+                        @foreach (var item in cultureItems)
+                        {
+                            <li><a asp-controller="Manage" asp-action="SetLanguage" asp-route-culture="@item.Value">@item.Text</a></li>
+                        }
+                    </ul>
+                </div>
+            </li>
+        }
         <li>
             <a class="navlink left center-align" asp-area="Core" asp-controller="Storage" asp-action="Index" title="Pika Browser">
                 Pika Browser

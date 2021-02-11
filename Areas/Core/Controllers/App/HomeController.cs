@@ -19,7 +19,9 @@ namespace PikaCore.Areas.Core.Controllers.App
         }
 
         [ViewData] public string? InfoMessage { get; set; } = "";
-
+        
+        [Route("/[area]")]
+        [Route("", Name = "CoreIndex")]
         public async Task<IActionResult> Index()
         {
             var cookieOptions = new CookieOptions()

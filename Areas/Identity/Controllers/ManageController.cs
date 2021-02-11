@@ -113,15 +113,19 @@ namespace PikaCore.Areas.Identity.Controllers
         }
         
         [HttpGet]
-        [Authorize]
         public IActionResult SetLanguage(string culture)
         {
-              Response.Cookies.Append(
+            if (Request.Cookies.ContainsKey(CookieRequestCultureProvider.DefaultCookieName))
+            {
+                Response.Cookies.Delete(CookieRequestCultureProvider.DefaultCookieName);
+            }
+            Response.Cookies.Append(
                   CookieRequestCultureProvider.DefaultCookieName,
                   CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
                   new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
-              );
-              return LocalRedirect(HttpContext.Request.Path);
+                  );
+
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
