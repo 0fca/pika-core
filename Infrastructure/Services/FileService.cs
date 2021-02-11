@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using PikaCore.Areas.Core.Controllers.App;
+using PikaCore.Areas.Core.Exceptions;
 using PikaCore.Infrastructure.Services.Helpers;
 using Serilog;
 
@@ -113,6 +114,26 @@ namespace PikaCore.Infrastructure.Services
                 copyHash = md5.ComputeHash(stream);
             
             return origHash.SequenceEqual(copyHash);
+        }
+
+        public bool IsFileHidden(string path)
+        {
+            if (Path.IsPathFullyQualified(path))
+            {
+                path = Path.GetFileName(path);
+            }
+
+            return path.StartsWith("~");
+        }
+
+        public bool IsVisibleToAdminOnly(string path)
+        {
+            if (!Path.IsPathFullyQualified(path))
+            {
+               throw new InvalidPathException("Path must be absolute"); 
+            }
+
+            return UnixHelper.HasAccess(_configuration.GetSection("OsUser:OsAdminUsername").Value, path);
         }
 
         public Stream AsStreamAsync(string absolutePath, int bufferSize = 8192, bool useAsync = true)

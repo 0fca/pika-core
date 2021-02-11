@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Localization;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
@@ -38,6 +39,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         private readonly IHubContext<StatusHub> _hubContext;
         private readonly IdDataProtection _idDataProtection;
         private readonly IJobService _jobService;
+        private readonly IStringLocalizer<StorageController> _stringLocalizer;
 
         #region TempDataMessages
 
@@ -56,7 +58,8 @@ namespace PikaCore.Areas.Core.Controllers.App
                IHubContext<StatusHub> hubContext,
                IConfiguration configuration,
                IdDataProtection idDataProtection,
-               IJobService jobService)
+               IJobService jobService,
+               IStringLocalizer<StorageController> stringLocalizer)
         {
             _signInManager = signInManager;
             _fileService = fileService;
@@ -66,6 +69,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             _configuration = configuration;
             _idDataProtection = idDataProtection;
             _jobService = jobService;
+            _stringLocalizer = stringLocalizer;
         }
 
         [HttpGet]
@@ -75,7 +79,8 @@ namespace PikaCore.Areas.Core.Controllers.App
             return RedirectToActionPermanent(nameof(Browse));
         }
 
-        [HttpGet]
+        [HttpGet(Name = "Browse")]
+        [ActionName("Browse")]
         [AllowAnonymous]
         public async Task<IActionResult> Browse(string? path, int offset = 0, int count = 10)
         {
@@ -96,13 +101,13 @@ namespace PikaCore.Areas.Core.Controllers.App
 
             if (null == contents)
             {
-                ReturnMessage = "Something went wrong...";
+                ReturnMessage = _stringLocalizer.GetString("Something went wrong...").Value;
                 return View(lrmv);
             }
 
             if (!contents.Exists)
             {
-                ReturnMessage = "The resource doesn't exist on the filesystem";
+                ReturnMessage = _stringLocalizer.GetString("The resource doesn't exist on the filesystem").Value;
                 return View(lrmv);
             }
             
@@ -145,6 +150,35 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
             
             return View(lrmv);
+        }
+
+        [HttpGet(Name = "ResourceInformation")]
+        [AllowAnonymous]
+        public IActionResult ResourceInformation(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("An id cannot be empty");
+            }
+
+            var path = _idDataProtection.Decode(id);
+            var model = new ResourceInformationViewModel(_fileService.RetrieveFileInfoFromAbsolutePath(path))
+            {
+                IsHidden = _fileService.IsFileHidden(path)
+            };
+            if (model.IsHidden 
+                && (!this.User.IsInRole("Admin") || User.IsInRole("FileManagerUser")))
+            {
+                return Forbid();
+            }
+
+            if (_fileService.IsVisibleToAdminOnly(path) 
+                && !User.IsInRole("Admin"))
+            {
+                return NotFound("No such resource");
+            }
+            
+            return View(model);
         }
 
         [HttpGet]
@@ -197,7 +231,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 }
             }
 
-            ReturnMessage = "Couldn't generate token for that resource.";
+            ReturnMessage = _stringLocalizer.GetString("Couldn't generate token for that resource").Value;
             return RedirectToAction(nameof(Browse), new { @path = returnUrl });
         }
 
@@ -225,26 +259,29 @@ namespace PikaCore.Areas.Core.Controllers.App
                                     return File(fileBytes, MimeAssistant.GetMimeType(name), name, true);
                                 }
                                 
-                                ReturnMessage = "Couldn't read requested resource: " + s.Urlid;
+                                ReturnMessage = _stringLocalizer.GetString("Couldn't read requested resource:").Value 
+                                                + s.Urlid;
                                 Log.Warning(ReturnMessage);
                                 return RedirectToAction(nameof(Browse));
                         }
-                        ReturnMessage = "It seems that this url expired, you need to generate a new one.";
+                        ReturnMessage = _stringLocalizer
+                            .GetString("It seems that this url expired, you need to generate a new one").Value;
                         return RedirectToAction(nameof(Browse));
                     }
-                    ReturnMessage = "It seems that given token doesn't exist in the database.";
+                    ReturnMessage = _stringLocalizer
+                        .GetString("It seems that given token doesn't exist in the database").Value;
                     return RedirectToAction(nameof(Browse));
                 }
                 catch (InvalidOperationException ex)
                 {
-                    ReturnMessage = s != null 
+                    ReturnMessage = _stringLocalizer.GetString(s != null 
                         ? "Couldn't read requested resource: " + s.Urlid 
-                        : "Database error occured.";
+                        : "Database error occured.").Value;
                     Log.Error(ex, string.Concat(ReturnMessage, "StorageController#PermanentDownload"));
                     return RedirectToAction(nameof(Browse));
                 }
             }
-            ReturnMessage = "No id given or database is down.";
+            ReturnMessage = _stringLocalizer.GetString("No id given or database is down").Value;
             return RedirectToAction(nameof(Browse));
         }
 
@@ -263,17 +300,22 @@ namespace PikaCore.Areas.Core.Controllers.App
                     var fileInfo = _fileService.RetrieveFileInfoFromAbsolutePath(id);
                     var path = fileInfo.PhysicalPath;
                     Log.Information($"Decoded path: {path}");
+                    
+                    if (Directory.Exists(path))
+                    {
+                        ReturnMessage = _stringLocalizer
+                            .GetString( "This is a folder, cannot download it directly").Value;
+                        return RedirectToAction(nameof(Browse), new {@path = returnUrl});
+                    }
+                    
                     if (!fileInfo.Exists)
                     {
-                        ReturnMessage = "File doesn't exist on server's filesystem.";
+                        ReturnMessage = _stringLocalizer
+                            .GetString("File doesn't exist on server's filesystem").Value;
                         return RedirectToAction(nameof(Browse), new {@path = returnUrl});
                     }
 
-                    if (Directory.Exists(path))
-                    {
-                        ReturnMessage = "This is a folder, cannot download it directly.";
-                        return RedirectToAction(nameof(Browse), new {@path = returnUrl});
-                    }
+                    
 
 
                     var fs = _fileService.AsStreamAsync(path);
@@ -286,7 +328,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 Log.Error(e, "StorageController#Download");
             }
 
-            ReturnMessage = "Resource id cannot be null.";
+            ReturnMessage = _stringLocalizer.GetString("Resource id cannot be null").Value;
             return RedirectToAction(nameof(Browse), new {@path = returnUrl, offset, count});
         }
 
@@ -314,8 +356,8 @@ namespace PikaCore.Areas.Core.Controllers.App
             {
                 var size = files.Sum(f => f.Length);
                 var returnMessage = files.Count 
-                                    + (files.Count == 1 ? "file" : " files ") 
-                                    + $" uploaded of summary size "
+                                    + _stringLocalizer.GetString( (files.Count == 1 ? "file" : " files")).Value + " " 
+                                    + _stringLocalizer.GetString("uploaded of summary size").Value + " "
                                     + UnixHelper.DetectUnitBySize(size);
                 var (checkResultMessage, tmpFilesList) = 
                     await _fileService.SanitizeFileUpload(files, 
@@ -351,7 +393,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 {"absolutePath", absolutePath}
             };
             var name = await _jobService.CreateJob<ArchiveJob>(jobDataMap);
-            ReturnMessage = "Your request has been accepted.";
+            ReturnMessage = _stringLocalizer.GetString("Your request has been accepted").Value;
             // /Core/Jobs/Submit?name={name}
             return RedirectPermanent(Url.Action("Submit","Jobs", new {name}));
         }
@@ -362,8 +404,8 @@ namespace PikaCore.Areas.Core.Controllers.App
         public async Task<IActionResult> Create(string name, string returnUrl)
         {
             var pattern = new Regex(@"\W|_");
-            int offset = int.Parse(Get("Offset"));
-            int count = int.Parse(Get("Count"));
+            var offset = int.Parse(Get("Offset"));
+            var count = int.Parse(Get("Count"));
             
             if (!pattern.Match(name).Success)
             {
@@ -371,19 +413,21 @@ namespace PikaCore.Areas.Core.Controllers.App
                 {
                     var dirInfo = await _fileService.MkdirAsync(_fileService.RetrieveAbsoluteFromSystemPath(name));
                     
-                    ReturnMessage = "Successfully created directory: " + dirInfo?.Name;
+                    ReturnMessage = _stringLocalizer
+                        .GetString("Successfully created directory:").Value + dirInfo?.Name;
                     Log.Information(ReturnMessage);
                     return RedirectToAction(nameof(Browse), new { path = returnUrl });
                 }
                 catch (Exception e)
                 {
                     Log.Error(e, "StorageController#Create");
-                    ReturnMessage = "Error: Couldn't create directory.";
+                    ReturnMessage = _stringLocalizer.GetString( "Error: Couldn't create directory").Value;
                     return RedirectToAction(nameof(Browse), new { path = returnUrl, offset, count });
                 }
             }
 
-            ReturnMessage = "You cannot use non-alphabetic characters in directory names.";
+            ReturnMessage = _stringLocalizer
+                .GetString("You cannot use non-alphabetic characters in directory names").Value;
             return RedirectToAction(nameof(Browse), new { path = returnUrl, offset, count });
         }
 
@@ -419,18 +463,18 @@ namespace PikaCore.Areas.Core.Controllers.App
                 {
                     await _fileService.Delete(contents);
 
-                    ReturnMessage = "Successfully deleted elements.";
+                    ReturnMessage = _stringLocalizer.GetString( "Successfully deleted elements").Value;
                     Log.Information(ReturnMessage);
                     return RedirectToAction(nameof(Browse), new { path = returnPath, offset,  count});
                 }
                 catch
                 { 
-                    ReturnMessage = "Error: Couldn't delete resource.";
+                    ReturnMessage = _stringLocalizer.GetString("Error: Couldn't delete resource").Value;
                     return RedirectToAction(nameof(Browse), new { path =  returnPath,  offset,  count});
                 }
             }
 
-            ReturnMessage = "Error: Nothing to be deleted.";
+            ReturnMessage = _stringLocalizer.GetString("Error: Nothing to be deleted").Value;
             return RedirectToAction(nameof(Browse), new { path = returnPath });
         }
 
@@ -467,13 +511,14 @@ namespace PikaCore.Areas.Core.Controllers.App
                     return RedirectToAction(nameof(Browse),
                         new {path = rfm.ReturnUrl});
                 }
-                ReturnMessage = "Successfully renamed to " + rfm.NewName;
+                ReturnMessage = string.Format(_stringLocalizer.GetString( "Successfully renamed to {0}").Value, rfm.NewName);
 
                 return RedirectToAction(nameof(Browse), 
                     new { path = rfm.ReturnUrl });
 
             }
-            ModelState.AddModelError(HttpContext.TraceIdentifier, "New name cannot be empty!");
+            ModelState.AddModelError(HttpContext.TraceIdentifier, 
+                _stringLocalizer.GetString( "New name cannot be empty"));
             return View(rfm);
         }
 
@@ -492,13 +537,14 @@ namespace PikaCore.Areas.Core.Controllers.App
                 var isHidden = _fileService.HideFile(
                     systemPath
                 );
-                ReturnMessage = isHidden ? "Resource hidden." : "Couldn't be hidden.";
+                ReturnMessage = isHidden ? 
+                    _stringLocalizer.GetString( "Resource hidden").Value : 
+                    _stringLocalizer.GetString( "Couldn't be hidden").Value;
             }
             catch (Exception e)
             {
                 Log.Error(e, e.Message);
             }
-            Log.Debug("Redirecting to Browse...");
             return RedirectToAction(nameof(Browse), new {@path = returnPath, offset, count});
         }
         
@@ -517,13 +563,14 @@ namespace PikaCore.Areas.Core.Controllers.App
                 var isHidden = _fileService.ShowFile(
                     systemPath
                 );
-                ReturnMessage = isHidden ? "Resource is visible now." : "Couldn't be set visible.";
+                ReturnMessage = isHidden 
+                    ? _stringLocalizer.GetString( "Resource is visible now").Value 
+                    : _stringLocalizer.GetString( "Couldn't be set visible").Value;
             }
             catch (Exception e)
             {
                 Log.Error(e, e.Message);
             }
-            Log.Debug("Redirecting to Browse...");
             return RedirectToAction(nameof(Browse), new {@path = returnPath, offset, count});
         }
 

@@ -1,0 +1,52 @@
+﻿@model PikaCore.Areas.Identity.Models.ManageViewModels.IndexViewModel
+@inject IViewLocalizer Localizer  
+@{
+    ViewData["Title"] = Localizer["Profile"];
+    ViewData.AddActivePage(ManageNavPages.Index);
+}
+<div class="row">
+    <h4>@ViewData["Title"]</h4>
+    @(await Html.PartialAsync("_StatusMessage", TempData["StatusMessage"]))
+    <div class="col s12 m12 l12">
+        <form method="post">
+            <div class="input-field">
+                <label>@Html.DisplayNameFor(m => m.Username)</label>
+                <input asp-for="Username" class="validate login-input-color" />
+                <span asp-validation-for="Username" class="red-text"></span>
+            </div>
+            <div class="input-field">
+                <label>@Html.DisplayNameFor(m => m.Email)</label>
+                <input asp-for="Email" class="validate login-input-color" />
+                <span asp-validation-for="Email" class="red-text"></span>
+            </div>
+            <div class="input-field">
+                <label>@Html.DisplayNameFor(m => m.PhoneNumber)</label>
+                <input asp-for="PhoneNumber" class="validate login-input-color" />
+                <span asp-validation-for="PhoneNumber" class="red-text"></span>
+            </div>
+            <button type="submit" class="btn btn-default">@Localizer["Save"]</button>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <h5>@Localizer["Account Data"]</h5>
+    <p>@Localizer["From here, you can request export of your data to CSV file or just delete your account"]</p>
+    <div class="col s12 m6 l6">
+        <div class="input-field">
+            <strong>
+                <a class="btn btn-primary teal" onclick="M.toast({html: '@Localizer["This feature is not available at the moment"]'})">
+                    @Localizer["Export"]
+                </a>
+            </strong>
+        </div>
+    </div>
+    <div class="col s12 m6 l6">
+        <div class="input-field">
+            <a class="btn btn-danger" asp-area="Core" asp-controller="Account" asp-action="Delete">@Localizer["Delete"]</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

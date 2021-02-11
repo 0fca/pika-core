@@ -1,19 +1,47 @@
 ﻿@using PikaCore.Infrastructure.Security
 @inject UserManager<ApplicationUser> UserManager
 @inject IdDataProtection DataProtection
-
+@inject IViewLocalizer Localizer
 @{
     var user = await UserManager.GetUserAsync(Context.User);
 }
 <ul id="menu" style="display: none;" class="nav-context-menu">
     <li id="download"><span class="material-icons">cloud_download</span></li>
+    <li id="info">
+        <span class="material-icons">info</span>
+    </li>
 </ul>
 <script>
-    
     $('#download').on('click', () => {
        const id = localStorage.getItem('selectedCardId');
        if(id !== null){
-           window.location = `/Core/Storage/Download/${id}`;
+           window.location = '@Url.Action("Download", "Storage")/' + `${id}`;
        }
-    })
+       $('#menu').hide();
+    });
+    $('#info').on('click', () => {
+        const infoSlide = $('#info-slide');   
+        if(!infoSlide.is(':visible')){
+          infoSlide.show();
+          const id = localStorage.getItem('selectedCardId');
+          fetch('@Url.Action("ResourceInformation", "Storage")/' + `${id}`).then(r => {
+              if(r.ok){
+                  r.text().then(t => {
+                      $('#info-slide').html(t);
+                  });
+              }else{
+                 console.log(r.statusText); 
+              }
+          });
+        }else{
+            infoSlide.hide();
+            resetInfoView();
+        }
+    });
+    
+    function resetInfoView(){
+        const infoSlide = $('#info-slide');  
+        infoSlide.empty();
+        infoSlide.html('<p>@Localizer["Choose something on the left, detailed information will show up here"]</p>');
+    }
 </script>

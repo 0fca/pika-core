@@ -1,0 +1,24 @@
+﻿@using PikaCore.Infrastructure.Services.Helpers
+@using PikaCore.Infrastructure.Security
+@inject SignInManager<ApplicationUser> SignInManager
+@model ResourceInformationViewModel
+@inject IdDataProtection DataProtection
+@inject IViewLocalizer Localizer
+@{
+    Layout = null;
+}
+<ul>
+    <li>@Localizer["Full name"]: @Model.FullName </li>
+    <li>MIME: @Model.MimeType</li>
+
+    <li>@Localizer["Size"]: @UnixHelper.DetectUnitBySize(Model.Size)</li>
+    <li>@Localizer["Last Modified"]: @Model.LastModified.ToShortDateString()</li>
+    @if (Model.IsHidden)
+    {
+        <li>
+            <span class="material-icons">
+                lock
+            </span>
+        </li>
+    }
+</ul>

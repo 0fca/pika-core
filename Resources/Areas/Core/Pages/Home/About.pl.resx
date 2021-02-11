@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="Pika Core is a core web application of whole web system called Pika Cloud. It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem. PikaCore first web app I've ever build. I started development on .NET Core 1.1 SDK, but now I use .NET Core SDK of version {0}" xml:space="preserve">
+        <value>Pika Core jest rdzeniem mojego autorskiego cloudu - Pika Cloud. Jego głównym przeznaczeniem od samego początku było i jest udostępnianie zasobów na moim serwerze, któe gromadzę na dysku mojego serwera. Sam PikaCore to moja pierwsza aplikacja Web, zacząłem budować ją na .NET Core 1.1, jednak teraz używam do tego wersji {0}</value>
+        <comment>Pika Core is a core web application of whole web system called Pika Cloud.It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem.PikaCore first web app I've ever build. I started development on .NET Core 1.1 SDK, but now I use .NET Core SDK of version {0}</comment>
+    </data>
+    <data name="This is PikaCore aka Hannah, version" xml:space="preserve">
+        <value>To jest PikaCore aka Hannah, wersja</value>
+        <comment>This is PikaCore aka Hannah, version</comment>
+    </data>
+    <data name="Some technical stuff for those who are interested" xml:space="preserve">
+        <value>Trochę technicznych szczegółów dla tych co są zainteresowani</value>
+        <comment>Some technical stuff for those who are interested</comment>
+    </data>
+    <data name="This neat simple web app is hosted on my private server and running on" xml:space="preserve">
+        <value>Ta schludna, prosta aplikacja Web jest hostowana na moim prywatnym serwerze z zainstalowanym OS </value>
+        <comment>This neat simple web app is hosted on my private server and running on</comment>
+    </data>
+    <data name=".NET Core is the technology I used to build Pika Core, its version is" xml:space="preserve">
+        <value>Użyłem .NET Core, aby zbudować Pika Core, aktualne wersja to </value>
+        <comment>.NET Core is the technology I used to build Pika Core, its version is</comment>
+    </data>
+    <data name="All this is open source under GPL v.3.0 license" xml:space="preserve">
+        <value>Wszystko to jest na licencji GPL v.3.0</value>
+        <comment>All this is open source under GPL v.3.0 license</comment>
+    </data>
+    <data name="About" xml:space="preserve">
+        <value>O aplikacji</value>
+        <comment>About</comment>
+    </data>
+    <data name="What is this" xml:space="preserve">
+        <value>Co to jest</value>
+        <comment>What is this</comment>
+    </data>
+    <data name="Instance: " xml:space="preserve">
+        <value>Instancja: </value>
+        <comment>Instance: </comment>
+    </data>
+    <data name="Technical information" xml:space="preserve">
+        <value>Informacje techniczne</value>
+        <comment>Technical information</comment>
+    </data>
+</root>

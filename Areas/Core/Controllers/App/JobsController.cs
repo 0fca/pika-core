@@ -8,6 +8,7 @@ using Quartz;
 namespace PikaCore.Areas.Core.Controllers.App
 {
     [Area("Core")]
+    [ResponseCache(CacheProfileName = "Default")]
     public class JobsController : Controller
     {
         private readonly IConfiguration _configuration;

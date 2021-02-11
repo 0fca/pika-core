@@ -196,8 +196,9 @@ namespace PikaCore
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
                 options.SlidingExpiration = true;
-                options.LoginPath = "/Core/Account/Login";
+                options.LoginPath = "/Identity/Account/Login";
                 options.Cookie.Name = ".AspNet.ShrCk";
+                options.LogoutPath = "/Identity/Account/Logout";
             });
             
     	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
@@ -270,18 +271,17 @@ namespace PikaCore
             
             services.AddMvc()
                 .AddMvcOptions(options =>
-            {
-                options.CacheProfiles.Add("Default",
+                {
+                    options.AllowEmptyInputInBodyModelBinding = true;
+                    options.CacheProfiles.Add("Default",
                     new CacheProfile()
                     {
-                        Duration = 60,
+                        Duration = 360000,
                         Location = ResponseCacheLocation.Client,
                         NoStore = false
                     });
-                options.MaxModelValidationErrors = 50;
-                options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
-                    _ => "The field is required.");
-            })
+                    options.MaxModelValidationErrors = 50;
+                })
 	        .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -321,7 +321,7 @@ namespace PikaCore
             Constants.Tmp = Configuration.GetSection("Paths")[OsName + "-tmp"];
             Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
             
-            app.UseStatusCodePagesWithRedirects("/Core/Home/ErrorByCode/{0}");
+            // app.UseStatusCodePagesWithRedirects("/Core/Home/ErrorByCode/{0}");
             app.UseSession();
             
 

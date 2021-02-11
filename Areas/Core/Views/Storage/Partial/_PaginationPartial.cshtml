@@ -1,10 +1,10 @@
 ﻿@model Dictionary<string,object>
 @{ 
 
-    Model.TryGetValue("PageCount", out object pgc);
-    Model.TryGetValue("Last", out object last);
-    Model.TryGetValue("Count", out object strCount);
-    Model.TryGetValue("Offset", out object strOffset);
+    Model.TryGetValue("PageCount", out var pgc);
+    Model.TryGetValue("Last", out var last);
+    Model.TryGetValue("Count", out var strCount);
+    Model.TryGetValue("Offset", out var strOffset);
     var pageCount = int.Parse(pgc.ToString());
     var offset = int.Parse(strOffset.ToString());
     var count = int.Parse(strCount.ToString());

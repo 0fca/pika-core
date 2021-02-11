@@ -1,0 +1,6 @@
+﻿@inject IViewLocalizer Localizer
+<div id="info-slide" class="information-side-pane" style="display: none;">
+   <h3>@Localizer["Resource information"]</h3>
+   @await Html.PartialAsync("_Loader.cshtml")
+</div>
+

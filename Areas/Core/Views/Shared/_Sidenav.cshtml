@@ -1,6 +1,6 @@
 ﻿@inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
-
+@inject IViewLocalizer Localizer
 @{
     var userName = UserManager.GetUserName(User);
 }
@@ -22,17 +22,17 @@
     </li>
 }
 
-<li><a class="navlink" asp-area="Core" asp-page="/Home/About">About</a></li>
+<li><a class="navlink" asp-area="Core" asp-page="/Home/About">@Localizer["About"]</a></li>
 @if (SignInManager.IsSignedIn(User))
 {
     <li>
-        <button type="submit" class="waves-effect waves-teal btn-flat">Log out</button>
+        <button type="submit" class="waves-effect waves-teal btn-flat">@Localizer["Log out"]</button>
     </li>
 
 }
 else
 {
-    <li><a asp-area="Core" class="navlink" asp-controller="Account" asp-action="Register">Register</a></li>
-    <li><a asp-area="Core" class="navlink" asp-controller="Account" asp-action="Login">Log in</a></li>
+    <li><a asp-area="Identity" class="navlink" asp-controller="Account" asp-action="Register">@Localizer["Register"]</a></li>
+    <li><a asp-area="Identity" class="navlink" asp-controller="Account" asp-action="Login">@Localizer["Log in"]</a></li>
 }
 

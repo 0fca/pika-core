@@ -1,12 +1,16 @@
 @{
     var hash = TempData["urlhash"];
     var port = TempData["port"];
-    var url = TempData["protocol"]+"://"+TempData["host"] + "/Storage/PermanentDownload/" + hash;
+    var url = Url.Link("PermanentDownload" , new
+    {
+        hash
+    });
 }
+@inject IViewLocalizer Localizer
 <span id="urlDiv" class="col s2">
-    URL generated successfully!
+    @Localizer["URL generated successfully"]!
     <input type="text" class="form-control toast-input" id="urlOut" value=@url readonly>
-    <button class="btn-flat toast-action toast-button-color" onclick="copyToClipboard('urlOut');" id="copyButton" type="button">COPY</button>
+    <button class="btn-flat toast-action toast-button-color" onclick="copyToClipboard('urlOut');" id="copyButton" type="button">@Localizer["COPY"]</button>
 </span>
 <script>    
     let content = document.getElementById("urlDiv");

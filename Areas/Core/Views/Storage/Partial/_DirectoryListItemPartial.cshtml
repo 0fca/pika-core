@@ -1,9 +1,8 @@
-﻿@using PikaCore.Infrastructure.Services.Helpers
-@using PikaCore.Infrastructure.Security
+﻿@using PikaCore.Infrastructure.Security
 @inject SignInManager<ApplicationUser> SignInManager
 @model Tuple<string, Microsoft.Extensions.FileProviders.IFileInfo>
 @inject IdDataProtection DataProtection
-
+@inject IViewLocalizer Localizer
 
 @{
     var item = Model.Item2;
@@ -33,33 +32,10 @@
                     </a>
                 </div>
                 <div class="col s2 m2 l2">
-                    <span class="material-icons right activator">info</span>
+                    <span class="material-icons right activator" style="cursor: pointer;" data-infoid="@did">info</span>
                 </div>
             </div>
-            
         </div>
     </div>
-    <div class="card-reveal grey lighten-4 ">
-        <span class="card-title grey-text text-darken-4">Information<i class="material-icons right">close</i></span>
-        <div>
-            <p>Full name: @item.Name</p>
-            <p>MIME: inode/directory</p>
-            @if (!item.IsDirectory)
-            {
-                <p>Size: @UnixHelper.DetectUnitBySize(item.Length)</p>
-            }
-            <div>
-                <p>Last Modified: @dateString</p>
-            </div>
-        </div>
-        
-        @if (item.Name.StartsWith("~"))
-        {
-            <span class="material-icons">
-                lock
-            </span>
-        }
-    </div>
-    
 </div>
 

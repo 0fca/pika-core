@@ -1,0 +1,43 @@
+﻿@model PikaCore.Areas.Identity.Models.AccountViewModels.ExportDataViewModel
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IViewLocalizer Localizer  
+
+@{
+    ViewData["Title"] = Localizer["Export Your Data"];
+}
+
+<div class="container">
+<div class="col s12 m6 l6 offset-2">
+    <div class="card indigo">
+        <h3 class="card-title white-text center">@ViewData["Title"]</h3>
+        <div class="card-content">
+            <strong class="white-text">
+            @Localizer["Your privacy is very valuable for me, as a creator of PikaCloud, thus you can export your data and take a look on what PikaCloud 'knows' about you"].
+            </strong>
+            <form asp-area="Core" asp-controller="Account" asp-action="ExportData" method="post">
+                <div class="row">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        @Html.ValidationSummary(true, "", new {@class = "card-panel red white-text"})
+                    }
+                    <div class="col s12 m12 l12">
+                        <h6 class="white-text center">@Localizer["Choose what do export"]</h6>
+                        <select asp-for="DataCollections" id="dataCollectionSelect" class="form-control" multiple>
+                            @foreach (var collectionDataString in Model.DataCollections)
+                            {
+                                <option value="@collectionDataString">@collectionDataString</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col s12 m12 l12 center">
+                            <button type="submit" class="btn btn-default center">@Localizer["Request Export"]</button>
+                            <a asp-area="Core" asp-controller="Manage" asp-action="Index" class="btn btn-primary">@Localizer["Cancel"]</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>

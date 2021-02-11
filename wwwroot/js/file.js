@@ -1,7 +1,8 @@
 ﻿'use strict';
 
 const fileHubconnection = new signalR.HubConnectionBuilder().withUrl("/hubs/files",{
-    transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.WebSockets
+    transport:  signalR.HttpTransportType.ServerSentEvents 
+    
 })
     .configureLogging(signalR.LogLevel.Debug)
     .build();

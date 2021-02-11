@@ -44,5 +44,7 @@ namespace PikaCore.Infrastructure.Services
         bool ShowFile(string absolutePath);
 
         bool IsSameFile(string original, string copy);
+        bool IsFileHidden(string path);
+        bool IsVisibleToAdminOnly(string path);
     }
 }

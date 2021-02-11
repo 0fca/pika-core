@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using PikaCore.Areas.Admin.Models.Index;
 using PikaCore.Areas.Admin.Models.Index.DTO;
 using PikaCore.Areas.Core.Models;
-using PikaCore.Areas.Core.Models.ManageViewModels;
 using PikaCore.Areas.Core.Services;
+using PikaCore.Areas.Identity.Models.ManageViewModels;
 using PikaCore.Infrastructure.Services;
 using Serilog;
 

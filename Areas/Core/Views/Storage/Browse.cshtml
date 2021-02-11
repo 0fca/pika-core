@@ -1,11 +1,13 @@
 ﻿@using Microsoft.Extensions.FileProviders
+@using PikaCore.Areas.Core.Controllers.App
 @using PikaCore.Infrastructure.Security
 @using PikaCore.Infrastructure.Services
+@using Microsoft.AspNetCore.Mvc.RazorPages
 @model FileResultViewModel
 @inject UserManager<ApplicationUser> UserManager
 @inject IFileService FileService
 @inject IdDataProtection DataProtection
-
+@inject IViewLocalizer Localizer  
 @{
     var msg = TempData["returnMessage"];
 }
@@ -14,7 +16,7 @@
 @if(Model?.Contents != null && !Model.Contents.GetType().IsInstanceOfType(typeof(NotFoundDirectoryContents)))
 {
 
-    ViewData["Title"] = "Browse";
+    ViewData["Title"] = Localizer["Browse"];
     var lastPath = ViewData["path"] as string;
     var returnUrl = ViewData["returnUrl"];
     var user = await UserManager.GetUserAsync(Context.User);
@@ -25,30 +27,35 @@
     var paginationData = new Dictionary<string, object> {{"Offset", offset}, {"Count", count}, {"PageCount", pageCount}, {"Last", lastPath}};
     
     <div class="row">
-        <div class="col s12 m12 l12">
+        <div class="col s10 m10 l10">
             @{
                 var splitted = lastPath?.Split(System.IO.Path.DirectorySeparatorChar);
                 var last = "";
-                var tmp = "/Core/Storage/Browse?path=" + last;
-
-                <a class="teal-text" href="/Core/Storage/Browse/">Browse</a>
+                var tmp = Url.Action("Browse", "Storage",new {path = last});
+                var baseLink = Url.Action("Browse", "Storage", new { path = ""});
+                
+                <a class="teal-text" href="@baseLink">Browse</a>
 
                 foreach (var part in splitted)
                 {
                     if (!string.IsNullOrEmpty(part))
                     {
                         last = System.IO.Path.Combine(last, part);
-                        tmp = "/Core/Storage/Browse?path=" + last;
-                        <a class="breadcrumb breadcrumb-icon teal-text" href=@tmp>@part</a>
+                        tmp = Url.Action("Browse", "Storage", new { path = last });
+                        <a class="breadcrumb breadcrumb-icon teal-text" href="@tmp">@part</a>
                     }
                 }
             }
-            <button class="waves-effect waves-teal btn-flat" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
-            <input id="helperInput" value="https://@Context.Request.Host@tmp" class="offscreen" aria-hidden="true"/>
         </div>
+        <div class="col s2 m2 l2">
+                    <button class="waves-effect waves-teal btn-flat right" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
+                    <input id="helperInput" value="@Url.Link(nameof(StorageController.Browse), new {path = last})" class="offscreen" aria-hidden="true"/>
+        </div>
+    </div>
+    <div class="row">
         <div class="col s12 m12 l12">
             <div class="input-field">
-                <input type="text" id="pathField" placeholder="Enter the absolute system path..." class="autocomplete" value="@lastPath" autofocus/>
+                <input type="text" id="pathField" placeholder="@Localizer["Enter the absolute system path..."]" class="autocomplete" value="@string.Concat(directorySeparator, last)" autofocus style="color: rgb(12,12,12);"/>
             </div>
         </div>
         <div class="col s12 hide-on-med-and-up center">
@@ -59,16 +66,15 @@
             </button>
         </div>
     </div>
-
     @await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
 
     <div id="file-list">
         <div class="row">
             <div class="col s12 l7 m8">
                 @{
-                    var itemText = @Model.ContentsList.Count == 1 ? "item" : "items";
+                    var itemText = @Model.ContentsList.Count == 1 ? Localizer["item"] : Localizer["items"];
                 }
-                <h5 class="center-on-small-only">Found @Model.ContentsList.Count @itemText</h5>
+                <h5 class="center-on-small-only">@Localizer["Found"] @Model.ContentsList.Count @itemText</h5>
             </div>
             <div class="col s12 m5 l4 right">
                 <div class="input-field">
@@ -118,7 +124,7 @@
             {
                 <div class="row">
                     <div class="s10 m10 l10">
-                        <p class="flow-text center-align">It is empty in here...</p>
+                        <p class="flow-text center-align">@Localizer["It is empty in here..."]</p>
                     </div>
                 </div>
             }
@@ -160,6 +166,9 @@
     @await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)
 
     @await Html.PartialAsync("Partial/_UploadPartial.cshtml", lastPath)
+   
+    @await Html.PartialAsync("Partial/_InformationSidePartial.cshtml")
+    
 
 @if (TempData["showGenerateUrlPartial"] != null && bool.Parse(TempData["showGenerateUrlPartial"].ToString() ?? string.Empty))
 {
@@ -212,26 +221,31 @@
         window.location = `/Core/Storage/Browse?path=${document.getElementById("pathField").value}`;
     }
     
+    $('span[data-infoid]').click((e) => {
+        $('#info-slide').show(); 
+    });    
 </script>
 
     <script>
     $('document').ready(() => {
-        $('.card, .card-content').click((e) => { 
-            setCurrentCardId(e);    
-        });
-        
-        $('main').click((e) => {
-            if($('#menu').is(':visible')){
-                $('#menu').hide();
-                e.stopPropagation()
-            }
+        $('.card').click((e) => { 
+            setCurrentCardId(e);  
+            changeMenuVisibility();
         });
     });
     
+    function changeMenuVisibility(){
+        if($('#menu').is(':visible')){
+            $('#menu').hide();
+            $('.z-depth-2').removeClass('z-depth-2').addClass('z-depth-0');
+        }else{
+            $('#menu').show();
+        }
+    }
+    
     function setCurrentCardId(e){
-        console.log(e.target.id);
         localStorage.setItem('selectedCardId', e.target.id);
-        $('#menu').show();
+        $(e.target).removeClass('z-depth-0').addClass('z-depth-2');
         e.stopPropagation();
     }
     </script>
@@ -260,8 +274,9 @@
 }
 else
 {
-    ViewData["Title"] = "Browse - Error";
+    ViewData["Title"] = Localizer["Browse - Error"];
     <div class="card-panel red darken-3">
-        Well, the fact you see this message just means that I have totally fucked up something
+        <p>Well, the fact you see this message just means that I have totally fucked up something.</p>
+        <p>It is not even translated to underline the fact.</p>
     </div>
 }

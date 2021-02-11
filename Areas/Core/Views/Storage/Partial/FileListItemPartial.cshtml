@@ -1,8 +1,8 @@
-﻿@using Microsoft.Extensions.FileProviders
-@using PikaCore.Infrastructure.Security
+﻿@using PikaCore.Infrastructure.Security
 @using PikaCore.Infrastructure.Services.Helpers
 @model Tuple<string, Microsoft.Extensions.FileProviders.IFileInfo>
 @inject IdDataProtection DataProtection
+@inject IViewLocalizer Localizer
 
 @{
     var item = Model.Item2;
@@ -46,31 +46,8 @@
                                 </p>
                             }
                         </div>
-                        <div class="col s2 m2 l2">
-                            <i class="material-icons right activator">info</i>
-                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="card-reveal grey lighten-4">
-                <span class="card-title grey-text text-darken-4">Information<i class="material-icons right">close</i></span>
-                <div>
-                    <p>Full name: @item.Name</p>
-                    <p>MIME: @mime</p>
-                    @if (!item.IsDirectory)
-                    {
-                        <p>Size: @UnixHelper.DetectUnitBySize(item.Length)</p>
-                    }
-                    <div>
-                        <p>Last Modified: @dateString</p>
-                    </div>
-                </div>
-                @if (item.Name.StartsWith("~"))
-                {
-                    <span class="material-icons">
-                        lock
-                    </span>
-                }
             </div>
         </div>
     }
@@ -112,31 +89,8 @@
                                 </p>
                             }
                         </div>
-                        <div class="col s2 m2 l2">
-                            <i class="material-icons right activator">info</i>
-                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="card-reveal">
-                <span class="card-title grey-text text-darken-4">Information<i class="material-icons right">close</i></span>
-                <div>
-                    <p>Full name: @item.Name</p>
-                    <p>MIME: @mime</p>
-                    @if (!item.IsDirectory)
-                    {
-                        <p>Size: @UnixHelper.DetectUnitBySize(item.Length)</p>
-                    }
-                    <div>
-                        <p>Last Modified: @dateString</p>
-                    </div>
-                </div>
-                @if (item.Name.StartsWith("~"))
-                {
-                    <span class="material-icons">
-                        lock
-                    </span>
-                }
             </div>
         </div>
     }

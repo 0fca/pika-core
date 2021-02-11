@@ -314,6 +314,10 @@ input[type="password"]:not(.browser-default):focus
     color:  teal;
 }
 
+.nav-context-menu li{
+    cursor: pointer;
+}
+
 .page-footer .container .row a{
     color: teal;
 }
@@ -328,4 +332,36 @@ input[type="password"]:not(.browser-default):focus
 
 .tabs .indicator {
     background-color: teal !important;
+}
+
+.breadcrumb::before{
+    content: '\E5CC';
+    color: rgb(12,12,12);
+    vertical-align: top;
+    display: inline-block;
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 25px;
+    margin: 0 10px 0 8px;
+}
+.information-side-pane{
+    float: right;
+    width: 15%;
+    right: 0;
+    position: fixed; 
+    top: 65px;
+    bottom: 0;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    padding-left: 10px;
+    padding-top: 10px;
+    background-color: whitesmoke;
+}
+#menu > li {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    float: left;
+    width: 10%;
+    padding: 5px;
 }

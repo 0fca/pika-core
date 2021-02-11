@@ -1,8 +1,9 @@
 ﻿@model string
+@inject IViewLocalizer Localizer
 <div id="upload-modal" class="modal modal-fixed-footer">
     <form method="post" enctype="multipart/form-data" id="upload-form">
         <div class="modal-content container">
-            <h4>Upload one or more files</h4>
+            <h4>@Localizer["Upload one or more files"]</h4>
             
             <div class="row">
                 <p id="output-paragraph" class="transparent">
@@ -11,11 +12,11 @@
                     <div class="col s12 m12 l12">
                         <div class="file-field input-field">
                             <div class="btn">
-                                <span>Choose</span>
+                                <span>@Localizer["Choose"]</span>
                                 <input id="files" name="files" type="file" multiple>
                                 </div>
                             <div class="file-path-wrapper">
-                                <input class="file-path validate" type="text" placeholder="Upload one or more files">
+                                <input class="file-path validate" type="text" placeholder="@Localizer["Upload one or more files"]">
                             </div>
                             </div>
                     </div>
@@ -35,8 +36,8 @@
                 </div>
             </div>
         <div class="modal-footer">
-            <button id="upload-submit" type="button" class="waves-effect waves-green btn-flat" disabled>Upload</button>
-            <button type="button" class="btn btn-danger modal-close">Close</button>
+            <button id="upload-submit" type="button" class="waves-effect waves-green btn-flat" disabled>@Localizer["Upload"]</button>
+            <button type="button" class="btn btn-danger modal-close">@Localizer["Close"]</button>
         </div>
     </form>
 </div>
@@ -52,7 +53,7 @@
             uploadButton.setAttribute("disabled", "true");
         }
         if (getSummarySize() >= 268435456) {
-            messageLabel.innerText = "File or files are too big to upload it at once.";
+            messageLabel.innerText = "@Localizer["File or files are too big to upload it at once"]";
             uploadButton.setAttribute("disabled", "true");
             deleteAllFiles();
         } else if (uploadButton.hasAttribute("disabled")) {
@@ -84,7 +85,7 @@
                      if(response.status === 202){
                          const fileRefLink = document.createElement('a');
                          fileRefLink.href = response.headers.get("Location");
-                         fileRefLink.text = " You can see your file here.";
+                         fileRefLink.text = "@Localizer["You can see your file here"]";
                          fileRefLink.setAttribute("class", "indigo-text");
                          resultElement.appendChild(fileRefLink);
                      }
