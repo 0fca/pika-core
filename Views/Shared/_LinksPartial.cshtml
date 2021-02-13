@@ -1,3 +1,4 @@
+@using Newtonsoft.Json
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @inject IViewLocalizer Localizer  
@@ -72,11 +73,12 @@
         </div>
     </div>
 </div>
-<script>
- function translateAppDropdown() {
-         const dropdownLink = document.getElementById("app-dropdown-link");
-         
- }
-    
- window.onresize = translateAppDropdown();
-</script>
+@section Scripts
+{
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        window.onresize = () => {
+             const dropdownLink = document.getElementById("app-dropdown-link");
+        };
+    </script>
+}

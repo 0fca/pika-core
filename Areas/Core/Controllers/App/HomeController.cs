@@ -61,9 +61,17 @@ namespace PikaCore.Areas.Core.Controllers.App
             return errorViewModel != null ? View(errorViewModel) : View(nameof(Index));
         }
 
-        public IActionResult ErrorByCode(int id)
+        public IActionResult Status(int id)
         {
-            return RedirectToAction("Error", new ErrorViewModel { ErrorCode = id, Message = "HTTP/1.1 " + id, RequestId = HttpContext.TraceIdentifier, Url = HttpContext.Request.Path });
+            return RedirectToAction("Error", 
+                new ErrorViewModel { 
+                    ErrorCode = id, 
+                    Message = System.IO.File.ReadAllText( $"~/Views/Shared/Errors/{id}.html")
+                              ?? "No specific error information", 
+                    RequestId = HttpContext.TraceIdentifier, 
+                    Url = HttpContext.Request.Headers["Referer"].ToString()
+                }
+            );
         }
     }
 }

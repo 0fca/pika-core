@@ -18,6 +18,22 @@
     <ItemGroup>
       <Compile Remove="Services\Helpers\Jobs\**" />
       <Content Remove="Services\Helpers\Jobs\**" />
+      <Content Include="Views\Shared\Errors\404.html">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Include="Views\Shared\Errors\500.html">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Include="Views\Shared\Errors\502.html">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Include="Views\Shared\Errors\503.html">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
       <EmbeddedResource Remove="Services\Helpers\Jobs\**" />
       <None Remove="Services\Helpers\Jobs\**" />
       <TypeScriptCompile Remove="Services\Helpers\Jobs\**" />
@@ -735,6 +751,27 @@
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
       <Content Update="Areas\Identity\Views\Shared\_Partials\_LocaleSwitch.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <EmbeddedResource Update="Resources\Areas\Identity\Views\Shared\_Partials\_LocaleSwitch.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>_LocaleSwitch.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Identity\Views\Shared\_Partials\_LocaleSwitch.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>_LocaleSwitch.pl.resx</DependentUpon>
+      </Compile>
+      <Content Update="Areas\Core\Views\Shared\_Layout.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Views\Shared\_Partial\_Scripts.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Views\Shared\_Partial\_Styles.cshtml">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>

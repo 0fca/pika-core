@@ -1,1 +1,30 @@
-﻿Switch
+﻿@using Microsoft.AspNetCore.Builder
+@using Microsoft.AspNetCore.Http.Features
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Options
+
+@inject IViewLocalizer Localizer
+@inject IOptions<RequestLocalizationOptions> LocOptions
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var cultureItems = LocOptions.Value.SupportedUICultures
+        .Select(c => new SelectListItem { Value = c.Name, Text = c.DisplayName })
+        .ToList().FindAll(l => !l.Value.Equals(requestCulture.RequestCulture.UICulture.Name.ToLower()));
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
+}
+
+<div title="@Localizer["Change your display language"]" class="right" style="margin-top: 10px;">
+    <ul class="hide-on-med-and-down">
+        <li>
+            <form id="selectLanguage" asp-controller="Manage"
+                  asp-action="SetLanguage" asp-route-returnUrl="@returnUrl"
+                  method="post" class="form-horizontal" role="form">
+                <select name="culture"
+                        asp-for="@requestCulture.RequestCulture.UICulture.Name" asp-items="cultureItems">
+                </select>
+            </form>
+        </li>
+    </ul>
+</div>

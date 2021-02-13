@@ -43,8 +43,9 @@ namespace PikaCore.Areas.Admin.Controllers
             _messageService = messageService;
 
         }
-
+                
         [HttpGet]
+        [Route("/{area}", Name = "Index")]
         public async Task<IActionResult> Index(int offset = 0)
         {
             var usersWithRoles = new Dictionary<ApplicationUser, IList<string>>();

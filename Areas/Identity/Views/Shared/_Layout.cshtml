@@ -3,10 +3,27 @@
 }
 
 
-@RenderBody()
-@await RenderSectionAsync("Scripts", required: false)
 @section LocaleSwitch
 {
     @await Html.PartialAsync("_Partials/_LocaleSwitch")
 }
+
+@section meta{
+    <meta property="og:description" content="Welcome to Pika Core Identity Area!" />
+    <meta property="og:image" content="https://core.lukas-bownik.net/images/pika-logos/pikacloud_brand.png" />
+    <meta name="theme-color" content="#009688" />
+}
+
+@RenderBody()
+@section Scripts{
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        const switcher = $(".select-dropdown");
+        switcher.click(() => {
+            console.log('Test');
+        });
+        
+    </script>
+}
+
     

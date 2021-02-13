@@ -303,11 +303,9 @@ namespace PikaCore
                 .AddSupportedUICultures(supportedCultures);
                         
             app.UseRequestLocalization(localizationOptions);
-
+            app.UseStatusCodePagesWithRedirects("/Core/Home/Status/{0}");
             lifetime.ApplicationStopping.Register(OnShutdown);
 
-            app.UseStatusCodePages();
-            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -323,10 +321,7 @@ namespace PikaCore
             Constants.Tmp = Configuration.GetSection("Paths")[OsName + "-tmp"];
             Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
             
-            // app.UseStatusCodePagesWithRedirects("/Core/Home/ErrorByCode/{0}");
             app.UseSession();
-            
-
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
