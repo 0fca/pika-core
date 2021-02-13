@@ -7,17 +7,14 @@
        @if (Model != null)
             {
     <div class="col s12 m12 l12">
-        <div class="card large sticky-action indigo  white-text center">
-            <span class="card-title activator">Pika Core Error</span>
+        <div class="card large sticky-action indigo white-text center">
             <div class="card-content">
-                <p class="flow-text">
-                    @Html.Raw(Model.Message)
-                </p>
-                <img class="responsive-img center-align activator" src="https://http.cat/@Model.ErrorCode" width="390" height="270" alt="Couldn't load kitty :c."/>
+                @await Html.PartialAsync($"_Partial/Errors/{Model.ErrorCode}")
+                <img class="responsive-img center-align activator" src="https://http.cat/@Model.ErrorCode" width="390" height="270" alt="Couldn't load kitty :c." style="margin-top: 25px;"/>
             </div>
                 <div class="card-action white-text">
-                    <a href="mailto:lukasbownik99@gmail.com?&title=Error%20report%20PikaCore&body=@Model.Message @Model.RequestId">Report it</a>
-                    <a href="#" class="activator">Show details</a>
+                    <a href="mailto:lukasbownik99@gmail.com?&title=Error%20report%20PikaCore&body=@Model.Message @Model.RequestId" class="white-text">Report it</a>
+                    <a href="#" class="activator white-text">Show details</a>
                 </div>
             <div class="card-reveal teal-text center">
                 <span class="card-title grey-text text-darken-4">Error Details<i class="material-icons right">close</i></span>

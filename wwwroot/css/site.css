@@ -358,3 +358,11 @@ input[type="password"]:not(.browser-default):focus
     width: 10%;
     padding: 5px;
 }
+
+div .select-dropdown{
+    color: black !important;
+    border-bottom: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important; 
+    text-align: center !important;
+}

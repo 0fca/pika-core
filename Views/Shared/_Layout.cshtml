@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Localization
+<!DOCTYPE html>
 @inject UserManager<ApplicationUser> UserManager
 @inject IViewLocalizer Localizer  
 @{ 
@@ -8,15 +9,15 @@
     {
         role = (UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).Result.ElementAt(0);
         ViewData["Role"] = role;
-        roleName = role !??  $" - {role} - ";
+        roleName = !string.IsNullOrEmpty(role) ? $" - {role} - " : "";
     }
     else
     {
         roleName = " - ";
     }
-
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
 }
-<html lang="en">
+<html lang="@requestCulture.RequestCulture.UICulture.Name.ToLower()">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -26,6 +27,8 @@
     <meta property="og:url" content="https://core.lukas-bownik.net/" />
     @await RenderSectionAsync("meta", required: false)
     @await Html.PartialAsync("_Partial/_Styles")
+    
+    @await Html.PartialAsync("_Partial/_Scripts")   
 </head>
 <body>
 <main>
@@ -62,7 +65,7 @@
                     @(Html.Raw(string.Format(msg.Value, link))) 
                 </p>
                 
-                <p class="white-text left small-text">@Localizer["FooterCookieText"] <a asp-page="/Core/Policy/Index">@Localizer["PoliciesText"]</a> .</p>
+                <p class="white-text left small-text">@Localizer["FooterCookieText"] <a href="/Core/Policy/Index">@Localizer["PoliciesText"]</a> .</p>
             </div>
             <environment include="Development">
                 <div class="col s12 m6 l6">
@@ -78,7 +81,6 @@
     </div>
 </footer>
 
-@await Html.PartialAsync("_Partial/_Scripts")   
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

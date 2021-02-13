@@ -174,7 +174,7 @@
 {
     @await Html.PartialAsync("Partial/_GenerateUrlPartial.cshtml")
 }
-
+@section Scripts{
     <script>
 @{
     lastPath = !string.IsNullOrEmpty(lastPath) ? lastPath.Replace("\\", "\\\\") : "\\";
@@ -249,7 +249,7 @@
         e.stopPropagation();
     }
     </script>
-    
+
     <div id="loader" class="card-content hide">
         @await Html.PartialAsync("Partial/_Loader")
     </div>
@@ -266,11 +266,18 @@
            el.appendChild(loaderDiv);
         });
     });
-     
+    document.addEventListener('DOMContentLoaded', function() {
+                const elems = document.querySelectorAll('.modal');
+                const instances = M.Modal.init(elems);
+    }); 
 </script>
     <script src="~/js/media.js" asp-append-version="true" defer=""></script>
+    <script src="~/js/file.js" asp-append-version="true" defer=""></script>
     <script src="~/lib/jquery-ui-1.12.1/jquery-ui.min.js" asp-append-version="true" defer=""></script>
-    <link rel="stylesheet" href="~/lib/jquery-ui-1.12.1/jquery-ui.min.css" asp-append-version="true" />                                                                                     
+    <link rel="stylesheet" href="~/lib/jquery-ui-1.12.1/jquery-ui.min.css" asp-append-version="true"/>
+    
+        
+}
 }
 else
 {

@@ -63,11 +63,14 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         public IActionResult Status(int id)
         {
+            if (!System.IO.File.Exists($"_Partial/Errors/{id}.html"))
+            {
+                id = 404;
+            }
             return RedirectToAction("Error", 
                 new ErrorViewModel { 
                     ErrorCode = id, 
-                    Message = System.IO.File.ReadAllText( $"~/Views/Shared/Errors/{id}.html")
-                              ?? "No specific error information", 
+                    Message = "No specific error information", 
                     RequestId = HttpContext.TraceIdentifier, 
                     Url = HttpContext.Request.Headers["Referer"].ToString()
                 }

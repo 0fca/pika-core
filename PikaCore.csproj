@@ -18,22 +18,10 @@
     <ItemGroup>
       <Compile Remove="Services\Helpers\Jobs\**" />
       <Content Remove="Services\Helpers\Jobs\**" />
-      <Content Include="Views\Shared\Errors\404.html">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="Views\Shared\Errors\500.html">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="Views\Shared\Errors\502.html">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="Views\Shared\Errors\503.html">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
+      <Content Update="Views\Shared\_Partial\Errors\404.cshtml" />
+      <Content Update="Views\Shared\_Partial\Errors\500.cshtml" />
+      <Content Update="Views\Shared\_Partial\Errors\502.cshtml" />
+      <Content Update="Views\Shared\_Partial\Errors\503.cshtml" />
       <EmbeddedResource Remove="Services\Helpers\Jobs\**" />
       <None Remove="Services\Helpers\Jobs\**" />
       <TypeScriptCompile Remove="Services\Helpers\Jobs\**" />
