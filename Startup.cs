@@ -304,8 +304,10 @@ namespace PikaCore
                         
             app.UseRequestLocalization(localizationOptions);
 
-            lifetime.ApplicationStopping.Register(OnShutdown); 
- 
+            lifetime.ApplicationStopping.Register(OnShutdown);
+
+            app.UseStatusCodePages();
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

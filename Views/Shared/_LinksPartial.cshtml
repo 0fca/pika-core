@@ -1,4 +1,3 @@
-@using PikaCore.Areas.Core.Models
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @inject IViewLocalizer Localizer  
@@ -17,14 +16,14 @@
         @if (SignInManager.IsSignedIn(User))
         {
             <li>
-                <a asp-area="Core" class="navlink" asp-controller="Manage" asp-action="Index" title="@Localizer["Manage"]">
+                <a asp-area="Identity" class="navlink" asp-controller="Manage" asp-action="Index" title="@Localizer["Manage"]">
                     <i class="material-icons">
                         account_box
                     </i>
                 </a>
             </li>
             <li>
-                <button type="submit" class="waves-effect waves-teal btn-flat">Log out</button>
+                <button type="submit" class="waves-effect waves-teal btn-flat">@Localizer["Log out"]</button>
             </li>
 
         }

@@ -112,20 +112,19 @@ namespace PikaCore.Areas.Identity.Controllers
             return RedirectToAction(nameof(Index));
         }
         
-        [HttpGet]
+        [HttpPost]
         public IActionResult SetLanguage(string culture)
         {
-            if (Request.Cookies.ContainsKey(CookieRequestCultureProvider.DefaultCookieName))
-            {
-                Response.Cookies.Delete(CookieRequestCultureProvider.DefaultCookieName);
-            }
             Response.Cookies.Append(
                   CookieRequestCultureProvider.DefaultCookieName,
                   CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                  new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+                  new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), 
+                      SameSite = SameSiteMode.None, 
+                      HttpOnly = true
+                  }
                   );
 
-            return RedirectToAction("Index", "Home");
+            return LocalRedirect(Request.Headers["Referer"].ToString());
         }
 
         [HttpGet]

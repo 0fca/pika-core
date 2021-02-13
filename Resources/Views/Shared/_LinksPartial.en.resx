@@ -19,19 +19,19 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="PikaCloudApps" xml:space="preserve">
-    <value>Pika Cloud Aplikacje</value>
+    <value>Pika Cloud Apps</value>
         <comment/>
   </data>
     <data name="Manage" xml:space="preserve">
-    <value>Zarządzaj</value>
+    <value>Manage</value>
         <comment/>
   </data>
     <data name="Register" xml:space="preserve">
-    <value>Zarejestruj się</value>
+    <value>Register</value>
         <comment/>
   </data>
     <data name="Login" xml:space="preserve">
-    <value>Zaloguj się</value>
+    <value>Log in</value>
         <comment/>
   </data>
 </root>

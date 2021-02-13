@@ -19,23 +19,23 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="FooterInterestedInAppText" xml:space="preserve">
-    <value>Zainteresowany aplikacją</value>
+    <value>Interested in the app</value>
         <comment/>
   </data>
     <data name="FooterSeeAboutText" xml:space="preserve">
-    <value>Zobacz stronę {0} po więcej szczegółów!</value>
+    <value>See {0} page to take a better look at it!</value>
         <comment/>
   </data>
     <data name="AboutText" xml:space="preserve">
-    <value>O aplikacji</value>
+    <value>About</value>
         <comment/>
   </data>
     <data name="FooterCookieText" xml:space="preserve">
-    <value>PikaCloud używa cookies, używając go, akceptujesz nasze</value>
+    <value>PikaCloud uses cookies, by using all apps in PikaCloud, you accept our</value>
         <comment/>
   </data>
     <data name="PoliciesText" xml:space="preserve">
-    <value>polityki</value>
+    <value>policies</value>
         <comment/>
   </data>
 </root>

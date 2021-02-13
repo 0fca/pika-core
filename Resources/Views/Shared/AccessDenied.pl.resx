@@ -18,24 +18,11 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
-    <data name="FooterInterestedInAppText" xml:space="preserve">
-    <value>Zainteresowany aplikacją</value>
-        <comment/>
-  </data>
-    <data name="FooterSeeAboutText" xml:space="preserve">
-    <value>Zobacz stronę {0} po więcej szczegółów!</value>
-        <comment/>
-  </data>
-    <data name="AboutText" xml:space="preserve">
-    <value>O aplikacji</value>
-        <comment/>
-  </data>
-    <data name="FooterCookieText" xml:space="preserve">
-    <value>PikaCloud używa cookies, używając go, akceptujesz nasze</value>
-        <comment/>
-  </data>
-    <data name="PoliciesText" xml:space="preserve">
-    <value>polityki</value>
-        <comment/>
-  </data>
+    <data name="Access Denied" xml:space="preserve">
+        <value>Dostęp wzbroniony</value>
+    </data>
+    <data name="You do not have access to this resource" xml:space="preserve">
+        <value>Nie masz dostępu do tego zasobu</value>
+        <comment>You do not have access to this resource</comment>
+    </data>
 </root>

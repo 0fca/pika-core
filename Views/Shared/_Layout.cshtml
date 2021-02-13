@@ -46,8 +46,8 @@
 <main>
     <form asp-area="Identity" asp-action="Logout" asp-controller="Account" method="post" id="logoutForm">
         <div class="navbar-fixed">
-            <nav>
-                <div class="nav-wrapper navbar-color">
+            <nav class="z-depth-0">
+                <div class="nav-wrapper white">
                     <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons indigo-text">menu</i></a>
                     <a asp-area="Core" asp-controller="Home" asp-action="Index" class="brand-logo brand-margin brand-text">
                         <img src="~/images/pika-logos/pikacloud_brand.png" class="responsive-img" width="137" height="48" alt="Pika Cloud"/>
@@ -100,7 +100,7 @@
     });
 </script>
 
-
+@await RenderSectionAsync("LocaleSwitch", required: false)
 @await RenderSectionAsync("Scripts", required: false)
 
 </body>
