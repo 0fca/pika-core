@@ -27,7 +27,8 @@ namespace PikaCore.Areas.Core.Controllers.App
             var cookieOptions = new CookieOptions()
             {
                 HttpOnly = true,
-                Expires = DateTimeOffset.Now.Add(TimeSpan.FromDays(365))
+                Expires = DateTimeOffset.Now.Add(TimeSpan.FromDays(365)),
+                SameSite = SameSiteMode.Lax
             };
             var message = (await _messageService.GetLatestMessage());
             var date = message.UpdatedAt;

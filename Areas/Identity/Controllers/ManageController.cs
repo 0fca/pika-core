@@ -120,11 +120,12 @@ namespace PikaCore.Areas.Identity.Controllers
                   CookieRequestCultureProvider.DefaultCookieName,
                   CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
                   new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), 
-                      SameSite = SameSiteMode.None
+                      SameSite = SameSiteMode.None,
+                      Secure = true
                   }
                   );
 
-            return LocalRedirect(string.IsNullOrEmpty(Request.Headers["Referer"].ToString()) 
+            return Redirect(string.IsNullOrEmpty(Request.Headers["Referer"].ToString()) 
                 ? returnUrl 
                 : Request.Headers["Referer"].ToString()
                 );

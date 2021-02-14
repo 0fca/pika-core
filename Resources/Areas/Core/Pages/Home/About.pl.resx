@@ -22,9 +22,9 @@
         <value>Pika Core jest rdzeniem mojego autorskiego cloudu - Pika Cloud. Jego głównym przeznaczeniem od samego początku było i jest udostępnianie zasobów na moim serwerze, któe gromadzę na dysku mojego serwera. Sam PikaCore to moja pierwsza aplikacja Web, zacząłem budować ją na .NET Core 1.1, jednak teraz używam do tego wersji {0}</value>
         <comment>Pika Core is a core web application of whole web system called Pika Cloud.It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem.PikaCore first web app I've ever build. I started development on .NET Core 1.1 SDK, but now I use .NET Core SDK of version {0}</comment>
     </data>
-    <data name="This is PikaCore aka Hannah, version" xml:space="preserve">
-        <value>To jest PikaCore aka Hannah, wersja</value>
-        <comment>This is PikaCore aka Hannah, version</comment>
+    <data name="This is PikaCore aka Hannah" xml:space="preserve">
+        <value>To jest PikaCore aka Hannah</value>
+        <comment>This is PikaCore aka Hannah</comment>
     </data>
     <data name="Some technical stuff for those who are interested" xml:space="preserve">
         <value>Trochę technicznych szczegółów dla tych co są zainteresowani</value>
