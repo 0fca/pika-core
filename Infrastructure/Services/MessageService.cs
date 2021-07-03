@@ -65,10 +65,13 @@ namespace PikaCore.Infrastructure.Services
             return await messages.SingleAsync(m => m.Id == id);
         }
 
-        public async Task<MessageEntity> GetLatestMessage()
+        public async Task<MessageEntity?> GetLatestMessage()
         {
-            return await _systemContext.Messages.OrderByDescending(m => m.CreatedAt)
-                .FirstAsync(m => m.IsVisible);
+            if(_systemContext.Messages.Any()){
+                return await _systemContext.Messages.OrderByDescending(m => m.CreatedAt)
+                                .FirstAsync(m => m.IsVisible); 
+            }
+            return null;
         }
         
         public async Task<IssueEntity> GetLatestIssueByMessageId(int id)

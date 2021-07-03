@@ -15,7 +15,7 @@ namespace PikaCore.Infrastructure.Services
 
         public Task<MessageEntity> GetMessageById(int id);
 
-        public Task<MessageEntity> GetLatestMessage();
+        public Task<MessageEntity?> GetLatestMessage();
 
         public Task<IList<IssueEntity>> GetIssuesByMessageId(int id);
 

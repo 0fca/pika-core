@@ -34,7 +34,7 @@
     <div class="col s12 m6 l6">
         <div class="input-field">
             <strong>
-                <a class="btn btn-primary teal" onclick="M.toast({html: '@Localizer["This feature is not available at the moment"]'})">
+                <a class="btn btn-primary teal" asp-area="Identity" asp-controller="Account" asp-action="ExportData">
                     @Localizer["Export"]
                 </a>
             </strong>
