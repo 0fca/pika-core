@@ -3,11 +3,11 @@ WORKDIR /app
 
 # Copy csproj and restore as distinct layers
 COPY *.csproj ./
-RUN dotnet restore
+RUN dotnet restore PikaCore.csproj
 
 # Copy everything else and build
 COPY . ./
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -c Release -o out PikaCore.csproj
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0
