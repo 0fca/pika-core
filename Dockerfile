@@ -10,7 +10,7 @@ COPY . ./
 RUN dotnet publish -c Release -o out PikaCore.csproj
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0
+FROM mcr.microsoft.com/dotnet/aspnet:5.0.1-buster-slim
 RUN apt update && apt install ffmpeg
 EXPOSE 80
 WORKDIR /app
