@@ -11,9 +11,9 @@ RUN dotnet publish -c Release -o out PikaCore.csproj
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0.1-buster-slim
-RUN apt install apt-transport-https
+RUN apt install -y apt-transport-https
 RUN apt update
-RUN apt install ffmpeg
+RUN apt install -y ffmpeg
 EXPOSE 80
 WORKDIR /app
 COPY --from=build-env /app/out .
