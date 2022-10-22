@@ -46,4 +46,7 @@
         <value>Zarejestruj się jako nowy użytkownik</value>
         <comment/>
     </data>
+    <data name="Incorrect authorization request" xml:space="preserve">
+        <value>Niepoprawne żądanie autoryzacji</value>
+    </data>
 </root>

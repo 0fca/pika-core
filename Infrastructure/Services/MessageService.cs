@@ -4,18 +4,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Pika.Domain.Identity.Data;
+using Pika.Domain.Status.Data;
+using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
-using PikaCore.Infrastructure.Data;
 
 namespace PikaCore.Infrastructure.Services
 {
     public class MessageService : IMessageService
     {
-        private readonly SystemContext _systemContext;
+        private readonly ApplicationDbContext _systemContext;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
         public MessageService(SignInManager<ApplicationUser> signInManager,
-            SystemContext systemContext)
+            ApplicationDbContext systemContext)
         {
             _signInManager = signInManager;
             _systemContext = systemContext;

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Pika.Domain.Identity.Data;
 using PikaCore.Areas.Admin.Models.Index;
 using PikaCore.Areas.Admin.Models.Index.DTO;
 using PikaCore.Areas.Core.Models;

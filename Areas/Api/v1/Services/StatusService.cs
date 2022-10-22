@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Pika.Domain.Status.Data;
 using PikaCore.Areas.Api.v1.Services.Utils;
-using PikaCore.Infrastructure.Data;
 using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Api.v1.Services

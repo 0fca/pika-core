@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using PikaCore.Infrastructure.Services;
 using PikaCore.Infrastructure.Services.Helpers;
-using Quartz;
 
 namespace PikaCore.Areas.Core.Services
 {
@@ -23,26 +21,7 @@ namespace PikaCore.Areas.Core.Services
 
         public void ExportData(IList<string> dataCollections, string userId)
         {
-            var triggerFactory = TriggerFactory.GetInstance();
-            var triggerIdentity = new TriggerIdentity()
-            {
-                Name = Guid.NewGuid().ToString()
-            };
-            var scheduleBuilder = SimpleScheduleBuilder.Create().WithRepeatCount(0);
-            var triggerData = new TriggerData()
-            {
-                When = DateTimeOffset.Now,
-                ShouldStartNow = true,
-                TriggerIdentity = triggerIdentity,
-                ScheduleBuilder = scheduleBuilder
-            };
-            var trigger = triggerFactory.CreateTrigger(triggerData);
-            trigger.JobDataMap.Add("data", "");
-            trigger.JobDataMap.Add("exportPath", 
-                Path.Combine(_configuration.GetSection("Storage:exportPath").Value, userId));
-            trigger.JobDataMap.Add("uid", userId);
-            _schedulerService.Init();
-            _schedulerService.StartJob(string.Concat("DataExportJob_", userId), trigger);
+
         }
 
         public string RetrieveFilePath(string userId)

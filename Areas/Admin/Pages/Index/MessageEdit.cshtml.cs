@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using PikaCore.Areas.Admin.Pages.DTO;
+using PikaCore.Areas.Admin.Pages.Index.DTO;
 using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Admin.Pages.Index
@@ -23,7 +23,7 @@ namespace PikaCore.Areas.Admin.Pages.Index
 
         public async Task<IActionResult> OnGetAsync(int id){
             var message = await _messageService.GetMessageById(id);
-            Message = message.ToMessageDto();
+            Message = MessageDTO.FromMessageEntity(message);
             Message.Systems = await _systemService.GetAll();
             return Page();
         }

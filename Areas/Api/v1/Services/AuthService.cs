@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Pika.Domain.Identity.Data;
 using PikaCore.Areas.Core.Models;
 
 namespace PikaCore.Areas.Api.v1.Services

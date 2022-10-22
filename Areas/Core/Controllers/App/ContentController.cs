@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Pika.Adapters.Filesystem;
 using PikaCore.Areas.Core.Models.ContentViewModels;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
@@ -14,15 +15,12 @@ namespace PikaCore.Areas.Core.Controllers.App
     public class ContentController : Controller
     {
         private readonly IdDataProtection _dataProtection;
-        private readonly IStaticContentService _contentService;
         private readonly IConfiguration _configuration;
         
         public ContentController(IdDataProtection idDataProtection,
-                                 IStaticContentService fileService,
                                  IConfiguration configuration)
         {
             _dataProtection = idDataProtection;
-            _contentService = fileService;
             _configuration = configuration;
         }
 
@@ -48,20 +46,8 @@ namespace PikaCore.Areas.Core.Controllers.App
                 DataType = MimeAssistant.GetMimeType(physicalPath),
                 ReturnUrl = returnUrl
             };
-            
-            if (_contentService.IsInCdn(physicalPath))
-            {
-                contentViewModel.TempFileId = "/Static/" + _contentService.RetrieveFromCdn(physicalPath);
-                return View(contentViewModel);
-            }
 
-            contentViewModel.TempFileId = "/Static/" + await _contentService.CopyToCdn(physicalPath);
             return View(contentViewModel);
-        }
-        
-         ~ContentController()
-        {
-            _contentService.CleanCdn();   
         }
     }
 }

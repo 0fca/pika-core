@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using PikaCore.Infrastructure.Data;
+using Pika.Domain.Status.Data;
 using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Pages.Admin

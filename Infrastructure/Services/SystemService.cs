@@ -2,15 +2,16 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using PikaCore.Infrastructure.Data;
+using Pika.Domain.Status.Data;
+using PikaCore.Areas.Core.Data;
 
 namespace PikaCore.Infrastructure.Services
 {
     public class SystemService : ISystemService
     {
-        private readonly SystemContext _systemContext;
+        private readonly ApplicationDbContext _systemContext;
 
-        public SystemService(SystemContext systemContext)
+        public SystemService(ApplicationDbContext systemContext)
         {
             _systemContext = systemContext;
         }

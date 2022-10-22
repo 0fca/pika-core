@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Pika.Domain.Status.Data;
+using Pika.Domain.Status.DTO;
 using PikaCore.Areas.Api.v1.Models;
-using PikaCore.Areas.Api.v1.Models.DTO;
 using PikaCore.Areas.Api.v1.Services;
-using PikaCore.Infrastructure.Data;
 using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Api.v1.Controllers

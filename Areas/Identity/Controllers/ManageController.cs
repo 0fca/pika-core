@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Pika.Domain.Identity.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Identity.Models.ManageViewModels;
 using Serilog;
@@ -44,6 +45,7 @@ namespace PikaCore.Areas.Identity.Controllers
         [TempData] public string StatusMessage { get; set; }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -63,6 +65,7 @@ namespace PikaCore.Areas.Identity.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(IndexViewModel model)
         {
@@ -114,6 +117,7 @@ namespace PikaCore.Areas.Identity.Controllers
         
         [HttpGet]
         [Route("/[area]/[controller]/[action]", Name = "SetLanguage")]
+        [AllowAnonymous]
         public IActionResult SetLanguage(string culture, string returnUrl = "/")
         {
             Response.Cookies.Append(

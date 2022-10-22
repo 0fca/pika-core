@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PikaCore.Infrastructure.Data;
+using Pika.Domain.Status.Data;
 
 namespace PikaCore.Areas.Admin.Models.Index
 {

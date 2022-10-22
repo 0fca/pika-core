@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using PikaCore.Areas.Admin.Pages.DTO;
+using PikaCore.Areas.Admin.Pages.Index.DTO;
 using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Admin.Pages.Index

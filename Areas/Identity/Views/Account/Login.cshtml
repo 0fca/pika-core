@@ -1,11 +1,12 @@
-﻿@model PikaCore.Areas.Identity.Models.AccountViewModels.LoginViewModel
+﻿@using Pika.Domain.Identity.Data
+@model PikaCore.Areas.Identity.Models.AccountViewModels.LoginViewModel
 @inject SignInManager<ApplicationUser> SignInManager
-@inject IViewLocalizer Localizer  
+@inject IViewLocalizer Localizer 
 @{
     ViewData["Title"] = Localizer["Log in"];
 }
 
-    <div class="container">
+<div class="container">
     <div class="col s12 m6 l6 offset-2">
         <div class="card indigo">
             <div class="card-content grey-text text-lighten-4 center">
@@ -18,7 +19,7 @@
                         <div class="row">
                             @if (!ViewData.ModelState.IsValid)
                             {
-                                @Html.ValidationSummary(true,"", new {@class = "card-panel red white-text"})
+                                @Html.ValidationSummary(false, @Localizer[""].Value, new { @class = "card-panel red white-text" })
                             }
                             <div class="col s12 m12 l12">
                                 <div class="input-field">
@@ -31,6 +32,10 @@
                                     <input asp-for="Password" class="validate grey-text text-lighten-4"/>
                                     <span asp-validation-for="Password" class="red-text"></span>
                                 </div>
+                                <div class="input-field hide">
+                                    <input asp-for="ReturnUrl" class="validate grey-text text-lighten-4" value="/"/>
+                                    <span asp-validation-for="Password" class="red-text"></span>
+                                </div>
                             </div>
                         </div>
                         <div class="row">
@@ -39,47 +44,49 @@
                             </div>
                         </div>
                     </form>
-                         <section id="external_account_login">
-                             <div class="row">
-                                 <p>@Localizer["OR"]</p>
-                                 <h6>@Localizer["Log in using third party account"]</h6>
-                                 <p></p>
-                                 @{
-                                     var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-                                     if (loginProviders.Count == 0)
-                                     {
+                    <section id="external_account_login">
+                        <div class="row">
+                            <p>@Localizer["OR"]</p>
+                            <h6>@Localizer["Log in using third party account"]</h6>
+                            <p></p>
+                            @{
+                                var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+                                if (loginProviders.Count == 0)
+                                {
+                                    <div class="card-panel teal white-text center">
+                                        @Localizer["Sorry, but you can't use any 3rd party authorization provider at the moment"]
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+                                    <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
 
-                                         <div class="card-panel teal white-text center">
-                                             @Localizer["Sorry, but you can't use any 3rd party authorization provider at the moment"]
-                                         </div>
-                                     }
-                                     else
-                                     {
-                                         <div class="g-signin2" data-onsuccess="onSignIn"></div>
-                                         <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
+                                        @foreach (var provider in loginProviders)
+                                        {
+                                            var name = System.IO.File.Exists("wwwroot/images/" + @provider.Name.ToLower() + "-icon.png") ? @provider.Name.ToLower() + "-icon.png" : @provider.Name.ToLower() + "-icon.svg";
 
-                                             @foreach (var provider in loginProviders)
-                                             {
-                                                 var name = System.IO.File.Exists("wwwroot/images/" + @provider.Name.ToLower() + "-icon.png") ? @provider.Name.ToLower() + "-icon.png" : @provider.Name.ToLower() + "-icon.svg";
+                                            <button type="submit" class="btn btn-flat transparent" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account">
+                                                <img height="32" width="32" src="~/images/@name" alt="@provider.DisplayName"/>
+                                            </button>
+                                        }
 
-                                                 <button type="submit" class="btn btn-flat transparent" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account"><img height="32" width="32" src="~/images/@name" alt="@provider.DisplayName"/></button>
-                                             }
-
-                                         </form>
-                                     }
-                                 }
-                             </div>
-                             </section>
-                        <div class="card-action">
-                            <a class="grey-text text-lighten-4 left small-text" asp-action="ForgotPassword">@Localizer["Forgot your password"]?</a>
-                            <a class="grey-text text-lighten-4 left small-text" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">@Localizer["Register as a new user"]?</a>
+                                    </form>
+                                }
+                            }
                         </div>
-                    
+                    </section>
+                    <div class="card-action">
+                        <a class="grey-text text-lighten-4 left small-text" asp-action="ForgotPassword">@Localizer["Forgot your password"]?</a>
+                        <a class="grey-text text-lighten-4 left small-text" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">@Localizer["Register as a new user"]?</a>
+                    </div>
+
                 </section>
             </div>
         </div>
     </div>
-    </div>
+</div>
+
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 }

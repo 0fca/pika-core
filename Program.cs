@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace PikaCore
@@ -25,10 +26,11 @@ namespace PikaCore
                 .ConfigureLogging(l =>
                 {
                     l.AddSerilog();
+                    l.AddEventLog();
                 })
                 .UseStartup<Startup>()
                 .UseConfiguration(configuration)
-                .UseUrls($"http://localhost:{port}")
+                .UseUrls($"http://core.cloud.localhost:{port}", $"https://core.cloud.localhost:{port+1}")
                 .UseKestrel()
                 .Build();
             host.Run();

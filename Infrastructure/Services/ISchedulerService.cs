@@ -1,12 +1,11 @@
 ﻿using System.Threading.Tasks;
-using Quartz;
 
 namespace PikaCore.Infrastructure.Services
 {
     public interface ISchedulerService
     {
         Task Init();
-        Task StartJob(string name, ITrigger trigger);
+        Task StartJob(string name);
         void Dispose();
     }
 }

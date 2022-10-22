@@ -1,4 +1,5 @@
-﻿@inject IViewLocalizer Localizer  
+﻿@using Pika.Domain.Identity.Data
+@inject IViewLocalizer Localizer  
 @inject SignInManager<ApplicationUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();

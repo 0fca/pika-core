@@ -13,12 +13,12 @@ namespace PikaCore.Areas.Core.Models.File
         
         public DateTime LastModified;
 
-        public ResourceInformationViewModel(IFileInfo fileInfo)
+        public ResourceInformationViewModel()
         {
-            this.FullName = fileInfo.Name;
-            this.Size = fileInfo.Length;
-            this.LastModified = fileInfo.LastModified.DateTime;
-            this.MimeType = MimeAssistant.GetMimeType(fileInfo.PhysicalPath);
+            this.FullName = "N"; 
+            this.Size = 0L;
+            this.LastModified = DateTime.Now;
+            this.MimeType = "";
         }
     }
 }

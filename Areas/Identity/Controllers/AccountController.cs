@@ -1,20 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+using System.Data;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityServer4;
+using IdentityServer4.Extensions;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Pika.Domain.Identity.Data;
 using PikaCore.Areas.Core.Controllers.App;
+using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Identity.Models.AccountViewModels;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
+using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace PikaCore.Areas.Identity.Controllers
 {
@@ -28,52 +36,48 @@ namespace PikaCore.Areas.Identity.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly IStringLocalizer<AccountController> _localizer;
+        private readonly ApplicationDbContext _applicationDbContext;
+        private readonly IIdentityServerInteractionService _interactionService;
 
         public AccountController(UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager, 
             IEmailSender emailSender,
             ILogger<AccountController> logger,
             IMessageService messageService,
-            IStringLocalizer<AccountController> stringLocalizer)
+            IStringLocalizer<AccountController> stringLocalizer,
+            IIdentityServerInteractionService interactionService,
+            ApplicationDbContext applicationDbContext)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
             _localizer = stringLocalizer;
+            _applicationDbContext = applicationDbContext;
+            _interactionService = interactionService;
         }
 
         [TempData] private string ErrorMessage { get; set; }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(string returnUrl = "/")
+        public async Task<IActionResult> Login()
         {
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            ViewData["ReturnUrl"] = returnUrl;
-            ViewData["Message"] = null;
+            
             return View();
         }
-
+        
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = "/")
         {
-            ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid) return View(model);
-            var result = await _signInManager.PasswordSignInAsync(model.Username, 
-                model.Password, 
-                model.RememberMe, 
-                lockoutOnFailure: true);
+            var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, false, true);
             if (result.Succeeded)
             {
-                _logger.LogInformation($"User of email: {model.Username} logged in.");
-                return RedirectPermanent(returnUrl);
-            }
-            if (result.RequiresTwoFactor)
-            {
-                return RedirectToAction(nameof(LoginWith2Fa), new { returnUrl, model.RememberMe });
+                var user = await _signInManager.UserManager.FindByEmailAsync(model.Username);
+                return RedirectToLocal(returnUrl);
             }
             if (result.IsLockedOut)
             {
@@ -165,17 +169,13 @@ namespace PikaCore.Areas.Identity.Controllers
             {
                 return View(model);
             }
-
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
                 throw new ApplicationException(_localizer.GetString("Unable to load two-factor authentication user").Value);
             }
-
             var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty);
-
             var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);
-
             if (result.Succeeded)
             {
                 _logger.LogInformation("User with ID {UserId} logged in with a recovery code.", user.Id);
@@ -186,12 +186,10 @@ namespace PikaCore.Areas.Identity.Controllers
                 _logger.LogWarning("User with ID {UserId} account locked out.", user.Id);
                 return RedirectToAction(nameof(Lockout));
             }
-            else
-            {
-                _logger.LogWarning("Invalid recovery code entered for user with ID {UserId}", user.Id);
-                ModelState.AddModelError(string.Empty, _localizer.GetString("Invalid recovery code entered").Value);
-                return View();
-            }
+
+            _logger.LogWarning("Invalid recovery code entered for user with ID {UserId}", user.Id);
+            ModelState.AddModelError(string.Empty, _localizer.GetString("Invalid recovery code entered").Value);
+            return View();
         }
 
         [HttpGet]
@@ -216,18 +214,16 @@ namespace PikaCore.Areas.Identity.Controllers
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid) return View(model);
-            
             var user = new ApplicationUser { UserName = model.Username, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
-            
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, RoleString.User);
                 _logger.LogInformation("User created a new account.");
+                await _signInManager.PasswordSignInAsync(user, model.Password, false, true);
                 return RedirectToAction("Index", "Manage");
             }
             AddErrors(result);
-
             return View(model);
         }
 
@@ -265,7 +261,6 @@ namespace PikaCore.Areas.Identity.Controllers
             {
                 return RedirectToAction(nameof(Login));
             }
-
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
             if (result.Succeeded)
             {
@@ -276,11 +271,9 @@ namespace PikaCore.Areas.Identity.Controllers
             {
                 return RedirectToAction(nameof(Lockout));
             }
-
             ViewData["ReturnUrl"] = returnUrl;
             ViewData["LoginProvider"] = info.LoginProvider;
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-
             return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
         }
 
@@ -292,15 +285,12 @@ namespace PikaCore.Areas.Identity.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Get the information about the user from the external login provider
                 var info = await _signInManager.GetExternalLoginInfoAsync();
                 if (info == null)
                 {
                     throw new ApplicationException(_localizer.GetString("Error loading external login information during confirmation."));
                 }
-
                 var user = new ApplicationUser {UserName = model.Username, Email = model.Email};
-
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -313,10 +303,8 @@ namespace PikaCore.Areas.Identity.Controllers
                         return RedirectToLocal(returnUrl);
                     }
                 }
-
                 AddErrors(result);
             }
-
             ViewData["ReturnUrl"] = returnUrl;
             return View(nameof(ExternalLogin), model);
         }
@@ -374,20 +362,12 @@ namespace PikaCore.Areas.Identity.Controllers
         {
             var userExportData = new ExportDataViewModel()
             {
-                DataCollections = new List<string>(){ "User Data" }
+                // TODO: Remember to move creation of SelectListItem list of collections somewhere else
+                DataCollections = new List<SelectListItem>()
+                {
+                    new SelectListItem("User Data", "User Data")
+                }
             };
-
-            var propertyInfos = typeof(ApplicationUser).GetProperties();
-            var userRelatedComplexCollections = propertyInfos
-                .ToList()
-                .Where(prop => !prop.GetType().IsPrimitive);
-            var relatedComplexCollections = userRelatedComplexCollections 
-                as PropertyInfo[] ?? userRelatedComplexCollections.ToArray();
-            if (relatedComplexCollections.ToList().Count == 0)
-            {
-                relatedComplexCollections.ToList().ForEach(p => 
-                    userExportData.DataCollections.Add(p.Name));
-            }
             return View(userExportData);
         }
         
@@ -395,13 +375,15 @@ namespace PikaCore.Areas.Identity.Controllers
         [HttpPost]
         [ActionName("ExportData")]
         [Route("[area]/[controller]/[action]")]
+        [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> ExportUserDataConfirmation(ExportDataViewModel exportDataViewModel)
         {
-            //TODO: Add analyzing request data and gathering requested data here, in a service ofc
-            ViewData["returnMessage"] = _localizer.GetString("Your data is gathered from whole system, it can take a while. " +
-                                        "Your data will be accessible for download in CSV format as soon as they are ready").Value;
-            
-            return View();
+            ViewData["returnMessage"] = _localizer.GetString(
+                "Your data will be accessible for download in CSV format as soon as they are ready").Value;
+            var user = await _userManager.GetUserAsync(User);
+            var returnPath = _applicationDbContext.ExecuteUserExportDataFunction(user.Id);
+            Log.Information("GrepMe: "+exportDataViewModel.SelectedCollections.Count);
+            return View(exportDataViewModel);
         }
 
         [HttpGet]

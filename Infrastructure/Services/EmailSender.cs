@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace PikaCore.Infrastructure.Services
 {
+    // Use Twilio client to do it using Twilio.
     public class EmailSender : IEmailSender
     {
         public Task SendEmailAsync(string email, string subject, string message)

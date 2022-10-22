@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using PikaCore.Infrastructure.Data;
-using PikaCore.Infrastructure.Models;
+using Pika.Domain.Status.Data;
+using Pika.Domain.Status.Models;
 
-namespace PikaCore.Areas.Admin.Pages.DTO
+namespace PikaCore.Areas.Admin.Pages.Index.DTO
 {
     public class MessageDTO
     {
@@ -26,6 +26,17 @@ namespace PikaCore.Areas.Admin.Pages.DTO
                 Message = this.Content,
                 IsVisible = IsVisible,
                 MessageType = MessageType
+            };
+        }
+
+        public static MessageDTO FromMessageEntity(MessageEntity messageEntity)
+        {
+            return new MessageDTO
+            {
+                Id = messageEntity.Id,
+                Content = messageEntity.Message,
+                MessageType = messageEntity.MessageType,
+                SystemName = messageEntity.SystemDescriptor.SystemName
             };
         }
     }

@@ -11,18 +11,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Localization;
+using Pika.Domain.Identity.Data;
+using Pika.Domain.Storage.Data;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Areas.Core.Services.Jobs;
 using PikaCore.Infrastructure.Security;
-using PikaCore.Infrastructure.Services;
-using PikaCore.Infrastructure.Services.Helpers;
-using Quartz;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
@@ -32,13 +29,11 @@ namespace PikaCore.Areas.Core.Controllers.App
     public class StorageController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IFileService _fileService;
         private readonly IUrlGenerator _urlGeneratorService;
         private readonly IConfiguration _configuration;
-        private readonly StorageIndexContext _storageIndexContext;
+        private readonly ApplicationDbContext _storageIndexContext;
         private readonly IHubContext<StatusHub> _hubContext;
         private readonly IdDataProtection _idDataProtection;
-        private readonly IJobService _jobService;
         private readonly IStringLocalizer<StorageController> _stringLocalizer;
 
         #region TempDataMessages
@@ -52,23 +47,19 @@ namespace PikaCore.Areas.Core.Controllers.App
         #endregion
 
         public StorageController(SignInManager<ApplicationUser> signInManager,
-               IFileService fileService, 
                IUrlGenerator iUrlGenerator,
-               StorageIndexContext storageIndexContext,
+               ApplicationDbContext storageIndexContext,
                IHubContext<StatusHub> hubContext,
                IConfiguration configuration,
                IdDataProtection idDataProtection,
-               IJobService jobService,
                IStringLocalizer<StorageController> stringLocalizer)
         {
             _signInManager = signInManager;
-            _fileService = fileService;
             _urlGeneratorService = iUrlGenerator;
             _storageIndexContext = storageIndexContext;
             _hubContext = hubContext;
             _configuration = configuration;
             _idDataProtection = idDataProtection;
-            _jobService = jobService;
             _stringLocalizer = stringLocalizer;
         }
 
@@ -84,70 +75,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         [AllowAnonymous]
         public async Task<IActionResult> Browse(string? path, int offset = 0, int count = 10)
         {
-            var osUser = _configuration.GetSection("OsUser")["OsUsername"];
-            
-            if (string.IsNullOrEmpty(path)
-            || !UnixHelper.HasAccess(osUser, 
-                _fileService.RetrieveAbsoluteFromSystemPath(path)))
-            {
-                path = Path.DirectorySeparatorChar.ToString();
-            }
-            
-            var contents = GetContents(path);
-
-            ViewData["path"] = path;
-            ViewData["returnUrl"] =  UnixHelper.GetParent(path);
             var lrmv = new FileResultViewModel();
-
-            if (null == contents)
-            {
-                ReturnMessage = _stringLocalizer.GetString("Something went wrong...").Value;
-                return View(lrmv);
-            }
-
-            if (!contents.Exists)
-            {
-                ReturnMessage = _stringLocalizer.GetString("The resource doesn't exist on the filesystem").Value;
-                return View(lrmv);
-            }
-            
-            lrmv.Contents = contents;
-            lrmv.ContentsList = contents.ToList();
-
-            await lrmv.SortContents();
-            var fileInfosList = lrmv.ContentsList;
-            Log.Information("Browser List Count: " + fileInfosList.Count.ToString());
-            var pageCount = (int)Math.Ceiling((float)fileInfosList.Count / count);
-
-            SetPagingParams(offset, count, pageCount);
-
-            Set("Offset", offset.ToString(), 3600);
-            Set("Count", count.ToString(), 3600);
-            Set("PageCount", pageCount.ToString(), 3600);
-                
-            if (fileInfosList.Count > count)
-            {
-                lrmv.ApplyPaging(offset, count);
-            }
-                
-            if (!HttpContext.User.IsInRole("Admin"))
-            {
-                try
-                {
-                    lrmv.ApplyAcl(osUser);
-                }
-                catch (InvalidOperationException ex)
-                {
-                    Log.Error(ex, "StorageController#Browse");
-                }
-            }
-                
-            var fileInfo = _fileService.RetrieveFileInfoFromSystemPath(path);
-            if (fileInfo.Exists 
-            && !fileInfo.IsDirectory)
-            {
-                return RedirectToAction(nameof(Download), new { @id = fileInfo.Name, @z = true });
-            }
             
             return View(lrmv);
         }
@@ -162,21 +90,11 @@ namespace PikaCore.Areas.Core.Controllers.App
             }
 
             var path = _idDataProtection.Decode(id);
-            var model = new ResourceInformationViewModel(_fileService.RetrieveFileInfoFromAbsolutePath(path))
+            var model = new ResourceInformationViewModel()
             {
-                IsHidden = _fileService.IsFileHidden(path)
+                IsHidden = false 
             };
-            if (model.IsHidden 
-                && (!this.User.IsInRole("Admin") || User.IsInRole("FileManagerUser")))
-            {
-                return Forbid();
-            }
 
-            if (_fileService.IsVisibleToAdminOnly(path) 
-                && !User.IsInRole("Admin"))
-            {
-                return NotFound("No such resource");
-            }
             
             return View(model);
         }
@@ -234,57 +152,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             ReturnMessage = _stringLocalizer.GetString("Couldn't generate token for that resource").Value;
             return RedirectToAction(nameof(Browse), new { @path = returnUrl });
         }
-
-       
-        [HttpGet]
-        [AllowAnonymous]
-        [Route("/[controller]/[action]/{id?}")]
-        public ActionResult PermanentDownload(string id)
-        {
-            if (!string.IsNullOrEmpty(id))
-            {
-                StorageIndexRecord? s = null;
-                try
-                {
-                    s = _storageIndexContext.IndexStorage.SingleOrDefault(record => record.Urlhash.Equals(id));
-
-                    if (s != null)
-                    {
-                        if (!s.Expires || (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now))
-                        {
-                                var fileBytes = _fileService.AsStreamAsync(s.AbsolutePath);
-                                var name = Path.GetFileName(s.AbsolutePath);
-                                if (fileBytes != null)
-                                {
-                                    return File(fileBytes, MimeAssistant.GetMimeType(name), name, true);
-                                }
-                                
-                                ReturnMessage = _stringLocalizer.GetString("Couldn't read requested resource:").Value 
-                                                + s.Urlid;
-                                Log.Warning(ReturnMessage);
-                                return RedirectToAction(nameof(Browse));
-                        }
-                        ReturnMessage = _stringLocalizer
-                            .GetString("It seems that this url expired, you need to generate a new one").Value;
-                        return RedirectToAction(nameof(Browse));
-                    }
-                    ReturnMessage = _stringLocalizer
-                        .GetString("It seems that given token doesn't exist in the database").Value;
-                    return RedirectToAction(nameof(Browse));
-                }
-                catch (InvalidOperationException ex)
-                {
-                    ReturnMessage = _stringLocalizer.GetString(s != null 
-                        ? "Couldn't read requested resource: " + s.Urlid 
-                        : "Database error occured.").Value;
-                    Log.Error(ex, string.Concat(ReturnMessage, "StorageController#PermanentDownload"));
-                    return RedirectToAction(nameof(Browse));
-                }
-            }
-            ReturnMessage = _stringLocalizer.GetString("No id given or database is down").Value;
-            return RedirectToAction(nameof(Browse));
-        }
-
+        
         [HttpGet]
         [AllowAnonymous]
         public ActionResult Download(string id, string returnUrl, bool z = false)
@@ -293,40 +161,6 @@ namespace PikaCore.Areas.Core.Controllers.App
             int offset = int.Parse(Get("Offset"));
             int count = int.Parse(Get("Count"));
 
-            try
-            {
-                if (!string.IsNullOrEmpty(id))
-                {
-                    var fileInfo = _fileService.RetrieveFileInfoFromAbsolutePath(id);
-                    var path = fileInfo.PhysicalPath;
-                    Log.Information($"Decoded path: {path}");
-                    
-                    if (Directory.Exists(path))
-                    {
-                        ReturnMessage = _stringLocalizer
-                            .GetString( "This is a folder, cannot download it directly").Value;
-                        return RedirectToAction(nameof(Browse), new {@path = returnUrl});
-                    }
-                    
-                    if (!fileInfo.Exists)
-                    {
-                        ReturnMessage = _stringLocalizer
-                            .GetString("File doesn't exist on server's filesystem").Value;
-                        return RedirectToAction(nameof(Browse), new {@path = returnUrl});
-                    }
-
-                    
-
-
-                    var fs = _fileService.AsStreamAsync(path);
-                    var mime = MimeAssistant.GetMimeType(path);
-                    return File(fs, mime, fileInfo.Name, true);
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, "StorageController#Download");
-            }
 
             ReturnMessage = _stringLocalizer.GetString("Resource id cannot be null").Value;
             return RedirectToAction(nameof(Browse), new {@path = returnUrl, offset, count});
@@ -336,14 +170,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         [AllowAnonymous]
         public IActionResult Thumb(string id)
         {
-            Log.Information($"Request for thumb of id: {id}");
-            var format = _configuration.GetSection("Images")["Format"].ToLower();
-            var thumbFileName = $"{id}.{format}";
-            var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
-                                                 thumbFileName
-                                                 );
-            var thumbFileStream = _fileService.AsStreamAsync(absoluteThumbPath);
-            return File(thumbFileStream, "image/jpeg");
+            return StatusCode(501);
         }
         
         [HttpPost]
@@ -352,32 +179,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         [RequestFormLimits(MultipartBodyLengthLimit = 268435456)]
         public async Task<IActionResult> Upload(List<IFormFile> files, string returnPath = "")
         {
-            try
-            {
-                var size = files.Sum(f => f.Length);
-                var returnMessage = files.Count 
-                                    + _stringLocalizer.GetString( (files.Count == 1 ? "file" : " files")).Value + " " 
-                                    + _stringLocalizer.GetString("uploaded of summary size").Value + " "
-                                    + UnixHelper.DetectUnitBySize(size);
-                var (checkResultMessage, tmpFilesList) = 
-                    await _fileService.SanitizeFileUpload(files, 
-                            returnPath,
-                    HttpContext.User.IsInRole("Admin"));
-
-                returnMessage = string.IsNullOrEmpty(checkResultMessage) ? returnMessage : checkResultMessage;
-                if (!string.IsNullOrEmpty(checkResultMessage))
-                {
-                    return StatusCode(403, checkResultMessage);
-                }
-
-                await _fileService.PostSanitizeUpload(tmpFilesList);
-                Log.Warning($"Accepted to be created at path: /Core/Storage/Browse?path={returnPath}");
-                return Accepted(Url.Action("Browse", "Storage", new {path = returnPath}), returnMessage);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, e.Message);
-            }
+            return StatusCode(501);
         }
         
         [HttpPost]
@@ -386,16 +188,9 @@ namespace PikaCore.Areas.Core.Controllers.App
         public async Task<IActionResult> Archive(string id)
         {
             var absolutePath = _idDataProtection.Decode(id);
-            var jobDataMap = new JobDataMap
-            {
-                {"userId", _signInManager.UserManager.GetUserId(HttpContext.User)},
-                {"output", _configuration["Paths:zip-tmp"]},
-                {"absolutePath", absolutePath}
-            };
-            var name = await _jobService.CreateJob<ArchiveJob>(jobDataMap);
+            
             ReturnMessage = _stringLocalizer.GetString("Your request has been accepted").Value;
-            // /Core/Jobs/Submit?name={name}
-            return RedirectPermanent(Url.Action("Submit","Jobs", new {name}));
+            return StatusCode(501);
         }
         
         [HttpPost]
@@ -411,10 +206,9 @@ namespace PikaCore.Areas.Core.Controllers.App
             {
                 try
                 {
-                    var dirInfo = await _fileService.MkdirAsync(_fileService.RetrieveAbsoluteFromSystemPath(name));
-                    
+
                     ReturnMessage = _stringLocalizer
-                        .GetString("Successfully created directory:").Value + dirInfo?.Name;
+                        .GetString("Successfully created directory:").Value + "";
                     Log.Information(ReturnMessage);
                     return RedirectToAction(nameof(Browse), new { path = returnUrl });
                 }
@@ -437,13 +231,11 @@ namespace PikaCore.Areas.Core.Controllers.App
         {
             var offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
             var count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
-            var contentsList = GetContents(currentPath).ToList();
             var toBeDeletedItemsModel = new DeleteResourcesViewModel()
             {
                 ReturnPath = currentPath
             };
             toBeDeletedItemsModel.ApplyPaging(offset, count);
-            toBeDeletedItemsModel.FromFileInfoList(contentsList);
 
             return View(toBeDeletedItemsModel);
         }
@@ -461,7 +253,6 @@ namespace PikaCore.Areas.Core.Controllers.App
             {
                 try
                 {
-                    await _fileService.Delete(contents);
 
                     ReturnMessage = _stringLocalizer.GetString( "Successfully deleted elements").Value;
                     Log.Information(ReturnMessage);
@@ -483,8 +274,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         [AutoValidateAntiforgeryToken]
         public IActionResult Rename(string n)
         {
-            var name = _fileService.RetrieveAbsoluteFromSystemPath(n);
-            ViewData["path"] = name;
+            var name = "";
             var rfm = new RenameFileModel
             {
                 IsDirectory = IsDirectory(name),
@@ -504,7 +294,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         {
             if (!string.IsNullOrEmpty(rfm.NewName))
             {
-                var isRenamed = _fileService.Move(Path.Combine(rfm.AbsoluteParentPath, rfm.OldName), Path.Combine(rfm.AbsoluteParentPath, rfm.NewName));
+                var isRenamed = false; 
                 if (!isRenamed)
                 {
                     ReturnMessage = "Couldn't renamed to " + rfm.NewName;
@@ -534,10 +324,8 @@ namespace PikaCore.Areas.Core.Controllers.App
             Log.Information($"{systemPath}");
             try
             {
-                var isHidden = _fileService.HideFile(
-                    systemPath
-                );
-                ReturnMessage = isHidden ? 
+                
+                ReturnMessage = true ? 
                     _stringLocalizer.GetString( "Resource hidden").Value : 
                     _stringLocalizer.GetString( "Couldn't be hidden").Value;
             }
@@ -560,9 +348,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             Log.Information($"{systemPath}");
             try
             {
-                var isHidden = _fileService.ShowFile(
-                    systemPath
-                );
+                var isHidden = true; 
                 ReturnMessage = isHidden 
                     ? _stringLocalizer.GetString( "Resource is visible now").Value 
                     : _stringLocalizer.GetString( "Couldn't be set visible").Value;
@@ -582,11 +368,6 @@ namespace PikaCore.Areas.Core.Controllers.App
             return user != null
                 ? await _signInManager.UserManager.GetEmailAsync(user)
                 : HttpContext.Connection.RemoteIpAddress.ToString();
-        }
-
-        private IDirectoryContents GetContents(string systemPath)
-        {
-            return _fileService.GetDirectoryContents(systemPath);
         }
 
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
