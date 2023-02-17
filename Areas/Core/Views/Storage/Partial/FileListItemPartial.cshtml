@@ -1,7 +1,6 @@
 ﻿@using PikaCore.Infrastructure.Security
-@using PikaCore.Infrastructure.Services.Helpers
-@using Pika.Adapters.Filesystem
 @using Microsoft.AspNetCore.Mvc.TagHelpers
+@using MimeAssistant = PikaCore.Infrastructure.Adapters.Filesystem.MimeAssistant
 @model Tuple<string, Microsoft.Extensions.FileProviders.IFileInfo>
 @inject IdDataProtection DataProtection
 @inject IViewLocalizer Localizer

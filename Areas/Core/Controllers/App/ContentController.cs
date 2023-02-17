@@ -3,11 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Pika.Adapters.Filesystem;
 using PikaCore.Areas.Core.Models.ContentViewModels;
 using PikaCore.Infrastructure.Security;
-using PikaCore.Infrastructure.Services;
-using PikaCore.Infrastructure.Services.Helpers;
+using MimeAssistant = PikaCore.Infrastructure.Adapters.Filesystem.MimeAssistant;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {

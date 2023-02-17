@@ -1,7 +1,6 @@
-﻿@using PikaCore.Infrastructure.Services.Helpers
-@using PikaCore.Infrastructure.Security
+﻿@using PikaCore.Infrastructure.Security
 @using Pika.Domain.Identity.Data
-@using Pika.Adapters.Filesystem
+@using UnixHelper = PikaCore.Infrastructure.Adapters.Filesystem.UnixHelper
 @inject SignInManager<ApplicationUser> SignInManager
 @model ResourceInformationViewModel
 @inject IdDataProtection DataProtection

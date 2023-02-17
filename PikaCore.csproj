@@ -803,6 +803,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.0" />
+    <PackageReference Include="Minio" Version="4.0.7" />
+    <PackageReference Include="Minio.AspNetCore" Version="4.0.7" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.4" />
     <PackageReference Include="NReco.Csv" Version="1.0.0" />
@@ -823,6 +825,7 @@
       <Folder Include="Areas\Api\v1\Data" />
       <Folder Include="Areas\Core\Exceptions" />
       <Folder Include="Areas\Identity\Models" />
+      <Folder Include="Infrastructure\Adapters" />
       <Folder Include="Resources\Areas\Admin\Views" />
       <Folder Include="Resources\Views" />
       <Folder Include="wwwroot\images\github\" />
@@ -1020,8 +1023,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Pika.Adapters\Pika.Adapters.csproj" />
-      <ProjectReference Include="..\Pika.Domain\Pika.Domain\Pika.Domain.csproj" />
+      <ProjectReference Include="..\Pika.Domain\Pika.Domain.csproj" />
     </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
