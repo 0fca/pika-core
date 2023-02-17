@@ -30,7 +30,7 @@ namespace PikaCore
                 })
                 .UseStartup<Startup>()
                 .UseConfiguration(configuration)
-                .UseUrls($"http://core.cloud.localhost:{port}", $"https://core.cloud.localhost:{port+1}")
+                .UseUrls($"http://0.0.0.0:{port}")
                 .UseKestrel()
                 .Build();
             host.Run();
