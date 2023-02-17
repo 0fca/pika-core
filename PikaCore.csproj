@@ -773,10 +773,6 @@
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="EventBus" Version="1.1.2" />
     <PackageReference Include="Google.Apis" Version="1.57.0" />
-    <PackageReference Include="IdentityServer4" Version="4.1.2" />
-    <PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
-    <PackageReference Include="IdentityServer4.Contrib.RedisStore" Version="4.0.0" />
-    <PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.2" />
     <PackageReference Include="Localization.AspNetCore.TagHelpers" Version="0.6.0" />
     <PackageReference Include="MediatR" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.5" />

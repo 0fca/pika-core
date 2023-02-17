@@ -14,9 +14,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using IdentityServer4;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
@@ -25,12 +22,10 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Win32;
 using Pika.Domain.Identity.Data;
-using Pika.Domain.Status.Data;
 using PikaCore.Areas.Api.v1.Services;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
-using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Services;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
@@ -132,15 +127,7 @@ namespace PikaCore
                     .SetApplicationName("ShrCkApp");
             }
 
-            services.AddAuthentication(
-                    options =>
-                    {
-                        options.DefaultScheme =
-                            CookieAuthenticationDefaults.AuthenticationScheme;
-                        options.DefaultChallengeScheme =
-                            IdentityServerConstants.DefaultCookieAuthenticationScheme;
-                    }
-                )
+            services.AddAuthentication()
                 .AddGoogle(googleOpts =>
                 {
                     googleOpts.ClientId = Configuration["Authentication:Google:ClientId"];
@@ -161,7 +148,8 @@ namespace PikaCore
                 {
                     discordOptions.ClientId = Configuration["Authentication:Discord:ClientId"];
                     discordOptions.ClientSecret = Configuration["Authentication:Discord:ClientSecret"];
-                })
+                });
+                /*
                 .AddOpenIdConnect(options =>
                 {
                     options.SignInScheme =
@@ -176,6 +164,7 @@ namespace PikaCore
                     options.GetClaimsFromUserInfoEndpoint = true;
                     options.SaveTokens = true;
                 });
+                */
 
             services.AddAspNetCoreCustomValidation();
             services.AddSingleton<IEmailSender, EmailSender>();
@@ -208,21 +197,7 @@ namespace PikaCore
             {
                 options.MultipartBodyLengthLimit = 268435456; //256MB
             });
-            services.AddIdentityServer(options =>
-                {
-                    options.Authentication.CookieSameSiteMode = SameSiteMode.Lax;
-                    options.Authentication.CheckSessionCookieDomain = ".cloud.localhost";
-                })
-                .AddAspNetIdentity<ApplicationUser>()
-                .AddDefaultEndpoints()
-                .AddJwtBearerClientAuthentication()
-                .AddInMemoryApiResources(Configuration.GetSection("IdentityServer:ApiResources"))
-                .AddInMemoryClients(Configuration.GetSection("IdentityServer:Clients"))
-                .AddRedisCaching(optionsBuilder =>
-                {
-                    optionsBuilder.Db = 2;
-                    optionsBuilder.RedisConnectionString = Configuration.GetConnectionString("RedisConnection");
-                });
+           
             services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;
@@ -394,7 +369,6 @@ namespace PikaCore
             //app.UseHttpsRedirection();
             app.UseResponseCompression();
             app.UseAuthorization();
-            app.UseIdentityServer();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

@@ -1,23 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using IdentityServer4;
-using IdentityServer4.Extensions;
-using IdentityServer4.Services;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Pika.Domain.Identity.Data;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Data;
-using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Identity.Models.AccountViewModels;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
@@ -37,7 +30,6 @@ namespace PikaCore.Areas.Identity.Controllers
         private readonly ILogger _logger;
         private readonly IStringLocalizer<AccountController> _localizer;
         private readonly ApplicationDbContext _applicationDbContext;
-        private readonly IIdentityServerInteractionService _interactionService;
 
         public AccountController(UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager, 
@@ -45,7 +37,6 @@ namespace PikaCore.Areas.Identity.Controllers
             ILogger<AccountController> logger,
             IMessageService messageService,
             IStringLocalizer<AccountController> stringLocalizer,
-            IIdentityServerInteractionService interactionService,
             ApplicationDbContext applicationDbContext)
         {
             _userManager = userManager;
@@ -54,7 +45,6 @@ namespace PikaCore.Areas.Identity.Controllers
             _logger = logger;
             _localizer = stringLocalizer;
             _applicationDbContext = applicationDbContext;
-            _interactionService = interactionService;
         }
 
         [TempData] private string ErrorMessage { get; set; }
