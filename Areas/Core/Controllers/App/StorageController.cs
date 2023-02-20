@@ -7,16 +7,13 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
-using Pika.Domain.Identity.Data;
 using Pika.Domain.Storage.Data;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
-using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Services;
 using PikaCore.Infrastructure.Security;
@@ -28,7 +25,6 @@ namespace PikaCore.Areas.Core.Controllers.App
     [ResponseCache(CacheProfileName = "Default")]
     public class StorageController : Controller
     {
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IUrlGenerator _urlGeneratorService;
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _storageIndexContext;
@@ -46,15 +42,13 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         #endregion
 
-        public StorageController(SignInManager<ApplicationUser> signInManager,
-               IUrlGenerator iUrlGenerator,
+        public StorageController(IUrlGenerator iUrlGenerator,
                ApplicationDbContext storageIndexContext,
                IHubContext<StatusHub> hubContext,
                IConfiguration configuration,
                IdDataProtection idDataProtection,
                IStringLocalizer<StorageController> stringLocalizer)
         {
-            _signInManager = signInManager;
             _urlGeneratorService = iUrlGenerator;
             _storageIndexContext = storageIndexContext;
             _hubContext = hubContext;
@@ -64,14 +58,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Index()
-        {
-            return RedirectToActionPermanent(nameof(Browse));
-        }
-
-        [HttpGet(Name = "Browse")]
-        [ActionName("Browse")]
+        [Route("{area}/{controller}/")]
         [AllowAnonymous]
         public async Task<IActionResult> Browse(string? path, int offset = 0, int count = 10)
         {
@@ -94,13 +81,10 @@ namespace PikaCore.Areas.Core.Controllers.App
             {
                 IsHidden = false 
             };
-
-            
             return View(model);
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin, FileManagerUser, User")]
         [Route("/[controller]/[action]/{name?}")]
         public async Task<IActionResult> GenerateUrl(string name, string returnUrl)
         {
@@ -364,10 +348,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         private async Task<string> IdentifyUser()
         {
-            var user = await _signInManager.UserManager.GetUserAsync(HttpContext.User);
-            return user != null
-                ? await _signInManager.UserManager.GetEmailAsync(user)
-                : HttpContext.Connection.RemoteIpAddress.ToString();
+            return "User";
         }
 
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)

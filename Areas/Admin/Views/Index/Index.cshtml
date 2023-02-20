@@ -47,9 +47,9 @@
                             @Html.DisplayFor(modelItem => roleString)
                         </div>
                         <div class="col s4">
-                            <a class="teal-text" asp-action="Edit" asp-controller="Index" asp-route-id=@key.Id><i class="fas fa-pen"></i></a>
-                            <a class="teal-text" asp-action="Delete" asp-controller="Index" asp-route-id="@key.Id"><i class="fas fa-trash-alt"></i></a>
-                            <a class="teal-text" asp-action="GeneratePassword" asp-controller="Index" asp-route-id="@key.Id"><i class="fas fa-key"></i></a>
+                            <a class="teal-text" asp-route-id=@key.Id><i class="fas fa-pen"></i></a>
+                            <a class="teal-text" asp-route-id="@key.Id"><i class="fas fa-trash-alt"></i></a>
+                            <a class="teal-text" asp-route-id="@key.Id"><i class="fas fa-key"></i></a>
                         </div>
                     </div>
                 }
@@ -66,7 +66,7 @@
                     @for (var pageIndex = 0; pageIndex < @Model.MessageViewModel.PageCount; pageIndex++)
                     {
                         var displayIndex = pageIndex + 1;
-                        <li><a asp-controller="Index" asp-action="Index" asp-route-offset="@pageIndex" class="btn btn-flat">@displayIndex</a></li>
+                        <li><a asp-route-offset="@pageIndex" class="btn btn-flat">@displayIndex</a></li>
                     }
                 </ul>
             </div>
@@ -75,7 +75,7 @@
                     <a class="btn btn-primary teal" href="/Admin/Index/CreateMessage">Create</a>
                 </div>
                 <div class="col s12 m6 l6">
-                    <a  class="btn btn-danger" asp-controller="Index" asp-action="RemoveMessages">Delete</a>
+                    <a  class="btn btn-danger">Delete</a>
                 </div>
             </div>
             <table class="collection">

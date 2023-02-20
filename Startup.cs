@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,23 +9,32 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using System;
 using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
+using Google.Apis.Util;
+using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.Win32;
-using Pika.Domain.Identity.Data;
+using OpenIddict.Abstractions;
+using OpenIddict.Client;
+using OpenIddict.Validation.AspNetCore;
 using PikaCore.Areas.Api.v1.Services;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Services;
+using PikaCore.Areas.Identity.Extensions;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
 using Serilog;
@@ -69,19 +77,7 @@ namespace PikaCore
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
-                {
-                    opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(
-                        int.Parse(Configuration
-                            .GetSection("Policies")
-                            .GetSection("LoginPolicy")["DefaultLockout"])
-                    );
-                    opt.Lockout.MaxFailedAccessAttempts = int.Parse(Configuration
-                        .GetSection("Policies")
-                        .GetSection("LoginPolicy")["MaxFailedAttempts"]);
-                })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+           
 
             services.AddDistributedMemoryCache();
             services.AddStackExchangeRedisCache(a =>
@@ -127,77 +123,38 @@ namespace PikaCore
                     .SetApplicationName("ShrCkApp");
             }
 
-            services.AddAuthentication()
-                .AddGoogle(googleOpts =>
+            services.AddOpenIddict()
+                .AddClient(o =>
                 {
-                    googleOpts.ClientId = Configuration["Authentication:Google:ClientId"];
-                    googleOpts.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
+                    o.AllowPasswordFlow();
+                    o.DisableTokenStorage();
+                    o.UseSystemNetHttp()
+                        .SetProductInformation(typeof(Program).Assembly);
+
+                    o.AddRegistration(new OpenIddictClientRegistration
+                    {
+                        ClientId = Configuration.GetSection("Auth")["ClientId"],
+                        ClientSecret = Configuration.GetSection("Auth")["ClientSecret"],
+                        Issuer = new Uri(Configuration.GetSection("Auth")["Authority"], UriKind.Absolute)
+                    });
                 })
-                .AddMicrosoftAccount(microsoftOptions =>
+                .AddValidation(o =>
                 {
-                    microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ApplicationId"];
-                    microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:Password"];
-                })
-                .AddGitHub(githubOptions =>
-                {
-                    githubOptions.ClientId = Configuration["Authentication:GitHub:ClientId"];
-                    githubOptions.ClientSecret = Configuration["Authentication:GitHub:ClientSecret"];
-                    githubOptions.CallbackPath = "/signin-github";
-                })
-                .AddDiscord(discordOptions =>
-                {
-                    discordOptions.ClientId = Configuration["Authentication:Discord:ClientId"];
-                    discordOptions.ClientSecret = Configuration["Authentication:Discord:ClientSecret"];
+                    o.SetIssuer(Configuration.GetSection("Auth")["Authority"]);
+                    o.AddAudiences("pika-core");
+                    o.UseIntrospection()
+                        .SetClientId(Configuration.GetSection("Auth")["ClientId"])
+                        .SetClientSecret(Configuration.GetSection("Auth")["ClientSecret"]);
+                    o.UseSystemNetHttp();
+                    o.UseAspNetCore();
                 });
-                /*
-                .AddOpenIdConnect(options =>
-                {
-                    options.SignInScheme =
-                        CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.Authority = "https://core.localhost:5001"; // Auth Server  
-                    options.RequireHttpsMetadata = false; // only for development   
-                    options.ClientId = "pika_core"; // client setup in Auth Server  
-                    options.ClientSecret = "95cd49e8-c060-4e0d-ba66-b2b1145ab2eb";
-                    options.ResponseType = "code id_token"; // means Hybrid flow  
-                    options.Scope.Add("profile");
-                    options.Scope.Add("resource1");
-                    options.GetClaimsFromUserInfoEndpoint = true;
-                    options.SaveTokens = true;
-                });
-                */
-
-            services.AddAspNetCoreCustomValidation();
-            services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
-            services.AddSingleton<ISchedulerService, SchedulerService>();
-            services.AddSingleton<UniqueCode>();
-            services.AddSingleton<IdDataProtection>();
-            services.AddScoped<IMessageService, MessageService>();
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddTransient<ISystemService, SystemService>();
-            services.AddTransient<IStatusService, StatusService>();
-            services.AddTransient<IDataExportService, DataExportService>();
-
-            services.AddLocalization(options => options.ResourcesPath = "Resources");
-
-            services.Configure<RequestLocalizationOptions>(options =>
+            
+            services.AddAuthentication(o =>
             {
-                var supportedCultures = new[]
-                {
-                    new CultureInfo("en"),
-                    new CultureInfo("pl")
-                };
-
-                options.DefaultRequestCulture = new RequestCulture(culture: "en", uiCulture: "en");
-                options.SupportedCultures = supportedCultures;
-                options.SupportedUICultures = supportedCultures;
-            });
-
-            services.Configure<FormOptions>(options =>
-            {
-                options.MultipartBodyLengthLimit = 268435456; //256MB
-            });
-           
+                o.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer();
+            
             services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;
@@ -214,9 +171,41 @@ namespace PikaCore
                 options.Cookie.Domain = ".cloud.localhost";
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
                 options.SlidingExpiration = true;
-                options.LoginPath = "/Identity/Account/Login";
+                options.LoginPath = "/Identity/Gateway/Login";
                 options.Cookie.Name = ".AspNet.ShrCk";
-                options.LogoutPath = "/Identity/Account/Logout";
+                options.LogoutPath = "/Identity/Gateway/Logout";
+            });
+            services.AddAuthorization();
+            services.AddAspNetCoreCustomValidation();
+            services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
+            services.AddSingleton<ISchedulerService, SchedulerService>();
+            services.AddSingleton<UniqueCode>();
+            services.AddSingleton<IdDataProtection>();
+            services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddTransient<ISystemService, SystemService>();
+            services.AddTransient<IStatusService, StatusService>();
+            services.AddTransient<IDataExportService, DataExportService>();
+            services.AddScoped<IOidcService, OidcService>();
+
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+            
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new[]
+                {
+                    new CultureInfo("en"),
+                    new CultureInfo("pl")
+                };
+
+                options.DefaultRequestCulture = new RequestCulture(culture: "en", uiCulture: "en");
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+            });
+
+            services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 268435456; //256MB
             });
 
             services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
@@ -312,9 +301,8 @@ namespace PikaCore
                 .AddSupportedUICultures(supportedCultures);
 
             app.UseRequestLocalization(localizationOptions);
-            app.UseStatusCodePagesWithRedirects("/Core/Home/Status/{0}");
             lifetime.ApplicationStopping.Register(OnShutdown);
-
+            app.UseStatusCodePagesWithRedirects("/Core/Home/Status/{0}");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -325,7 +313,6 @@ namespace PikaCore
                 app.UseHsts();
                 app.UseCertificateForwarding();
             }
-
             Constants.RootPath = Configuration.GetSection("Paths")["storage"];
             Constants.FileSystemRoot = Configuration.GetSection("Paths")[OsName + "-root"];
             Constants.Tmp = Configuration.GetSection("Paths")[OsName + "-tmp"];
@@ -365,9 +352,11 @@ namespace PikaCore
             app.UseRouting();
             app.UseCors("CorsPolicy");
             app.UseResponseCaching();
+            app.UseOiddictAuthenticationCookieSupport();
+            app.UseEnsureJwtBearerValid();
             app.UseAuthentication();
-            //app.UseHttpsRedirection();
             app.UseResponseCompression();
+            app.UseMapJwtClaimsToIdentity();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
@@ -400,48 +389,8 @@ namespace PikaCore
                     .RequireCors("CorsPolicy")
                     .RequireHost("localhost", "core.localhost");
             });
-            CreateRoles(serviceProvider).Wait();
         }
-
-        private async Task CreateRoles(IServiceProvider serviceProvider)
-        {
-            //adding custom roles
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            string[] roleNames = { "Admin", "FileManagerUser", "User" };
-
-            foreach (var roleName in roleNames)
-            {
-                //creating the roles and seeding them to the database
-                var roleExist = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
-                {
-                    await roleManager.CreateAsync(new IdentityRole(roleName));
-                }
-            }
-
-            //creating a super user who could maintain the web app
-            var poweruser = new ApplicationUser
-            {
-                UserName = Configuration.GetSection("UserSettings")["UserEmail"],
-                Email = Configuration.GetSection("UserSettings")["UserEmail"]
-            };
-
-            var userPassword = Configuration.GetSection("UserSettings")["UserPassword"];
-            var user = await userManager.FindByEmailAsync(Configuration.GetSection("UserSettings")["UserEmail"]);
-
-            //Debug.WriteLine(_user.Email);
-            if (user == null)
-            {
-                var createPowerUser = await userManager.CreateAsync(poweruser, userPassword);
-                if (createPowerUser.Succeeded)
-                {
-                    //here we tie the new user to the "Admin" role 
-                    await userManager.AddToRoleAsync(poweruser, "Admin");
-                }
-            }
-        }
-
+        
         #region LifetimeHelpers
 
         private static void OnShutdown()

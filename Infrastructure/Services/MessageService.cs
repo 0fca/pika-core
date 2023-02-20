@@ -14,12 +14,9 @@ namespace PikaCore.Infrastructure.Services
     public class MessageService : IMessageService
     {
         private readonly ApplicationDbContext _systemContext;
-        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public MessageService(SignInManager<ApplicationUser> signInManager,
-            ApplicationDbContext systemContext)
+        public MessageService(ApplicationDbContext systemContext)
         {
-            _signInManager = signInManager;
             _systemContext = systemContext;
         }
 
@@ -29,20 +26,15 @@ namespace PikaCore.Infrastructure.Services
                 PrepareJoin()
                 .Where(m => m.SystemDescriptor.SystemName.Equals(systemName))
                 .AsQueryable();
-            if (_signInManager.Context.User.IsInRole("Admin"))
-            { 
-                return await messages.ToListAsync();
-            }
+            // TODO: Add admin support
             return await messages.Where(m => m.IsVisible).ToListAsync();
         }
         
         public async Task<IList<MessageEntity>> GetAllMessages()
         {
             var messages = PrepareJoin();
-            if (_signInManager.Context.User.IsInRole("Admin"))
-            { 
-                return await messages.ToListAsync();
-            }
+            // TODO: Add admin support
+
             return await messages.Where(m => m.IsVisible).ToListAsync();
         }
 
@@ -60,10 +52,7 @@ namespace PikaCore.Infrastructure.Services
         public async Task<MessageEntity> GetMessageById(int id)
         {
             var messages = PrepareJoin();
-            if (!_signInManager.Context.User.IsInRole("Admin"))
-            {
-                messages = messages.Where(m => m.IsVisible);
-            }
+            // TODO: Add admin support
             return await messages.SingleAsync(m => m.Id == id);
         }
 

@@ -13,8 +13,8 @@
     
 }
 
-<div title="@Localizer["Change your display language"]" class="right" style="margin-top: 10px;">
+<div title="@Localizer["Change your display language"]" class="left" style="margin-top: 10px;">
             <select name="culture"
-                    asp-for="@requestCulture.RequestCulture.UICulture.Name" asp-items="cultureItems">
+                    asp-for="@requestCulture!.RequestCulture.UICulture.Name" asp-items="cultureItems">
             </select>
 </div>

@@ -8,7 +8,7 @@
             Delete user @Model.Email
         </span>
         <div class="card-content">
-            <form asp-area="Admin" asp-controller="Index" asp-action="DeleteConfirmation" asp-route-id="@Model.Id" method="post">
+            <form asp-action="DeleteConfirmation" asp-route-id="@Model.Id" method="post">
                 <div class="form-group">
                     <span>
                         <button type="submit" class="btn btn-danger">Delete</button>

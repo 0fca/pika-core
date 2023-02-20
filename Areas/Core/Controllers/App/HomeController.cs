@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Infrastructure.Services;
@@ -60,7 +62,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             return View();
         }
 
-        public IActionResult Error(ErrorViewModel errorViewModel)
+        public IActionResult Error(ErrorViewModel? errorViewModel)
         {
             return errorViewModel != null ? View(errorViewModel) : View(nameof(Index));
         }
@@ -69,15 +71,34 @@ namespace PikaCore.Areas.Core.Controllers.App
         {
             if (!System.IO.File.Exists($"_Partial/Errors/{id}.html"))
             {
-                id = 404;
+                id = 500;
             }
             return RedirectToAction("Error", 
                 new ErrorViewModel { 
                     ErrorCode = id, 
                     Message = "No specific error information", 
                     RequestId = HttpContext.TraceIdentifier, 
-                    Url = HttpContext.Request.Headers["Referer"].ToString()
                 }
+            );
+        }
+        
+        [HttpGet]
+        [Route("/[area]/[controller]/[action]", Name = "SetLanguage")]
+        [AllowAnonymous]
+        public IActionResult SetLanguage(string culture, string returnUrl = "/")
+        {
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), 
+                    SameSite = SameSiteMode.None,
+                    Secure = true
+                }
+            );
+
+            return Redirect(string.IsNullOrEmpty(Request.Headers["Referer"].ToString()) 
+                ? returnUrl 
+                : Request.Headers["Referer"].ToString()
             );
         }
     }

@@ -1,12 +1,12 @@
-@using Newtonsoft.Json
-@using Pika.Domain.Identity.Data
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
-@inject IViewLocalizer Localizer  
+@inject IViewLocalizer Localizer
+@{
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
+}
 <div class="right">
     <ul class="right hide-on-med-and-down">
+        @await Html.PartialAsync("_Partial/_LocaleSwitch")
         <li>
-            <a class="navlink left center-align" asp-area="Core" asp-controller="Storage" asp-action="Index" title="Pika Browser">
+            <a class="navlink left center-align" asp-area="Core" asp-controller="Storage" title="Pika Browser">
                 Pika Browser
             </a>
         </li>
@@ -15,24 +15,13 @@
                 <i class="large material-icons">apps</i>
             </a>
         </li>
-        @if (SignInManager.IsSignedIn(User))
+        @if (!Context.User.Identity!.IsAuthenticated)
         {
-            <li>
-                <a asp-area="Identity" class="navlink" asp-controller="Manage" asp-action="Index" title="@Localizer["Manage"]">
-                    <i class="material-icons">
-                        account_box
-                    </i>
-                </a>
-            </li>
-            <li>
-                <button type="submit" class="waves-effect waves-teal btn-flat">@Localizer["Log out"]</button>
-            </li>
-
+            <li><a asp-area="Identity" asp-controller="Gateway" asp-action="Login" class="navlink">@Localizer["Login"]</a></li>
         }
         else
         {
-            <li><a asp-area="Identity" class="navlink" asp-controller="Account" asp-action="Register">@Localizer["Register"]</a></li>
-            <li><a asp-area="Identity" class="navlink" asp-controller="Account" asp-action="Login">@Localizer["Login"]</a></li>
+            <li><button class="btn btn-link">@Localizer["Logout"]</button></li>
         }
     </ul>
 </div>
@@ -62,9 +51,9 @@
                 Pika Status
             </a>
             
-            @if (User.IsInRole("Admin"))
+            @if (User.IsInRole("Administrator"))
             {
-                <a asp-area="Admin" asp-controller="Index" asp-action="Index" class="collection-item navlink app-menu-item" title="Pika Cloud Admin">
+                <a class="collection-item navlink app-menu-item" title="Pika Cloud Admin">
                     <span class="material-icons secondary-content navlink">
                         dashboard
                     </span>
@@ -74,12 +63,3 @@
         </div>
     </div>
 </div>
-@section Scripts
-{
-    @await RenderSectionAsync("Scripts", required: false)
-    <script>
-        window.onresize = () => {
-             const dropdownLink = document.getElementById("app-dropdown-link");
-        };
-    </script>
-}

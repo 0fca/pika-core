@@ -1,9 +1,10 @@
 ﻿@using Pika.Domain.Identity.Data
 @model PikaCore.Areas.Identity.Models.AccountViewModels.LoginViewModel
-@inject SignInManager<ApplicationUser> SignInManager
 @inject IViewLocalizer Localizer 
 @{
     ViewData["Title"] = Localizer["Log in"];
+    var returnMessage = ViewData["ReturnMessage"] ?? "";
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
 }
 
 <div class="container">
@@ -20,6 +21,12 @@
                             @if (!ViewData.ModelState.IsValid)
                             {
                                 @Html.ValidationSummary(false, @Localizer[""].Value, new { @class = "card-panel red white-text" })
+                            }
+                            @if (!string.IsNullOrEmpty(returnMessage.ToString()))
+                            {
+                                <div class="card-panel red white-text">
+                                    <p>@returnMessage</p>
+                                </div>
                             }
                             <div class="col s12 m12 l12">
                                 <div class="input-field">
@@ -44,43 +51,6 @@
                             </div>
                         </div>
                     </form>
-                    <section id="external_account_login">
-                        <div class="row">
-                            <p>@Localizer["OR"]</p>
-                            <h6>@Localizer["Log in using third party account"]</h6>
-                            <p></p>
-                            @{
-                                var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-                                if (loginProviders.Count == 0)
-                                {
-                                    <div class="card-panel teal white-text center">
-                                        @Localizer["Sorry, but you can't use any 3rd party authorization provider at the moment"]
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="g-signin2" data-onsuccess="onSignIn"></div>
-                                    <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
-
-                                        @foreach (var provider in loginProviders)
-                                        {
-                                            var name = System.IO.File.Exists("wwwroot/images/" + @provider.Name.ToLower() + "-icon.png") ? @provider.Name.ToLower() + "-icon.png" : @provider.Name.ToLower() + "-icon.svg";
-
-                                            <button type="submit" class="btn btn-flat transparent" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account">
-                                                <img height="32" width="32" src="~/images/@name" alt="@provider.DisplayName"/>
-                                            </button>
-                                        }
-
-                                    </form>
-                                }
-                            }
-                        </div>
-                    </section>
-                    <div class="card-action">
-                        <a class="grey-text text-lighten-4 left small-text" asp-action="ForgotPassword">@Localizer["Forgot your password"]?</a>
-                        <a class="grey-text text-lighten-4 left small-text" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">@Localizer["Register as a new user"]?</a>
-                    </div>
-
                 </section>
             </div>
         </div>
@@ -89,4 +59,14 @@
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+         $(document).ready(() => {
+               $('select[name="culture"]').change((e) => {
+                    const locale = $(e.target).select().val();
+                    window.location = `@Url.Link("SetLanguage", 
+                                           new { culture = "locale", returnUrl = returnUrl})`
+                                           .replace('locale', locale).replace(/&amp;/g, "&");
+                })}
+         );
+        </script> 
 }

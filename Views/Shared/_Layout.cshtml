@@ -1,21 +1,11 @@
 ﻿@using Microsoft.AspNetCore.Localization
 @using Pika.Domain.Identity.Data
 <!DOCTYPE html>
-@inject UserManager<ApplicationUser> UserManager
 @inject IViewLocalizer Localizer  
 @{ 
     var role = "";
     var roleName = "";
-    if (User.Identity.Name != null)
-    {
-        role = (UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).Result.ElementAt(0);
-        ViewData["Role"] = role;
-        roleName = !string.IsNullOrEmpty(role) ? $" - {role} - " : "";
-    }
-    else
-    {
-        roleName = " - ";
-    }
+
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
 }
 <html lang="@requestCulture.RequestCulture.UICulture.Name.ToLower()">
@@ -28,12 +18,11 @@
     <meta property="og:url" content="https://core.lukas-bownik.net/" />
     @await RenderSectionAsync("meta", required: false)
     @await Html.PartialAsync("_Partial/_Styles")
-    
     @await Html.PartialAsync("_Partial/_Scripts")   
 </head>
 <body>
 <main>
-    <form asp-area="Identity" asp-action="Logout" asp-controller="Account" method="post" id="logoutForm">
+    <form method="post" asp-area="Identity" asp-controller="Gateway" asp-action="Logout" id="logoutForm">
         <div class="navbar-fixed">
             <nav class="z-depth-0">
                 <div class="nav-wrapper white">

@@ -1,11 +1,7 @@
 ﻿@using Microsoft.Extensions.FileProviders
 @using PikaCore.Areas.Core.Controllers.App
 @using PikaCore.Infrastructure.Security
-@using PikaCore.Infrastructure.Services
-@using Microsoft.AspNetCore.Mvc.RazorPages
-@using Pika.Domain.Identity.Data
 @model FileResultViewModel
-@inject UserManager<ApplicationUser> UserManager
 @inject IdDataProtection DataProtection
 @inject IViewLocalizer Localizer  
 @{
@@ -19,7 +15,6 @@
     ViewData["Title"] = Localizer["Browse"];
     var lastPath = ViewData["path"] as string;
     var returnUrl = ViewData["returnUrl"];
-    var user = await UserManager.GetUserAsync(Context.User);
     var pageCount = int.Parse(TempData["PageCount"].ToString() ?? "0");
     var offset = int.Parse(TempData["Offset"].ToString() ?? "0");
     var count = int.Parse(TempData["Count"].ToString() ?? "0");
@@ -145,15 +140,6 @@
             <a class="btn-floating btn-large teal-accent">
                 <i class="large material-icons">menu</i>
             </a>
-            <ul>
-                @if (user != null
-                     && !(await UserManager.IsInRoleAsync(user, "User")))
-                {
-                    <li><a data-target="file-editor" class="btn btn-floating modal-trigger"><i class="fas fa-folder-plus"></i></a></li>
-                    <li><a class="btn btn-floating" asp-controller="Storage" asp-action="Delete" asp-route-currentPath="@lastPath"><i class="fas fa-trash-alt"></i></a></li>
-                }
-                <li><a class="btn btn-floating modal-trigger" data-target="upload-modal"><i class="material-icons">cloud_upload</i></a></li>
-            </ul>
         </div>
 
     </div>
