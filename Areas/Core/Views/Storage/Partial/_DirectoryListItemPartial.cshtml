@@ -1,42 +1,28 @@
 ﻿@using PikaCore.Infrastructure.Security
-@using Pika.Domain.Identity.Data
-@inject SignInManager<ApplicationUser> SignInManager
-@model Tuple<string, Microsoft.Extensions.FileProviders.IFileInfo>
+@model Tuple<string, ObjectInfo>
 @inject IdDataProtection DataProtection
 @inject IViewLocalizer Localizer
 
 @{
     var item = Model.Item2;
-    var lastPath = Model.Item1;
     var viewableName = item.Name.StartsWith("~")
         ? item.Name.Replace("~", "")
         : item.Name;
-    var dirIcon = item.Name.StartsWith("~") ? "folder" : "folder_shared";
-    var dateString = @item.LastModified.Date.ToLongDateString();
-    var did = @DataProtection.Encode(item.PhysicalPath);
+    var dirIcon = "folder";
+    var etag = item.ETag;
 }
 
-<div class="card grey lighten-4 z-depth-0 small" id="@did">
-    <div class="card-content">
-        <div class="card-title truncate">
-            <div class="row">
-                <div class="col s10 m10 l10">
-                    <a class="teal-text truncate" asp-area="Core"
-                       asp-controller="Storage"
-                       asp-action="Browse"
-                       asp-route-path="@System.IO.Path.Combine(Model.Item1, item.Name)"
-                       title="@viewableName">
-                        <span class="material-icons">
-                            @dirIcon
-                        </span>
-                        @viewableName
-                    </a>
-                </div>
-                <div class="col s2 m2 l2">
-                    <span class="material-icons right activator" style="cursor: pointer;" data-infoid="@did">info</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<td>
+    <a class="teal-text truncate" asp-area="Core"
+       asp-controller="Storage"
+       asp-action="Browse"
+       title="@viewableName">
+        <span class="material-icons">
+            @dirIcon
+        </span>
+        @item.Name
+    </a>
+</td>
+<td>@item.Size</td>
+<td>@item.LastModified</td>
 

@@ -1,7 +1,7 @@
 ﻿@using PikaCore.Infrastructure.Security
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using MimeAssistant = PikaCore.Infrastructure.Adapters.Filesystem.MimeAssistant
-@model Tuple<string, Microsoft.Extensions.FileProviders.IFileInfo>
+@model Tuple<string, ObjectInfo>
 @inject IdDataProtection DataProtection
 @inject IViewLocalizer Localizer
 
@@ -12,87 +12,64 @@
         ? item.Name.Replace("~", "")
         : item.Name;
     var dateString = @item.LastModified.Date.ToLongDateString();
-    var did = @DataProtection.Encode(item.PhysicalPath);
+    var etag = item.ETag;
 }
 @{
     var mime = "";
-    mime = MimeAssistant.GetMimeType(item.PhysicalPath);
+    mime = MimeAssistant.GetMimeType(item.Name);
     if (!mime.StartsWith("image/")
         && !mime.StartsWith("video/"))
     {
         var type = MimeAssistant.RecognizeIconByMime(mime);
-        <div id="@did" class="card grey lighten-4 z-depth-0 small">
-            <div class="card-content">
-                <div class="card-title">
-                    <div class="row">
-                        <div class="col s10 m10 l10">
-                            @if (item.Length <= 100000000)
-                            {
-                                <a class="teal-text truncate flow-text"
-                                   asp-area="Core"
-                                   asp-controller="Content"
-                                   asp-action="Index"
-                                   asp-route-fileId=@did
-                                   asp-route-returnUrl="@lastPath"
-                                   title="@viewableName">
-                                    <span class="fas fa-@type prefix browse-icon-margin"></span>
-                                    @viewableName
-                                </a>
-                            }
-                            else
-                            {
-                                <p class="teal-text truncate flow-text">
-                                    <span class="fas fa-@type prefix browse-icon-margin"></span>
-                                    @viewableName
-                                </p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <td id="@etag">
+            @if (item.Size <= 100000000)
+            {
+                <a class="teal-text truncate"
+                   asp-area="Core"
+                   asp-controller="Content"
+                   asp-action="Index"
+                   asp-route-fileId=@etag
+                   asp-route-returnUrl="@lastPath"
+                   title="@viewableName">
+                    <span class="fas fa-@type prefix browse-icon-margin"></span>
+                    @viewableName
+                </a>
+            }
+            else
+            {
+                <p class="teal-text truncate">
+                    <span class="fas fa-@type prefix browse-icon-margin"></span>
+                    @viewableName
+                </p>
+            }
+        </td>
     }
     else
     {
         var id = "0." + Model.Item1?.Replace("/", "-") + $"-{item.Name}";
 
-        <div  class="card small grey lighten-4 z-depth-0">
-            <div class="card-image">
-                <picture class="fit-image activator">
-                    <source id="@id" srcset="~/images/loading_icon.gif" data-name="@item.Name"/>
-                    <img class="fit-image activator"
-                         alt=""
-                         loading="eager"
-                         src="https://www.lukas-bownik.net/img/logos/pikacloud_core.svg"/>
-                </picture>
-            </div>
-            <div id="@did" class="card-content">
-                <div class="card-title truncate">
-                    <div class="row">
-                        <div class="col s10 m10 l10">
-                            @if (item.Length <= 100000000)
-                            {
-                                <a class="teal-text truncate flow-text"
-                                   asp-area="Core"
-                                   asp-controller="Content"
-                                   asp-action="Index"
-                                   asp-route-fileId=@did
-                                   asp-route-returnUrl="@lastPath"
-                                   title="@viewableName">
-                                    <span class="fas fa-image prefix browse-icon-margin"></span>
-                                    @viewableName
-                                </a>
-                            }
-                            else
-                            {
-                                <p class="black-text truncate flow-text" title="@viewableName">
-                                    @viewableName
-                                </p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <td id="@etag">
+            @if (item.Size <= 100000000)
+            {
+                <a class="teal-text truncate"
+                   asp-area="Core"
+                   asp-controller="Content"
+                   asp-action="Index"
+                   asp-route-fileId=@etag
+                   asp-route-returnUrl="@lastPath"
+                   title="@viewableName">
+                    <span class="fas fa-image prefix browse-icon-margin"></span>
+                    @viewableName
+                </a>
+            }
+            else
+            {
+                <p class="black-text truncate" title="@viewableName">
+                    @viewableName
+                </p>
+            }
+        </td>
     }
+    <td>@item.Size</td>
+    <td>@item.LastModified</td>
 }

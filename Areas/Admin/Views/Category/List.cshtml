@@ -1,0 +1,31 @@
+﻿@model PikaCore.Areas.Admin.Models.CategoryViewModels.ListCategoryViewModel
+@inject IViewLocalizer Localizer
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = @Localizer["Lista kategorii"];
+    var text = ViewData["Success"] == null ? "bg-gradient-warning" : "success";
+    var icon = ViewData["Success"] == null ? "fa-xmark" : "fa-check";
+}
+
+<div class="content mt-3 mr-3 ml-3">
+    <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="nav-link">
+        <i class="nav-icon fa-sharp fa-solid fa-house-blank"></i>
+        <p>@Localizer["Stwórz kategorię"]</p>
+    </a>
+    @foreach (var category in Model.Categories)
+    {
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">@category.Name</h3>
+            </div>
+            <div class="card-body">
+                @category.Description
+            </div>
+            <div class="card-footer">
+                <a asp-area="Admin" asp-controller="Category" asp-action="Edit" asp-route-id="@category.Id" class="btn-link">
+                    @Localizer["Edytuj"]
+                </a>
+            </div>
+        </div>
+    }
+</div>

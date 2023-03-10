@@ -9,9 +9,9 @@ namespace PikaCore.Infrastructure.Services
 {
     public class SystemService : ISystemService
     {
-        private readonly ApplicationDbContext _systemContext;
+        private readonly StorageIndexContext _systemContext;
 
-        public SystemService(ApplicationDbContext systemContext)
+        public SystemService(StorageIndexContext systemContext)
         {
             _systemContext = systemContext;
         }

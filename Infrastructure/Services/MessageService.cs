@@ -2,20 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Pika.Domain.Identity.Data;
 using Pika.Domain.Status.Data;
 using PikaCore.Areas.Core.Data;
-using PikaCore.Areas.Core.Models;
 
 namespace PikaCore.Infrastructure.Services
 {
     public class MessageService : IMessageService
     {
-        private readonly ApplicationDbContext _systemContext;
+        private readonly StorageIndexContext _systemContext;
 
-        public MessageService(ApplicationDbContext systemContext)
+        public MessageService(StorageIndexContext systemContext)
         {
             _systemContext = systemContext;
         }

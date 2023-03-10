@@ -1,6 +1,4 @@
-﻿@using Microsoft.Extensions.FileProviders
-@using PikaCore.Areas.Core.Controllers.App
-@using PikaCore.Infrastructure.Security
+﻿@using PikaCore.Infrastructure.Security
 @model FileResultViewModel
 @inject IdDataProtection DataProtection
 @inject IViewLocalizer Localizer  
@@ -9,75 +7,18 @@
 }
 <!-- TODO Part this file to partials -->
 <!-- TODO Add detailed list view -->
-@if(Model?.Contents != null && !Model.Contents.GetType().IsInstanceOfType(typeof(NotFoundDirectoryContents)))
+@if(Model?.Objects != null)
 {
-
     ViewData["Title"] = Localizer["Browse"];
     var lastPath = ViewData["path"] as string;
     var returnUrl = ViewData["returnUrl"];
-    var pageCount = int.Parse(TempData["PageCount"].ToString() ?? "0");
-    var offset = int.Parse(TempData["Offset"].ToString() ?? "0");
-    var count = int.Parse(TempData["Count"].ToString() ?? "0");
-    var directorySeparator = System.IO.Path.DirectorySeparatorChar;
-    var paginationData = new Dictionary<string, object> {{"Offset", offset}, {"Count", count}, {"PageCount", pageCount}, {"Last", lastPath}};
-    
-    <div class="row">
-        <div class="col s10 m10 l10">
-            @{
-                var splitted = lastPath?.Split(System.IO.Path.DirectorySeparatorChar);
-                var last = "";
-                var tmp = Url.Action("Browse", "Storage",new {path = last});
-                var baseLink = Url.Action("Browse", "Storage", new { path = ""});
-                
-                <a class="teal-text" href="@baseLink">Browse</a>
-
-                foreach (var part in splitted)
-                {
-                    if (!string.IsNullOrEmpty(part))
-                    {
-                        last = System.IO.Path.Combine(last, part);
-                        tmp = Url.Action("Browse", "Storage", new { path = last });
-                        <a class="breadcrumb breadcrumb-icon teal-text" href="@tmp">@part</a>
-                    }
-                }
-            }
-        </div>
-        <div class="col s2 m2 l2">
-                    <button class="waves-effect waves-teal btn-flat right" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
-                    <input id="helperInput" value="@Url.Link(nameof(StorageController.Browse), new {path = last})" class="offscreen" aria-hidden="true"/>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col s12 m12 l12">
-            <div class="input-field">
-                <input type="text" id="pathField" placeholder="@Localizer["Enter the absolute system path..."]" class="autocomplete" value="@string.Concat(directorySeparator, last)" autofocus style="color: rgb(12,12,12);"/>
-            </div>
-        </div>
-        <div class="col s12 hide-on-med-and-up center">
-            <button class="btn btn-large" id="mobile-search-button">
-                <span class="material-icons">
-                    search
-                </span>
-            </button>
-        </div>
-    </div>
-    @await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
-
     <div id="file-list">
         <div class="row">
             <div class="col s12 l7 m8">
                 @{
-                    var itemText = @Model.ContentsList.Count == 1 ? Localizer["item"] : Localizer["items"];
+                    var itemText = @Model.Objects.Count == 1 ? Localizer["item"] : Localizer["items"];
                 }
-                <h5 class="center-on-small-only">@Localizer["Found"] @Model.ContentsList.Count @itemText</h5>
-            </div>
-            <div class="col s12 m5 l4 right">
-                <div class="input-field">
-                    <span class="material-icons prefix">
-                        search
-                    </span>
-                    <input type="text" id="searchBox" placeholder="Search" oninput="searchFileList();"/>
-                </div>
+                <h5 class="center-on-small-only">@Localizer["Found"] @Model.Objects.Count @itemText</h5>
             </div>
         </div>
         <div class="row card-panel grey lighten-4 z-depth-0">
@@ -97,23 +38,33 @@
             </div>
             </div>
         @{
-            if (Model.ContentsList.Count > 0)
+            if (Model.Objects.Count > 0)
             {
-                <div class="row transparent">
-                @foreach (var item in Model.ContentsList)
-                {
-                    <div class="col s12 m6 l4 truncate valign-wrapper">
-                        @if (item.IsDirectory)
-                        {
-                            @await Html.PartialAsync("Partial/_DirectoryListItemPartial", new Tuple<string, IFileInfo>(lastPath, item))
-                        }
-                        else
-                        {
-                            @await Html.PartialAsync("Partial/FileListItemPartial", new Tuple<string, IFileInfo>(lastPath, item))
-                        }
-                    </div>
-                }
-                 </div>
+                <table class="table" id="dir_content">
+                    <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Size</th>
+                        <th scope="col">Modified</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.Objects)
+                    {
+                        <tr>
+                            @if (item.IsDir)
+                            {
+                               @await Html.PartialAsync("Partial/_DirectoryListItemPartial", new Tuple<string, ObjectInfo>(lastPath, item))
+
+                            }
+                            else
+                            {
+                                @await Html.PartialAsync("Partial/FileListItemPartial", new Tuple<string, ObjectInfo>(lastPath, item))
+                            }
+                        </tr>
+                    }
+                    </tbody>
+                </table>
             }
             else
             {
@@ -124,18 +75,6 @@
                 </div>
             }
         }
-        <div class="row card-panel grey lighten-4 z-depth-0">
-            <a class="transparent flow-text"
-               asp-area="Core"
-               asp-controller="Storage"
-               asp-action="Browse"
-               asp-route-path="@returnUrl">
-                <span class="material-icons">
-                    arrow_back
-                </span>
-            </a>
-        </div>
-
         <div class="fixed-action-btn">
             <a class="btn-floating btn-large teal-accent">
                 <i class="large material-icons">menu</i>
@@ -145,126 +84,25 @@
     </div>
  
 
-    @await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
 
-    @await Html.PartialAsync("Partial/_AddDirectoryPartial.cshtml", lastPath)
+    //@await Html.PartialAsync("Partial/_AddDirectoryPartial.cshtml", lastPath)
 
-    @await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)
+    //@await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)
 
-    @await Html.PartialAsync("Partial/_UploadPartial.cshtml", lastPath)
+    //@await Html.PartialAsync("Partial/_UploadPartial.cshtml", lastPath)
    
-    @await Html.PartialAsync("Partial/_InformationSidePartial.cshtml")
+   // @await Html.PartialAsync("Partial/_InformationSidePartial.cshtml")
     
-@section Scripts{
-    <script>
-@{
-    lastPath = !string.IsNullOrEmpty(lastPath) ? lastPath.Replace("\\", "\\\\") : "\\";
-}
-    const listingPath = "@lastPath";
-    const directorySeparator = "@directorySeparator";
-    document.getElementById("searchBox").addEventListener("keydown", function (e) {
-        if (e.code === "Enter") {
-            searchFileList();
-        }
-    });
-    
-    document.getElementById("mobile-search-button").addEventListener("click", function (e) {
-        toPath();
-    });
-    
-    document.getElementById("pathField").addEventListener("keydown", (key) => {
-        if (key.code === "Enter") {
-            toPath();
-        }
-    });
 
-    document.getElementById("pathField").addEventListener("keyup", (key) => {
-        let currentPath = document.getElementById("pathField").value;
-        if(currentPath.toString().endsWith(directorySeparator)){
-            requestListing(currentPath);
-            return;
-        }
-        let lastIndex = currentPath.toString().lastIndexOf(directorySeparator);
-            
-        currentPath = currentPath.toString().slice(lastIndex, currentPath.toString().length)
-        requestListing(currentPath);
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const elems = document.querySelectorAll('.autocomplete');
-        const instances = M.Autocomplete.init(elems, {});
-        
-        const dropdown = document.querySelectorAll('.dropdown-trigger');
-        const dropdowns = M.Dropdown.init(elems, {});
-    });
-    
-    function toPath(){
-        window.location = `/Core/Storage/Browse?path=${document.getElementById("pathField").value}`;
-    }
-    
-    $('span[data-infoid]').click((e) => {
-        $('#info-slide').show(); 
-    });    
-</script>
-
-    <script>
-    $('document').ready(() => {
-        $('.card').click((e) => { 
-            setCurrentCardId(e);  
-            changeMenuVisibility();
-        });
-    });
-    
-    function changeMenuVisibility(){
-        if($('#menu').is(':visible')){
-            $('#menu').hide();
-            $('.z-depth-2').removeClass('z-depth-2').addClass('z-depth-0');
-        }else{
-            $('#menu').show();
-        }
-    }
-    
-    function setCurrentCardId(e){
-        localStorage.setItem('selectedCardId', e.target.id);
-        $(e.target).removeClass('z-depth-0').addClass('z-depth-2');
-        e.stopPropagation();
-    }
-    </script>
-
-    <div id="loader" class="card-content hide">
-        @await Html.PartialAsync("Partial/_Loader")
-    </div>
-    <script>
-    document.querySelectorAll('.card').forEach(el => {
-        let a = el.querySelector('a');
-        a.addEventListener('click', () => {
-           while(el.lastChild){
-               el.removeChild(el.firstChild);
-           } 
-           let loaderDiv = document.getElementById("loader");
-           loaderDiv.removeAttribute("class");
-           loaderDiv.setAttribute("class", "card-content center");
-           el.appendChild(loaderDiv);
-        });
-    });
-    document.addEventListener('DOMContentLoaded', function() {
-                const elems = document.querySelectorAll('.modal');
-                const instances = M.Modal.init(elems);
-    }); 
-</script>
     <script src="~/js/media.js" asp-append-version="true" defer=""></script>
     <script src="~/js/file.js" asp-append-version="true" defer=""></script>
     <script src="~/lib/jquery-ui-1.12.1/jquery-ui.min.js" asp-append-version="true" defer=""></script>
     <link rel="stylesheet" href="~/lib/jquery-ui-1.12.1/jquery-ui.min.css" asp-append-version="true"/>
-    
-        
-}
-}
-else
-{
-    ViewData["Title"] = Localizer["Browse - Error"];
-    <div class="card-panel red darken-3">
-        <p>Well, the fact you see this message just means that I have totally fucked up something.</p>
-        <p>It is not even translated to underline the fact.</p>
-    </div>
+    <link rel="stylesheet" href="//cdn.datatables.net/1.13.2/css/jquery.dataTables.min.css" />
+    <script src="//cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js" defer=""></script>
+     <script>
+         $(document).ready( function () {
+             $('#dir_content').DataTable();
+         } );
+    </script> 
 }

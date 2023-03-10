@@ -9,7 +9,7 @@ internal class MinioClientBuilder
     private static MinioClient? _minioClient;
     private MinioClientBuilder(){}
 
-    internal static MinioClientBuilder? Instance()
+    internal static MinioClientBuilder Instance()
     {
         return _minioClientBuilder ??= new MinioClientBuilder();
     }

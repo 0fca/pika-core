@@ -1,5 +1,4 @@
 ﻿@using Microsoft.AspNetCore.Localization
-@using Pika.Domain.Identity.Data
 <!DOCTYPE html>
 @inject IViewLocalizer Localizer  
 @{ 
@@ -18,7 +17,7 @@
     <meta property="og:url" content="https://core.lukas-bownik.net/" />
     @await RenderSectionAsync("meta", required: false)
     @await Html.PartialAsync("_Partial/_Styles")
-    @await Html.PartialAsync("_Partial/_Scripts")   
+    @await Html.PartialAsync("_Partial/_Scripts")
 </head>
 <body>
 <main>

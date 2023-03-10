@@ -8,9 +8,7 @@ namespace PikaCore.Infrastructure.Adapters.Minio
 
     public interface IClientService : IDisposable
     {
-        public void Init(string endpoint, string clientId, string password);
-        public void ConfigureBucket(string bucketName);
         public Task<IList<Bucket>> GetBuckets();
-        public Task<IObservable<Item>> ListObjects();
+        public Task<IList<Item>> ListObjects(string bucket, bool recursive = false, string? prefix = null);
     }
 }

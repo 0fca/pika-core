@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.Extensions.Localization;
@@ -47,7 +48,11 @@ public class GatewayController : Controller
       try
       {
          var token = await _oidcService.GetAccessToken(loginViewModel);
-         this.HttpContext.Response.Cookies.Append(".AspNet.ShrCk", token);
+         this.HttpContext.Response.Cookies.Append(".AspNet.ShrCk", token, new CookieOptions
+         {
+            Secure = true,
+            HttpOnly = true
+         });
       }
       catch (OpenIddictExceptions.ProtocolException e)
       {

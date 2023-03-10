@@ -9,45 +9,47 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using System;
 using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
-using Google.Apis.Util;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using AutoMapper;
+using Hangfire;
+using Hangfire.Common;
+using Hangfire.Redis;
+using Marten;
+using MediatR;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.Win32;
-using OpenIddict.Abstractions;
+using Newtonsoft.Json;
 using OpenIddict.Client;
 using OpenIddict.Validation.AspNetCore;
+using Pika.Domain.Storage.Repository;
 using PikaCore.Areas.Api.v1.Services;
+using PikaCore.Areas.Core.Callables;
 using PikaCore.Areas.Core.Controllers.App;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Identity.Extensions;
+using PikaCore.Infrastructure.Adapters.Minio;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
 using Serilog;
 using StackExchange.Redis;
 using TanvirArjel.CustomValidation.AspNetCore.Extensions;
+using Weasel.Core;
 using WebSocketOptions = Microsoft.AspNetCore.Builder.WebSocketOptions;
 
 namespace PikaCore
 {
     public class Startup
     {
-        private static readonly string OsName = Constants.OsName;
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -57,38 +59,42 @@ namespace PikaCore
 
         public void ConfigureServices(IServiceCollection services)
         {
-            Constants.Instance = Configuration.GetSection("Name:Instance").Value ?? "Default";
-            var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
-                $"pika_core_{Constants.Instance}.{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 Log.Logger = new LoggerConfiguration()
                     .Enrich.FromLogContext()
                     .MinimumLevel.Information()
                     .WriteTo.Console()
-                    .WriteTo.File(path,
-                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
                     .CreateLogger();
             }
             else
             {
                 services.AddLogging();
             }
-
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddMarten(c =>
+                {
+                    c.Connection(Configuration.GetConnectionString("DefaultConnection"));
+                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!.Equals("Development"))
+                    {
+                        c.AutoCreateSchemaObjects = AutoCreate.All;
+                    }
+                })
+                .OptimizeArtifactWorkflow()
+                .UseLightweightSessions();
+            services.AddDbContext<StorageIndexContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
            
 
-            services.AddDistributedMemoryCache();
             services.AddStackExchangeRedisCache(a =>
             {
                 a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
                 a.Configuration = Configuration.GetConnectionString("RedisConnection");
             });
-            ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(new ConfigurationOptions
+            var redis = ConnectionMultiplexer.Connect(new ConfigurationOptions
             {
                 EndPoints = { Configuration.GetConnectionString("RedisConnection") }
             });
+            services.AddMemoryCache();
 
             services.AddResponseCaching(options =>
             {
@@ -122,7 +128,6 @@ namespace PikaCore
                             Configuration["Security:Passphrase"]))
                     .SetApplicationName("ShrCkApp");
             }
-
             services.AddOpenIddict()
                 .AddClient(o =>
                 {
@@ -130,7 +135,6 @@ namespace PikaCore
                     o.DisableTokenStorage();
                     o.UseSystemNetHttp()
                         .SetProductInformation(typeof(Program).Assembly);
-
                     o.AddRegistration(new OpenIddictClientRegistration
                     {
                         ClientId = Configuration.GetSection("Auth")["ClientId"],
@@ -148,11 +152,11 @@ namespace PikaCore
                     o.UseSystemNetHttp();
                     o.UseAspNetCore();
                 });
-            
+
             services.AddAuthentication(o =>
-            {
-                o.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-            })
+                {
+                    o.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer();
             
             services.Configure<CookiePolicyOptions>(options =>
@@ -160,7 +164,7 @@ namespace PikaCore
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
                 options.Secure = CookieSecurePolicy.Always;
-                options.ConsentCookie.Domain = ".cloud.localhost";
+                options.ConsentCookie.Domain = Configuration.GetSection("Auth")["CookieDomain"];
             });
 
             services.ConfigureApplicationCookie(options =>
@@ -168,7 +172,7 @@ namespace PikaCore
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.Domain = ".cloud.localhost";
+                options.Cookie.Domain = Configuration.GetSection("Auth")["CookieDomain"];
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
                 options.SlidingExpiration = true;
                 options.LoginPath = "/Identity/Gateway/Login";
@@ -176,20 +180,35 @@ namespace PikaCore
                 options.LogoutPath = "/Identity/Gateway/Logout";
             });
             services.AddAuthorization();
+            services.AddHangfire(o =>
+            {
+                o.UseSerializerSettings(new JsonSerializerSettings()
+                {
+                    MaxDepth = 128,
+                    MissingMemberHandling = MissingMemberHandling.Error,
+                    ObjectCreationHandling = ObjectCreationHandling.Auto
+                });
+                o.UseRedisStorage(Configuration.GetConnectionString("RedisConnection"),
+                    new RedisStorageOptions()
+                    {
+                        Db = 1
+                    });
+            });
+            services.AddHangfireServer();
             services.AddAspNetCoreCustomValidation();
             services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
             services.AddSingleton<ISchedulerService, SchedulerService>();
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
             services.AddScoped<IMessageService, MessageService>();
-            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<AggregateRepository>();
             services.AddTransient<ISystemService, SystemService>();
             services.AddTransient<IStatusService, StatusService>();
             services.AddTransient<IDataExportService, DataExportService>();
             services.AddScoped<IOidcService, OidcService>();
-
+            services.AddSingleton<IClientService, MinioService>();
             services.AddLocalization(options => options.ResourcesPath = "Resources");
-            
+
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 var supportedCultures = new[]
@@ -242,8 +261,6 @@ namespace PikaCore
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
 
-            Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-" + OsName];
-            Constants.UploadTmp = Configuration.GetSection("Paths")["upload-dir-tmp"];
             services.AddControllers()
                 .ConfigureApiBehaviorOptions(options =>
                 {
@@ -265,6 +282,9 @@ namespace PikaCore
                 opt.EnableForHttps = true;
                 opt.MimeTypes = new[] { "image/jpeg", "image/png", "image/gif" };
             });
+            services.AddMediatR(typeof(Startup));
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddMvc()
                 .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
                 .AddDataAnnotationsLocalization()
@@ -302,7 +322,6 @@ namespace PikaCore
 
             app.UseRequestLocalization(localizationOptions);
             lifetime.ApplicationStopping.Register(OnShutdown);
-            app.UseStatusCodePagesWithRedirects("/Core/Home/Status/{0}");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -310,14 +329,11 @@ namespace PikaCore
             else
             {
                 app.UseExceptionHandler("/Core/Home/Error");
+                app.UseStatusCodePagesWithRedirects("/Core/Home/Status/{0}");
                 app.UseHsts();
                 app.UseCertificateForwarding();
             }
-            Constants.RootPath = Configuration.GetSection("Paths")["storage"];
-            Constants.FileSystemRoot = Configuration.GetSection("Paths")[OsName + "-root"];
-            Constants.Tmp = Configuration.GetSection("Paths")[OsName + "-tmp"];
-            Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
-
+            
             app.UseSession();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
@@ -353,11 +369,12 @@ namespace PikaCore
             app.UseCors("CorsPolicy");
             app.UseResponseCaching();
             app.UseOiddictAuthenticationCookieSupport();
-            app.UseEnsureJwtBearerValid();
             app.UseAuthentication();
+            app.UseEnsureJwtBearerValid();
             app.UseResponseCompression();
             app.UseMapJwtClaimsToIdentity();
             app.UseAuthorization();
+            app.UseHangfireDashboard();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -389,6 +406,25 @@ namespace PikaCore
                     .RequireCors("CorsPolicy")
                     .RequireHost("localhost", "core.localhost");
             });
+            this.RegisterRecurringCategoryJobs(serviceProvider);
+        }
+
+        private void RegisterRecurringCategoryJobs(IServiceProvider serviceProvider)
+        {
+            var cache = serviceProvider.GetService<IDistributedCache>();
+            var mediator = serviceProvider.GetService<IMediator>();
+            var aggregateRepository = serviceProvider.GetService<AggregateRepository>();
+            var mapper = serviceProvider.GetService<IMapper>();
+            var clientService = serviceProvider.GetService<IClientService>();
+            var refreshCallable = new RefreshCategoriesCallable(cache, 
+                mediator, 
+                aggregateRepository, 
+                clientService, 
+                Configuration, 
+                mapper);
+            RecurringJob.AddOrUpdate("UpdateCategories", () => 
+                    refreshCallable.Execute(null), 
+                "*/5 * * * *");
         }
         
         #region LifetimeHelpers

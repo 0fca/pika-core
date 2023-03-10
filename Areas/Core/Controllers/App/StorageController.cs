@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,9 +14,13 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Pika.Domain.Storage.Data;
+using Pika.Domain.Storage.Entity;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
+using PikaCore.Areas.Core.Models;
+using PikaCore.Areas.Core.Models.DTO;
 using PikaCore.Areas.Core.Models.File;
+using PikaCore.Areas.Core.Queries;
 using PikaCore.Areas.Core.Services;
 using PikaCore.Infrastructure.Security;
 using Serilog;
@@ -27,10 +33,11 @@ namespace PikaCore.Areas.Core.Controllers.App
     {
         private readonly IUrlGenerator _urlGeneratorService;
         private readonly IConfiguration _configuration;
-        private readonly ApplicationDbContext _storageIndexContext;
-        private readonly IHubContext<StatusHub> _hubContext;
+        private readonly IMapper _mapper;
         private readonly IdDataProtection _idDataProtection;
         private readonly IStringLocalizer<StorageController> _stringLocalizer;
+        private readonly IMediator _mediator;
+        private readonly StorageIndexContext _storageIndexContext;
 
         #region TempDataMessages
 
@@ -43,27 +50,52 @@ namespace PikaCore.Areas.Core.Controllers.App
         #endregion
 
         public StorageController(IUrlGenerator iUrlGenerator,
-               ApplicationDbContext storageIndexContext,
-               IHubContext<StatusHub> hubContext,
+               StorageIndexContext storageIndexContext,
                IConfiguration configuration,
                IdDataProtection idDataProtection,
-               IStringLocalizer<StorageController> stringLocalizer)
+               IStringLocalizer<StorageController> stringLocalizer,
+               IMediator mediator,
+               IMapper mapper)
         {
             _urlGeneratorService = iUrlGenerator;
             _storageIndexContext = storageIndexContext;
-            _hubContext = hubContext;
             _configuration = configuration;
             _idDataProtection = idDataProtection;
             _stringLocalizer = stringLocalizer;
+            _mediator = mediator;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        [Route("{area}/{controller}/")]
         [AllowAnonymous]
-        public async Task<IActionResult> Browse(string? path, int offset = 0, int count = 10)
+        [Route("[area]/[controller]/")]
+        public async Task<IActionResult> Index()
         {
-            var lrmv = new FileResultViewModel();
-            
+            var objects = await _mediator.Send(new GetAllCategoriesQuery());
+            var categories = new List<CategoryDTO>();
+            objects.ForEach(c =>
+            {
+                categories.Add(_mapper.Map<CategoryDTO>(c));
+            });
+            var model = new IndexViewModel
+            {
+                Categories = categories
+            };
+            return View(model);
+        }
+        
+        [HttpGet]
+        [Route("[area]/[controller]/[action]/{categoryId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Browse(string categoryId)
+        {
+            var objects = await _mediator.Send(
+                new GetAllObjectsByCategoryQuery(Guid.Parse(categoryId))
+                );
+            var lrmv = new FileResultViewModel()
+            {
+                Objects = objects
+            };
             return View(lrmv);
         }
 
@@ -144,8 +176,6 @@ namespace PikaCore.Areas.Core.Controllers.App
             id = !z ? _idDataProtection.Decode(id) : id;
             int offset = int.Parse(Get("Offset"));
             int count = int.Parse(Get("Count"));
-
-
             ReturnMessage = _stringLocalizer.GetString("Resource id cannot be null").Value;
             return RedirectToAction(nameof(Browse), new {@path = returnUrl, offset, count});
         }
