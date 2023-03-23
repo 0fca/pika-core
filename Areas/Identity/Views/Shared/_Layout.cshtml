@@ -1,13 +1,5 @@
 ﻿@{
     Layout = "/Views/Shared/_Layout.cshtml";
-    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
-}
-
-
-@section LocaleSwitch
-{
-    @await Html.PartialAsync("_Partials/_LocaleSwitch")
-    
 }
 
 @section meta{
@@ -18,18 +10,3 @@
 
 @RenderBody()
 @await RenderSectionAsync("Scripts", required: false)
-@section Scripts
-{
-    <script>
-     $(document).ready(() => {
-           $('select[name="culture"]').change((e) => {
-                const locale = $(e.target).select().val();
-                window.location = `@Url.Link("SetLanguage", 
-                                       new { culture = "locale", returnUrl = returnUrl})`
-                                       .replace('locale', locale).replace(/&amp;/g, "&");
-            })}
-     );
-    </script> 
-}
-
-    

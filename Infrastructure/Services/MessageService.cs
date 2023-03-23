@@ -2,24 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Pika.Domain.Identity.Data;
 using Pika.Domain.Status.Data;
 using PikaCore.Areas.Core.Data;
-using PikaCore.Areas.Core.Models;
 
 namespace PikaCore.Infrastructure.Services
 {
     public class MessageService : IMessageService
     {
-        private readonly ApplicationDbContext _systemContext;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly StorageIndexContext _systemContext;
 
-        public MessageService(SignInManager<ApplicationUser> signInManager,
-            ApplicationDbContext systemContext)
+        public MessageService(StorageIndexContext systemContext)
         {
-            _signInManager = signInManager;
             _systemContext = systemContext;
         }
 
@@ -29,20 +23,15 @@ namespace PikaCore.Infrastructure.Services
                 PrepareJoin()
                 .Where(m => m.SystemDescriptor.SystemName.Equals(systemName))
                 .AsQueryable();
-            if (_signInManager.Context.User.IsInRole("Admin"))
-            { 
-                return await messages.ToListAsync();
-            }
+            // TODO: Add admin support
             return await messages.Where(m => m.IsVisible).ToListAsync();
         }
         
         public async Task<IList<MessageEntity>> GetAllMessages()
         {
             var messages = PrepareJoin();
-            if (_signInManager.Context.User.IsInRole("Admin"))
-            { 
-                return await messages.ToListAsync();
-            }
+            // TODO: Add admin support
+
             return await messages.Where(m => m.IsVisible).ToListAsync();
         }
 
@@ -60,10 +49,7 @@ namespace PikaCore.Infrastructure.Services
         public async Task<MessageEntity> GetMessageById(int id)
         {
             var messages = PrepareJoin();
-            if (!_signInManager.Context.User.IsInRole("Admin"))
-            {
-                messages = messages.Where(m => m.IsVisible);
-            }
+            // TODO: Add admin support
             return await messages.SingleAsync(m => m.Id == id);
         }
 

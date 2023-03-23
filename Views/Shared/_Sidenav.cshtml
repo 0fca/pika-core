@@ -1,39 +1,29 @@
-﻿@using Pika.Domain.Identity.Data
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
-@inject IViewLocalizer Localizer
-@{
-    var userName = UserManager.GetUserName(User);
-}
+﻿@inject IViewLocalizer Localizer
 
-<li>
-    <div class="user-view">
-        <a asp-controller="Manage" asp-action="Index"><span class="name">@userName</span></a>
-    </div>
-</li>
 
 <li><a asp-area="Core" asp-controller="Storage" asp-action="Browse">Pika Core Browser</a></li>
 <li><a href="https://player.lukas-bownik.net">Pika Player</a></li>
-@if (User.IsInRole("Admin"))
+@if (User.IsInRole("Administrator"))
 {
     <li>
-        <a asp-area="Admin" asp-controller="Index" asp-action="Index" class="navlink app-menu-item" title="Pika Cloud Admin">
+        <a class="navlink app-menu-item" title="Pika Cloud Admin">
             Pika Cloud Admin
         </a>
     </li>
 }
 
 <li><a class="navlink" asp-area="Core" asp-page="/Home/About">@Localizer["About"]</a></li>
-@if (SignInManager.IsSignedIn(User))
+
+@if (!Context.User.Identity!.IsAuthenticated)
 {
     <li>
-        <button type="submit" class="waves-effect waves-teal btn-flat">@Localizer["Log out"]</button>
+        <a asp-area="Identity" asp-controller="Gateway" asp-action="Login" class="navlink">@Localizer["Login"]</a>
     </li>
-
 }
 else
 {
-    <li><a asp-area="Identity" class="navlink" asp-controller="Account" asp-action="Register">@Localizer["Register"]</a></li>
-    <li><a asp-area="Identity" class="navlink" asp-controller="Account" asp-action="Login">@Localizer["Log in"]</a></li>
+    <li>
+        <button class="btn btn-link">@Localizer["Logout"]</button>
+    </li>
 }
 

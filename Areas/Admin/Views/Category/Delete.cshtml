@@ -1,0 +1,22 @@
+﻿@model Guid 
+@inject IViewLocalizer Localizer
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = Localizer["Usuń kategorię"];
+    var text = ViewData["Success"] == null ? "bg-gradient-warning" : "success";
+    var icon = ViewData["Success"] == null ? "fa-xmark" : "fa-check";
+}
+
+<div class="content mt-3 mr-3 ml-3">
+    <div class="card">
+       <div class="card-header">
+           <h3 class="card-title">@Localizer["Usuń kategorię"]</h3>
+       </div>
+        <div class="card-body">
+            <p>@Localizer["Czy na pewno chcesz usunąć tę kategorię?"]</p>
+            <form asp-area="Admin" asp-controller="Category" asp-action="DeleteSubmit" asp-route-id="@Model">
+                <button class="btn btn-primary">@Localizer["Usuń"]</button>
+            </form>
+        </div>
+   </div> 
+</div>

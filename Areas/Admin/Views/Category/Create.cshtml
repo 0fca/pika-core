@@ -1,0 +1,38 @@
+﻿@model PikaCore.Areas.Admin.Models.CategoryViewModels.CreateCategoryViewModel
+@inject IViewLocalizer Localizer
+@{
+    Layout = "_Layout";
+    var text = ViewData["Success"] == null ? "bg-gradient-warning" : "success";
+    var icon = ViewData["Success"] == null ? "fa-xmark" : "fa-check";
+}
+
+<div class="content mt-3 mr-3 ml-3">
+        @if (ViewData["ReturnMessage"] != null)
+   {
+       <div class="info-box bg-@text">
+           <span class="info-box-icon"><i class="fas fa-solid @icon"></i></span>
+           <div class="info-box-content">
+               <span class="info-box-text">@ViewData["ReturnMessage"]</span>
+           </div>
+       </div>
+   }
+   <div class="card">
+       <div class="card-header">
+           <h3 class="card-title">@Localizer["Dodaj kategorię"]</h3>
+       </div>
+       <div class="card-body">
+           <form asp-area="Admin" asp-controller="Category" asp-action="Create">
+               <label for="category_name">@Localizer["Nazwa"]</label>
+               <input class="form-control form-control-sidebar" id="category_name" asp-for="Name"/>
+               <br/>
+               <label for="category_mimes">@Localizer["MIMES"]</label>
+               <input class="form-control form-control-sidebar" id="category_mimes" asp-for="Mimes"/>
+               <br/>
+               <label for="category_mimes">@Localizer["Opis"]</label>
+               <input class="form-control form-control-sidebar" id="category_description" asp-for="Description"/>
+               <br/>
+               <button class="btn btn-primary">@Localizer["Dodaj"]</button>
+           </form>
+       </div>
+   </div> 
+</div>

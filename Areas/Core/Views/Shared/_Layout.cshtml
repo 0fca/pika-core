@@ -1,11 +1,32 @@
 ﻿@{
     Layout = "/Views/Shared/_Layout.cshtml";
+    var returnMessage = ViewData["ReturnMessage"];
+    var tempReturnMessage = TempData["ReturnMessage"];
 }
 
 @section meta{
-    <meta property="og:description" content="Welcome to Pika Core Core Area! Enter to browse through a lot of interesting stuff." />
-    <meta property="og:image" content="https://core.lukas-bownik.net/images/pika-logos/pikacloud_brand.png" />
-    <meta name="theme-color" content="#009688" />
+    <meta property="og:description" content="Welcome to Pika Core Core Area! Enter to browse through a lot of interesting stuff."/>
+    <meta property="og:image" content="https://core.lukas-bownik.net/images/pika-logos/pikacloud_brand.png"/>
+    <meta name="theme-color" content="#009688"/>
+}
+
+@if (returnMessage != null || tempReturnMessage != null)
+{
+    <div class="row">
+        <div class="card-panel red white-text">
+            <i class="fas fa-x"></i>
+            <strong>
+            @if (returnMessage != null)
+            {
+                @returnMessage
+            }
+            else
+            {
+                @tempReturnMessage
+            }
+            </strong>
+        </div>
+    </div>
 }
 @RenderBody()
 @await RenderSectionAsync("Scripts", required: false)

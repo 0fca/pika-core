@@ -1,34 +1,30 @@
-﻿@using PikaCore.Infrastructure.Security
-@using Pika.Domain.Identity.Data
-@inject UserManager<ApplicationUser> UserManager
-@inject IdDataProtection DataProtection
-@inject IViewLocalizer Localizer
+﻿@inject IViewLocalizer Localizer
 @{
-    var user = await UserManager.GetUserAsync(Context.User);
+    var user = Context.User.Identity?.Name;
 }
 <ul id="menu" style="display: none;" class="nav-context-menu">
     <li id="download"><span class="material-icons">cloud_download</span></li>
-    <li id="info">
-        <span class="material-icons">info</span>
-    </li>
 </ul>
 <script>
-    $('#download').on('click', () => {
-       const id = localStorage.getItem('selectedCardId');
-       if(id !== null){
-           window.location = '@Url.Action("Download", "Storage")/' + `${id}`;
-       }
-       $('#menu').hide();
+    $(document).ready(() => {
+    $('#close_button').on('click', () => {
+        const infoSlide = $('#info-slide');   
+        infoSlide.hide();
+        resetInfoView();
     });
-    $('#info').on('click', () => {
+    $('button[type=button]').on('click', (e) => {
         const infoSlide = $('#info-slide');   
         if(!infoSlide.is(':visible')){
           infoSlide.show();
-          const id = localStorage.getItem('selectedCardId');
-          fetch('@Url.Action("ResourceInformation", "Storage")/' + `${id}`).then(r => {
+          const bucketId = $(e.currentTarget).attr("data-bucket-id");
+          const name = $(e.currentTarget).attr('data-object-name');
+          const categoryId = $(e.currentTarget).attr('data-category-id');
+          fetch('@Url.Action("Information", "Storage")/' + `?bucketId=${bucketId}&objectName=${name}&categoryId=${categoryId}`)
+          .then(r => {
               if(r.ok){
                   r.text().then(t => {
-                      $('#info-slide').html(t);
+                      $('#loader').hide();
+                      $('#resource_information_content').html(t);
                   });
               }else{
                  console.log(r.statusText); 
@@ -38,11 +34,11 @@
             infoSlide.hide();
             resetInfoView();
         }
-    });
+    })});
     
     function resetInfoView(){
-        const infoSlide = $('#info-slide');  
-        infoSlide.empty();
-        infoSlide.html('<p>@Localizer["Choose something on the left, detailed information will show up here"]</p>');
+        const loader = $('#loader');
+        loader.show();
+        $('#resource_information_content').empty();
     }
 </script>

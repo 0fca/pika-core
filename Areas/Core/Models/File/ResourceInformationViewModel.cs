@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.FileProviders;
 using PikaCore.Infrastructure.Services.Helpers;
 
@@ -8,10 +9,11 @@ namespace PikaCore.Areas.Core.Models.File
     {
         public string FullName { get; set; }
         public string MimeType { get; set; }
-        public bool IsHidden { get; set; }
         public long Size { get; set; } = 0;
-        
         public DateTime LastModified;
+        public string CategoryId { get; set; }
+        public string BucketId { get; set; }
+        public string ETag { get; set; }
 
         public ResourceInformationViewModel()
         {

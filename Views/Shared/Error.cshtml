@@ -1,6 +1,6 @@
 ﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Error - ";
 }
 
 <div class="row">
@@ -13,7 +13,6 @@
                 <img class="responsive-img center-align activator" src="https://http.cat/@Model.ErrorCode" width="390" height="270" alt="Couldn't load kitty :c." style="margin-top: 25px;"/>
             </div>
                 <div class="card-action white-text">
-                    <a href="mailto:lukasbownik99@gmail.com?&title=Error%20report%20PikaCore&body=@Model.Message @Model.RequestId" class="white-text">Report it</a>
                     <a href="#" class="activator white-text">Show details</a>
                 </div>
             <div class="card-reveal teal-text center">
@@ -30,12 +29,6 @@
                             <strong>Message: </strong><code>@Model.Message</code>
                             <br>
                             <strong>Code: </strong><code>@Model.ErrorCode</code>
-                            <br/>
-                        
-                            <strong>URL: </strong>
-                            <code>
-                                @Model.Url
-                            </code>
                         </span>
                     </div>
                     <div class="col s12 m6 l6">

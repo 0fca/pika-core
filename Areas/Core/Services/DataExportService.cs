@@ -9,13 +9,10 @@ namespace PikaCore.Areas.Core.Services
 {
     public class DataExportService : IDataExportService
     {
-        private readonly ISchedulerService _schedulerService;
         private readonly IConfiguration _configuration;
         
-        public DataExportService(ISchedulerService schedulerService, 
-                                 IConfiguration configuration)
+        public DataExportService(IConfiguration configuration)
         {
-            _schedulerService = schedulerService;
             _configuration = configuration;
         }
 

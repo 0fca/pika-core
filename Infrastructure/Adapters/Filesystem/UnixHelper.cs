@@ -1,9 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using Mono.Unix;
-using Pika.Adapters.Filesystem;
-using Serilog;
 using InvalidPathException = PikaCore.Infrastructure.Adapters.Filesystem.Exceptions.InvalidPathException;
 
 namespace PikaCore.Infrastructure.Adapters.Filesystem
@@ -69,16 +66,6 @@ namespace PikaCore.Infrastructure.Adapters.Filesystem
             }
             var scaledSize = Math.Round(i / Math.Pow(1024, unitIndex), 2);
             return scaledSize + " " + units[unitIndex];
-        }
-        
-        internal static bool HasAccess(string username, string absolutePath)
-        {
-            if (Environment.OSVersion.Platform != PlatformID.Unix)
-                return true;
-            var userInfo = new UnixUserInfo(username);
-            var oid = FileSystemAccessor.owner(absolutePath);
-            Log.Information($"{userInfo.UserId} : {oid}");
-            return userInfo.UserId == oid;
         }
     }
 }
