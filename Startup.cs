@@ -8,15 +8,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using AutoMapper;
 using Hangfire;
-using Hangfire.Common;
 using Hangfire.Redis;
 using Marten;
+using Marten.Events.Projections;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Connections;
@@ -29,14 +31,18 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using OpenIddict.Client;
 using OpenIddict.Validation.AspNetCore;
+using Pika.Domain.Storage.Entity.Projection;
 using Pika.Domain.Storage.Repository;
 using PikaCore.Areas.Api.v1.Services;
 using PikaCore.Areas.Core.Callables;
-using PikaCore.Areas.Core.Controllers.App;
+using PikaCore.Areas.Core.Commands;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
+using PikaCore.Areas.Core.Queries;
+using PikaCore.Areas.Core.Repository;
 using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Identity.Extensions;
+using PikaCore.Infrastructure.Adapters;
 using PikaCore.Infrastructure.Adapters.Minio;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
@@ -59,18 +65,12 @@ namespace PikaCore
 
         public void ConfigureServices(IServiceCollection services)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Log.Logger = new LoggerConfiguration()
-                    .Enrich.FromLogContext()
-                    .MinimumLevel.Information()
-                    .WriteTo.Console()
-                    .CreateLogger();
-            }
-            else
-            {
-                services.AddLogging();
-            }
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .CreateLogger();
+            services.AddLogging();
             services.AddMarten(c =>
                 {
                     c.Connection(Configuration.GetConnectionString("DefaultConnection"));
@@ -78,8 +78,9 @@ namespace PikaCore
                     {
                         c.AutoCreateSchemaObjects = AutoCreate.All;
                     }
+                    c.Projections.Add<BucketsProjection>(ProjectionLifecycle.Inline);
+                    c.Projections.Add<CategoriesProjection>(ProjectionLifecycle.Inline);
                 })
-                .OptimizeArtifactWorkflow()
                 .UseLightweightSessions();
             services.AddDbContext<StorageIndexContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
@@ -145,7 +146,6 @@ namespace PikaCore
                 .AddValidation(o =>
                 {
                     o.SetIssuer(Configuration.GetSection("Auth")["Authority"]);
-                    o.AddAudiences("pika-core");
                     o.UseIntrospection()
                         .SetClientId(Configuration.GetSection("Auth")["ClientId"])
                         .SetClientSecret(Configuration.GetSection("Auth")["ClientSecret"]);
@@ -197,7 +197,6 @@ namespace PikaCore
             services.AddHangfireServer();
             services.AddAspNetCoreCustomValidation();
             services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
-            services.AddSingleton<ISchedulerService, SchedulerService>();
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
             services.AddScoped<IMessageService, MessageService>();
@@ -206,7 +205,10 @@ namespace PikaCore
             services.AddTransient<IStatusService, StatusService>();
             services.AddTransient<IDataExportService, DataExportService>();
             services.AddScoped<IOidcService, OidcService>();
-            services.AddSingleton<IClientService, MinioService>();
+            services.AddSingleton<IMinioService, MinioService>();
+            services.AddTransient<CategoryRepository>();
+            services.AddTransient<BucketRepository>();
+            services.AddTransient<IStorage, MinioStorage>();
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
             services.Configure<RequestLocalizationOptions>(options =>
@@ -374,6 +376,7 @@ namespace PikaCore
             app.UseResponseCompression();
             app.UseMapJwtClaimsToIdentity();
             app.UseAuthorization();
+            app.UseMinioBucketAccessAuthorization();
             app.UseHangfireDashboard();
             app.UseEndpoints(endpoints =>
             {
@@ -406,6 +409,7 @@ namespace PikaCore
                     .RequireCors("CorsPolicy")
                     .RequireHost("localhost", "core.localhost");
             });
+            this.CreateBuckets(serviceProvider);
             this.RegisterRecurringCategoryJobs(serviceProvider);
         }
 
@@ -413,18 +417,40 @@ namespace PikaCore
         {
             var cache = serviceProvider.GetService<IDistributedCache>();
             var mediator = serviceProvider.GetService<IMediator>();
-            var aggregateRepository = serviceProvider.GetService<AggregateRepository>();
             var mapper = serviceProvider.GetService<IMapper>();
-            var clientService = serviceProvider.GetService<IClientService>();
+            var clientService = serviceProvider.GetService<IMinioService>();
             var refreshCallable = new RefreshCategoriesCallable(cache, 
                 mediator, 
-                aggregateRepository, 
                 clientService, 
-                Configuration, 
                 mapper);
             RecurringJob.AddOrUpdate("UpdateCategories", () => 
                     refreshCallable.Execute(null), 
                 "*/5 * * * *");
+            var updateTagsCallables = new GenerateCategoriesTagsCallable(mediator, clientService, cache);
+            RecurringJob.AddOrUpdate("UpdateCategoriesTags", 
+                () => updateTagsCallables.Execute(null), 
+                "*/6 * * * *");
+        }
+
+        private void CreateBuckets(IServiceProvider serviceProvider)
+        {
+            var client = serviceProvider.GetService<IMinioService>();
+            var mediator = serviceProvider.GetService<IMediator>();
+            var buckets = client.GetBuckets().Result;
+            var savedBuckets = mediator.Send(new GetAllBucketsQuery()).Result;
+            buckets.ToList().ForEach(b =>
+            {
+                if (!savedBuckets.Any(sb => sb.Name.Equals(b.Name)))
+                {
+                    mediator.Send(new CreateBucketCommand
+                    {
+                        Name = b.Name,
+                        RoleClaims = System.Text.Json.JsonSerializer.Deserialize<List<string>>(
+                            Configuration.GetSection($"Minio:Buckets:{b.Name}").Value
+                        )
+                    });
+                }
+            });
         }
         
         #region LifetimeHelpers

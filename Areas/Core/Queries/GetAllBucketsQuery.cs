@@ -6,7 +6,7 @@ using PikaCore.Areas.Core.Queries.Enums;
 
 namespace PikaCore.Areas.Core.Queries;
 
-public class GetAllCategoriesQuery : IRequest<IEnumerable<CategoriesView>>
-{ 
+public class GetAllBucketsQuery : IRequest<IEnumerable<BucketsView>>
+{
     public OrderByOptions OrderBy { get; set; }
 }

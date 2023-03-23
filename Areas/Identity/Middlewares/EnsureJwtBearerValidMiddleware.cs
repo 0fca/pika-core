@@ -26,7 +26,7 @@ public class EnsureJwtBearerValidMiddleware
         var handler = new JwtSecurityTokenHandler();
         var jsonToken = handler.ReadToken(token);
         var jwst = jsonToken as JwtSecurityToken;
-        if (jwst!.ValidTo < DateTime.Now)
+        if (jwst!.ValidTo.ToLocalTime() < DateTime.Now.ToLocalTime())
         {
             context.Response.Cookies.Delete(".AspNet.ShrCk");
             await _next(context);

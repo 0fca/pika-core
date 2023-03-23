@@ -13,23 +13,24 @@ using Microsoft.Extensions.Configuration;
 using Pika.Domain.Storage.Repository;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Infrastructure.Adapters.Minio;
+using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Queries;
 
 public class GetAllObjectByCategoryQueryHandler : IRequestHandler<GetAllObjectsByCategoryQuery, List<ObjectInfo>>
 {
-    private readonly IClientService _clientService;
+    private readonly IMinioService _minioService;
     private readonly IConfiguration _configuration;
     private readonly IDistributedCache _distributedCache;
     private readonly IMapper _mapper;
     private readonly AggregateRepository _aggregateRepository;
-    public GetAllObjectByCategoryQueryHandler(IClientService service, 
+    public GetAllObjectByCategoryQueryHandler(IMinioService service, 
         IConfiguration configuration, 
         IDistributedCache distributedCache,
         IMapper mapper,
         AggregateRepository aggregateRepository) 
     {
-        this._clientService = service;
+        this._minioService = service;
         this._configuration = configuration;
         this._distributedCache = distributedCache;
         this._mapper = mapper;

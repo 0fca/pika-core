@@ -3,8 +3,8 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = Localizer["Edytuj kategorię"];
-    var text = ViewData["Success"] == null ? "bg-gradient-warning" : "success";
-    var icon = ViewData["Success"] == null ? "fa-xmark" : "fa-check";
+    var text = TempData["Success"] == null ? "bg-gradient-warning" : "success";
+    var icon = TempData["Success"] == null ? "fa-xmark" : "fa-check";
 }
 
 <div class="content mt-3 mr-3 ml-3">

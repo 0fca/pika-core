@@ -5,14 +5,15 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Pika.Domain.Storage.Callables;
 using Pika.Domain.Storage.Callables.ValueTypes;
-using Pika.Domain.Storage.Entity;
-using Pika.Domain.Storage.Repository;
 using PikaCore.Areas.Core.Models.File;
+using PikaCore.Areas.Core.Queries;
 using PikaCore.Infrastructure.Adapters.Minio;
+using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Callables;
 
@@ -20,53 +21,51 @@ public class RefreshCategoriesCallable : BaseJobCallable
 {
     private readonly IDistributedCache _cache;
     private readonly IMediator _mediator;
-    private readonly AggregateRepository _aggregateRepository;
-    private readonly IClientService _clientService;
-    private readonly IConfiguration _configuration;
+    private readonly IMinioService _minioService;
     private readonly IMapper _mapper;
-    
+
     public RefreshCategoriesCallable(IDistributedCache cache,
         IMediator mediator,
-        AggregateRepository aggregateRepository,
-        IClientService clientService,
-        IConfiguration configuration,
+        IMinioService minioService,
         IMapper mapper)
     {
         this._cache = cache;
         this._mediator = mediator;
-        this._aggregateRepository = aggregateRepository;
-        this._clientService = clientService;
-        this._configuration = configuration;
+        this._minioService = minioService;
         this._mapper = mapper;
     }
-    
+
     public override async Task Execute(Dictionary<string, ParameterValueType>? parameterValueTypes)
     {
-        var guid = await _cache.GetStringAsync("category.streamids");
-        var gsList = JsonSerializer.Deserialize<List<Guid>>(guid);
-        foreach (var gid in gsList)
+        var buckets = await _mediator.Send(new GetAllBucketsQuery());
+        var categories = await _mediator.Send(new GetAllCategoriesQuery());
+        var bucketsToCategories = new Dictionary<string, List<string>>();
+        var mimeTypes = new Winista.Mime.MimeTypes();
+        foreach (var bucketsView in buckets)
         {
-            try
+            var bucketsCategories = new List<string>();
+            var items = await _minioService
+                .ListObjects(bucketsView.Name, true);
+            foreach (var category in categories)
             {
-                var category = await _aggregateRepository.LoadAsync<Category>(gid);
-                var items = await _clientService
-                    .ListObjects(_configuration.GetSection("Minio")["Bucket"], true);
-                var objectInfos = new List<ObjectInfo>();
                 var mimes = category.Mimes;
+                var objectInfos = new List<ObjectInfo>();
                 items.ToList().ForEach(i =>
                 {
-                    var mimeTypes = Winista.Mime.MimeTypes.Get(i.Key);
-                    var mime = mimeTypes.GetMimeType(i.Key); 
+                    var mime = mimeTypes.GetMimeType(i.Key);
                     if (mime is not null && mimes.Contains(mime.Name))
                     {
                         objectInfos.Add(_mapper.Map<ObjectInfo>(i));
                     }
-                }); 
-                await _cache.SetAsync($"category.contents.{gid}", JsonSerializer.SerializeToUtf8Bytes(objectInfos));
+                });
+                bucketsCategories.Add(category.Id.ToString());
+                await _cache.SetAsync($"{bucketsView.Id}.category.contents.{category.Id}",
+                    JsonSerializer.SerializeToUtf8Bytes(objectInfos));
             }
-            catch
-            {
-            }
+
+            bucketsToCategories.Add(bucketsView.Id.ToString(), bucketsCategories);
         }
+
+        await _cache.SetAsync($"buckets.categories.map", JsonSerializer.SerializeToUtf8Bytes(bucketsToCategories));
     }
 }

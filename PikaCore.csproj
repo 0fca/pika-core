@@ -99,10 +99,6 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
-      <Content Update="Areas\Core\Views\Storage\Partial\_DirectoryListItemPartial.cshtml">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
       <Content Update="Areas\Core\Views\Storage\Partial\FileListItemPartial.cshtml">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -148,10 +144,6 @@
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
       <Content Update="wwwroot\css\fonts\MaterialIcons-Regular.woff2">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Update="Areas\Core\Views\Content\Index.cshtml">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
@@ -474,10 +466,6 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>_Loader.pl.resx</DependentUpon>
       </Compile>
-      <Content Update="Areas\Core\Views\Storage\ResourceInformation.cshtml">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
       <EmbeddedResource Update="Resources\Areas\Core\Pages\Home\About.pl.resx">
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>About.pl.Designer.cs</LastGenOutput>
@@ -810,6 +798,7 @@
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.18.0" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="4.7.0" />
+    <PackageReference Include="System.Threading.AccessControl" Version="6.0.0" />
     <PackageReference Include="TanvirArjel.CustomValidation.AspNetCore" Version="1.2.2" />
     <PackageReference Include="Winista.MimeDetect" Version="1.0.1" />
     <PackageReference Include="xFFmpeg.NET" Version="7.1.3" />

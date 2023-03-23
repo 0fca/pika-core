@@ -1,75 +1,41 @@
-﻿@using PikaCore.Infrastructure.Security
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@using MimeAssistant = PikaCore.Infrastructure.Adapters.Filesystem.MimeAssistant
-@model Tuple<string, ObjectInfo>
-@inject IdDataProtection DataProtection
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Tuple<ObjectInfo, string, string>
 @inject IViewLocalizer Localizer
 
 @{
-    var item = Model.Item2;
-    var lastPath = Model.Item1;
-    var viewableName = item.Name.StartsWith("~")
-        ? item.Name.Replace("~", "")
-        : item.Name;
-    var dateString = @item.LastModified.Date.ToLongDateString();
+    var item = Model.Item1;
+    var categoryId = Model.Item2;
+    var bucketId = Model.Item3;
+    var viewableName = item.Name.Split("/").Last();
     var etag = item.ETag;
+    var tags = "";
+    var chunks = item.Name.Split("/");
+    chunks.SkipLast(1).ToList().ForEach(c => { tags = string.Concat(tags, c, " "); });
 }
 @{
-    var mime = "";
-    mime = MimeAssistant.GetMimeType(item.Name);
-    if (!mime.StartsWith("image/")
-        && !mime.StartsWith("video/"))
-    {
-        var type = MimeAssistant.RecognizeIconByMime(mime);
-        <td id="@etag">
-            @if (item.Size <= 100000000)
-            {
-                <a class="teal-text truncate"
-                   asp-area="Core"
-                   asp-controller="Content"
-                   asp-action="Index"
-                   asp-route-fileId=@etag
-                   asp-route-returnUrl="@lastPath"
-                   title="@viewableName">
-                    <span class="fas fa-@type prefix browse-icon-margin"></span>
-                    @viewableName
-                </a>
-            }
-            else
-            {
-                <p class="teal-text truncate">
-                    <span class="fas fa-@type prefix browse-icon-margin"></span>
-                    @viewableName
-                </p>
-            }
-        </td>
-    }
-    else
-    {
-        var id = "0." + Model.Item1?.Replace("/", "-") + $"-{item.Name}";
+    <td id="@etag">
+        <a class="teal-text truncate"
+           asp-area="Core"
+           asp-controller="Storage"
+           asp-action="Download"
+           asp-route-categoryId=@categoryId
+           asp-route-bucketId=@bucketId
+           asp-route-objectName="@Model.Item1.Name"
+           title="@viewableName">
+            <span class="fas fa-file prefix browse-icon-margin"></span>
+            @viewableName
+        </a>
 
-        <td id="@etag">
-            @if (item.Size <= 100000000)
-            {
-                <a class="teal-text truncate"
-                   asp-area="Core"
-                   asp-controller="Content"
-                   asp-action="Index"
-                   asp-route-fileId=@etag
-                   asp-route-returnUrl="@lastPath"
-                   title="@viewableName">
-                    <span class="fas fa-image prefix browse-icon-margin"></span>
-                    @viewableName
-                </a>
-            }
-            else
-            {
-                <p class="black-text truncate" title="@viewableName">
-                    @viewableName
-                </p>
-            }
-        </td>
-    }
-    <td>@item.Size</td>
-    <td>@item.LastModified</td>
+    </td>
 }
+<td>@item.SizeWithUnit()</td>
+<td>@item.LastModified</td>
+<td>@tags</td>
+<td>
+    <button type="button" class="btn btn-flat" 
+            data-object-name="@item.Name" 
+            data-bucket-id="@bucketId" 
+            data-category-id="@categoryId">
+            <i class="fas fa-info-circle"></i>
+    </button>
+</td>

@@ -341,7 +341,7 @@ input[type="password"]:not(.browser-default):focus
 }
 .information-side-pane{
     float: right;
-    width: 15%;
+    width: 20%;
     right: 0;
     position: fixed; 
     top: 65px;

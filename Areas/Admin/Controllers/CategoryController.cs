@@ -42,7 +42,7 @@ public class CategoryController : Controller
     {
         var listModel = new ListCategoryViewModel();
         var categories = await _mediator.Send(new GetAllCategoriesQuery());
-        listModel.Categories = categories;
+        listModel.Categories = categories.ToList();
         return View(listModel);
     }
     
@@ -61,7 +61,7 @@ public class CategoryController : Controller
             ViewData["ReturnMessage"] = _localizer.GetString("Niepoprawne dane dla kategorii").Value;
             return View();
         }
-        var callable = new CreateCategoryCallable(_mediator, _distributedCache);
+        var callable = new CreateCategoryCallable(_mediator);
         var parameters = new Dictionary<string, ParameterValueType>()
         {
             ["Name"] = new(createCategoryViewModel.Name),
@@ -88,8 +88,25 @@ public class CategoryController : Controller
     public async Task<IActionResult> Edit(EditCategoryViewModel editCategoryViewModel)
     {
         await _mediator.Send(_mapper.Map<UpdateCategoryCommand>(editCategoryViewModel));
-        ViewData["Success"] = true;
-        ViewData["ReturnMessage"] = this._localizer.GetString("Kategoria przekazana do aktualizacji").Value;
+        TempData["Success"] = true;
+        TempData["ReturnMessage"] = this._localizer.GetString("Kategoria przekazana do aktualizacji").Value;
         return RedirectPermanent($"/Admin/Category/Edit?id={editCategoryViewModel.Id}");
-    } 
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var did = await _mediator.Send(new GetCategoryByIdQuery(id));
+        return View(id);
+    }
+
+    [HttpPost]
+    [AutoValidateAntiforgeryToken]
+    public async Task<IActionResult> DeleteSubmit(Guid id)
+    {
+        var rid = await _mediator.Send(new ArchiveCategoryCommand(id));
+        TempData["Success"] = true;
+        TempData["ReturnMessage"] = this._localizer.GetString($"Kategoria {rid} przekazana do usunięcia").Value; 
+        return Redirect("/Admin/Category/List");
+    }
 }

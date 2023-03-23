@@ -21,7 +21,7 @@ internal class MinioClientBuilder
         return this;
     }
 
-    internal MinioClient ConfigureClient(string endpoint, string clientId, string password)
+    internal MinioClient ConfigureClient(string endpoint, string clientId, string password, string? region = null)
     {
         if (_minioClient == null)
         {
@@ -30,6 +30,7 @@ internal class MinioClientBuilder
         return _minioClient
             .WithEndpoint(endpoint)
             .WithCredentials(clientId, password)
+            .WithRegion(region)
             .Build();
     }
 }

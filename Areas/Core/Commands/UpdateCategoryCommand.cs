@@ -11,4 +11,6 @@ public class UpdateCategoryCommand : IRequest
     public List<string> Mimes { get; set; }
 
     public string Description { get; set; } = "";
+    
+    public Dictionary<string, List<string>>? Tags { get; set; }
 }

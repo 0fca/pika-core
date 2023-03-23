@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -8,35 +9,35 @@ using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
-using Pika.Domain.Storage.Entity;
-using Pika.Domain.Storage.Repository;
-using PikaCore.Areas.Core.Models.File;
+using Pika.Domain.Storage.Entity.View;
+using PikaCore.Areas.Core.Repository;
 using PikaCore.Infrastructure.Adapters.Minio;
+using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Queries;
 
-public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, List<Category>>
+public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, IEnumerable<CategoriesView>>
 {
-    private readonly IClientService _clientService;
+    private readonly IMinioService _minioService;
     private readonly IConfiguration _configuration;
     private readonly IDistributedCache _distributedCache;
     private readonly IMapper _mapper;
-    private readonly AggregateRepository _aggregateRepository;
-    public GetAllCategoriesQueryHandler(IClientService service, 
+    private readonly CategoryRepository _aggregateRepository;
+    public GetAllCategoriesQueryHandler(IMinioService service, 
         IConfiguration configuration, 
         IDistributedCache distributedCache,
         IMapper mapper,
-        AggregateRepository aggregateRepository) 
+        CategoryRepository aggregateRepository) 
     {
-        this._clientService = service;
+        this._minioService = service;
         this._configuration = configuration;
         this._distributedCache = distributedCache;
         this._mapper = mapper;
         this._aggregateRepository = aggregateRepository;
     }
-    public async Task<List<Category>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<CategoriesView>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var guid = await _distributedCache.GetStringAsync("category.streamids", cancellationToken);
+        /*var guid = await _distributedCache.GetStringAsync("category.streamids", cancellationToken);
         var gsList = JsonSerializer.Deserialize<List<Guid>>(guid);
         var objectInfos = new List<Category>();
         foreach (var gid in gsList)
@@ -48,7 +49,8 @@ public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuer
             catch (InvalidOperationException e)
             {
             }
-        }
-        return objectInfos;
+        }*/
+        var categories = await _aggregateRepository.GetAll();
+        return new List<CategoriesView>(categories);
     }
 }

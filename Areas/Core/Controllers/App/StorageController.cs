@@ -1,27 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Localization;
+using Pika.Domain.Security;
 using Pika.Domain.Storage.Data;
-using Pika.Domain.Storage.Entity;
-using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.DTO;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Queries;
 using PikaCore.Areas.Core.Services;
+using PikaCore.Areas.Identity.Attributes;
+using PikaCore.Infrastructure.Adapters;
 using PikaCore.Infrastructure.Security;
 using Serilog;
 
@@ -32,13 +30,13 @@ namespace PikaCore.Areas.Core.Controllers.App
     public class StorageController : Controller
     {
         private readonly IUrlGenerator _urlGeneratorService;
-        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
         private readonly IdDataProtection _idDataProtection;
         private readonly IStringLocalizer<StorageController> _stringLocalizer;
         private readonly IMediator _mediator;
         private readonly StorageIndexContext _storageIndexContext;
-
+        private readonly IStorage _storage;
+        private readonly IDistributedCache _cache;
         #region TempDataMessages
 
         [TempData(Key = "showGenerateUrlPartial")]
@@ -51,69 +49,74 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         public StorageController(IUrlGenerator iUrlGenerator,
                StorageIndexContext storageIndexContext,
-               IConfiguration configuration,
                IdDataProtection idDataProtection,
                IStringLocalizer<StorageController> stringLocalizer,
                IMediator mediator,
-               IMapper mapper)
+               IMapper mapper,
+               IStorage service,
+               IDistributedCache cache)
         {
             _urlGeneratorService = iUrlGenerator;
             _storageIndexContext = storageIndexContext;
-            _configuration = configuration;
             _idDataProtection = idDataProtection;
             _stringLocalizer = stringLocalizer;
             _mediator = mediator;
             _mapper = mapper;
+            _cache = cache;
+            _storage = service;
         }
 
         [HttpGet]
         [AllowAnonymous]
         [Route("[area]/[controller]/")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery(Name = "CurrentBucketName")]string currentBucketName = "storage")
         {
-            var objects = await _mediator.Send(new GetAllCategoriesQuery());
-            var categories = new List<CategoryDTO>();
-            objects.ForEach(c =>
+            var role = HttpContext.User.Claims.FirstOrDefault(c => c.Type.Equals(ClaimTypes.Role));
+            var buckets = await _storage.GetBucketsForRole(role?.Value ?? RoleString.User);
+            if (buckets.Count == 0)
             {
-                categories.Add(_mapper.Map<CategoryDTO>(c));
-            });
+                ViewData["ReturnMessage"] = _stringLocalizer.GetString("Wystąpił problem z ładowaniem bucketów").Value;
+                return View();
+            }
+
+            var currentBucket = buckets.FirstOrDefault(b => b.Name.Equals(currentBucketName));
+            if (currentBucket == null)
+            {
+                ViewData["ReturnMessage"] = _stringLocalizer.GetString("Wystąpił problem z ładowaniem bucketów").Value;
+                return View();
+            }
+            var categoriesViews = await _storage.GetCategoriesForBucket(currentBucket.Id);
             var model = new IndexViewModel
             {
-                Categories = categories
+                CurrentBucketId = currentBucket.Id,
+                CurrentBucketName = currentBucketName,
+                Categories = categoriesViews.ConvertAll(c => _mapper.Map<CategoryDTO>(c)),
+                Buckets = buckets.ToList().ConvertAll(b => _mapper.Map<BucketDTO>(b))
             };
             return View(model);
         }
         
         [HttpGet]
-        [Route("[area]/[controller]/[action]/{categoryId}")]
+        [Route("[area]/[controller]/[action]")]
+        [AuthorizeUserBucketAccess]
         [AllowAnonymous]
-        public async Task<IActionResult> Browse(string categoryId)
+        public async Task<IActionResult> Browse([FromQuery] string categoryId, [FromQuery] string bucketId, [FromQuery] string? tag = null)
         {
-            var objects = await _mediator.Send(
-                new GetAllObjectsByCategoryQuery(Guid.Parse(categoryId))
+            var objects = JsonSerializer
+                .Deserialize<List<ObjectInfo>>(
+                    await _cache.GetStringAsync($"{bucketId}.category.contents.{categoryId}")
                 );
-            var lrmv = new FileResultViewModel()
+            var tags = (await _mediator.Send(new GetCategoryByIdQuery(Guid.Parse(categoryId))))
+                .Tags;
+            var lrmv = new FileResultViewModel
             {
-                Objects = objects
+                Objects = objects,
+                SelectedTag = tag,
+                Tags = tags[bucketId],
+                CategoryId = categoryId,
+                BucketId = bucketId
             };
             return View(lrmv);
-        }
-
-        [HttpGet(Name = "ResourceInformation")]
-        [AllowAnonymous]
-        public IActionResult ResourceInformation(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("An id cannot be empty");
-            }
-
-            var path = _idDataProtection.Decode(id);
-            var model = new ResourceInformationViewModel()
-            {
-                IsHidden = false 
-            };
-            return View(model);
         }
 
         [HttpGet]
@@ -171,249 +174,52 @@ namespace PikaCore.Areas.Core.Controllers.App
         
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult Download(string id, string returnUrl, bool z = false)
+        [AuthorizeUserBucketAccess]
+        public async Task<ActionResult> Download([FromQuery] string bucketId, 
+            [FromQuery] string categoryId, 
+            [FromQuery] string objectName)
         {
-            id = !z ? _idDataProtection.Decode(id) : id;
-            int offset = int.Parse(Get("Offset"));
-            int count = int.Parse(Get("Count"));
-            ReturnMessage = _stringLocalizer.GetString("Resource id cannot be null").Value;
-            return RedirectToAction(nameof(Browse), new {@path = returnUrl, offset, count});
+            var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(bucketId)));
+            if (!await _storage.StatObject(bucket.Name, objectName))
+            {
+                ReturnMessage = _stringLocalizer.GetString("Zasób nie istnieje").Value;
+                return RedirectToAction(nameof(Browse), new { categoryId, bucketId });
+            }
+
+            var (memoryStream, returnName, mime) = await _storage.GetObjectAsStream(bucket.Name, objectName);
+            return File(memoryStream, mime, returnName);
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Thumb(string id)
+        [AuthorizeUserBucketAccess]
+        public async Task<IActionResult> Information([FromQuery] string bucketId, 
+            [FromQuery] string categoryId,
+            [FromQuery] string objectName)
         {
-            return StatusCode(501);
+            var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(bucketId)));
+            if (!await _storage.StatObject(bucket.Name, objectName))
+            {
+                ReturnMessage = _stringLocalizer.GetString("Zasób nie istnieje").Value;
+                return View();
+            }
+
+            var objectInfo = await _storage.ObjectInformation(bucket.Name, objectName);
+            var viewModel = _mapper.Map<ResourceInformationViewModel>(objectInfo);
+            viewModel.CategoryId = categoryId;
+            viewModel.BucketId = bucketId;
+            return View(viewModel);
         }
         
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [AllowAnonymous]
-        [RequestFormLimits(MultipartBodyLengthLimit = 268435456)]
-        public async Task<IActionResult> Upload(List<IFormFile> files, string returnPath = "")
-        {
-            return StatusCode(501);
-        }
-        
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [AllowAnonymous]
-        public async Task<IActionResult> Archive(string id)
-        {
-            var absolutePath = _idDataProtection.Decode(id);
-            
-            ReturnMessage = _stringLocalizer.GetString("Your request has been accepted").Value;
-            return StatusCode(501);
-        }
-        
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin, FileManagerUser")]
-        public async Task<IActionResult> Create(string name, string returnUrl)
-        {
-            var pattern = new Regex(@"\W|_");
-            var offset = int.Parse(Get("Offset"));
-            var count = int.Parse(Get("Count"));
-            
-            if (!pattern.Match(name).Success)
-            {
-                try
-                {
-
-                    ReturnMessage = _stringLocalizer
-                        .GetString("Successfully created directory:").Value + "";
-                    Log.Information(ReturnMessage);
-                    return RedirectToAction(nameof(Browse), new { path = returnUrl });
-                }
-                catch (Exception e)
-                {
-                    Log.Error(e, "StorageController#Create");
-                    ReturnMessage = _stringLocalizer.GetString( "Error: Couldn't create directory").Value;
-                    return RedirectToAction(nameof(Browse), new { path = returnUrl, offset, count });
-                }
-            }
-
-            ReturnMessage = _stringLocalizer
-                .GetString("You cannot use non-alphabetic characters in directory names").Value;
-            return RedirectToAction(nameof(Browse), new { path = returnUrl, offset, count });
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public IActionResult Delete(string currentPath)
-        {
-            var offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
-            var count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
-            var toBeDeletedItemsModel = new DeleteResourcesViewModel()
-            {
-                ReturnPath = currentPath
-            };
-            toBeDeletedItemsModel.ApplyPaging(offset, count);
-
-            return View(toBeDeletedItemsModel);
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> DeleteConfirmation(DeleteResourcesViewModel deleteResourcesViewModel)
-        {
-            var contents = deleteResourcesViewModel.ToBeDeletedItems;
-            var returnPath = deleteResourcesViewModel.ReturnPath;
-            var offset = int.Parse(Get("Offset"));
-            var count = int.Parse(Get("Count"));
-            if (contents.Count > 0)
-            {
-                try
-                {
-
-                    ReturnMessage = _stringLocalizer.GetString( "Successfully deleted elements").Value;
-                    Log.Information(ReturnMessage);
-                    return RedirectToAction(nameof(Browse), new { path = returnPath, offset,  count});
-                }
-                catch
-                { 
-                    ReturnMessage = _stringLocalizer.GetString("Error: Couldn't delete resource").Value;
-                    return RedirectToAction(nameof(Browse), new { path =  returnPath,  offset,  count});
-                }
-            }
-
-            ReturnMessage = _stringLocalizer.GetString("Error: Nothing to be deleted").Value;
-            return RedirectToAction(nameof(Browse), new { path = returnPath });
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin, FileManagerUser")]
-        [AutoValidateAntiforgeryToken]
-        public IActionResult Rename(string n)
-        {
-            var name = "";
-            var rfm = new RenameFileModel
-            {
-                IsDirectory = IsDirectory(name),
-                OldName = name,
-                AbsoluteParentPath = Directory.GetParent(name).FullName,
-                ReturnUrl = Directory.GetParent(n).Name
-            };
-            Log.Information("Directory created.");
-
-            return View(rfm);
-        }
-
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin, FileManagerUser")]
-        public IActionResult Rename(RenameFileModel rfm)
-        {
-            if (!string.IsNullOrEmpty(rfm.NewName))
-            {
-                var isRenamed = false; 
-                if (!isRenamed)
-                {
-                    ReturnMessage = "Couldn't renamed to " + rfm.NewName;
-                    return RedirectToAction(nameof(Browse),
-                        new {path = rfm.ReturnUrl});
-                }
-                ReturnMessage = string.Format(_stringLocalizer.GetString( "Successfully renamed to {0}").Value, rfm.NewName);
-
-                return RedirectToAction(nameof(Browse), 
-                    new { path = rfm.ReturnUrl });
-
-            }
-            ModelState.AddModelError(HttpContext.TraceIdentifier, 
-                _stringLocalizer.GetString( "New name cannot be empty"));
-            return View(rfm);
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [AutoValidateAntiforgeryToken]
-        [Route("Storage/Hide/{systemPath}")]
-        public IActionResult Hide(string systemPath, string returnPath)
-        {
-            var offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
-            var count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
-            systemPath = _idDataProtection.Decode(systemPath);
-            Log.Information($"{systemPath}");
-            try
-            {
-                
-                ReturnMessage = true ? 
-                    _stringLocalizer.GetString( "Resource hidden").Value : 
-                    _stringLocalizer.GetString( "Couldn't be hidden").Value;
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, e.Message);
-            }
-            return RedirectToAction(nameof(Browse), new {@path = returnPath, offset, count});
-        }
-        
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [AutoValidateAntiforgeryToken]
-        [Route("Storage/Show/{systemPath}")]
-        public IActionResult Show(string systemPath, string returnPath)
-        {
-            var offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
-            var count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
-            systemPath = _idDataProtection.Decode(systemPath);
-            Log.Information($"{systemPath}");
-            try
-            {
-                var isHidden = true; 
-                ReturnMessage = isHidden 
-                    ? _stringLocalizer.GetString( "Resource is visible now").Value 
-                    : _stringLocalizer.GetString( "Couldn't be set visible").Value;
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, e.Message);
-            }
-            return RedirectToAction(nameof(Browse), new {@path = returnPath, offset, count});
-        }
-
         #region HelperMethods
 
         private async Task<string> IdentifyUser()
         {
             return "User";
         }
-
-        public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
-        {
-        }
-
-        private static bool IsDirectory(string name)
-        {
-            return !System.IO.File.Exists(name);
-        }
-
         #endregion
 
         #region CookieHelperMethods
-
-        private void Set(string key, string value, int? expireTime)
-        {
-            var option = new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.Lax,
-                Expires = expireTime.HasValue
-                    ? DateTime.Now.AddMinutes(expireTime.Value)
-                    : DateTime.Now.AddMilliseconds(10)
-            };
-            
-            Response.Cookies.Append(key, value, option);
-        }
-
-        private void SetPagingParams(int offset, int count, int pageCount)
-        {
-            TempData["Offset"] = offset;
-            TempData["Count"] = count;
-            TempData["PageCount"] = pageCount;
-        }
         
         private string Get(string key)
         {

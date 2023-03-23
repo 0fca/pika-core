@@ -25,8 +25,6 @@ public class JobsController : Controller
     [ActionName("queue")]
     public IActionResult QueueRecurringJob([FromBody] QueuedJobViewModel queuedJobViewModel)
     {
-        var callable = new UpdateCategoryCallable(this._mediator, this._distributedCache);
-        RecurringJob.AddOrUpdate(queuedJobViewModel.Name,  () => callable.Execute(null), queuedJobViewModel.CronExpression);
         return Ok();
     }
 }

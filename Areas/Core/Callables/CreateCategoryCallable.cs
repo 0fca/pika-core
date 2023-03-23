@@ -13,23 +13,13 @@ namespace PikaCore.Areas.Core.Callables;
 public class CreateCategoryCallable : BaseJobCallable
 {
     private readonly IMediator _mediator;
-    private readonly IDistributedCache _distributedCache;
-    public CreateCategoryCallable(IMediator mediator,
-        IDistributedCache distributedCache)
+    public CreateCategoryCallable(IMediator mediator)
     {
         this._mediator = mediator;
-        this._distributedCache = distributedCache;
     }
 
     public override async Task Execute(Dictionary<string, ParameterValueType>? parameterValueTypes)
     {
-        var serializedIds = await _distributedCache.GetStringAsync("category.streamids");
-        var streamIds = new List<Guid>();
-        if (!string.IsNullOrEmpty(serializedIds))
-        {
-            streamIds = JsonSerializer.Deserialize<List<Guid>>(serializedIds);
-        }
-
         switch (parameterValueTypes)
         {
             case { Count: 0 }:
@@ -46,8 +36,5 @@ public class CreateCategoryCallable : BaseJobCallable
             Mimes = parameterValueTypes["Mimes"].Value<List<string>>(),
         }; 
         await _mediator.Send(c);
-
-        await _distributedCache.SetAsync("category.streamids",
-            JsonSerializer.SerializeToUtf8Bytes(streamIds));
     }
 }

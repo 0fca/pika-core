@@ -16,9 +16,12 @@ public class UpdateCategoryHandler : IRequestHandler<UpdateCategoryCommand, Unit
     
     public async Task<Unit> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var c = await _aggregateRepository.LoadAsync<Category>(request.Guid, ct: cancellationToken); 
-        c.AddMimes(request.Mimes);
+        var c = await _aggregateRepository.LoadAsync<Category>(request.Guid, ct: cancellationToken);
+        c.SetName(request.Name);
         c.SetDescription(request.Description);
+        c.AddMimes(request.Mimes);
+        c.AddTags(request.Tags);
+        c.Update();
         await _aggregateRepository.StoreAsync(c, cancellationToken);
         return Unit.Value;
     }

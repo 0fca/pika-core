@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using OpenIddict.Abstractions;
+using Pika.Domain.Security;
 
 namespace PikaCore.Areas.Identity.Middlewares;
 
@@ -21,6 +22,7 @@ public class MapJwtClaimsToIdentityMiddleware
         var token = context.Request.Cookies[".AspNet.ShrCk"];
         if (string.IsNullOrEmpty(token))
         {
+            context.User.AddClaim(ClaimTypes.Role, RoleString.User);
             await _next(context);
             return;
         }

@@ -68,7 +68,11 @@ public class GatewayController : Controller
    [ActionName("Logout")]
    public async Task<IActionResult> Logout()
    {
-      HttpContext.Response.Cookies.Delete(".AspNet.ShrCk");
+      if (HttpContext.Request.Cookies.ContainsKey(".AspNet.ShrCk"))
+      {
+         HttpContext.Response.Cookies.Delete(".AspNet.ShrCk");
+      }
+
       return Redirect("/Core");
    }
 }

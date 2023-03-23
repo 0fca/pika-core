@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Microsoft.Extensions.FileProviders;
 using Minio.DataModel;
 
 namespace PikaCore.Areas.Core.Models.File
 {
     public class FileResultViewModel
     {
-        public List<string> ToBeDeleted { get; set; } = new List<string>();
-        public List<ObjectInfo> Objects { get; set; } = new List<ObjectInfo>();
-
+        public List<ObjectInfo> Objects { get; set; } = new();
+        public string? SelectedTag { get; set; }
+        public List<string> Tags { get; set; }
+        public string BucketId { get; set; }
+        public string CategoryId { get; set; }
         public static FileResultViewModel FromMinioItems(IEnumerable<Item> items)
         {
             var objects = new List<ObjectInfo>();
