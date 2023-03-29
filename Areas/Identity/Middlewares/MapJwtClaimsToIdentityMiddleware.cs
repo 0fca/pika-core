@@ -19,7 +19,7 @@ public class MapJwtClaimsToIdentityMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var token = context.Request.Cookies[".AspNet.ShrCk"];
+        var token = context.Request.Cookies[".AspNet.Identity"];
         if (string.IsNullOrEmpty(token))
         {
             context.User.AddClaim(ClaimTypes.Role, RoleString.User);

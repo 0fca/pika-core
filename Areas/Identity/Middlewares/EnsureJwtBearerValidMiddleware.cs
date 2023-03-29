@@ -17,7 +17,7 @@ public class EnsureJwtBearerValidMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var token = context.Request.Cookies[".AspNet.ShrCk"];
+        var token = context.Request.Cookies[".AspNet.Identity"];
         if (string.IsNullOrEmpty(token))
         {
             await _next(context);
@@ -28,7 +28,7 @@ public class EnsureJwtBearerValidMiddleware
         var jwst = jsonToken as JwtSecurityToken;
         if (jwst!.ValidTo.ToLocalTime() < DateTime.Now.ToLocalTime())
         {
-            context.Response.Cookies.Delete(".AspNet.ShrCk");
+            context.Response.Cookies.Delete(".AspNet.Identity");
             await _next(context);
             return;
         }

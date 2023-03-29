@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using AspNetCoreRateLimit;
 using AutoMapper;
 using Hangfire;
 using Hangfire.Redis;
@@ -78,13 +79,14 @@ namespace PikaCore
                     {
                         c.AutoCreateSchemaObjects = AutoCreate.All;
                     }
+
                     c.Projections.Add<BucketsProjection>(ProjectionLifecycle.Inline);
                     c.Projections.Add<CategoriesProjection>(ProjectionLifecycle.Inline);
                 })
                 .UseLightweightSessions();
             services.AddDbContext<StorageIndexContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-           
+
 
             services.AddStackExchangeRedisCache(a =>
             {
@@ -112,7 +114,8 @@ namespace PikaCore
             }
             else if (redis.IsConnected)
             {
-                var key = string.Concat("CoreKeys-", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
+                var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                var key = string.Concat("CoreKeys-", env);
                 services.AddDataProtection()
                     .PersistKeysToStackExchangeRedis(redis, key)
                     .ProtectKeysWithCertificate(
@@ -129,6 +132,7 @@ namespace PikaCore
                             Configuration["Security:Passphrase"]))
                     .SetApplicationName("ShrCkApp");
             }
+
             services.AddOpenIddict()
                 .AddClient(o =>
                 {
@@ -154,30 +158,8 @@ namespace PikaCore
                 });
 
             services.AddAuthentication(o =>
-                {
-                    o.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer();
-            
-            services.Configure<CookiePolicyOptions>(options =>
             {
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-                options.Secure = CookieSecurePolicy.Always;
-                options.ConsentCookie.Domain = Configuration.GetSection("Auth")["CookieDomain"];
-            });
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.HttpOnly = true;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.Domain = Configuration.GetSection("Auth")["CookieDomain"];
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
-                options.SlidingExpiration = true;
-                options.LoginPath = "/Identity/Gateway/Login";
-                options.Cookie.Name = ".AspNet.ShrCk";
-                options.LogoutPath = "/Identity/Gateway/Logout";
+                o.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
             });
             services.AddAuthorization();
             services.AddHangfire(o =>
@@ -324,6 +306,7 @@ namespace PikaCore
 
             app.UseRequestLocalization(localizationOptions);
             lifetime.ApplicationStopping.Register(OnShutdown);
+            lifetime.ApplicationStarted.Register(OnStartup);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -335,7 +318,7 @@ namespace PikaCore
                 app.UseHsts();
                 app.UseCertificateForwarding();
             }
-            
+
             app.UseSession();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
@@ -353,18 +336,10 @@ namespace PikaCore
                     }
                 }
             );
-
-            app.UseFileServer(new FileServerOptions
-            {
-                FileProvider = new PhysicalFileProvider(Configuration.GetSection("Storage")["staticFiles"]),
-                RequestPath = "/Static",
-                EnableDirectoryBrowsing = false
-            });
             var webSocketOptions = new WebSocketOptions()
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
             };
-            webSocketOptions.AllowedOrigins.Add("https://dev-core.lukas-bownik.net");
             webSocketOptions.AllowedOrigins.Add("https://core.lukas-bownik.net");
             app.UseWebSockets(webSocketOptions);
             app.UseRouting();
@@ -409,7 +384,11 @@ namespace PikaCore
                     .RequireCors("CorsPolicy")
                     .RequireHost("localhost", "core.localhost");
             });
-            this.CreateBuckets(serviceProvider);
+            if (env.IsDevelopment())
+            {
+                this.CreateBuckets(serviceProvider);
+            }
+
             this.RegisterRecurringCategoryJobs(serviceProvider);
         }
 
@@ -419,16 +398,16 @@ namespace PikaCore
             var mediator = serviceProvider.GetService<IMediator>();
             var mapper = serviceProvider.GetService<IMapper>();
             var clientService = serviceProvider.GetService<IMinioService>();
-            var refreshCallable = new RefreshCategoriesCallable(cache, 
-                mediator, 
-                clientService, 
+            var refreshCallable = new RefreshCategoriesCallable(cache,
+                mediator,
+                clientService,
                 mapper);
-            RecurringJob.AddOrUpdate("UpdateCategories", () => 
-                    refreshCallable.Execute(null), 
+            RecurringJob.AddOrUpdate("UpdateCategories", () =>
+                    refreshCallable.Execute(null),
                 "*/5 * * * *");
             var updateTagsCallables = new GenerateCategoriesTagsCallable(mediator, clientService, cache);
-            RecurringJob.AddOrUpdate("UpdateCategoriesTags", 
-                () => updateTagsCallables.Execute(null), 
+            RecurringJob.AddOrUpdate("UpdateCategoriesTags",
+                () => updateTagsCallables.Execute(null),
                 "*/6 * * * *");
         }
 
@@ -452,9 +431,14 @@ namespace PikaCore
                 }
             });
         }
-        
+
         #region LifetimeHelpers
 
+        private static void OnStartup()
+        {
+            Log.Information("System is starting... Hellorld!");
+        }
+        
         private static void OnShutdown()
         {
             Log.Information("System is stopping... Good bye.");

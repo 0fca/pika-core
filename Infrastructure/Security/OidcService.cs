@@ -19,7 +19,7 @@ public class OidcService : IOidcService
     public async Task<string> GetAccessToken(LoginViewModel loginViewModel)
     {
         var (response, info) = await _client.AuthenticateWithPasswordAsync(
-            issuer: new Uri("http://192.168.1.252:5080/", UriKind.Absolute),
+            issuer: new Uri(_configuration.GetSection("Auth")["Authority"], UriKind.Absolute),
             username: loginViewModel.Username,
             password: loginViewModel.Password,
             scopes: new []{ "Base" }

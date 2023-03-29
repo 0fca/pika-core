@@ -367,3 +367,8 @@ div .select-dropdown{
     box-shadow: none !important; 
     text-align: center !important;
 }
+
+.padded-item-content{
+    padding-top: 1.5em;
+    padding-bottom: 1.5em;
+}
