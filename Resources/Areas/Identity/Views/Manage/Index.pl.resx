@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="Profile" xml:space="preserve">
+        <value>Profile</value>
+        <comment>Profile</comment>
+    </data>
+    <data name="Account Data" xml:space="preserve">
+        <value>Dane konta</value>
+        <comment>Account Data</comment>
+    </data>
+    <data name="From here, you can request export of your data to CSV file or just delete your account" xml:space="preserve">
+        <value>Stąd możesz wysłać rządanie eksportu swoich danych do pliku CSV albo po prostu usunąć konto</value>
+        <comment>From here, you can request export of your data to CSV file or just delete your account</comment>
+    </data>
+    <data name="This feature is not available at the moment" xml:space="preserve">
+        <value>Ta funkcjonalność nie jest dostępna</value>
+        <comment>This feature is not available at the moment</comment>
+    </data>
+    <data name="Export" xml:space="preserve">
+        <value>Eksport</value>
+        <comment>Export</comment>
+    </data>
+    <data name="Delete" xml:space="preserve">
+        <value>Usuń</value>
+        <comment>Delete</comment>
+    </data>
+    <data name="Save" xml:space="preserve">
+        <value>Zapisz</value>
+        <comment>Save</comment>
+    </data>
+</root>

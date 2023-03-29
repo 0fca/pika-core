@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="Invalid login attempt. Username: {0}" xml:space="preserve">
+        <value>Logowanie nie powiodło się. Użytkownik: {0}</value>
+        <comment/>
+    </data>
+    <data name="Account has been locked out" xml:space="preserve">
+        <value>Konto zostało zablokowane, przekroczyłeś liczbę błędnych logowań</value>
+        <comment/>
+    </data>
+    <data name="Invalid authenticator code" xml:space="preserve">
+        <value>Niepoprawny kod autentykacyjny</value>
+        <comment/>
+    </data>
+    <data name="Unable to load two-factor authentication user" xml:space="preserve">
+        <value>Błąd ładowania użytkownika</value>
+        <comment/>
+    </data>
+    <data name="Invalid recovery code entered" xml:space="preserve">
+        <value>Wprowadziłeś niepoprawny kod</value>
+        <comment/>
+    </data>
+    <data name="Error loading external login information during confirmation" xml:space="preserve">
+        <value>Napotkaliśmy problem w trakcie ładowania informacji o logowaniu</value>
+        <comment/>
+    </data>
+    <data name="Your data is gathered from whole system, it can take a while. 
+                Your data will be accessible for download in CSV format as soon as they are ready" xml:space="preserve">
+        <value>Twoje dane są właśnie gromadzone, to może chwilkę zająć. Twoje dane będą dostępne do pobrania w formacie CSV, gdy tylko zostaną skompletowane.</value>
+        <comment/>
+    </data>
+    <data name="Your account has been successfully deleted" xml:space="preserve">
+        <value>Twoje konto zostało pomyślnie stworzone</value>
+        <comment/>
+    </data>
+    <data name="There was a problem during deleting your account" xml:space="preserve">
+        <value>Wystąpił nieoczekiwany problem w trakcie usuwania Twojego konta</value>
+        <comment/>
+    </data>
+    <data name="Your password has been successfully reset" xml:space="preserve">
+        <value>Twoje hasło zostało pomyślnie zresetowane</value>
+    </data>
+</root>

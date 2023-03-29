@@ -11,6 +11,7 @@ body {
 
 main {
     flex: 1 0 auto;
+    background-color: white;
 }
 
 hr{
@@ -22,13 +23,6 @@ hr{
     background-color: #303F9F !important;
     color: #212121 !important;
 }
-
-
-.navbar-color {
-    background-color: #eee !important;
-    border-bottom-color: #eee !important;
-}
-
 
 .navlink {
     color: #212121 !important;
@@ -129,12 +123,14 @@ a, a:hover, a:focus {
 
 
 .container-padding {
-    margin-top: 5% !important;
-    padding-bottom: 20px !important;
+    margin-top: 5vh !important;
+    padding-bottom: 5vh !important;
 }
 
 .main-page-content {
-    margin-top: 15%;
+    height: 60vh;
+    align-content: center;
+    display: grid;
 }
 
 .main-page.path-button {
@@ -264,9 +260,24 @@ a, a:hover, a:focus {
     color: teal;
 }
 
-.login-input-color, .login-input-color::placeholder{
-    border-bottom-color: #f5f5f5 !important;
-    color: white !important;
+input[type="text"]:not(.browser-default), 
+input[type="email"]:not(.browser-default),
+input[type="tel"]:not(.browser-default),
+input[type="password"]:not(.browser-default)
+{
+    border-bottom-color: #f5f5f5;
+    color: white;
+}
+
+
+input[type="text"]:not(.browser-default):focus,
+input[type="tel"]:not(.browser-default):focus,
+input[type="email"]:not(.browser-default):focus,
+input[type="password"]:not(.browser-default):focus
+ {
+    color: white;
+    box-shadow: 0 1px 0 0 teal;
+    border-bottom: 1px solid teal;
 }
 
 .nav-menu-colors{
@@ -289,4 +300,70 @@ a, a:hover, a:focus {
 
 .fit-image{
     object-fit: fill;
+}
+
+.nav-context-menu{
+    list-style-position: inside; 
+    margin: 2px 0 0 0; 
+    color:  teal;
+}
+
+.nav-context-menu li{
+    cursor: pointer;
+}
+
+.page-footer .container .row a{
+    color: teal;
+}
+
+.tabs .tab a {
+    color: white;
+}
+
+.tabs .tab a:hover, .tabs .tab a.active {
+    color: teal;
+}
+
+.tabs .indicator {
+    background-color: teal !important;
+}
+
+.breadcrumb::before{
+    content: '\E5CC';
+    color: rgb(12,12,12);
+    vertical-align: top;
+    display: inline-block;
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 25px;
+    margin: 0 10px 0 8px;
+}
+.information-side-pane{
+    float: right;
+    width: 20%;
+    right: 0;
+    position: fixed; 
+    top: 65px;
+    bottom: 0;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    padding-left: 10px;
+    padding-top: 10px;
+    background-color: whitesmoke;
+}
+#menu > li {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    float: left;
+    width: 10%;
+    padding: 5px;
+}
+
+div .select-dropdown{
+    color: black !important;
+    border-bottom: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important; 
+    text-align: center !important;
 }

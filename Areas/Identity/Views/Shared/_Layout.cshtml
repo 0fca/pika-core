@@ -1,0 +1,12 @@
+﻿@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+@section meta{
+    <meta property="og:description" content="Welcome to Pika Core Identity Area!" />
+    <meta property="og:image" content="https://core.lukas-bownik.net/images/pika-logos/pikacloud_brand.png" />
+    <meta name="theme-color" content="#009688" />
+}
+
+@RenderBody()
+@await RenderSectionAsync("Scripts", required: false)

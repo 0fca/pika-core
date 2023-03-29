@@ -1,44 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
+using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.FileProviders;
-using PikaCore.Areas.Core.Controllers.Helpers;
-using PikaCore.Areas.Core.Controllers.Hubs;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Localization;
+using Pika.Domain.Security;
+using Pika.Domain.Storage.Data;
 using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
+using PikaCore.Areas.Core.Models.DTO;
 using PikaCore.Areas.Core.Models.File;
+using PikaCore.Areas.Core.Queries;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Areas.Core.Services.Jobs;
-using PikaCore.Areas.Infrastructure.Services;
-using PikaCore.Areas.Infrastructure.Services.Helpers;
-using PikaCore.Security;
-using Quartz;
+using PikaCore.Areas.Identity.Attributes;
+using PikaCore.Infrastructure.Adapters;
+using PikaCore.Infrastructure.Security;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {
     [Area("Core")]
+    [ResponseCache(CacheProfileName = "Default")]
     public class StorageController : Controller
     {
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IFileService _fileService;
         private readonly IUrlGenerator _urlGeneratorService;
-        private readonly IConfiguration _configuration;
-        private readonly StorageIndexContext _storageIndexContext;
-        private readonly IHubContext<StatusHub> _hubContext;
+        private readonly IMapper _mapper;
         private readonly IdDataProtection _idDataProtection;
-        private readonly IJobService _jobService;
-
+        private readonly IStringLocalizer<StorageController> _stringLocalizer;
+        private readonly IMediator _mediator;
+        private readonly StorageIndexContext _storageIndexContext;
+        private readonly IStorage _storage;
+        private readonly IDistributedCache _cache;
         #region TempDataMessages
 
         [TempData(Key = "showGenerateUrlPartial")]
@@ -49,106 +47,79 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         #endregion
 
-        public StorageController(SignInManager<ApplicationUser> signInManager,
-               IFileService fileService, 
-               IUrlGenerator iUrlGenerator,
+        public StorageController(IUrlGenerator iUrlGenerator,
                StorageIndexContext storageIndexContext,
-               IHubContext<StatusHub> hubContext,
-               IConfiguration configuration,
                IdDataProtection idDataProtection,
-               IJobService jobService)
+               IStringLocalizer<StorageController> stringLocalizer,
+               IMediator mediator,
+               IMapper mapper,
+               IStorage service,
+               IDistributedCache cache)
         {
-            _signInManager = signInManager;
-            _fileService = fileService;
             _urlGeneratorService = iUrlGenerator;
             _storageIndexContext = storageIndexContext;
-            _hubContext = hubContext;
-            _configuration = configuration;
             _idDataProtection = idDataProtection;
-            _jobService = jobService;
+            _stringLocalizer = stringLocalizer;
+            _mediator = mediator;
+            _mapper = mapper;
+            _cache = cache;
+            _storage = service;
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Index()
+        [Route("[area]/[controller]/")]
+        public async Task<IActionResult> Index([FromQuery(Name = "CurrentBucketName")]string currentBucketName = "storage")
         {
-            return RedirectToActionPermanent(nameof(Browse));
+            var role = HttpContext.User.Claims.FirstOrDefault(c => c.Type.Equals(ClaimTypes.Role));
+            var buckets = await _storage.GetBucketsForRole(role?.Value ?? RoleString.User);
+            if (buckets.Count == 0)
+            {
+                ViewData["ReturnMessage"] = _stringLocalizer.GetString("Wystąpił problem z ładowaniem bucketów").Value;
+                return View();
+            }
+
+            var currentBucket = buckets.FirstOrDefault(b => b.Name.Equals(currentBucketName));
+            if (currentBucket == null)
+            {
+                ViewData["ReturnMessage"] = _stringLocalizer.GetString("Wystąpił problem z ładowaniem bucketów").Value;
+                return View();
+            }
+            var categoriesViews = await _storage.GetCategoriesForBucket(currentBucket.Id);
+            var model = new IndexViewModel
+            {
+                CurrentBucketId = currentBucket.Id,
+                CurrentBucketName = currentBucketName,
+                Categories = categoriesViews.ConvertAll(c => _mapper.Map<CategoryDTO>(c)),
+                Buckets = buckets.ToList().ConvertAll(b => _mapper.Map<BucketDTO>(b))
+            };
+            return View(model);
         }
-
+        
         [HttpGet]
+        [Route("[area]/[controller]/[action]")]
+        [AuthorizeUserBucketAccess]
         [AllowAnonymous]
-        public async Task<IActionResult> Browse(string? path, int offset = 0, int count = 50)
+        public async Task<IActionResult> Browse([FromQuery] string categoryId, [FromQuery] string bucketId, [FromQuery] string? tag = null)
         {
-            var osUser = _configuration.GetSection("OsUser")["OsUsername"];
-            
-            if (string.IsNullOrEmpty(path)
-            || !UnixHelper.HasAccess(osUser, 
-                _fileService.RetrieveAbsoluteFromSystemPath(path)))
+            var objects = JsonSerializer
+                .Deserialize<List<ObjectInfo>>(
+                    await _cache.GetStringAsync($"{bucketId}.category.contents.{categoryId}")
+                );
+            var tags = (await _mediator.Send(new GetCategoryByIdQuery(Guid.Parse(categoryId))))
+                .Tags;
+            var lrmv = new FileResultViewModel
             {
-                path = Path.DirectorySeparatorChar.ToString();
-            }
-            
-            var contents = GetContents(path);
-
-            ViewData["path"] = path;
-            ViewData["returnUrl"] =  UnixHelper.GetParent(path);
-            var lrmv = new FileResultViewModel();
-
-            if (null == contents)
-            {
-                ReturnMessage = "Something went wrong...";
-                return View(lrmv);
-            }
-
-            if (!contents.Exists)
-            {
-                ReturnMessage = "The resource doesn't exist on the filesystem.";
-                return View(lrmv);
-            }
-            
-            lrmv.Contents = contents;
-            lrmv.ContentsList = contents.ToList();
-
-            await lrmv.SortContents();
-            var fileInfosList = lrmv.ContentsList;
-
-            var pageCount = fileInfosList.Count / count;
-
-            SetPagingParams(offset, count, pageCount);
-
-            Set("Offset", offset.ToString(), 3600);
-            Set("Count", count.ToString(), 3600);
-            Set("PageCount", pageCount.ToString(), 3600);
-                
-            if (fileInfosList.Count > count)
-            {
-                lrmv.ApplyPaging(offset, count);
-            }
-                
-            if (!HttpContext.User.IsInRole("Admin"))
-            {
-                try
-                {
-                    lrmv.ApplyAcl(osUser);
-                }
-                catch (InvalidOperationException ex)
-                {
-                    Log.Error(ex, "StorageController#Browse");
-                }
-            }
-                
-            var fileInfo = _fileService.RetrieveFileInfoFromSystemPath(path);
-            if (fileInfo.Exists 
-            && !fileInfo.IsDirectory)
-            {
-                return RedirectToAction(nameof(Download), new { @id = fileInfo.Name, @z = true });
-            }
-            
+                Objects = objects,
+                SelectedTag = tag,
+                Tags = tags[bucketId],
+                CategoryId = categoryId,
+                BucketId = bucketId
+            };
             return View(lrmv);
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin, FileManagerUser, User")]
         [Route("/[controller]/[action]/{name?}")]
         public async Task<IActionResult> GenerateUrl(string name, string returnUrl)
         {
@@ -197,380 +168,58 @@ namespace PikaCore.Areas.Core.Controllers.App
                 }
             }
 
-            ReturnMessage = "Couldn't generate token for that resource.";
+            ReturnMessage = _stringLocalizer.GetString("Couldn't generate token for that resource").Value;
             return RedirectToAction(nameof(Browse), new { @path = returnUrl });
         }
-
-       
+        
         [HttpGet]
         [AllowAnonymous]
-        [Route("/[controller]/[action]/{id?}")]
-        public ActionResult PermanentDownload(string id)
+        [AuthorizeUserBucketAccess]
+        public async Task<ActionResult> Download([FromQuery] string bucketId, 
+            [FromQuery] string categoryId, 
+            [FromQuery] string objectName)
         {
-            if (!string.IsNullOrEmpty(id))
+            var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(bucketId)));
+            if (!await _storage.StatObject(bucket.Name, objectName))
             {
-                StorageIndexRecord? s = null;
-                try
-                {
-                    s = _storageIndexContext.IndexStorage.SingleOrDefault(record => record.Urlhash.Equals(id));
-
-                    if (s != null)
-                    {
-                        if (!s.Expires || (s.ExpireDate != DateTime.Now && s.ExpireDate > DateTime.Now))
-                        {
-                                var fileBytes = _fileService.AsStreamAsync(s.AbsolutePath);
-                                var name = Path.GetFileName(s.AbsolutePath);
-                                if (fileBytes != null)
-                                {
-                                    return File(fileBytes, MimeAssistant.GetMimeType(name), name, true);
-                                }
-                                
-                                ReturnMessage = "Couldn't read requested resource: " + s.Urlid;
-                                Log.Warning(ReturnMessage);
-                                return RedirectToAction(nameof(Browse));
-                        }
-                        ReturnMessage = "It seems that this url expired, you need to generate a new one.";
-                        return RedirectToAction(nameof(Browse));
-                    }
-                    ReturnMessage = "It seems that given token doesn't exist in the database.";
-                    return RedirectToAction(nameof(Browse));
-                }
-                catch (InvalidOperationException ex)
-                {
-                    ReturnMessage = s != null 
-                        ? "Couldn't read requested resource: " + s.Urlid 
-                        : "Database error occured.";
-                    Log.Error(ex, string.Concat(ReturnMessage, "StorageController#PermanentDownload"));
-                    return RedirectToAction(nameof(Browse));
-                }
+                ReturnMessage = _stringLocalizer.GetString("Zasób nie istnieje").Value;
+                return RedirectToAction(nameof(Browse), new { categoryId, bucketId });
             }
-            ReturnMessage = "No id given or database is down.";
-            return RedirectToAction(nameof(Browse));
+
+            var (memoryStream, returnName, mime) = await _storage.GetObjectAsStream(bucket.Name, objectName);
+            return File(memoryStream, mime, returnName);
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult Download(string id,  string returnUrl, bool z = false)
+        [AuthorizeUserBucketAccess]
+        public async Task<IActionResult> Information([FromQuery] string bucketId, 
+            [FromQuery] string categoryId,
+            [FromQuery] string objectName)
         {
-            
-            id = !z ? _idDataProtection.Decode(id) : id;
-            int offset = int.Parse(Get("Offset"));
-            int count = int.Parse(Get("Count"));
-            
-            try{
-                if (!string.IsNullOrEmpty(id))
-                {
-                    var fileInfo = _fileService.RetrieveFileInfoFromAbsolutePath(id); 
-                    var path = fileInfo.PhysicalPath;
-                    Log.Information($"Decoded path: {path}");
-                    if (!fileInfo.Exists)
-                    {
-                        ReturnMessage = "File doesn't exist on server's filesystem.";
-                        return RedirectToAction(nameof(Browse), new { @path = returnUrl });
-                    }
-                    
-                    if (Directory.Exists(path))
-                    {
-                        ReturnMessage = "This is a folder, cannot download it directly.";
-                        return RedirectToAction(nameof(Browse), new { @path = returnUrl });
-                    }
-                    
-                    var fs =  _fileService.AsStreamAsync(path);
-                    var mime = MimeAssistant.GetMimeType(path);
-                    return File(fs, mime, fileInfo.Name);
-                }
-            }catch(Exception e){
-                Log.Error(e, "StorageController#Download");
+            var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(bucketId)));
+            if (!await _storage.StatObject(bucket.Name, objectName))
+            {
+                ReturnMessage = _stringLocalizer.GetString("Zasób nie istnieje").Value;
+                return View();
             }
-            ReturnMessage = "Resource id cannot be null.";
-            return RedirectToAction(nameof(Browse), new { @path = returnUrl, offset, count });
 
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Thumb(string id)
-        {
-            Log.Information($"Request for thumb of id: {id}");
-            var format = _configuration.GetSection("Images")["Format"].ToLower();
-            var thumbFileName = $"{id}.{format}";
-            var absoluteThumbPath = Path.Combine(_configuration.GetSection("Images")["ThumbDirectory"],
-                                                 thumbFileName
-                                                 );
-            var thumbFileStream = _fileService.AsStreamAsync(absoluteThumbPath);
-            return File(thumbFileStream, "image/jpeg");
+            var objectInfo = await _storage.ObjectInformation(bucket.Name, objectName);
+            var viewModel = _mapper.Map<ResourceInformationViewModel>(objectInfo);
+            viewModel.CategoryId = categoryId;
+            viewModel.BucketId = bucketId;
+            return View(viewModel);
         }
         
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [AllowAnonymous]
-        [RequestFormLimits(MultipartBodyLengthLimit = 268435456)]
-        public async Task<IActionResult> Upload(List<IFormFile> files, string returnPath = "")
-        {
-            try
-            {
-                var size = files.Sum(f => f.Length);
-                var returnMessage = files.Count 
-                                    + (files.Count == 1 ? "file" : " files ") 
-                                    + $" uploaded of summary size "
-                                    + UnixHelper.DetectUnitBySize(size);
-                var (checkResultMessage, tmpFilesList) = 
-                    await _fileService.SanitizeFileUpload(files, 
-                            returnPath,
-                    HttpContext.User.IsInRole("Admin"));
-
-                returnMessage = string.IsNullOrEmpty(checkResultMessage) ? returnMessage : checkResultMessage;
-                if (!string.IsNullOrEmpty(checkResultMessage))
-                {
-                    return StatusCode(403, checkResultMessage);
-                }
-
-                await _fileService.PostSanitizeUpload(tmpFilesList);
-                Log.Warning($"Accepted to be created at path: /Core/Storage/Browse?path={returnPath}");
-                return Accepted($"/Core/Storage/Browse?path={returnPath}", returnMessage);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, e.Message);
-            }
-        }
-        
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [AllowAnonymous]
-        public async Task<IActionResult> Archive(string id)
-        {
-            var absolutePath = _idDataProtection.Decode(id);
-            var jobDataMap = new JobDataMap
-            {
-                {"userId", _signInManager.UserManager.GetUserId(HttpContext.User)},
-                {"output", _configuration["Paths:zip-tmp"]},
-                {"absolutePath", absolutePath}
-            };
-            var name = await _jobService.CreateJob<ArchiveJob>(jobDataMap);
-            ReturnMessage = "Your request has been accepted.";
-            return RedirectPermanent($"/Core/Jobs/Submit?name={name}");
-        }
-        
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin, FileManagerUser")]
-        public async Task<IActionResult> Create(string name, string returnUrl)
-        {
-            var pattern = new Regex(@"\W|_");
-            int offset = int.Parse(Get("Offset"));
-            int count = int.Parse(Get("Count"));
-            
-            if (!pattern.Match(name).Success)
-            {
-                try
-                {
-                    var dirInfo = await _fileService.MkdirAsync(_fileService.RetrieveAbsoluteFromSystemPath(name));
-                    
-                    ReturnMessage = "Successfully created directory: " + dirInfo?.Name;
-                    Log.Information(ReturnMessage);
-                    return RedirectToAction(nameof(Browse), new { path = returnUrl });
-                }
-                catch (Exception e)
-                {
-                    Log.Error(e, "StorageController#Create");
-                    ReturnMessage = "Error: Couldn't create directory.";
-                    return RedirectToAction(nameof(Browse), new { path = returnUrl, offset, count });
-                }
-            }
-
-            ReturnMessage = "You cannot use non-alphabetic characters in directory names.";
-            return RedirectToAction(nameof(Browse), new { path = returnUrl, offset, count });
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public IActionResult Delete(string currentPath)
-        {
-            var offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
-            var count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
-            var contentsList = GetContents(currentPath).ToList();
-            var toBeDeletedItemsModel = new DeleteResourcesViewModel()
-            {
-                ReturnPath = currentPath
-            };
-            toBeDeletedItemsModel.ApplyPaging(offset, count);
-            toBeDeletedItemsModel.FromFileInfoList(contentsList);
-
-            return View(toBeDeletedItemsModel);
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> DeleteConfirmation(DeleteResourcesViewModel deleteResourcesViewModel)
-        {
-            var contents = deleteResourcesViewModel.ToBeDeletedItems;
-            var returnPath = deleteResourcesViewModel.ReturnPath;
-            var offset = int.Parse(Get("Offset"));
-            var count = int.Parse(Get("Count"));
-            if (contents.Count > 0)
-            {
-                try
-                {
-                    await _fileService.Delete(contents);
-
-                    ReturnMessage = "Successfully deleted elements.";
-                    Log.Information(ReturnMessage);
-                    return RedirectToAction(nameof(Browse), new { path = returnPath, offset,  count});
-                }
-                catch
-                { 
-                    ReturnMessage = "Error: Couldn't delete resource.";
-                    return RedirectToAction(nameof(Browse), new { path =  returnPath,  offset,  count});
-                }
-            }
-
-            ReturnMessage = "Error: Nothing to be deleted.";
-            return RedirectToAction(nameof(Browse), new { path = returnPath });
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin, FileManagerUser")]
-        [AutoValidateAntiforgeryToken]
-        public IActionResult Rename(string n)
-        {
-            var name = _fileService.RetrieveAbsoluteFromSystemPath(n);
-            ViewData["path"] = name;
-            var rfm = new RenameFileModel
-            {
-                IsDirectory = IsDirectory(name),
-                OldName = name,
-                AbsoluteParentPath = Directory.GetParent(name).FullName,
-                ReturnUrl = Directory.GetParent(n).Name
-            };
-            Log.Information("Directory created.");
-
-            return View(rfm);
-        }
-
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        [Authorize(Roles = "Admin, FileManagerUser")]
-        public IActionResult Rename(RenameFileModel rfm)
-        {
-            if (!string.IsNullOrEmpty(rfm.NewName))
-            {
-                var isRenamed = _fileService.Move(Path.Combine(rfm.AbsoluteParentPath, rfm.OldName), Path.Combine(rfm.AbsoluteParentPath, rfm.NewName));
-                if (!isRenamed)
-                {
-                    ReturnMessage = "Couldn't renamed to " + rfm.NewName;
-                    return RedirectToAction(nameof(Browse),
-                        new {path = rfm.ReturnUrl});
-                }
-                ReturnMessage = "Successfully renamed to " + rfm.NewName;
-
-                return RedirectToAction(nameof(Browse), 
-                    new { path = rfm.ReturnUrl });
-
-            }
-            ModelState.AddModelError(HttpContext.TraceIdentifier, "New name cannot be empty!");
-            return View(rfm);
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [AutoValidateAntiforgeryToken]
-        [Route("Storage/Hide/{systemPath}")]
-        public IActionResult Hide(string systemPath, string returnPath)
-        {
-            var offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
-            var count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
-            systemPath = _idDataProtection.Decode(systemPath);
-            Log.Information($"{systemPath}");
-            try
-            {
-                var isHidden = _fileService.HideFile(
-                    systemPath
-                );
-                ReturnMessage = isHidden ? "Resource hidden." : "Couldn't be hidden.";
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, e.Message);
-            }
-            Log.Debug("Redirecting to Browse...");
-            return RedirectToAction(nameof(Browse), new {@path = returnPath, offset, count});
-        }
-        
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [AutoValidateAntiforgeryToken]
-        [Route("Storage/Show/{systemPath}")]
-        public IActionResult Show(string systemPath, string returnPath)
-        {
-            var offset = int.Parse(string.IsNullOrEmpty(Get("Offset")) ? "0" : Get("Offset"));
-            var count = int.Parse(string.IsNullOrEmpty(Get("Count")) ? "0" : Get("Count"));
-            systemPath = _idDataProtection.Decode(systemPath);
-            Log.Information($"{systemPath}");
-            try
-            {
-                var isHidden = _fileService.ShowFile(
-                    systemPath
-                );
-                ReturnMessage = isHidden ? "Resource is visible now." : "Couldn't be set visible.";
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, e.Message);
-            }
-            Log.Debug("Redirecting to Browse...");
-            return RedirectToAction(nameof(Browse), new {@path = returnPath, offset, count});
-        }
-
         #region HelperMethods
 
         private async Task<string> IdentifyUser()
         {
-            var user = await _signInManager.UserManager.GetUserAsync(HttpContext.User);
-            return user != null
-                ? await _signInManager.UserManager.GetEmailAsync(user)
-                : HttpContext.Connection.RemoteIpAddress.ToString();
+            return "User";
         }
-
-        private IDirectoryContents GetContents(string systemPath)
-        {
-            return _fileService.GetDirectoryContents(systemPath);
-        }
-
-        public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
-        {
-        }
-
-        private static bool IsDirectory(string name)
-        {
-            return !System.IO.File.Exists(name);
-        }
-
         #endregion
 
         #region CookieHelperMethods
-
-        private void Set(string key, string value, int? expireTime)
-        {
-            var option = new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.Lax,
-                Expires = expireTime.HasValue
-                    ? DateTime.Now.AddMinutes(expireTime.Value)
-                    : DateTime.Now.AddMilliseconds(10)
-            };
-            
-            Response.Cookies.Append(key, value, option);
-        }
-
-        private void SetPagingParams(int offset, int count, int pageCount)
-        {
-            TempData["Offset"] = offset;
-            TempData["Count"] = count;
-            TempData["PageCount"] = pageCount;
-        }
         
         private string Get(string key)
         {

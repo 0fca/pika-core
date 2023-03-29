@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="Export Your Data" xml:space="preserve">
+        <value>Wyeksportuj swoj dane</value>
+        <comment>Export Your Data</comment>
+    </data>
+    <data name="Your privacy is very valuable for me, as a creator of PikaCloud, thus you can export your data and take a look on what PikaCloud 'knows' about you" xml:space="preserve">
+        <value>Twoja prywatność jest bardzo ważna dla mnie, jako twócy PikaCloud. Dlatego też, możesz wyeksportować wszystkie swoje dane, aby być pewnym, że PikaCloud 'wie' o Tobie to, co chcesz</value>
+        <comment>Your privacy is very valuable for me, as a creator of PikaCloud, thus you can export your data and take a look on what PikaCloud 'knows' about you</comment>
+    </data>
+    <data name="Choose what do export" xml:space="preserve">
+        <value>Wybierz, co chcesz wyeksportować</value>
+        <comment>Choose what do export</comment>
+    </data>
+    <data name="Request Export" xml:space="preserve">
+        <value>Zatwierdź</value>
+        <comment>Request Export</comment>
+    </data>
+    <data name="Cancel" xml:space="preserve">
+        <value>Anuluj</value>
+        <comment>Cancel</comment>
+    </data>
+</root>

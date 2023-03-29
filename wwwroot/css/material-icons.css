@@ -8,10 +8,11 @@
        url(fonts/MaterialIcons-Regular.woff2) format('woff2'),
        url(fonts/MaterialIcons-Regular.woff) format('woff'),
        url(fonts/MaterialIcons-Regular.ttf) format('truetype');
+  font-display: swap;
 }
 
 .material-icons {
-  font-family: 'Material Icons';
+  font-family: 'Material Icons', monospace;
   font-weight: normal;
   font-style: normal;
   font-size: 24px;  /* Preferred icon size */

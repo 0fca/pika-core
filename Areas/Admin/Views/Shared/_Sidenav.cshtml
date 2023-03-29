@@ -1,0 +1,36 @@
+﻿@inject IViewLocalizer Localizer
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <dvi class="sidebar">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column">
+                <li class="nav-item">
+                    <a asp-area="Core" asp-controller="Home" asp-action="Index" class="nav-link">
+                        <i class="nav-icon fa-sharp fa-solid fa-house-blank"></i>
+                        <p>@Localizer["Home"]</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="Admin" asp-controller="Category" asp-action="List" class="nav-link">
+                        <p>@Localizer["Kategorie"]</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <p>@Localizer["Wiadomości"]</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/Admin/Index/CreateMessage"class="nav-link">
+                        <p>@Localizer["Stwórz wiadomość"]</p>
+                    </a> 
+                </li>
+                <li class="nav-item">
+                    <a href="/Admin/Index/CreateSystem" class="nav-link">
+                        <p>@Localizer["Dodaj system"]</p>
+                    </a>
+                </li>
+            </ul> 
+        </nav>
+    </dvi>
+</aside>
+

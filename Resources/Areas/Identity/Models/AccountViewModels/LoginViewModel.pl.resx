@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="Username" xml:space="preserve">
+        <value>Nazwa użytkownika</value>
+        <comment/>
+    </data>
+    <data name="Password" xml:space="preserve">
+        <value>Hasło</value>
+        <comment/>
+    </data>
+    <data name="Confirm password" xml:space="preserve">
+        <value>Powtórz hasło</value>
+        <comment/>
+    </data>
+    <data name="Please, enter a nickname" xml:space="preserve">
+        <value>Wprowadź nazwę użytkownika</value>
+        <comment/>
+    </data>
+    <data name="Please, enter a valid password" xml:space="preserve">
+        <value>Wprowadź poprawne hasło</value>
+        <comment/>
+    </data>
+</root>

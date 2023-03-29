@@ -1,0 +1,75 @@
+﻿@page "{id:int}"
+@using Pika.Domain.Status.Models
+@model PikaCore.Areas.Admin.Pages.Index.MessageEdit
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    Layout = "_Layout";
+}
+
+@{ 
+    ViewData["Title"] = "Edit message: "+Model.Message.Id;
+}
+<div class="container">
+    <div class="card indigo white-text center">
+        <span class="card-title">
+            @ViewData["Title"]
+        </span>
+        <div class="card-content">
+            <form asp-page="MessageEdit" method="post">
+                <div class="row">
+                    <div class="input-field">
+                        <input asp-for="Message.Id" hidden="hidden" type="text" class="validate"/>
+                    </div>
+                    <div class="input-field">
+                        <label>@Html.DisplayNameFor(m => m.Message.Content)</label>
+                        <textarea asp-for="Message.Content" class="materialize-textarea login-input-color" data-length="1000"></textarea>
+                        <span asp-validation-for="Message.Content" class="red-text"></span>
+                    </div>
+                    <div class="input-field">
+                        <select asp-for="Message.IsVisible" class="validate login-input-color">
+                            <option value="true" selected>Visible</option>
+                            <option value="false">Invisible</option>
+                        </select>
+                        <label>@Html.DisplayNameFor(m => m.Message.IsVisible)</label>
+                    </div>
+                    <div class="input-field">
+                        <select asp-for="Message.MessageType" class="validate login-input-color">
+                            @foreach (var type in typeof(MessageType).GetEnumValues())
+                            {
+                                <option value="@Convert.ToInt32(type)">@type</option>
+                            }
+                        </select>
+                        <label>@Html.DisplayNameFor(m => m.Message.MessageType)</label>
+                    </div>
+                    <div class="row">
+                        @if (Model.Message.RelatedIssueCount > 0)
+                        {
+                            <a asp-page="EditIssues" asp-route-id="@Model.Message.Id">Edit issues</a>
+                        }
+                        else
+                        {
+                            <p>No related issues</p>
+                        }
+                    </div>
+                    <div class="input-field">
+                        <p>This message is assigned to: @Model.Message.SystemName</p>
+                        <select asp-for="Message.SystemName" class="validate login-input-color">
+                            @foreach (var system in Model.Message.Systems)
+                            {
+                                <option value="@system.SystemName">@system.SystemName</option>
+                            }
+                        </select>
+                        <label>@Html.DisplayNameFor(m => m.Message.Systems)</label>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <span>
+                        <button type="submit" class="btn btn-danger">Edit</button>
+                        <a class="btn btn-primary">Cancel</a>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

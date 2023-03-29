@@ -6,9 +6,9 @@
 
 # THANKS
 
-    Dominik Drąg, Franek Łaniewski, Oskar Barcz, Zdzisław Goik, Monika Stępień
+    Dominik Drąg, Franek Łaniewski, Oskar Barcz, Zdzisław Goik, Monika Stępień, Aleksandra Woroszyło
 
 # TECHNOLOGY COLOPHON
 
-    Apache2 Server Configs, Kestrel, ASP.NET Core 3.1.1, jQuery3.4, Modernizr, Normalize.css,  Materializecss
+    Apache2 Server & Load Balancer, Kestrel, ASP.NET Core 3.1.1, jQuery3.4, Modernizr, Normalize.css,  Materializecss
     CSS3, HTML5

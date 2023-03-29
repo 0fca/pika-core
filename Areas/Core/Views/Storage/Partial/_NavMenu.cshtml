@@ -1,0 +1,44 @@
+﻿@inject IViewLocalizer Localizer
+@{
+    var user = Context.User.Identity?.Name;
+}
+<ul id="menu" style="display: none;" class="nav-context-menu">
+    <li id="download"><span class="material-icons">cloud_download</span></li>
+</ul>
+<script>
+    $(document).ready(() => {
+    $('#close_button').on('click', () => {
+        const infoSlide = $('#info-slide');   
+        infoSlide.hide();
+        resetInfoView();
+    });
+    $('button[type=button]').on('click', (e) => {
+        const infoSlide = $('#info-slide');   
+        if(!infoSlide.is(':visible')){
+          infoSlide.show();
+          const bucketId = $(e.currentTarget).attr("data-bucket-id");
+          const name = $(e.currentTarget).attr('data-object-name');
+          const categoryId = $(e.currentTarget).attr('data-category-id');
+          fetch('@Url.Action("Information", "Storage")/' + `?bucketId=${bucketId}&objectName=${name}&categoryId=${categoryId}`)
+          .then(r => {
+              if(r.ok){
+                  r.text().then(t => {
+                      $('#loader').hide();
+                      $('#resource_information_content').html(t);
+                  });
+              }else{
+                 console.log(r.statusText); 
+              }
+          });
+        }else{
+            infoSlide.hide();
+            resetInfoView();
+        }
+    })});
+    
+    function resetInfoView(){
+        const loader = $('#loader');
+        loader.show();
+        $('#resource_information_content').empty();
+    }
+</script>

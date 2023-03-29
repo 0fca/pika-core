@@ -1,0 +1,33 @@
+﻿@using UnixHelper = PikaCore.Infrastructure.Adapters.Filesystem.UnixHelper
+@model ResourceInformationViewModel
+@inject IViewLocalizer Localizer
+@{
+    Layout = null;
+    var chunks = Model.FullName.Split("/");
+    var tags = new List<string>();
+    tags.AddRange(chunks.SkipLast(1).ToList());
+    var viewableName = Model.FullName.Split("/").Last();
+}
+<ul class="collection" xmlns="http://www.w3.org/1999/html">
+    <li class="collection-item">@Localizer["Full name"]: @viewableName </li>
+    <li class="collection-item">MIME: @Model.MimeType</li>
+
+    <li class="collection-item">@Localizer["Size"]: @UnixHelper.DetectUnitBySize(Model.Size)</li>
+    <li class="collection-item">@Localizer["Last Modified"]: @Model.LastModified.ToShortDateString()</li>
+    <li class="collection-item">
+        <p class="text-break">
+            @Localizer["Tagi"]:
+            @foreach (var tag in tags)
+            {
+                <a asp-area="Core"
+                   asp-controller="Storage"
+                   asp-action="Browse"
+                   asp-route-bucketId="@Model.BucketId"
+                   asp-route-tag="@tag"
+                   asp-route-categoryId="@Model.CategoryId">
+                    @tag
+                </a>
+            }
+        </p>
+    </li>
+</ul>

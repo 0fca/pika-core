@@ -1,0 +1,46 @@
+﻿@using Microsoft.AspNetCore.Localization
+<!DOCTYPE html>
+@inject IViewLocalizer Localizer  
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+}
+<html lang="@requestCulture.RequestCulture.UICulture.Name.ToLower()">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Hannah</title>
+    <meta property="og:title" content="Pika Core" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://core.lukas-bownik.net/" />
+    @await RenderSectionAsync("meta", required: false)
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="~/lib/fontawesome-free-5.14.0-web/css/all.min.css" asp-append-version="true">
+</head>
+<body class="sidebar-mini">
+<main class="wrapper">
+    <form method="post" asp-area="Identity" asp-controller="Gateway" asp-action="Logout" id="logoutForm">
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <div class="nav-wrapper white">
+                <a asp-area="Core" asp-controller="Home" asp-action="Index" class="brand-logo brand-margin brand-text">
+                    <img src="~/images/pika-logos/pikacloud_brand.png" class="responsive-img" width="137" height="48" alt="Pika Cloud"/>
+                </a>
+                @await RenderSectionAsync("LocaleSwitch", required: false)
+            </div>
+        </nav>
+        @await Html.PartialAsync("_Sidenav")
+    </form>
+    <div class="content-wrapper">
+        @RenderBody()
+    </div>
+</main>
+<footer class="main-footer">
+    <environment include="Development">
+        <strong class="float-right d-none d-sm-inline">This is an developer instance of Pika Core Application.</strong>
+    </environment>
+    <strong>© 2018 - @DateTime.Now.Year Pika Cloud - From creativity comes immersion</strong>
+</footer>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

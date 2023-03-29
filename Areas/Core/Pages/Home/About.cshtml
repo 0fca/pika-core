@@ -1,21 +1,33 @@
 ﻿@page
+@inject IViewLocalizer Localizer
+@using Microsoft.AspNetCore.Mvc.Localization
+@using PikaCore.Areas.Core.Pages.Home
 @model PikaCore.Areas.Core.Pages.Home.AboutModel
 @{
-    ViewData["Title"] = "About";
+    ViewData["Title"] = Localizer["About"].Value;
 }
     <div class="row">
         <div class="col s12 m6">
-            <div class="card indigo">
+            <div class="card medium indigo z-depth-0">
                 <div class="card-content white-text">
-                    <span class="card-title">What is this?</span>
-                    <section id="aboutthis">
+                    <span class="card-title">@Localizer["What is this"]?</span>
+                    <section id="aboutthis" style="text-align: justify">
                         <p class="section_paragraph">
-                            Pika Core is a core web application of whole web system called Pika Cloud.
-                            It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem.
-                            PikaCore first web app I've ever build. I started development on .NET Core 2.1 SDK, but now I use .NET Core SDK of version @Model.FrameworkVer.
+                            @string.Format(Localizer["Pika Core is a core web application of whole web system called Pika Cloud. "+
+                            "It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem. "+
+                            "PikaCore first web app I've ever build. I started development on .NET Core 1.1 SDK, but now I use .NET Core SDK of version {0}"].Value, Model.FrameworkVer).
                         </p>
-                        <p class="section_paragraph center">
-                            This is PikaCore aka Hannah, version: @Model.Version.
+                        <br/>
+                        <p class="left">
+                            @{
+                                var instanceString = string.IsNullOrEmpty(@Model.Instance) 
+                                    ? "" 
+                                    : Localizer["Instance: "].Value  + @Model.Instance;
+                            }
+                            <b>@Localizer["This is PikaCore aka Hannah"]</b>
+                        </p>
+                        <p class="left">
+                            ver. @Model.Version <br/>@instanceString
                         </p>
                     </section>
                 </div>
@@ -23,7 +35,7 @@
                     <a href="https://www.github.com/Obsidiam/pika-cloud">
                         <img src="~/images/github/PNG/GitHub-Mark-32px.png" alt="GitHub repo"/>
                     </a>
-                    <a href="/Core/Home/Dedication" class="teal-text">
+                    <a href="@Url.Page(nameof(Dedication))" class="teal-text">
                         <span class="material-icons">
                             favorite
                         </span>
@@ -33,24 +45,24 @@
             
         </div>
         <div class="col s12 m6">
-            <div class="card indigo">
+            <div class="card medium indigo z-depth-0">
                 <div class="card-content white-text">
-                    <span class="card-title">Technical information</span>
-                    <section id="technicalinformation">
-                        <p class="section_paragraph">
-                            Some technical stuff for those who are interested:
+                    <span class="card-title">@Localizer["Technical information"]</span>
+                    <section id="technicalinformation" style="text-align: justify">
+                        <div class="section_paragraph">
+                            @Localizer["Some technical stuff for those who are interested"]:
                             <ul>
-                                <li>This neat simple web app is hosted on my private server and running on @Model.Os</li>
-                                <li>.NET Core is the technology I used to build Pika Core, its version is @Model.FrameworkVer</li>
-                                <li>All this is open source under GPL v.3.0 license.</li>
+                                <li>@Localizer["This neat simple web app is hosted on my private server and running on"] @Model.Os</li>
+                                <li>@Localizer[".NET Core is the technology I used to build Pika Core, its version is"] @Model.FrameworkVer</li>
+                                <li>@Localizer["All this is open source under GPL v.3.0 license"].</li>
                             </ul>
-                        </p>
+                        </div>
                     </section>
                 </div>
                 <div class="card-action">
                     <a class="teal-text" href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="~/images/heckert_gnu.transp.small.png" height="32" width="32" alt="GPL v.3.0" /></a>
                     <a class="teal-text" href="https://www.debian.org/"><img src="~/images/debian_logo.svg" height="32" width="32" alt="Debian" /></a>
-                    <a class="teal-text" href="https://dotnet.microsoft.com/download/dotnet-core"><img src="~/images/1024px-.NET_Core_Logo.svg.png" height="32" width="32" alt=".NET Core" /></a>
+                    <a class="teal-text" href="https://dotnet.microsoft.com/download/dotnet-core"><img src="~/images/dotnet-logo.svg" height="32" width="32" alt=".NET Core" /></a>
                     <a class="teal-text" href="https://github.com/Obsidiam/fms/tree/development">
                         <img src="~/images/github/PNG/GitHub-Mark-32px.png" alt="GitHub repo" />
                     </a>

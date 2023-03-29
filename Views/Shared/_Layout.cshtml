@@ -1,0 +1,75 @@
+﻿@using Microsoft.AspNetCore.Localization
+<!DOCTYPE html>
+@inject IViewLocalizer Localizer  
+@{ 
+    var role = "";
+    var roleName = "";
+
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+}
+<html lang="@requestCulture.RequestCulture.UICulture.Name.ToLower()">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] @roleName Hannah</title>
+    <meta property="og:title" content="Pika Core" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://core.lukas-bownik.net/" />
+    @await RenderSectionAsync("meta", required: false)
+    @await Html.PartialAsync("_Partial/_Styles")
+    @await Html.PartialAsync("_Partial/_Scripts")
+</head>
+<body>
+<main>
+    <form method="post" asp-area="Identity" asp-controller="Gateway" asp-action="Logout" id="logoutForm">
+        <div class="navbar-fixed">
+            <nav class="z-depth-0">
+                <div class="nav-wrapper white">
+                    <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons indigo-text">menu</i></a>
+                    <a asp-area="Core" asp-controller="Home" asp-action="Index" class="brand-logo brand-margin brand-text">
+                        <img src="~/images/pika-logos/pikacloud_brand.png" class="responsive-img" width="137" height="48" alt="Pika Cloud"/>
+                    </a>
+                    @await Html.PartialAsync("_LinksPartial")
+                    @await RenderSectionAsync("LocaleSwitch", required: false)
+                </div>
+            </nav>
+        </div>
+        <ul id="slide-out" class="sidenav">
+            @await Html.PartialAsync("_Sidenav")
+        </ul>
+    </form>
+    <div class="container container-padding">
+        @RenderBody()
+    </div>
+</main>
+<footer class="page-footer footer">
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m6 l6">
+                <p class="white-text left small-text">@Localizer["FooterInterestedInAppText"]?
+                    @{
+                        var msg = Localizer["FooterSeeAboutText"];
+                        var link = $"<a href=\"/Core/Home/About\">{Localizer["AboutText"].Value}</a>";
+                    }
+                    @(Html.Raw(string.Format(msg.Value, link))) 
+                </p>
+                
+                <p class="white-text left small-text">@Localizer["FooterCookieText"] <a href="/Core/Policy/Index">@Localizer["PoliciesText"]</a> .</p>
+            </div>
+            <environment include="Development">
+                <div class="col s12 m6 l6">
+                    <strong class="teal-text right">This is an developer instance of Pika Core Application.</strong>
+                </div>
+             </environment>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+            © 2018 - @DateTime.Now.Year Pika Cloud - From creativity comes immersion
+        </div>
+    </div>
+</footer>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

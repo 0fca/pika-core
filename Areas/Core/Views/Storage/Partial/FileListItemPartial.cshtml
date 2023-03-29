@@ -1,132 +1,41 @@
-﻿@using PikaCore.Security
-@using PikaCore.Areas.Core.Controllers.Helpers
-@using PikaCore.Areas.Infrastructure.Services.Helpers
-@using Microsoft.Extensions.FileProviders
-@model Tuple<string, Microsoft.Extensions.FileProviders.IFileInfo>
-@inject IdDataProtection DataProtection
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Tuple<ObjectInfo, string, string>
+@inject IViewLocalizer Localizer
 
 @{
-    var item = Model.Item2;
-    var lastPath = Model.Item1;
-    var viewableName = item.Name.StartsWith("~")
-        ? item.Name.Replace("~", "")
-        : item.Name;
-    var dateString = @item.LastModified.Date.ToLongDateString();
+    var item = Model.Item1;
+    var categoryId = Model.Item2;
+    var bucketId = Model.Item3;
+    var viewableName = item.Name.Split("/").Last();
+    var etag = item.ETag;
+    var tags = "";
+    var chunks = item.Name.Split("/");
+    chunks.SkipLast(1).ToList().ForEach(c => { tags = string.Concat(tags, c, " "); });
 }
 @{
-    var mime = "";
-    mime = MimeAssistant.GetMimeType(item.PhysicalPath);
-    if (!mime.StartsWith("image/")
-        && !mime.StartsWith("video/"))
-    {
-        var type = MimeAssistant.RecognizeIconByMime(mime);
-        <div class="card grey lighten-4 z-depth-0 small activator">
-            <div class="card-content">
-                <div class="card-title activator">
-                    <div class="row">
-                        <div class="col s10 m10 l10">
-                            <p class="flow-text truncate">
-                                <span class="fas fa-@type prefix browse-icon-margin"></span>
-                                @viewableName
-                            </p>
-                        </div>
-                        <div class="col s2 m2 l2">
-                            <i class="material-icons right activator">more_vert</i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card-reveal grey lighten-4">
-                <span class="card-title grey-text text-darken-4">Information<i class="material-icons right">close</i></span>
-                <div>
-                    @if (!item.IsDirectory)
-                    {
-                        <p>Size: @UnixHelper.DetectUnitBySize(item.Length)</p>
-                    }
-                    <div>
-                        <p>Last Modified: @dateString</p>
-                    </div>
-                </div>
-                @if (item.Name.StartsWith("~"))
-                {
-                    <span class="material-icons">
-                        lock
-                    </span>
-                }
-            </div>
-            <div class="card-action">
-                <a class="teal-text"
-                   asp-area="Core"
-                   asp-controller="Storage"
-                   asp-action="Download"
-                   asp-route-id=@DataProtection.Encode(item.PhysicalPath)
-                   asp-route-returnUrl=@Model.Item1 title="@viewableName">
-                    <span class="material-icons">
-                        cloud_download
-                    </span>
-                </a>
-                @await Html.PartialAsync("Partial/_ContextMenuPartial", new Tuple<string, IFileInfo>(lastPath, item))
-            </div>
-        </div>
-    }
-    else
-    {
-        var id = "0." + Model.Item1?.Replace("/", "-") + $"-{item.Name}";
+    <td id="@etag">
+        <a class="teal-text truncate"
+           asp-area="Core"
+           asp-controller="Storage"
+           asp-action="Download"
+           asp-route-categoryId=@categoryId
+           asp-route-bucketId=@bucketId
+           asp-route-objectName="@Model.Item1.Name"
+           title="@viewableName">
+            <span class="fas fa-file prefix browse-icon-margin"></span>
+            @viewableName
+        </a>
 
-        <div class="card small grey lighten-4 z-depth-0 activator">
-            <div class="card-image">
-                <picture class="fit-image activator">
-                    <source id="@id" srcset="~/images/loading_icon.gif" data-name="@item.Name"/>
-                    <img class="fit-image activator"
-                         alt=""
-                         loading="eager"
-                         src="https://www.lukas-bownik.net/img/logos/pikacloud_core.svg"/>
-                </picture>
-            </div>
-            <div class="card-content">
-                <div class="card-title truncate activator">
-                    <div class="row">
-                        <div class="col s10 m10 l10">
-                            <p class="flow-text  truncate">@viewableName</p>
-                        </div>
-                        <div class="col s2 m2 l2">
-                            <i class="material-icons right activator">more_vert</i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card-reveal">
-                <span class="card-title grey-text text-darken-4">Information<i class="material-icons right">close</i></span>
-                <div>
-                    @if (!item.IsDirectory)
-                    {
-                        <p>Size: @UnixHelper.DetectUnitBySize(item.Length)</p>
-                    }
-                    <div>
-                        <p>Last Modified: @dateString</p>
-                    </div>
-                </div>
-                @if (item.Name.StartsWith("~"))
-                {
-                    <span class="material-icons">
-                        lock
-                    </span>
-                }
-            </div>
-            <div class="card-action">
-                <a class="teal-text"
-                   asp-area="Core"
-                   asp-controller="Storage"
-                   asp-action="Download"
-                   asp-route-id=@DataProtection.Encode(item.PhysicalPath)
-                   asp-route-returnUrl=@Model.Item1 title="@viewableName">
-                    <span class="material-icons">
-                        cloud_download
-                    </span>
-                </a>
-                @await Html.PartialAsync("Partial/_ContextMenuPartial", new Tuple<string, IFileInfo>(lastPath, item))
-            </div>
-        </div>
-    }
-
+    </td>
 }
+<td>@item.SizeWithUnit()</td>
+<td>@item.LastModified</td>
+<td>@tags</td>
+<td>
+    <button type="button" class="btn btn-flat" 
+            data-object-name="@item.Name" 
+            data-bucket-id="@bucketId" 
+            data-category-id="@categoryId">
+            <i class="fas fa-info-circle"></i>
+    </button>
+</td>

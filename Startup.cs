@@ -2,39 +2,60 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using AspNetCore.CustomValidation.Extensions;
+using AutoMapper;
+using Hangfire;
+using Hangfire.Redis;
+using Marten;
+using Marten.Events.Projections;
+using MediatR;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Win32;
+using Newtonsoft.Json;
+using OpenIddict.Client;
+using OpenIddict.Validation.AspNetCore;
+using Pika.Domain.Storage.Entity.Projection;
+using Pika.Domain.Storage.Repository;
 using PikaCore.Areas.Api.v1.Services;
-using PikaCore.Areas.Core.Controllers.App;
+using PikaCore.Areas.Core.Callables;
+using PikaCore.Areas.Core.Commands;
 using PikaCore.Areas.Core.Controllers.Hubs;
 using PikaCore.Areas.Core.Data;
-using PikaCore.Areas.Core.Models;
+using PikaCore.Areas.Core.Queries;
+using PikaCore.Areas.Core.Repository;
 using PikaCore.Areas.Core.Services;
-using PikaCore.Areas.Infrastructure.Data;
-using PikaCore.Areas.Infrastructure.Services;
-using PikaCore.Properties;
-using PikaCore.Security;
+using PikaCore.Areas.Identity.Extensions;
+using PikaCore.Infrastructure.Adapters;
+using PikaCore.Infrastructure.Adapters.Minio;
+using PikaCore.Infrastructure.Security;
+using PikaCore.Infrastructure.Services;
 using Serilog;
+using StackExchange.Redis;
+using TanvirArjel.CustomValidation.AspNetCore.Extensions;
+using Weasel.Core;
+using WebSocketOptions = Microsoft.AspNetCore.Builder.WebSocketOptions;
 
 namespace PikaCore
 {
     public class Startup
     {
-        private static readonly string OsName = Constants.OsName;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -44,148 +65,204 @@ namespace PikaCore
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var path = Path.Combine(Configuration.GetSection("Logging").GetSection("LogDirs")[OsName + "-log"],
-                $"pika_core_{DateTime.Today.Day}-{DateTime.Today.Month}-{DateTime.Today.Year}.log");
             Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
                 .MinimumLevel.Information()
                 .WriteTo.Console()
-                .WriteTo.File(path,
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
-
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-
-            services.AddDbContext<StorageIndexContext>(options => 
-                options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
-
-            services.AddDbContext<SystemContext>(options => 
-                options.UseNpgsql(Configuration.GetConnectionString("StorageConnection")));
-
-            services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
+            services.AddLogging();
+            services.AddMarten(c =>
                 {
-                    opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(
-                        int.Parse(Configuration
-                            .GetSection("Policies")
-                            .GetSection("LoginPolicy")["DefaultLockout"])
-                        );
-                    opt.Lockout.MaxFailedAccessAttempts = int.Parse(Configuration
-                        .GetSection("Policies")
-                        .GetSection("LoginPolicy")["MaxFailedAttempts"]);
+                    c.Connection(Configuration.GetConnectionString("DefaultConnection"));
+                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!.Equals("Development"))
+                    {
+                        c.AutoCreateSchemaObjects = AutoCreate.All;
+                    }
+                    c.Projections.Add<BucketsProjection>(ProjectionLifecycle.Inline);
+                    c.Projections.Add<CategoriesProjection>(ProjectionLifecycle.Inline);
                 })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-            
-            services.AddMemoryCache();
-            services.AddStackExchangeRedisCache(a => { 
+                .UseLightweightSessions();
+            services.AddDbContext<StorageIndexContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+           
+
+            services.AddStackExchangeRedisCache(a =>
+            {
                 a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
                 a.Configuration = Configuration.GetConnectionString("RedisConnection");
             });
-            
+            var redis = ConnectionMultiplexer.Connect(new ConfigurationOptions
+            {
+                EndPoints = { Configuration.GetConnectionString("RedisConnection") }
+            });
+            services.AddMemoryCache();
+
             services.AddResponseCaching(options =>
             {
                 options.MaximumBodySize = 4096;
                 options.UseCaseSensitivePaths = true;
             });
-            
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                services.AddDataProtection();
+                var regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\PikaCloud\\PikaCore\\SecurityKeyRing", true);
+                services.AddDataProtection()
+                    .PersistKeysToRegistry(regKey)
+                    .ProtectKeysWithDpapi();
+            }
+            else if (redis.IsConnected)
+            {
+                var key = string.Concat("CoreKeys-", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
+                services.AddDataProtection()
+                    .PersistKeysToStackExchangeRedis(redis, key)
+                    .ProtectKeysWithCertificate(
+                        new X509Certificate2(Configuration["Security:CertificatePath"],
+                            Configuration["Security:Passphrase"]))
+                    .SetApplicationName("ShrCkApp");
             }
             else
             {
-                Console.WriteLine(Configuration["Security:CertificatePath"]);
                 services.AddDataProtection()
                     .PersistKeysToFileSystem(new DirectoryInfo("/srv/fms/keys"))
                     .ProtectKeysWithCertificate(
-                        new X509Certificate2(Configuration["Security:CertificatePath"], 
-                            Configuration["Security:Passphrase"]));
+                        new X509Certificate2(Configuration["Security:CertificatePath"],
+                            Configuration["Security:Passphrase"]))
+                    .SetApplicationName("ShrCkApp");
             }
-
-            services.AddAuthentication()
-                .AddGoogle(googleOpts =>
+            services.AddOpenIddict()
+                .AddClient(o =>
                 {
-                    googleOpts.ClientId = Configuration["Authentication:Google:ClientId"];
-                    googleOpts.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
+                    o.AllowPasswordFlow();
+                    o.DisableTokenStorage();
+                    o.UseSystemNetHttp()
+                        .SetProductInformation(typeof(Program).Assembly);
+                    o.AddRegistration(new OpenIddictClientRegistration
+                    {
+                        ClientId = Configuration.GetSection("Auth")["ClientId"],
+                        ClientSecret = Configuration.GetSection("Auth")["ClientSecret"],
+                        Issuer = new Uri(Configuration.GetSection("Auth")["Authority"], UriKind.Absolute)
+                    });
                 })
-                .AddMicrosoftAccount(microsoftOptions =>
+                .AddValidation(o =>
                 {
-                    microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ApplicationId"];
-                    microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:Password"];
-                })
-                .AddGitHub(githubOptions =>
-                {
-                    githubOptions.ClientId = Configuration["Authentication:GitHub:ClientId"];
-                    githubOptions.ClientSecret = Configuration["Authentication:GitHub:ClientSecret"];
-                    githubOptions.CallbackPath = "/signin-github";
-                })
-                .AddDiscord(discordOptions =>
-                {
-                    discordOptions.ClientId = Configuration["Authentication:Discord:ClientId"];
-                    discordOptions.ClientSecret = Configuration["Authentication:Discord:ClientSecret"];
+                    o.SetIssuer(Configuration.GetSection("Auth")["Authority"]);
+                    o.UseIntrospection()
+                        .SetClientId(Configuration.GetSection("Auth")["ClientId"])
+                        .SetClientSecret(Configuration.GetSection("Auth")["ClientSecret"]);
+                    o.UseSystemNetHttp();
+                    o.UseAspNetCore();
                 });
 
-            services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddTransient<IFileService, FileService>();
+            services.AddAuthentication(o =>
+                {
+                    o.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer();
+            
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+                options.Secure = CookieSecurePolicy.Always;
+                options.ConsentCookie.Domain = Configuration.GetSection("Auth")["CookieDomain"];
+            });
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.Domain = Configuration.GetSection("Auth")["CookieDomain"];
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
+                options.SlidingExpiration = true;
+                options.LoginPath = "/Identity/Gateway/Login";
+                options.Cookie.Name = ".AspNet.ShrCk";
+                options.LogoutPath = "/Identity/Gateway/Logout";
+            });
+            services.AddAuthorization();
+            services.AddHangfire(o =>
+            {
+                o.UseSerializerSettings(new JsonSerializerSettings()
+                {
+                    MaxDepth = 128,
+                    MissingMemberHandling = MissingMemberHandling.Error,
+                    ObjectCreationHandling = ObjectCreationHandling.Auto
+                });
+                o.UseRedisStorage(Configuration.GetConnectionString("RedisConnection"),
+                    new RedisStorageOptions()
+                    {
+                        Db = 1
+                    });
+            });
+            services.AddHangfireServer();
+            services.AddAspNetCoreCustomValidation();
             services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
-            services.AddTransient<IStreamingService, StreamingService>();
-            services.AddScoped<IMediaService, MediaService>();
-            services.AddSingleton<ISchedulerService, SchedulerService>();
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
             services.AddScoped<IMessageService, MessageService>();
-            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<AggregateRepository>();
             services.AddTransient<ISystemService, SystemService>();
             services.AddTransient<IStatusService, StatusService>();
-            services.AddTransient<IJobService, JobService>();
+            services.AddTransient<IDataExportService, DataExportService>();
+            services.AddScoped<IOidcService, OidcService>();
+            services.AddSingleton<IMinioService, MinioService>();
+            services.AddTransient<CategoryRepository>();
+            services.AddTransient<BucketRepository>();
+            services.AddTransient<IStorage, MinioStorage>();
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new[]
+                {
+                    new CultureInfo("en"),
+                    new CultureInfo("pl")
+                };
+
+                options.DefaultRequestCulture = new RequestCulture(culture: "en", uiCulture: "en");
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+            });
 
             services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 268435456; //256MB
             });
-            
-            services.AddAspNetCoreCustomValidation();
-            
-            Log.Information(Resources.Startup_ConfigureServices_Logger_output___0_, path);
-            
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.Lax;
-            });
-            
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
-                options.SlidingExpiration = true;
-                options.LoginPath = "/Core/Account/Login";
-            });
-            
-    	    services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
+
+            services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
             {
                 builder
                     .WithMethods("POST", "GET")
-                    .WithOrigins("https://dev-core.lukas-bownik.net", 
-                        "https://core.lukas-bownik.net", 
-                        "https://me.lukas-bownik.net", 
-                        "http://localhost:5000")
+                    .WithOrigins("https://dev-core.lukas-bownik.net",
+                        "https://core.lukas-bownik.net",
+                        "https://me.lukas-bownik.net",
+                        "https://www.lukas-bownik.net",
+                        "http://core.cloud.localhost:5000",
+                        "https://core.cloud.localhost:5001")
                     .AllowAnyHeader();
             }));
-            
-            services.AddSignalR();
+            services.AddHealthChecks();
+
+            services.AddSignalR(hubOptions =>
+                {
+                    hubOptions.EnableDetailedErrors = true;
+                    hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
+                })
+                .AddStackExchangeRedis(o =>
+                {
+                    o.Configuration.ClientName = "PikaCore";
+                    o.Configuration.ChannelPrefix = "PikaCoreHub";
+                    o.Configuration.EndPoints.Add("localhost", 6379);
+                });
+
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(120);
                 options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
 
-            IFileProvider physicalProvider = new PhysicalFileProvider(Configuration.GetSection("Paths")[OsName + "-root"]);
-            services.AddSingleton(physicalProvider);
-
-            Constants.UploadDirectory = Configuration.GetSection("Paths")["upload-dir-" + OsName];
-            Constants.UploadTmp = Configuration.GetSection("Paths")["upload-dir-tmp"];
             services.AddControllers()
                 .ConfigureApiBehaviorOptions(options =>
                 {
@@ -194,11 +271,8 @@ namespace PikaCore
                     options.SuppressMapClientErrors = true;
                 });
             services.AddRazorPages()
-                .AddRazorPagesOptions(options =>
-                {
-                    options.Conventions.AuthorizeAreaFolder("Core", "/Admin");
-                });
-            
+                .AddRazorPagesOptions(options => { options.Conventions.AuthorizeAreaFolder("Core", "/Admin"); });
+
             services.AddResponseCaching(opt =>
             {
                 opt.UseCaseSensitivePaths = true;
@@ -210,22 +284,25 @@ namespace PikaCore
                 opt.EnableForHttps = true;
                 opt.MimeTypes = new[] { "image/jpeg", "image/png", "image/gif" };
             });
-            
+            services.AddMediatR(typeof(Startup));
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddMvc()
+                .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+                .AddDataAnnotationsLocalization()
                 .AddMvcOptions(options =>
-            {
-                options.CacheProfiles.Add("Default",
-                    new CacheProfile()
-                    {
-                        Duration = 60,
-                        Location = ResponseCacheLocation.Client,
-                        NoStore = false
-                    });
-                options.MaxModelValidationErrors = 50;
-                options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
-                    _ => "The field is required.");
-            })
-	        .SetCompatibilityVersion(CompatibilityVersion.Latest);
+                {
+                    options.AllowEmptyInputInBodyModelBinding = true;
+                    options.CacheProfiles.Add("Default",
+                        new CacheProfile()
+                        {
+                            Duration = 360000,
+                            Location = ResponseCacheLocation.Client,
+                            NoStore = false
+                        });
+                    options.MaxModelValidationErrors = 50;
+                });
+
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -235,11 +312,18 @@ namespace PikaCore
         }
 
         public void Configure(IApplicationBuilder app,
-                              IWebHostEnvironment env,
-                              IServiceProvider serviceProvider,
-                              IHostApplicationLifetime lifetime
-                             )
+            IWebHostEnvironment env,
+            IServiceProvider serviceProvider,
+            IHostApplicationLifetime lifetime
+        )
         {
+            var supportedCultures = new[] { "en", "pl" };
+            var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
+
+            app.UseRequestLocalization(localizationOptions);
+            lifetime.ApplicationStopping.Register(OnShutdown);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -247,34 +331,53 @@ namespace PikaCore
             else
             {
                 app.UseExceptionHandler("/Core/Home/Error");
+                app.UseStatusCodePagesWithRedirects("/Core/Home/Status/{0}");
+                app.UseHsts();
+                app.UseCertificateForwarding();
             }
             
-            lifetime.ApplicationStopping.Register(OnStart);
-            lifetime.ApplicationStopping.Register(OnShutdown);
-
-            Constants.RootPath = Configuration.GetSection("Paths")["storage"];
-            Constants.FileSystemRoot = Configuration.GetSection("Paths")[OsName + "-root"];
-            Constants.Tmp = Configuration.GetSection("Paths")[OsName + "-tmp"];
-            Constants.MaxUploadSize = long.Parse(Configuration.GetSection("Storage")["maxUploadSize"]);
-
-            app.UseStaticFiles();
-            app.UseFileServer("/wwwroot/files");
-            app.UseStatusCodePagesWithRedirects("/Core/Home/ErrorByCode/{0}");
             app.UseSession();
-
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
-            app.UseWebSockets();
-	        app.UseCors("CorsPolicy");
-            app.UseResponseCaching();
-            app.UseAuthentication();
+            var cacheMaxAge = Configuration.GetSection("Storage")["cacheMaxAge"];
+            app.UseStaticFiles(new StaticFileOptions
+                {
+                    OnPrepareResponse = ctx =>
+                    {
+                        ctx.Context.Response.Headers.Append(
+                            "Cache-Control", $"public, max-age={cacheMaxAge}");
+                        ctx.Context.Response.Headers.Append("Pragma", "no-cache, no-store");
+                    }
+                }
+            );
+
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(Configuration.GetSection("Storage")["staticFiles"]),
+                RequestPath = "/Static",
+                EnableDirectoryBrowsing = false
+            });
+            var webSocketOptions = new WebSocketOptions()
+            {
+                KeepAliveInterval = TimeSpan.FromSeconds(120),
+            };
+            webSocketOptions.AllowedOrigins.Add("https://dev-core.lukas-bownik.net");
+            webSocketOptions.AllowedOrigins.Add("https://core.lukas-bownik.net");
+            app.UseWebSockets(webSocketOptions);
             app.UseRouting();
+            app.UseCors("CorsPolicy");
+            app.UseResponseCaching();
+            app.UseOiddictAuthenticationCookieSupport();
+            app.UseAuthentication();
+            app.UseEnsureJwtBearerValid();
             app.UseResponseCompression();
+            app.UseMapJwtClaimsToIdentity();
             app.UseAuthorization();
-            
+            app.UseMinioBucketAccessAuthorization();
+            app.UseHangfireDashboard();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -287,13 +390,13 @@ namespace PikaCore
                 endpoints.MapHub<StatusHub>("/hubs/status", options =>
                 {
                     options.Transports =
-                        HttpTransportType.LongPolling |
+                        HttpTransportType.WebSockets |
                         HttpTransportType.ServerSentEvents;
                 });
                 endpoints.MapHub<FileOperationHub>("/hubs/files", options =>
                 {
                     options.Transports =
-                        HttpTransportType.LongPolling |
+                        HttpTransportType.WebSockets |
                         HttpTransportType.ServerSentEvents;
                 });
                 endpoints.MapHub<MediaHub>("/hubs/media", options =>
@@ -302,60 +405,61 @@ namespace PikaCore
                         HttpTransportType.ServerSentEvents |
                         HttpTransportType.WebSockets;
                 });
+                endpoints.MapHealthChecks("/core/health")
+                    .RequireCors("CorsPolicy")
+                    .RequireHost("localhost", "core.localhost");
             });
-            
-            CreateRoles(serviceProvider).Wait();
+            this.CreateBuckets(serviceProvider);
+            this.RegisterRecurringCategoryJobs(serviceProvider);
         }
 
-        private async Task CreateRoles(IServiceProvider serviceProvider)
+        private void RegisterRecurringCategoryJobs(IServiceProvider serviceProvider)
         {
-            //adding custom roles
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            string[] roleNames = { "Admin", "FileManagerUser", "User" };
+            var cache = serviceProvider.GetService<IDistributedCache>();
+            var mediator = serviceProvider.GetService<IMediator>();
+            var mapper = serviceProvider.GetService<IMapper>();
+            var clientService = serviceProvider.GetService<IMinioService>();
+            var refreshCallable = new RefreshCategoriesCallable(cache, 
+                mediator, 
+                clientService, 
+                mapper);
+            RecurringJob.AddOrUpdate("UpdateCategories", () => 
+                    refreshCallable.Execute(null), 
+                "*/5 * * * *");
+            var updateTagsCallables = new GenerateCategoriesTagsCallable(mediator, clientService, cache);
+            RecurringJob.AddOrUpdate("UpdateCategoriesTags", 
+                () => updateTagsCallables.Execute(null), 
+                "*/6 * * * *");
+        }
 
-            foreach (var roleName in roleNames)
+        private void CreateBuckets(IServiceProvider serviceProvider)
+        {
+            var client = serviceProvider.GetService<IMinioService>();
+            var mediator = serviceProvider.GetService<IMediator>();
+            var buckets = client.GetBuckets().Result;
+            var savedBuckets = mediator.Send(new GetAllBucketsQuery()).Result;
+            buckets.ToList().ForEach(b =>
             {
-                //creating the roles and seeding them to the database
-                var roleExist = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
+                if (!savedBuckets.Any(sb => sb.Name.Equals(b.Name)))
                 {
-                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                    mediator.Send(new CreateBucketCommand
+                    {
+                        Name = b.Name,
+                        RoleClaims = System.Text.Json.JsonSerializer.Deserialize<List<string>>(
+                            Configuration.GetSection($"Minio:Buckets:{b.Name}").Value
+                        )
+                    });
                 }
-            }
-
-            //creating a super user who could maintain the web app
-            var poweruser = new ApplicationUser
-            {
-                UserName = Configuration.GetSection("UserSettings")["UserEmail"],
-                Email = Configuration.GetSection("UserSettings")["UserEmail"]
-            };
-
-            var userPassword = Configuration.GetSection("UserSettings")["UserPassword"];
-            var user = await userManager.FindByEmailAsync(Configuration.GetSection("UserSettings")["UserEmail"]);
-
-            //Debug.WriteLine(_user.Email);
-            if (user == null)
-            {
-                var createPowerUser = await userManager.CreateAsync(poweruser, userPassword);
-                if (createPowerUser.Succeeded)
-                {
-                    //here we tie the new user to the "Admin" role 
-                    await userManager.AddToRoleAsync(poweruser, "Admin");
-                }
-            }
+            });
         }
         
         #region LifetimeHelpers
-        
-        private static void OnStart()
-        {
-            Console.WriteLine(Resources.Startup_OnStart_System_is_starting___);
-        }
+
         private static void OnShutdown()
         {
             Log.Information("System is stopping... Good bye.");
         }
+
         #endregion
     }
 }

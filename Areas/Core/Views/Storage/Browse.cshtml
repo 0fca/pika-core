@@ -1,202 +1,140 @@
-﻿@using PikaCore.Areas.Infrastructure.Services
-@using PikaCore.Areas.Infrastructure.Services.Helpers
-@using PikaCore.Security
-@using Microsoft.Extensions.FileProviders
-@model FileResultViewModel
-@inject UserManager<ApplicationUser> UserManager
-@inject IFileService FileService
-@inject IdDataProtection DataProtection
-
+﻿@model FileResultViewModel
+@inject IViewLocalizer Localizer 
 @{
     var msg = TempData["returnMessage"];
 }
-<!-- TODO Part this file to partials -->
-@if(Model?.Contents != null && !Model.Contents.GetType().IsInstanceOfType(typeof(NotFoundDirectoryContents)))
+<!-- TODO Add detailed list view -->
+@if (Model?.Objects != null)
 {
-
-    ViewData["Title"] = "Browse";
-    var lastPath = ViewData["path"] as string;
-    var returnUrl = ViewData["returnUrl"];
-    var user = await UserManager.GetUserAsync(Context.User);
-    var pageCount = int.Parse(TempData["PageCount"].ToString() ?? "0");
-    var offset = int.Parse(TempData["Offset"].ToString() ?? "0");
-    var count = int.Parse(TempData["Count"].ToString() ?? "0");
-    var directorySeparator = System.IO.Path.DirectorySeparatorChar;
-    var paginationData = new Dictionary<string, object> {{"Offset", offset}, {"Count", count}, {"PageCount", pageCount}, {"Last", lastPath}};
-
-    <div class="row">
-        <div class="col s12 m12 l12">
-            
-            @{
-                var splitted = lastPath?.Split(System.IO.Path.DirectorySeparatorChar);
-                var last = "";
-                var tmp = "/Core/Storage/Browse?path=" + last;
-
-                <a class="teal-text" href="/Core/Storage/Browse/">Browse</a>
-
-                foreach (var part in splitted)
-                {
-                    if (!string.IsNullOrEmpty(part))
-                    {
-                        last = System.IO.Path.Combine(last, part);
-                        tmp = "/Core/Storage/Browse?path=" + last;
-                        <a class="breadcrumb breadcrumb-icon teal-text" href=@tmp>@part</a>
-                    }
-                }
-            }
-            <button class="waves-effect waves-teal btn-flat" id="copyButton" onclick="copyToClipboard('helperInput');" type="button"><i class="fas fa-copy"></i></button>
-            <input id="helperInput" value="https://@Context.Request.Host@tmp" class="offscreen" aria-hidden="true"/>
-        </div>
-        <div class="col s12 m12 l12">
-            <div class="input-field">
-                <input type="text" id="pathField" placeholder="Enter the absolute system path..." class="autocomplete" value="@lastPath" autofocus/>
-            </div>
-        </div>
-        <div class="col s12 hide-on-med-and-up center">
-            <button class="btn btn-large" id="mobile-search-button">
-                <span class="material-icons">
-                    search
-                </span>
-            </button>
-        </div>
-    </div>
-
-    @await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
-
+    ViewData["Title"] = Localizer["Browse"];
     <div id="file-list">
-        <div class="row">
-            <div class="col s12 l7 m8">
-                @{
-                    var itemText = @Model.ContentsList.Count == 1 ? "item" : "items";
-                }
-                <h5 class="center-on-small-only">Found @Model.ContentsList.Count @itemText</h5>
+        <div class="row grey lighten-4 z-depth-0">
+            <div class="col s6 m6 l6">
+                @await Html.PartialAsync("Partial/_NavMenu.cshtml")
             </div>
-            <div class="col s12 m5 l4 right">
-                <div class="input-field">
-                    <span class="material-icons prefix">
-                        search
-                    </span>
-                    <input type="text" id="searchBox" placeholder="Search" oninput="searchFileList();"/>
+            <div class="col s6 m6 l6">
+                <div class="input-field col s12">
+                    <select id="tags_select">
+                        <option value="" disabled selected>@Localizer["Filtruj po tagach"]</option>
+                        @foreach (var tag in Model.Tags)
+                        {
+                            @if (@Model.SelectedTag == tag)
+                            {
+                                <option value="@tag" selected>@tag</option>
+                            }
+                            else
+                            {
+                                <option value="@tag">@tag</option>
+                            }
+                        }
+                    </select>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <a class="transparent flow-text" 
-               asp-area="Core" 
-               asp-controller="Storage" 
-               asp-action="Browse" 
-               asp-route-path="@returnUrl">..</a>
+        <div class="row lighten-4 z-depth-0">
+            <div class="input-field col s2 m2 l2">
+                <select id="select_length">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+                <label for="select_length">
+                    @Localizer["Ilość rekordów"]:
+                </label>
+            </div>
+            <div class="col s6 m6 l6 right">
+                <div class="input-field col s12">
+                    <input id="search_input" value="" type="text" class="grey-text"/>
+                    <label for="search_input">@Localizer["Szukaj"]:</label>
+                </div>
+            </div>
         </div>
-        @{
-            if (Model.ContentsList.Count > 0)
-            {
-                <div class="row transparent">
-                @foreach (var item in Model.ContentsList)
+        @if (Model.Objects.Count > 0)
+        {
+            <table class="responsive-table striped" id="dir_content">
+                <thead>
+                <tr>
+                    <th scope="col">@Localizer["Nazwa"]</th>
+                    <th scope="col">@Localizer["Rozmiar"]</th>
+                    <th scope="col">@Localizer["Data modyfikacji"]</th>
+                    <th scope="col">@Localizer["Tagi"]</th>
+                    <th scope="col">@Localizer["Szczegóły"]</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Objects)
                 {
-                    <div class="col s12 m6 l4 truncate valign-wrapper">
-                        @if (item.IsDirectory)
-                        {
-                            @await Html.PartialAsync("Partial/_DirectoryListItemPartial", new Tuple<string, IFileInfo>(lastPath, item))
-                        }
-                        else
-                        {
-                            @await Html.PartialAsync("Partial/FileListItemPartial", new Tuple<string, IFileInfo>(lastPath, item))
-                        }
-                    </div>
+                    <tr>
+                        @await Html.PartialAsync("Partial/FileListItemPartial", 
+                            new Tuple<ObjectInfo, string, string>(item, Model.CategoryId, Model.BucketId))
+                    </tr>
                 }
-                 </div>
-            }
-            else
-            {
-                <div class="row">
-                    <div class="s10 m10 l10">
-                        <p class="flow-text center-align">It is empty in here...</p>
-                    </div>
-                </div>
-            }
+                </tbody>
+            </table>
         }
-        <div class="row">
-            <a class="collection-item flow-text transparent" asp-area="Core" asp-controller="Storage" asp-action="Browse" asp-route-path="@returnUrl">..</a>
-        </div>
-
-        <div class="fixed-action-btn">
-            <a class="btn-floating btn-large teal-accent">
-                <i class="large material-icons">mode_edit</i>
-            </a>
-            <ul>
-                @if (user != null
-                     && !(await UserManager.IsInRoleAsync(user, "User")))
-                {
-                    <li><a data-target="file-editor" class="btn btn-floating modal-trigger"><i class="fas fa-folder-plus"></i></a></li>
-                    <li><a class="btn btn-floating" asp-controller="Storage" asp-action="Delete" asp-route-currentPath="@lastPath"><i class="fas fa-trash-alt"></i></a></li>
-                }
-                <li><a class="btn btn-floating modal-trigger" data-target="upload-modal"><i class="fas fa-upload"></i></a></li>
-            </ul>
-        </div>
-
+        else
+        {
+            <div class="row">
+                <div class="s10 m10 l10">
+                    <p class="flow-text center-align">@Localizer["It is empty in here..."]</p>
+                </div>
+            </div>
+        }
     </div>
-    @await Html.PartialAsync("Partial/_PaginationPartial.cshtml", paginationData)
 
-    @await Html.PartialAsync("Partial/_AddDirectoryPartial.cshtml", lastPath)
+    //@await Html.PartialAsync("Partial/_UploadPartial.cshtml", lastPath)
 
-    @await Html.PartialAsync("Partial/_StatusMessage.cshtml", msg)
+    @await Html.PartialAsync("Partial/_InformationSidePartial.cshtml")
 
-    @await Html.PartialAsync("Partial/_UploadPartial.cshtml", lastPath)
-
-@if (TempData["showGenerateUrlPartial"] != null && bool.Parse(TempData["showGenerateUrlPartial"].ToString() ?? string.Empty))
-{
-    @await Html.PartialAsync("Partial/_GenerateUrlPartial.cshtml")
-}
-
+    <!--<script src="~/js/media.js" asp-append-version="true" defer=""></script>-->
+    <!--<script src="~/js/file.js" asp-append-version="true" defer=""></script>-->
+    <script src="~/lib/jquery-ui-1.12.1/jquery-ui.min.js" asp-append-version="true" defer=""></script>
+    <link rel="stylesheet" href="~/lib/jquery-ui-1.12.1/jquery-ui.min.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="//cdn.datatables.net/1.13.2/css/jquery.dataTables.min.css"/>
+    <script src="//cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js" defer=""></script>
     <script>
-@{
-    lastPath = !string.IsNullOrEmpty(lastPath) ? lastPath.Replace("\\", "\\\\") : "\\";
-}
-    const listingPath = "@lastPath";
-    const directorySeparator = "@directorySeparator";
-    document.getElementById("searchBox").addEventListener("keydown", function (e) {
-        if (e.code === "Enter") {
-            searchFileList();
-        }
-    });
-    
-    document.getElementById("mobile-search-button").addEventListener("click", function (e) {
-        toPath();
-    });
-    
-    document.getElementById("pathField").addEventListener("keydown", (key) => {
-        if (key.code === "Enter") {
-            toPath();
-        }
-    });
-
-    document.getElementById("pathField").addEventListener("keyup", (key) => {
-        let currentPath = document.getElementById("pathField").value;
-        if(currentPath.toString().endsWith(directorySeparator)){
-            requestListing(currentPath);
-            return;
-        }
-        let lastIndex = currentPath.toString().lastIndexOf(directorySeparator);
-            
-        currentPath = currentPath.toString().slice(lastIndex, currentPath.toString().length)
-        requestListing(currentPath);
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const elems = document.querySelectorAll('.autocomplete');
-        const instances = M.Autocomplete.init(elems, {});
-    });
-    
-    function toPath(){
-        window.location = `/Core/Storage/Browse?path=${document.getElementById("pathField").value}`;
-    }
-</script>
-    <script src="~/js/media.js" asp-append-version="true"></script>
-}
-else
-{
-    ViewData["Title"] = "Browse - Error";
-    <div class="card-panel red darken-3">
-        Unexpected error ocurred.
-    </div>
+         $(document).ready( function () {
+             const dt = $('#dir_content').DataTable({
+                "oSearch": {"sSearch": "@Model.SelectedTag"},
+                autoWidth: false,
+                language: {
+                  "emptyTable": '@Localizer["Brak danych"]',
+                  "loadingRecord": '@Localizer["Ładowanie..."]',
+                  "search": '@Localizer["Szukaj"]:',
+                  "info": '@Localizer["Wyświetlono _START_ do _END_ z _TOTAL_ rekordów"]',
+                  "infoEmpty": '@Localizer["Wyświetlono 0 do 0 z 0 rekordów"]',
+                  "paginate": {
+                      "first":      '@Localizer["Pierwszy"]',
+                      "last":       '@Localizer["Ostatni"]',
+                      "next":       '@Localizer["Następny"]',
+                      "previous":   '@Localizer["Poprzedni"]'
+                  },
+                  "zeroRecords":    '@Localizer["Brak pasujących rekordów"]',
+                },
+                columnDefs: [
+                    {
+                          target: 3,
+                          visible: false
+                    } 
+                ],
+                dom: 'tpri'
+             }); 
+             $('#select_length').change(e => {
+                 dt.page.len($('#select_length').val()).draw(); 
+             });
+             $('#tags_select').change((e) => {
+                 dt
+                 .columns(3)
+                 .search(`^.*${$('#tags_select').val()}.*$`, true, false, false)
+                 .draw(); 
+             });
+             $('#search_input').on('propertychange input', (e) => {
+                  dt
+                  .columns(0)
+                  .columns(3)
+                  .search($('#search_input').val())
+                  .draw(); 
+             });
+         } );
+    </script>
 }

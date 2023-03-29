@@ -1,6 +1,6 @@
 ﻿const mediaHubconnection = new signalR.HubConnectionBuilder()
                         .withUrl("/hubs/media", {
-                            transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.LongPolling
+                            transport: signalR.HttpTransportType.ServerSentEvents 
                         })
                 .configureLogging(signalR.LogLevel.None)
 				.build();
@@ -25,12 +25,7 @@ async function start() {
 function setErrorIcon(guid, err) {
     const imgEl = document.getElementById(guid);
     const imgParentLink = imgEl.parentElement;
-    const icon = document.createElement("i");
-    icon.setAttribute("class", "material-icons");
-    icon.setAttribute("title", "There was an error loading a thumb...");
-    icon.innerText = "error";
-    imgParentLink.insertBefore(icon, imgEl);
-    imgParentLink.removeChild(imgEl);
+    imgParentLink.setAttribute("title", "There was an error loading a thumb...");
     console.log(err);
 }
 
@@ -57,6 +52,7 @@ function ReceiveThumb(isSuccess, thumbId) {
         const url = "/Core/Storage/Thumb?id=" + thumbId;
         document.getElementById(thumbId).setAttribute("srcset", encodeURI(url));
     }else{
+        document.getElementById(thumbId).setAttribute("srcset", ""); 
         setErrorIcon(thumbId, "Error receiving thumb for: "+thumbId);
     }
 }

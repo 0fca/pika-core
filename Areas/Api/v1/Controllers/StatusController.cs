@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Pika.Domain.Status.Data;
+using Pika.Domain.Status.DTO;
 using PikaCore.Areas.Api.v1.Models;
-using PikaCore.Areas.Api.v1.Models.DTO;
 using PikaCore.Areas.Api.v1.Services;
-using PikaCore.Areas.Infrastructure.Data;
-using PikaCore.Areas.Infrastructure.Services;
+using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Api.v1.Controllers
 {
@@ -149,10 +149,39 @@ namespace PikaCore.Areas.Api.v1.Controllers
         }
         
         [HttpGet]
-        [ActionName("messages/bydate")]
-        public IActionResult MessagesByDateCreated([FromQuery]DateTime from, [FromQuery]DateTime to, int order = 0)
+        [ActionName("{systemName}/messages/{from}/{to}")]
+        public async Task<IActionResult> MessagesByDateCreated(string systemName, DateTime from, DateTime to, int order = 0, int count = 1)
         {
-            return StatusCode(302, "Temporarily moved to /messages");
+            if (from.Date > to.Date)
+            {
+                var apiMessage = new ApiMessage<IList<MessageDto>> { Status = false};
+                apiMessage.Messages.Push($"Bad request: Date from cannot be later than to date.");
+                return BadRequest(apiMessage);
+            }
+
+            try
+            {
+                var messages = await _messageService.GetAllMessagesForSystem(systemName);
+                
+                var messagesForSystem = messages.ToList();
+                if (order == 1)
+                {
+                    messagesForSystem = messagesForSystem.OrderByDescending(m => m.UpdatedAt).ToList();
+                }
+                _messageService.ApplyPagingByDate(ref messagesForSystem, count, from, to);
+                
+                var dtos = new List<MessageDto>();
+                messagesForSystem.ForEach(m => dtos.Add(MessageDto.FromMessageEntity(m)));
+                var apiMessage = new ApiMessage<IList<MessageDto>> {Data = dtos, Status = true};
+                apiMessage.Messages.Push("Messages available for current role in given date range.");
+                return Ok(apiMessage);
+            }
+            catch (Exception e)
+            {
+                var apiMessage = new ApiMessage<IList<MessageDto>> { Status = false};
+                apiMessage.Messages.Push($"Bad request: {e.Message}");
+                return BadRequest(apiMessage);
+            }
         }
 
         [HttpGet]

@@ -1,0 +1,20 @@
+﻿@using Microsoft.AspNetCore.Builder
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Options
+
+@inject IViewLocalizer Localizer
+@inject IOptions<RequestLocalizationOptions> LocOptions
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var cultureItems = LocOptions.Value.SupportedUICultures
+        .Select(c => new SelectListItem { Value = c.Name, Text = c.DisplayName })
+        .ToList();
+    
+}
+
+<div title="@Localizer["Change your display language"]" class="left" style="margin-top: 10px;">
+            <select name="culture"
+                    asp-for="@requestCulture!.RequestCulture.UICulture.Name" asp-items="cultureItems">
+            </select>
+</div>
