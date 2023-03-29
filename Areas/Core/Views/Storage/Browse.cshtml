@@ -13,21 +13,35 @@
                 @await Html.PartialAsync("Partial/_NavMenu.cshtml")
             </div>
             <div class="col s6 m6 l6">
-                <div class="input-field col s12">
-                    <select id="tags_select">
-                        <option value="" disabled selected>@Localizer["Filtruj po tagach"]</option>
-                        @foreach (var tag in Model.Tags)
-                        {
-                            @if (@Model.SelectedTag == tag)
+                <div class="row valign-wrapper">
+                    <div class="col s1 m1 l1 ">
+                        <div class="input-field">
+                            <a asp-area="Core"
+                               asp-controller="Storage"
+                               asp-action="Browse"
+                               asp-route-bucketId="@Model.BucketId"
+                               asp-route-categoryId="@Model.CategoryId"
+                               class="btn btn-flat">
+                                <i class="fas fa-times-circle"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="input-field col s11 m11 l11">
+                        <select id="tags_select">
+                            <option value="" disabled selected>@Localizer["Filtruj po tagach"]</option>
+                            @foreach (var tag in Model.Tags)
                             {
-                                <option value="@tag" selected>@tag</option>
+                                @if (@Model.SelectedTag == tag)
+                                {
+                                    <option value="@tag" selected>@tag</option>
+                                }
+                                else
+                                {
+                                    <option value="@tag">@tag</option>
+                                }
                             }
-                            else
-                            {
-                                <option value="@tag">@tag</option>
-                            }
-                        }
-                    </select>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -65,7 +79,7 @@
                 @foreach (var item in Model.Objects)
                 {
                     <tr>
-                        @await Html.PartialAsync("Partial/FileListItemPartial", 
+                        @await Html.PartialAsync("Partial/FileListItemPartial",
                             new Tuple<ObjectInfo, string, string>(item, Model.CategoryId, Model.BucketId))
                     </tr>
                 }

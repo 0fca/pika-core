@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Pika.Domain.Status.Data;
 using PikaCore.Infrastructure.Services;
 
-namespace PikaCore.Areas.Core.Pages.Admin
+namespace PikaCore.Areas.Admin.Pages.Index
 {
     public class CreateSystem : PageModel
     {
@@ -16,7 +16,7 @@ namespace PikaCore.Areas.Core.Pages.Admin
         }
         
         [BindProperty]
-        public SystemDescriptor SystemDescriptor { get; set;  } = new SystemDescriptor();
+        public SystemDescriptor SystemDescriptor { get; set;  } = new();
         
         public async Task<IActionResult> OnGetAsync()
         {

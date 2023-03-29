@@ -14,9 +14,9 @@ public class OiddictAuthenticationCookieSupportMiddleware
 
    public async Task InvokeAsync(HttpContext context)
    {
-      if (context.Request.Cookies.ContainsKey(".AspNet.ShrCk"))
+      if (context.Request.Cookies.ContainsKey(".AspNet.Identity"))
       {
-         var token = context.Request.Cookies[".AspNet.ShrCk"];
+         var token = context.Request.Cookies[".AspNet.Identity"];
          context.Request.Headers["Authorization"] =
             $"Bearer {token}";
       } 

@@ -1,4 +1,5 @@
 @using PikaCore.Areas.Core.Models.DTO
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model IndexViewModel
 @inject IViewLocalizer Localizer
 @{
@@ -10,48 +11,49 @@
 @if (Context.User.IsInRole("Administrator"))
 {
     <div class="row">
-        <div class="col s3 m3 l3">
-            <div class="input-field col s12">
-                <form asp-area="Core" asp-controller="Storage" asp-action="Index" method="get">
-                    <select id="buckets_select" onchange="this.form.submit()" asp-for="CurrentBucketName">
-                        <option value="" disabled selected>@Localizer["Wybierz bucket"]</option>
-                        @foreach (var bucket in Model.Buckets)
-                        {
-                            var selected = Model.CurrentBucketName.Equals(bucket.Name);
-                            if (selected)
+        <div class="col s12 m12 s12">
+            <form asp-area="Core" asp-controller="Storage" asp-action="Index" method="get">
+                <div class="row valign-wrapper">
+                    <div class="col s9 m9 l9 right-align">
+                        <span class="">
+                            <i class="fab fa-bitbucket"></i>
+                        </span>
+                    </div>
+                    <div class="col s3 m3 l3">
+                        <select style="width: 10em;"
+                                id="buckets_select"
+                                onchange="this.form.submit()"
+                                asp-for="CurrentBucketName">
+                            <option value="" disabled selected>@Localizer["Wybierz bucket"]</option>
+                            @foreach (var bucket in Model.Buckets)
                             {
-                                <option value="@bucket.Name" selected>@bucket.Name</option>
+                                var selected = Model.CurrentBucketName.Equals(bucket.Name);
+                                if (selected)
+                                {
+                                    <option value="@bucket.Name" selected>@bucket.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@bucket.Name">@bucket.Name</option>
+                                }
                             }
-                            else
-                            {
-                                <option value="@bucket.Name">@bucket.Name</option>
-                            }
-                        }
-                    </select>
-                    
-                </form>
-            </div>
+                        </select>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 }
 @if (Model.Categories.Count > 0)
 {
-    @for (var i = 0; i < Model.Categories.Count; i += 2)
-    {
-        var category = Model.Categories[i];
-        <div class="row">
-            @{ var current = Model.Categories.IndexOf(category); }
-            @{ var next = current < Model.Categories.Count - 1 ? Model.Categories[current + 1] : null; }
-            @await Html.PartialAsync("Partial/CategoryCardPartial", 
-                new Tuple<CategoryDTO, Guid>(category, Model.CurrentBucketId!.Value))
-
-            @if (next != null)
-            {
-                @await Html.PartialAsync("Partial/CategoryCardPartial", 
-                    new Tuple<CategoryDTO, Guid>(next, Model.CurrentBucketId!.Value))
-            }
-        </div>
-    }
+    <ul class="collection with-header">
+        <li class="collection-header"><h4>@Localizer["Kategorie"]</h4></li>
+        @foreach (var category in Model.Categories)
+        {
+            @(await Html.PartialAsync("Partial/CategoryCardPartial",
+                new Tuple<CategoryDTO, Guid>(category, Model.CurrentBucketId!.Value)))
+        }
+    </ul>
 }
 else
 {

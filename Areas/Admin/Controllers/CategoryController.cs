@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Hangfire;
@@ -96,7 +95,6 @@ public class CategoryController : Controller
     [HttpGet]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var did = await _mediator.Send(new GetCategoryByIdQuery(id));
         return View(id);
     }
 

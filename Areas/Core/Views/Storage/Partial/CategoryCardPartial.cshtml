@@ -1,18 +1,15 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Tuple<PikaCore.Areas.Core.Models.DTO.CategoryDTO, Guid>
 
-<div class="col s12 m6 l6">
-    <div class="card blue-grey darken-1">
-        <div class="card-content white-text">
-            <span class="card-title">
-                <a asp-area="Core" asp-controller="Storage" asp-action="Browse" 
-                   asp-route-categoryId="@Model.Item1.Guid" 
-                   asp-route-bucketId="@Model.Item2"
-                   class="white-text">
-                    @Model.Item1.Name
-                </a>
-            </span>
-            <p>@Model.Item1.Description</p>
-        </div>
+<li class="collection-item">
+    <div class="padded-item-content">
+        <a asp-area="Core" asp-controller="Storage" asp-action="Browse"
+           asp-route-categoryId="@Model.Item1.Guid"
+           asp-route-bucketId="@Model.Item2"
+           class="teal-text"
+           style="font-size: 20px;">
+            @Model.Item1.Name
+        </a>
+        <p class="secondary-content grey-text text-darken-1">@Model.Item1.Description</p>
     </div>
-</div>
+</li>
