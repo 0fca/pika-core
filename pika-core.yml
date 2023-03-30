@@ -5,6 +5,7 @@ services:
     volumes: 
       - /srv/configs/fms/prod/appsettings.json:/Pika.Core/appsettings.json
       - /srv/fms/certs/prod/:/Pika.Core/certs
+      - /Pika.Core/wwwroot/lib:/srv/fms/wwwroot/lib
     ports:
       - "5000:5000"
     command: ['dotnet', "PikaCore.dll"]

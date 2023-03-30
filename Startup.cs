@@ -234,7 +234,7 @@ namespace PikaCore
                 {
                     o.Configuration.ClientName = "PikaCore";
                     o.Configuration.ChannelPrefix = "PikaCoreHub";
-                    o.Configuration.EndPoints.Add("localhost", 6379);
+                    o.Configuration.EndPoints.Add(Configuration.GetConnectionString("RedisConnection"));
                 });
 
             services.AddSession(options =>
