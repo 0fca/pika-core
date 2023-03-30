@@ -10,3 +10,5 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
