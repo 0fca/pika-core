@@ -17,10 +17,7 @@ services:
     restart: always
     networks:
       - backend
-      - bridge
 networks:
   backend:
     name: pika-core
-    external: true
-  bridge:
     external: true
