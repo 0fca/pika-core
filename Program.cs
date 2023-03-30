@@ -27,10 +27,6 @@ namespace PikaCore
                 .ConfigureLogging(l =>
                 {
                     l.AddSerilog();
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    {
-                        l.AddEventLog();
-                    }
                 })
                 .UseStartup<Startup>()
                 .UseConfiguration(configuration)
