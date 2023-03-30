@@ -6,7 +6,6 @@ services:
       - /srv/configs/fms/prod/appsettings.json:/Pika.Core/appsettings.json
       - /srv/fms/certs/prod/:/Pika.Core/certs
       - /srv/fms/wwwroot/lib:/Pika.Core/wwwroot/lib
-    network_mode: bridge
     ports:
       - "5000:5000"
     command: ['dotnet', "PikaCore.dll"]
@@ -15,7 +14,9 @@ services:
       replicas: 1
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+    restart: always
 networks:
   backend:
     name: pika-core
     external: true
+  bridge:
