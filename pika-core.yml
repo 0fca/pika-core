@@ -16,6 +16,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
 networks:
-  pika-core_default:
-    name: pika-core_default
+  pika-core:
+    name: pika-core
     external: true
