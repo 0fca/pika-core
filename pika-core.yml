@@ -15,6 +15,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
     restart: always
+    networks:
+      - backend
+      - bridge
 networks:
   backend:
     name: pika-core
