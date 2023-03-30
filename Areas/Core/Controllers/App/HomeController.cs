@@ -86,9 +86,9 @@ namespace PikaCore.Areas.Core.Controllers.App
         }
         
         [HttpGet]
-        [Route("/[area]/[controller]/[action]", Name = "SetLanguage")]
+        [Route("/[area]/[action]", Name = "SetLanguage")]
         [AllowAnonymous]
-        public IActionResult SetLanguage(string culture, string returnUrl = "/")
+        public IActionResult SetLanguage([FromQuery] string culture, [FromQuery] string returnUrl = "/")
         {
             Response.Cookies.Append(
                 CookieRequestCultureProvider.DefaultCookieName,

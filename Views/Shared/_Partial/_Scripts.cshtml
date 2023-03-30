@@ -15,7 +15,7 @@
                   $('select[name="culture"]').change((e) => {
                      const locale = $(e.target).select().val();
                      window.location = `@Url.Link("SetLanguage", 
-                                            new { culture = "locale", returnUrl = returnUrl, m = DateTime.UnixEpoch.Ticks})`
+                                            new { culture = "locale", returnUrl = returnUrl})`
                                              .replace('locale', locale).replace(/&amp;/g, "&");
                   })}
         );
