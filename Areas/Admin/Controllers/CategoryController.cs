@@ -18,7 +18,7 @@ using PikaCore.Areas.Core.Queries;
 namespace PikaCore.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize("Administrator")]
+[Authorize(Roles="Administrator")]
 [Route("[area]/[controller]/[action]")]
 public class CategoryController : Controller
 {
