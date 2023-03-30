@@ -302,7 +302,8 @@ namespace PikaCore
         )
         {
             var supportedCultures = new[] { "en", "pl" };
-            var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
+            var localizationOptions = new RequestLocalizationOptions()
+                .SetDefaultCulture(Configuration.GetSection("UI")["DefaultCulture"])
                 .AddSupportedCultures(supportedCultures)
                 .AddSupportedUICultures(supportedCultures);
 

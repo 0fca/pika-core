@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
@@ -94,11 +95,12 @@ namespace PikaCore.Areas.Core.Controllers.App
                 CookieRequestCultureProvider.DefaultCookieName,
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
                 new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), 
-                    SameSite = SameSiteMode.None,
+                    SameSite = SameSiteMode.Lax,
                     Domain = _configuration.GetSection("Auth")["CookieDomain"],
                     Secure = false
                 }
             );
+            Response.Headers.Append("Cache-Control", "no-cache");
 
             return Redirect(string.IsNullOrEmpty(Request.Headers["Referer"].ToString()) 
                 ? returnUrl 
