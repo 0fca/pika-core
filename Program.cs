@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -26,7 +27,10 @@ namespace PikaCore
                 .ConfigureLogging(l =>
                 {
                     l.AddSerilog();
-                    l.AddEventLog();
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        l.AddEventLog();
+                    }
                 })
                 .UseStartup<Startup>()
                 .UseConfiguration(configuration)
