@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Infrastructure.Services;
 
@@ -14,9 +15,11 @@ namespace PikaCore.Areas.Core.Controllers.App
     public class HomeController : Controller
     {
         private readonly IMessageService _messageService;
-        public HomeController(IMessageService messageService)
+        private readonly IConfiguration _configuration;
+        public HomeController(IMessageService messageService, IConfiguration configuration)
         {
             _messageService = messageService;
+            _configuration = configuration;
         }
 
         [ViewData] public string? InfoMessage { get; set; } = "";
@@ -92,7 +95,8 @@ namespace PikaCore.Areas.Core.Controllers.App
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
                 new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), 
                     SameSite = SameSiteMode.None,
-                    Secure = true
+                    Domain = _configuration.GetSection("Auth")["CookieDomain"],
+                    Secure = false
                 }
             );
 

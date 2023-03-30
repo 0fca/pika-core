@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Hangfire;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Localization;
@@ -17,6 +18,7 @@ using PikaCore.Areas.Core.Queries;
 namespace PikaCore.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[Authorize("Administrator")]
 [Route("[area]/[controller]/[action]")]
 public class CategoryController : Controller
 {

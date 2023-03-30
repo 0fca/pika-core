@@ -201,7 +201,10 @@ namespace PikaCore
                     new CultureInfo("pl")
                 };
 
-                options.DefaultRequestCulture = new RequestCulture(culture: "en", uiCulture: "en");
+                options.DefaultRequestCulture = new RequestCulture(
+                    culture: Configuration.GetSection("UI")["DefaultCulture"],
+                    uiCulture: Configuration.GetSection("UI")["DefaultCulture"]
+                );
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
             });
@@ -215,8 +218,7 @@ namespace PikaCore
             {
                 builder
                     .WithMethods("POST", "GET")
-                    .WithOrigins("https://dev-core.lukas-bownik.net",
-                        "https://core.lukas-bownik.net",
+                    .WithOrigins("https://core.lukas-bownik.net",
                         "https://me.lukas-bownik.net",
                         "https://www.lukas-bownik.net",
                         "http://core.cloud.localhost:5000",
@@ -404,11 +406,16 @@ namespace PikaCore
                 mapper);
             RecurringJob.AddOrUpdate("UpdateCategories", () =>
                     refreshCallable.Execute(null),
-                "*/5 * * * *");
+                Configuration
+                    .GetSection("Storage")
+                    .GetSection("Workers")["CategoriesRefreshWorkerCron"]
+            );
             var updateTagsCallables = new GenerateCategoriesTagsCallable(mediator, clientService, cache);
             RecurringJob.AddOrUpdate("UpdateCategoriesTags",
                 () => updateTagsCallables.Execute(null),
-                "*/6 * * * *");
+                Configuration
+                    .GetSection("Storage")
+                    .GetSection("Workers")["CategoriesTagsRefreshWorkerCron"]);
         }
 
         private void CreateBuckets(IServiceProvider serviceProvider)
@@ -438,7 +445,7 @@ namespace PikaCore
         {
             Log.Information("System is starting... Hellorld!");
         }
-        
+
         private static void OnShutdown()
         {
             Log.Information("System is stopping... Good bye.");
