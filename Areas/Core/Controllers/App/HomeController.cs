@@ -67,13 +67,13 @@ namespace PikaCore.Areas.Core.Controllers.App
         }
         
         [Route("/[area]/[action]")]
-        public IActionResult Error(ErrorViewModel? errorViewModel)
+        public IActionResult Error([FromQuery] ErrorViewModel? errorViewModel)
         {
             errorViewModel!.Url = Request.Headers["Referer"];
             return errorViewModel != null ? View(errorViewModel) : View(nameof(Index));
         }
         
-        [Route("/[area]/[action]")]
+        [Route("/[area]/[action]/{id:int}")]
         public IActionResult Status(int id)
         {
             return RedirectToAction("Error", 

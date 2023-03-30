@@ -68,7 +68,7 @@ namespace PikaCore
         {
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
-                .MinimumLevel.Information()
+                .MinimumLevel.Warning()
                 .WriteTo.Console()
                 .CreateLogger();
             services.AddLogging();
@@ -319,7 +319,6 @@ namespace PikaCore
             {
                 app.UseExceptionHandler("/Core/Error");
                 app.UseStatusCodePagesWithRedirects("/Core/Status/{0}");
-                //app.UseHsts();
                 app.UseCertificateForwarding();
             }
 
