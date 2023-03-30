@@ -313,12 +313,13 @@ namespace PikaCore
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseStatusCodePagesWithRedirects("/Core/Status/{0}");
             }
             else
             {
-                app.UseExceptionHandler("/Core/Home/Error");
-                app.UseStatusCodePagesWithRedirects("/Core/Home/Status/{0}");
-                app.UseHsts();
+                app.UseExceptionHandler("/Core/Error");
+                app.UseStatusCodePagesWithRedirects("/Core/Status/{0}");
+                //app.UseHsts();
                 app.UseCertificateForwarding();
             }
 

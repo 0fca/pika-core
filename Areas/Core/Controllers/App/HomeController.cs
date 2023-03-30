@@ -25,7 +25,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [ViewData] public string? InfoMessage { get; set; } = "";
         
-        [Route("/[area]")]
+        [Route("/")]
         [Route("", Name = "CoreIndex")]
         public async Task<IActionResult> Index()
         {
@@ -65,22 +65,21 @@ namespace PikaCore.Areas.Core.Controllers.App
 
             return View();
         }
-
+        
+        [Route("/[area]/[action]")]
         public IActionResult Error(ErrorViewModel? errorViewModel)
         {
+            errorViewModel!.Url = Request.Headers["Referer"];
             return errorViewModel != null ? View(errorViewModel) : View(nameof(Index));
         }
-
+        
+        [Route("/[area]/[action]")]
         public IActionResult Status(int id)
         {
-            if (!System.IO.File.Exists($"_Partial/Errors/{id}.html"))
-            {
-                id = 500;
-            }
             return RedirectToAction("Error", 
                 new ErrorViewModel { 
                     ErrorCode = id, 
-                    Message = "No specific error information", 
+                    Message = "No specific error information passed", 
                     RequestId = HttpContext.TraceIdentifier, 
                 }
             );
@@ -100,7 +99,6 @@ namespace PikaCore.Areas.Core.Controllers.App
                     Secure = false
                 }
             );
-            Response.Headers.Append("Cache-Control", "no-cache");
 
             return Redirect(string.IsNullOrEmpty(Request.Headers["Referer"].ToString()) 
                 ? returnUrl 
