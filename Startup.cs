@@ -43,6 +43,7 @@ using PikaCore.Areas.Core.Queries;
 using PikaCore.Areas.Core.Repository;
 using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Identity.Extensions;
+using PikaCore.Areas.Identity.Filters;
 using PikaCore.Infrastructure.Adapters;
 using PikaCore.Infrastructure.Adapters.Minio;
 using PikaCore.Infrastructure.Security;
@@ -355,7 +356,10 @@ namespace PikaCore
             app.UseMapJwtClaimsToIdentity();
             app.UseAuthorization();
             app.UseMinioBucketAccessAuthorization();
-            app.UseHangfireDashboard();
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new [] { new HangfireAuthorizationFilter() }
+            });
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
