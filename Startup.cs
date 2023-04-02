@@ -463,7 +463,7 @@ namespace PikaCore
 
         private static void OnShutdown()
         {
-            Console.WriteLine("PikaCore is stopping... Good bye.");
+            Console.WriteLine("PikaCore is shutting down... Good bye.");
         }
 
         #endregion
