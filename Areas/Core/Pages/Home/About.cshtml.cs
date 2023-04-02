@@ -41,7 +41,8 @@ namespace PikaCore.Areas.Core.Pages.Home
 
             Instance = _configuration.GetSection("Name")["Instance"];
             FrameworkVer = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
-            Version = (Assembly.GetEntryAssembly() ?? throw new InvalidOperationException()).GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            Version = (Assembly.GetEntryAssembly() ?? throw new InvalidOperationException())
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
         }
     }
 }

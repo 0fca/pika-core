@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using AspNetCoreRateLimit;
@@ -396,7 +397,14 @@ namespace PikaCore
                 this.CreateBuckets(serviceProvider);
             }
 
-            this.RegisterRecurringCategoryJobs(serviceProvider);
+            if (bool.Parse(Configuration.GetSection("Workers")["RunWorkers"] ?? "true"))
+            {
+                this.RegisterRecurringCategoryJobs(serviceProvider);
+            }
+            else
+            {
+                Log.Warning("Workers won't be running, because disabled by user!");
+            }
         }
 
         private void RegisterRecurringCategoryJobs(IServiceProvider serviceProvider)
@@ -448,12 +456,14 @@ namespace PikaCore
 
         private static void OnStartup()
         {
-            Log.Verbose("System is starting... Hellorld!");
+            var currentVersion = (Assembly.GetEntryAssembly() ?? throw new InvalidOperationException())
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            Console.WriteLine($"PikaCore v.{currentVersion} is booting... Hellorld!");
         }
 
         private static void OnShutdown()
         {
-            Log.Information("System is stopping... Good bye.");
+            Console.WriteLine("PikaCore is stopping... Good bye.");
         }
 
         #endregion
