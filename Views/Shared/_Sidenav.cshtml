@@ -1,6 +1,5 @@
 ﻿@inject IViewLocalizer Localizer
 
-
 <li><a asp-area="Core" asp-controller="Storage" asp-action="Index">Pika Core Browser</a></li>
 <li><a href="https://player.lukas-bownik.net">Pika Player</a></li>
 @if (User.IsInRole("Administrator"))
@@ -26,3 +25,7 @@ else
         <button class="btn btn-link">@Localizer["Logout"]</button>
     </li>
 }
+
+<li>
+    @await Html.PartialAsync("_Partial/_LocaleSwitch")
+</li>

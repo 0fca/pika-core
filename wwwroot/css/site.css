@@ -3,7 +3,6 @@
 }
 
 body {
-    
     display: flex;
     min-height: 100vh;
     flex-direction: column;
@@ -339,17 +338,24 @@ input[type="password"]:not(.browser-default):focus
     font-size: 25px;
     margin: 0 10px 0 8px;
 }
+
+@media (min-height: 680px), screen and (orientation: portrait) {
+ .information-side-pane{
+     width: 100%;
+ }  
+}
 .information-side-pane{
     float: right;
-    width: 20%;
     right: 0;
     position: fixed; 
     top: 65px;
+    width: 20%;
     bottom: 0;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     padding-left: 10px;
     padding-top: 10px;
     background-color: whitesmoke;
+    z-index: 9999;
 }
 #menu > li {
     -webkit-box-sizing: border-box;

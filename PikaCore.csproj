@@ -8,7 +8,7 @@
         <PackageProjectUrl>https://core.lukas-bownik.net</PackageProjectUrl>
         <RepositoryUrl>https://www.github.com/0fca/pika-core</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageTags>cms core cloud</PackageTags>
+        <PackageTags>core cloud</PackageTags>
         <AssemblyVersion>3.0.1</AssemblyVersion>
         <FileVersion>3.0.1</FileVersion>
         <Version>3.0.1</Version>

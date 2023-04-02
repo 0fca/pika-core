@@ -49,7 +49,7 @@ public class UpdateCategoryCallable : BaseJobCallable
         var updateCommand = MapParameterTypeValueDictToUpdateCommand(parameterValueTypes);
         if (await CheckIfUpdateNeeded(updateCommand.Guid))
         {
-            await _mediator.Send(updateCommand);
+                await _mediator.Send(updateCommand);
             await UpdateCategoryHash(updateCommand.Guid);
         }
     }
@@ -64,7 +64,8 @@ public class UpdateCategoryCallable : BaseJobCallable
             throw new InvalidOperationException("Cannot run multiple update without data in relay cache");
         }
 
-        var parameterDictList = JsonConvert.DeserializeObject<List<Dictionary<string, ParameterValueType>>>(updateCategoriesParamsString); 
+        var parameterDictList = JsonConvert
+            .DeserializeObject<List<Dictionary<string, ParameterValueType>>>(updateCategoriesParamsString); 
         foreach (var parameterDict in parameterDictList)
         {
             await ExecuteSingleUpdate(parameterDict);
@@ -87,18 +88,15 @@ public class UpdateCategoryCallable : BaseJobCallable
     private async Task<bool> CheckIfUpdateNeeded(Guid guid)
     {
         var category = await _mediator.Send(new GetCategoryByIdQuery(guid));
-        var hashedCategory = JsonSerializer.SerializeToUtf8Bytes(category);
-        var hashUtf8Bytes = HashHelper.HashUtf8Bytes(hashedCategory);
+        var categoryHash = category.NormalizedHash(); 
         var cachedHash = await _cache.GetStringAsync($"{guid}.category.hash");
         return string.IsNullOrEmpty(cachedHash) 
-               || !cachedHash.Normalize().ToUpper().Equals(hashUtf8Bytes.Normalize().ToUpper());
+               || !cachedHash.Normalize().ToUpper().Equals(categoryHash);
     }
 
     private async Task UpdateCategoryHash(Guid guid)
     {
         var category = await _mediator.Send(new GetCategoryByIdQuery(guid));
-        var hashedCategory = JsonSerializer.SerializeToUtf8Bytes(category);
-        await _cache.SetStringAsync($"{guid}.category.hash", 
-            HashHelper.HashUtf8Bytes(hashedCategory).Normalize().ToUpper());
+        await _cache.SetStringAsync($"{guid}.category.hash", category.NormalizedHash());
     }
 }
