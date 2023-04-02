@@ -1,0 +1,13 @@
+﻿@page
+@using Microsoft.AspNetCore.Mvc.Localization
+@model PikaCore.Areas.Admin.Pages.Index.Index
+@inject IViewLocalizer Localizer
+
+@{
+    Layout = "_Layout";
+}
+<div class="content mt-3 mr-3 ml-3">
+    <h1 class="m-1">
+        @Localizer["Panel Administracyjny"] 
+    </h1> 
+</div>

@@ -18,4 +18,16 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
+    <data name="Nazwa" xml:space="preserve">
+        <value>Name</value>
+    </data>
+    <data name="Rozmiar" xml:space="preserve">
+        <value>Size</value>
+    </data>
+    <data name="Data modyfikacji" xml:space="preserve">
+        <value>Date Modified</value>
+    </data>
+    <data name="Informacje o zasobie" xml:space="preserve">
+        <value>Resource Information</value>
+    </data>
 </root>

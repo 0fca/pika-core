@@ -54,7 +54,13 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
                 {
                     var mime = mimeTypes.GetMimeType(i.Key);
                     if (mime is null || !c.Mimes.Contains(mime.Name)) continue;
-                    var tag = Path.GetDirectoryName(i.Key)?.Split("\\");
+                    var tag = new List<string>();
+                    if (i.Key.Contains('/'))
+                    {
+                        var s = new Stack<string>(i.Key.Split('/'));
+                        s.Pop();
+                        tag.AddRange(s);
+                    }
                     if (!tagsCategoriesMap.ContainsKey(c.Id))
                     {
                         tagsCategoriesMap.Add(c.Id, new Dictionary<Guid, HashSet<string>>());

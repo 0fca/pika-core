@@ -4,9 +4,9 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column">
                 <li class="nav-item">
-                    <a asp-area="Core" asp-controller="Home" asp-action="Index" class="nav-link">
+                    <a asp-page="/Admin/Index" class="nav-link">
                         <i class="nav-icon fa-sharp fa-solid fa-house-blank"></i>
-                        <p>@Localizer["Home"]</p>
+                        <p>@Localizer["Index"]</p>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -20,8 +20,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/Admin/Index/CreateSystem" class="nav-link">
-                        <p>@Localizer["Dodaj system"]</p>
+                    <a href="/Admin/Index/Systems" class="nav-link">
+                        <p>@Localizer["Systemy"]</p>
                     </a>
                 </li>
             </ul> 

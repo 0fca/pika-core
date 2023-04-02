@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PikaCore.Resources.Areas.Core.Views.Storage.Partial {
+namespace PikaCore.Resources.Areas.Core.Views.Storage {
     using System;
     
     
@@ -21,14 +21,14 @@ namespace PikaCore.Resources.Areas.Core.Views.Storage.Partial {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class _Loader_pl {
+    internal class Information_pl {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal _Loader_pl() {
+        internal Information_pl() {
         }
         
         /// <summary>
@@ -38,7 +38,7 @@ namespace PikaCore.Resources.Areas.Core.Views.Storage.Partial {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PikaCore.Resources.Areas.Core.Views.Storage.Partial._Loader.pl", typeof(_Loader_pl).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PikaCore.Resources.Areas.Core.Views.Storage.ResourceInformation.pl", typeof(Information_pl).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -60,20 +60,29 @@ namespace PikaCore.Resources.Areas.Core.Views.Storage.Partial {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ładowanie zawartości....
+        ///   Looks up a localized string similar to Date Modified.
         /// </summary>
-        internal static string Content_is_loading___ {
+        internal static string Data_modyfikacji {
             get {
-                return ResourceManager.GetString("Content is loading...", resourceCulture);
+                return ResourceManager.GetString("Data modyfikacji", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ładowanie.
+        ///   Looks up a localized string similar to Name.
         /// </summary>
-        internal static string Ładowanie {
+        internal static string Nazwa {
             get {
-                return ResourceManager.GetString("Ładowanie", resourceCulture);
+                return ResourceManager.GetString("Nazwa", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Size.
+        /// </summary>
+        internal static string Rozmiar {
+            get {
+                return ResourceManager.GetString("Rozmiar", resourceCulture);
             }
         }
     }

@@ -6,9 +6,9 @@
     Layout = "_Layout";
 }
 @{
-    ViewData["Title"] = "Browse Categories";
+    ViewData["Title"] = Localizer["Kategorie"];
 }
-@if (Context.User.IsInRole("Administrator"))
+@if (Context.User.Identity!.IsAuthenticated && Context.User.IsInRole("Administrator"))
 {
     <div class="row">
         <div class="col s12 m12 s12">
@@ -60,7 +60,7 @@ else
     <div class="row">
         <div class="col s12 m12 l12">
             <div class="card-panel teal white-text center-align">
-                <p class="flow-text">It seems there are no categories configured</p>
+                <p class="flow-text">@Localizer["Wygląda na to, że żadne kategorie nie są dostępne"]</p>
             </div>
         </div>
     </div>

@@ -46,9 +46,13 @@ public class MinioStorage : IStorage
     {
         var bucketsCategoriesMaps = await _cache.GetStringAsync("buckets.categories.map");
         var bucketsToCategories = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(
-            bucketsCategoriesMaps
+            bucketsCategoriesMaps ?? "{}"
         );
         var categoriesViews = new List<CategoriesView>();
+        if (!bucketsToCategories!.ContainsKey(bucketId.ToString()))
+        {
+            return categoriesViews;
+        }
         var categoriesIds = bucketsToCategories![bucketId.ToString()];
         foreach (var id in categoriesIds)
         {
@@ -78,10 +82,9 @@ public class MinioStorage : IStorage
     {
         var returnStream = await _minioService.GetObjectAsStream(bucket, @object, offset);
         returnStream.Position = 0;
-        var mimes = new MimeTypes();
         return new Tuple<MemoryStream, string, string>(returnStream, 
             Path.GetFileName(@object), 
-            mimes.GetMimeType(@object).Name);
+            MimeTypes.GetMimeType(@object));
     }
 
     public async Task<bool> UserHasBucketAccess(Guid bucketId, ClaimsPrincipal user)

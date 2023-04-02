@@ -104,7 +104,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         {
             var objects = JsonSerializer
                 .Deserialize<List<ObjectInfo>>(
-                    await _cache.GetStringAsync($"{bucketId}.category.contents.{categoryId}")
+                    await _cache.GetStringAsync($"{bucketId}.category.contents.{categoryId}") ?? "[]"
                 );
             var tags = (await _mediator.Send(new GetCategoryByIdQuery(Guid.Parse(categoryId))))
                 .Tags;

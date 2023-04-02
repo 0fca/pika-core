@@ -406,20 +406,12 @@
       <EmbeddedResource Update="Resources\Areas\Core\Controllers\App\StorageController.pl.resx">
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>StorageController.pl.Designer.cs</LastGenOutput>
+        <DependentUpon>StorageController.resx</DependentUpon>
       </EmbeddedResource>
       <Compile Update="Resources\Areas\Core\Controllers\App\StorageController.pl.Designer.cs">
         <DesignTime>True</DesignTime>
         <AutoGen>True</AutoGen>
         <DependentUpon>StorageController.resx</DependentUpon>
-      </Compile>
-      <EmbeddedResource Update="Resources\Areas\Core\Views\Storage\Browse.pl.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>Browse.pl.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
-      <Compile Update="Resources\Areas\Core\Views\Storage\Browse.pl.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>Browse.pl.resx</DependentUpon>
       </Compile>
       <EmbeddedResource Update="Resources\Areas\Core\Views\Storage\Partial\_AddDirectoryPartial.pl.resx">
         <Generator>ResXFileCodeGenerator</Generator>
@@ -488,15 +480,6 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
-      <EmbeddedResource Update="Resources\Areas\Core\Views\Storage\ResourceInformation.pl.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>ResourceInformation.pl.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
-      <Compile Update="Resources\Areas\Core\Views\Storage\ResourceInformation.pl.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>ResourceInformation.pl.resx</DependentUpon>
-      </Compile>
       <EmbeddedResource Update="Resources\Areas\Core\Views\Storage\Partial\_NavMenu.pl.resx">
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>_NavMenu.pl.Designer.cs</LastGenOutput>
@@ -731,6 +714,53 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Storage\Browse.en.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Browse.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Storage\Browse.en.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Browse.en.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Storage\Index.en.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Index.en.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Storage\Index.en.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Index.en.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Storage\_InformationSidePartial.en.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>ResourceInformation.pl.Designer.cs</LastGenOutput>
+        <DependentUpon>_InformationSidePartial.resx</DependentUpon>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Storage\_InformationSidePartial.en.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ResourceInformation.en.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Storage\Information.en.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>ResourceInformation.pl.Designer.cs</LastGenOutput>
+        <DependentUpon>Information.resx</DependentUpon>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Storage\Information.en.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>_Information.en.resx</DependentUpon>
+      </Compile>
+      <EmbeddedResource Update="Resources\Areas\Core\Views\Storage\Browse.pl.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Browse.pl.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <Compile Update="Resources\Areas\Core\Views\Storage\Browse.pl.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Browse.pl.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
     <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.6" />
@@ -784,6 +814,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.0" />
+    <PackageReference Include="MimeTypes" Version="2.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Minio" Version="4.0.7" />
     <PackageReference Include="Minio.AspNetCore" Version="4.0.7" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />

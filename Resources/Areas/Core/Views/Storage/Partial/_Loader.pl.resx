@@ -22,4 +22,8 @@
         <value>Ładowanie zawartości...</value>
         <comment>Content is loading...</comment>
     </data>
+    <data name="Ładowanie" xml:space="preserve">
+        <value>Ładowanie</value>
+        <comment>Ładowanie</comment>
+    </data>
 </root>

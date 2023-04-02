@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -52,13 +53,15 @@ public class GatewayController : Controller
         try
         {
             var token = await _oidcService.GetAccessToken(loginViewModel);
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token);
+            var jwst = jsonToken as JwtSecurityToken;
+            var validTo = jwst.ValidTo;
             this.HttpContext.Response.Cookies.Append(".AspNet.Identity", token, new CookieOptions
             {
                 Secure = true,
                 HttpOnly = true,
-                Expires = DateTimeOffset.Now.AddHours(
-                    double.Parse(_configuration.GetSection("Auth")["AuthCookieExpiry"])
-                ),
+                Expires =  jwst!.ValidTo.ToLocalTime(),
                 SameSite = SameSiteMode.None,
                 Domain = _configuration.GetSection("Auth")["CookieDomain"]
             });
@@ -80,7 +83,11 @@ public class GatewayController : Controller
     {
         if (HttpContext.Request.Cookies.ContainsKey(".AspNet.Identity"))
         {
-            HttpContext.Response.Cookies.Delete(".AspNet.Identity");
+            HttpContext.Response.Cookies.Delete(".AspNet.Identity", new CookieOptions
+            {
+                Domain = _configuration.GetSection("Auth")["CookieDomain"],
+                Path = "/"
+            });
         }
 
         return Redirect("/Core");

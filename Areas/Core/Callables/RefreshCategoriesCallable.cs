@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
 using Pika.Domain.Storage.Callables;
 using Pika.Domain.Storage.Callables.ValueTypes;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Queries;
-using PikaCore.Infrastructure.Adapters.Minio;
 using PikaCore.Infrastructure.Services;
 
 namespace PikaCore.Areas.Core.Callables;
@@ -40,7 +36,6 @@ public class RefreshCategoriesCallable : BaseJobCallable
         var buckets = await _mediator.Send(new GetAllBucketsQuery());
         var categories = await _mediator.Send(new GetAllCategoriesQuery());
         var bucketsToCategories = new Dictionary<string, List<string>>();
-        var mimeTypes = new Winista.Mime.MimeTypes();
         foreach (var bucketsView in buckets)
         {
             var bucketsCategories = new List<string>();
@@ -50,13 +45,20 @@ public class RefreshCategoriesCallable : BaseJobCallable
             {
                 var mimes = category.Mimes;
                 var objectInfos = new List<ObjectInfo>();
+                var itemsChecked = new List<int>();
                 items.ToList().ForEach(i =>
                 {
-                    var mime = mimeTypes.GetMimeType(i.Key);
-                    if (mime is not null && mimes.Contains(mime.Name))
-                    {
-                        objectInfos.Add(_mapper.Map<ObjectInfo>(i));
-                    }
+                    var mime = MimeTypes.GetMimeType(i.Key);
+                    if (string.IsNullOrEmpty(mime) || !mimes.Contains(mime)) return;
+                    var oi = _mapper.Map<ObjectInfo>(i);
+                    oi.MimeType = mime;
+                    objectInfos.Add(oi);
+                    itemsChecked.Add(items.IndexOf(i));
+                });
+                itemsChecked.Reverse();
+                itemsChecked.ForEach(ic =>
+                {
+                    items.RemoveAt(ic);
                 });
                 bucketsCategories.Add(category.Id.ToString());
                 await _cache.SetAsync($"{bucketsView.Id}.category.contents.{category.Id}",

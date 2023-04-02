@@ -9,11 +9,11 @@
     var viewableName = Model.FullName.Split("/").Last();
 }
 <ul class="collection" xmlns="http://www.w3.org/1999/html">
-    <li class="collection-item">@Localizer["Full name"]: @viewableName </li>
+    <li class="collection-item">@Localizer["Nazwa"]: @viewableName </li>
     <li class="collection-item">MIME: @Model.MimeType</li>
 
-    <li class="collection-item">@Localizer["Size"]: @UnixHelper.DetectUnitBySize(Model.Size)</li>
-    <li class="collection-item">@Localizer["Last Modified"]: @Model.LastModified.ToShortDateString()</li>
+    <li class="collection-item">@Localizer["Rozmiar"]: @UnixHelper.DetectUnitBySize(Model.Size)</li>
+    <li class="collection-item">@Localizer["Data modyfikacji"]: @Model.LastModified.ToShortDateString()</li>
     <li class="collection-item">
         <p class="text-break">
             @Localizer["Tagi"]:

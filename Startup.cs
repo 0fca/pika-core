@@ -45,7 +45,6 @@ using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Identity.Extensions;
 using PikaCore.Areas.Identity.Filters;
 using PikaCore.Infrastructure.Adapters;
-using PikaCore.Infrastructure.Adapters.Minio;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
 using Serilog;
@@ -92,7 +91,11 @@ namespace PikaCore
             services.AddStackExchangeRedisCache(a =>
             {
                 a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
-                a.Configuration = Configuration.GetConnectionString("RedisConnection");
+                a.ConfigurationOptions = new ConfigurationOptions
+                {
+                    DefaultDatabase = int.Parse(Configuration.GetSection("Redis")["RedisDb"] ?? "0"),
+                    EndPoints = { Configuration.GetConnectionString("RedisConnection") } 
+                }; 
             });
             var redis = ConnectionMultiplexer.Connect(new ConfigurationOptions
             {
@@ -149,7 +152,7 @@ namespace PikaCore
                     });
                 })
                 .AddValidation(o =>
-                {
+            {
                     o.SetIssuer(Configuration.GetSection("Auth")["Authority"]);
                     o.UseIntrospection()
                         .SetClientId(Configuration.GetSection("Auth")["ClientId"])
@@ -171,11 +174,14 @@ namespace PikaCore
                     MissingMemberHandling = MissingMemberHandling.Error,
                     ObjectCreationHandling = ObjectCreationHandling.Auto
                 });
-                o.UseRedisStorage(Configuration.GetConnectionString("RedisConnection"),
-                    new RedisStorageOptions()
-                    {
-                        Db = 1
-                    });
+                if (!string.IsNullOrEmpty(Configuration.GetConnectionString("RedisConnection")))
+                {
+                    o.UseRedisStorage(Configuration.GetConnectionString("RedisConnection"),
+                        new RedisStorageOptions()
+                        {
+                            Db = int.Parse(Configuration.GetSection("Hangfire")["RedisDb"] ?? "0")
+                        });
+                }
             });
             services.AddHangfireServer();
             services.AddAspNetCoreCustomValidation();
@@ -256,14 +262,8 @@ namespace PikaCore
                     options.SuppressMapClientErrors = true;
                 });
             services.AddRazorPages()
-                .AddRazorPagesOptions(options => { options.Conventions.AuthorizeAreaFolder("Core", "/Admin"); });
-
-            services.AddResponseCaching(opt =>
-            {
-                opt.UseCaseSensitivePaths = true;
-                opt.SizeLimit = 819200;
-            });
-
+                .AddRazorPagesOptions(options => { options.Conventions.AuthorizeAreaFolder("Admin", "/Index"); });
+            
             services.AddResponseCompression(opt =>
             {
                 opt.EnableForHttps = true;
@@ -283,7 +283,7 @@ namespace PikaCore
                         {
                             Duration = 360000,
                             Location = ResponseCacheLocation.Client,
-                            NoStore = false
+                            NoStore = true
                         });
                     options.MaxModelValidationErrors = 50;
                 });
@@ -336,7 +336,7 @@ namespace PikaCore
                     {
                         ctx.Context.Response.Headers.Append(
                             "Cache-Control", $"public, max-age={cacheMaxAge}");
-                        ctx.Context.Response.Headers.Append("Pragma", "no-cache, no-store");
+                        //ctx.Context.Response.Headers.Append("Pragma", "no-cache, no-store");
                     }
                 }
             );
@@ -351,9 +351,9 @@ namespace PikaCore
             app.UseResponseCaching();
             app.UseOiddictAuthenticationCookieSupport();
             app.UseAuthentication();
-            app.UseEnsureJwtBearerValid();
             app.UseResponseCompression();
             app.UseMapJwtClaimsToIdentity();
+            app.UseEnsureJwtBearerValid();
             app.UseAuthorization();
             app.UseMinioBucketAccessAuthorization();
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
@@ -448,7 +448,7 @@ namespace PikaCore
 
         private static void OnStartup()
         {
-            Log.Information("System is starting... Hellorld!");
+            Log.Verbose("System is starting... Hellorld!");
         }
 
         private static void OnShutdown()

@@ -64,7 +64,6 @@ public class UpdateCategoryCallable : BaseJobCallable
             throw new InvalidOperationException("Cannot run multiple update without data in relay cache");
         }
 
-        var jsonSerializer = new Newtonsoft.Json.JsonSerializer();
         var parameterDictList = JsonConvert.DeserializeObject<List<Dictionary<string, ParameterValueType>>>(updateCategoriesParamsString); 
         foreach (var parameterDict in parameterDictList)
         {

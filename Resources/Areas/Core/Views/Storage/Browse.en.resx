@@ -19,66 +19,69 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="Kategorie" xml:space="preserve">
-        <value>Kategorie</value>
+        <value>Categories</value>
     </data>
     <data name="Wybierz bucket" xml:space="preserve">
-        <value>Wybierz bucket</value>
+        <value>Choose bucket</value>
     </data>
     <data name="Wygląda na to, że żadne kategorie nie są dostępne" xml:space="preserve">
-        <value>Wygląda na to, że żadne kategorie nie są dostępne</value>
+        <value>It seems there are no categories configured</value>
     </data>
     <data name="Filtruj po tagach" xml:space="preserve">
-        <value>Filtruj po tagach</value>
+        <value>Filter by tags</value>
     </data>
     <data name="Ilość rekordów" xml:space="preserve">
-        <value>Ilość rrekordów</value>
+        <value>Record count</value>
     </data>
     <data name="Szukaj" xml:space="preserve">
-        <value>Szukaj</value>
+        <value>Search</value>
     </data>
     <data name="Nazwa" xml:space="preserve">
-        <value>Nazwa</value>
+        <value>Name</value>
     </data>
     <data name="Rozmiar" xml:space="preserve">
-        <value>Rozmiar</value>
+        <value>Size</value>
     </data>
     <data name="Data modyfikacji" xml:space="preserve">
-        <value>Data modyfikacji</value>
+        <value>Date Modified</value>
     </data>
     <data name="Wyszukiwarka" xml:space="preserve">
-        <value>Wyszukiwarka</value>
+        <value>Browse</value>
     </data>
     <data name="Tagi" xml:space="preserve">
-        <value>Tagi</value>
+        <value>Tags</value>
     </data>
     <data name="Szczegóły" xml:space="preserve">
-        <value>Szczegóły</value>
+        <value>Details</value>
     </data>
     <data name="Jakoś pusto tutaj" xml:space="preserve">
-        <value>Jakoś pusto tutaj</value>
+        <value>It is a little empty in here</value>
     </data>
     <data name="Brak danych" xml:space="preserve">
-        <value>Brak danych</value>
+        <value>No data</value>
     </data>
     <data name="Ładowanie" xml:space="preserve">
-        <value>Ładowanie</value>
+        <value>Loading</value>
     </data>
     <data name="Wyświetlono start do end z total rekordów" xml:space="preserve">
-        <value>Wyświetlono _START_ do _END_ z _TOTAL_ rekordów</value>
+        <value>Shown from _START_ to  _END_ of _TOTAL_ records</value>
     </data>
     <data name="Wyświetlono 0 do 0 z 0 rekordów" xml:space="preserve">
-        <value>Wyświetlono 0 do 0 z 0 rekordów</value>
+        <value>Shown from 0 to 0 of 0 records</value>
     </data>
     <data name="Pierwszy" xml:space="preserve">
-        <value>Pierwszy</value>
+        <value>First</value>
+    </data>
+    <data name="Następny" xml:space="preserve">
+        <value>Next</value>
     </data>
     <data name="Ostatni" xml:space="preserve">
-        <value>Ostatni</value>
-    </data>
+        <value>Last</value>
+    </data> 
     <data name="Poprzedni" xml:space="preserve">
-        <value>Poprzedni</value>
+        <value>Previous</value>
     </data>
     <data name="Brak pasujących rekordów" xml:space="preserve">
-        <value>Brak pasujących rekordów</value>
+        <value>No matching records</value>
     </data>
 </root>

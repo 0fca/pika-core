@@ -6,7 +6,7 @@
 <!-- TODO Add detailed list view -->
 @if (Model?.Objects != null)
 {
-    ViewData["Title"] = Localizer["Browse"];
+    ViewData["Title"] = Localizer["Wyszukiwarka"];
     <div id="file-list">
         <div class="row grey lighten-4 z-depth-0">
             <div class="col s6 m6 l6">
@@ -46,7 +46,7 @@
             </div>
         </div>
         <div class="row lighten-4 z-depth-0">
-            <div class="input-field col s2 m2 l2">
+            <div class="input-field col s12 m2 l2">
                 <select id="select_length">
                     <option value="10">10</option>
                     <option value="20">20</option>
@@ -56,7 +56,7 @@
                     @Localizer["Ilość rekordów"]:
                 </label>
             </div>
-            <div class="col s6 m6 l6 right">
+            <div class="col s12 m6 l6 right">
                 <div class="input-field col s12">
                     <input id="search_input" value="" type="text" class="grey-text"/>
                     <label for="search_input">@Localizer["Szukaj"]:</label>
@@ -90,7 +90,7 @@
         {
             <div class="row">
                 <div class="s10 m10 l10">
-                    <p class="flow-text center-align">@Localizer["It is empty in here..."]</p>
+                    <p class="flow-text center-align">@Localizer["Jakoś pusto tutaj"]...</p>
                 </div>
             </div>
         }
@@ -113,9 +113,9 @@
                 autoWidth: false,
                 language: {
                   "emptyTable": '@Localizer["Brak danych"]',
-                  "loadingRecord": '@Localizer["Ładowanie..."]',
+                  "loadingRecord": '@Localizer["Ładowanie"]...',
                   "search": '@Localizer["Szukaj"]:',
-                  "info": '@Localizer["Wyświetlono _START_ do _END_ z _TOTAL_ rekordów"]',
+                  "info": '@Localizer["Wyświetlono start do end z total rekordów"]',
                   "infoEmpty": '@Localizer["Wyświetlono 0 do 0 z 0 rekordów"]',
                   "paginate": {
                       "first":      '@Localizer["Pierwszy"]',
@@ -143,8 +143,7 @@
                  .draw(); 
              });
              $('#search_input').on('propertychange input', (e) => {
-                  dt
-                  .columns(0)
+                 dt
                   .columns(3)
                   .search($('#search_input').val())
                   .draw(); 

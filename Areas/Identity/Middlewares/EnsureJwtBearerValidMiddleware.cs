@@ -3,16 +3,19 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace PikaCore.Areas.Identity.Middlewares;
 
 public class EnsureJwtBearerValidMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly IConfiguration _configuration;
 
-    public EnsureJwtBearerValidMiddleware(RequestDelegate next)
+    public EnsureJwtBearerValidMiddleware(RequestDelegate next, IConfiguration configuration)
     {
         _next = next;
+        _configuration = configuration;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -26,11 +29,16 @@ public class EnsureJwtBearerValidMiddleware
         var handler = new JwtSecurityTokenHandler();
         var jsonToken = handler.ReadToken(token);
         var jwst = jsonToken as JwtSecurityToken;
-        if (jwst!.ValidTo.ToLocalTime() < DateTime.Now.ToLocalTime())
+        var validTo = jwst!.ValidTo.ToLocalTime();
+        var localNow = DateTime.Now.ToLocalTime();
+        
+        if (validTo <= localNow)
         {
-            context.Response.Cookies.Delete(".AspNet.Identity");
-            await _next(context);
-            return;
+            context.Response.Cookies.Delete(".AspNet.Identity", new CookieOptions
+            {
+                Path = "/",
+                Domain = _configuration.GetSection("Auth")["CookieDomain"]
+            });
         }
         await _next(context);
     }
