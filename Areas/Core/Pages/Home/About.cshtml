@@ -6,74 +6,89 @@
 @{
     ViewData["Title"] = Localizer["About"].Value;
 }
-    <div class="row">
-        <div class="col s12 m6">
-            <div class="card medium indigo z-depth-0">
-                <div class="card-content white-text">
-                    <span class="card-title">@Localizer["What is this"]?</span>
-                    <section id="aboutthis" style="text-align: justify">
-                        <p class="section_paragraph">
-                            @string.Format(Localizer["Pika Core is a core web application of whole web system called Pika Cloud. "+
-                            "It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem. "+
-                            "PikaCore first web app I've ever build. I started development on .NET Core 1.1 SDK, but now I use .NET Core SDK of version {0}"].Value, Model.FrameworkVer).
-                        </p>
-                        <br/>
-                        <p class="left">
+<div class="row">
+    <div class="col s12 m6">
+        <div class="card medium indigo z-depth-0">
+            <div class="card-content white-text">
+                <span class="card-title">@Localizer["What is this"]?</span>
+                <section id="aboutthis" style="text-align: justify">
+                    <p class="section_paragraph">
+                        @string.Format(Localizer["Pika Core is a core web application of whole web system called Pika Cloud. " +
+                                                 "It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem. " +
+                                                 "PikaCore first web app I've ever build. I started development on .NET Core 1.1 SDK, but now I use .NET Core SDK of version {0}"].Value, Model.FrameworkVer).
+                    </p>
+                    <ul>
+                        <li>
+                            <p>
+                                <strong style="font-style: oblique;">@Localizer["This is PikaCore aka Hannah"]</strong>
+                            </p>
+                        </li>
+                        <li>
+                            <p>
+                                <strong>ver.@Model.Version</strong>
+                            </p>
+                        </li>
+                        <li>
                             @{
-                                var instanceString = string.IsNullOrEmpty(@Model.Instance) 
-                                    ? "" 
-                                    : Localizer["Instance: "].Value  + @Model.Instance;
+                                var instanceString = string.IsNullOrEmpty(@Model.Instance)
+                                    ? ""
+                                    : Localizer["Instance: "].Value + @Model.Instance;
                             }
-                            <b>@Localizer["This is PikaCore aka Hannah"]</b>
-                        </p>
-                        <br/>
-                        <p class="left">
-                            ver. @Model.Version <br/>@instanceString
-                        </p>
-                    </section>
-                </div>
-                <div class="card-action">
-                    <a href="https://www.github.com/Obsidiam/pika-cloud">
-                        <img src="~/images/github/PNG/GitHub-Mark-32px.png" alt="GitHub repo"/>
-                    </a>
-                    <a href="@Url.Page(nameof(Dedication))" class="teal-text">
-                        <span class="material-icons">
-                            favorite
-                        </span>
-                    </a>
-                </div>
+                            <p>
+                                @instanceString
+                            </p>
+                        </li>
+                    </ul>
+                </section>
             </div>
-            
-        </div>
-        <div class="col s12 m6">
-            <div class="card medium indigo z-depth-0">
-                <div class="card-content white-text">
-                    <span class="card-title">@Localizer["Technical information"]</span>
-                    <section id="technicalinformation" style="text-align: justify">
-                        <div class="section_paragraph">
-                            @Localizer["Some technical stuff for those who are interested"]:
-                            <ul>
-                                <li>@Localizer["This neat simple web app is hosted on my private server and running on"] @Model.Os</li>
-                                <li>@Localizer[".NET Core is the technology I used to build Pika Core, its version is"] @Model.FrameworkVer</li>
-                                <li>@Localizer["All this is open source under GPL v.3.0 license"].</li>
-                            </ul>
-                        </div>
-                    </section>
-                </div>
-                <div class="card-action">
-                    <a class="teal-text" href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="~/images/heckert_gnu.transp.small.png" height="32" width="32" alt="GPL v.3.0" /></a>
-                    <a class="teal-text" href="https://www.debian.org/"><img src="~/images/debian_logo.svg" height="32" width="32" alt="Debian" /></a>
-                    <a class="teal-text" href="https://dotnet.microsoft.com/download/dotnet-core"><img src="~/images/dotnet-logo.svg" height="32" width="32" alt=".NET Core" /></a>
-                    <a class="teal-text" href="https://github.com/0fca/pika-core">
-                        <img src="~/images/github/PNG/GitHub-Mark-32px.png" alt="GitHub repo" />
-                    </a>
-                    <a class="teal-text" href="https://freedns.afraid.org/">
-                        <span class="material-icons">
-                            dns
-                        </span>
-                    </a>
-                </div>
+            <div class="card-action">
+                <a href="https://www.github.com/Obsidiam/pika-cloud">
+                    <img src="~/images/github/PNG/GitHub-Mark-32px.png" alt="GitHub repo"/>
+                </a>
+                <a href="@Url.Page(nameof(Dedication))" class="teal-text">
+                    <span class="material-icons">
+                        favorite
+                    </span>
+                </a>
             </div>
-            
         </div>
+
     </div>
+    <div class="col s12 m6">
+        <div class="card medium indigo z-depth-0">
+            <div class="card-content white-text">
+                <span class="card-title">@Localizer["Technical information"]</span>
+                <section id="technicalinformation" style="text-align: justify">
+                    <div class="section_paragraph">
+                        @Localizer["Some technical stuff for those who are interested"]:
+                        <ul>
+                            <li>@Localizer["This neat simple web app is hosted on my private server and running on"] @Model.Os</li>
+                            <li>@Localizer[".NET Core is the technology I used to build Pika Core, its version is"] @Model.FrameworkVer</li>
+                            <li>@Localizer["All this is open source under GPL v.3.0 license"].</li>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+            <div class="card-action">
+                <a class="teal-text" href="https://www.gnu.org/licenses/gpl-3.0.en.html">
+                    <img src="~/images/heckert_gnu.transp.small.png" height="32" width="32" alt="GPL v.3.0"/>
+                </a>
+                <a class="teal-text" href="https://www.debian.org/">
+                    <img src="~/images/debian_logo.svg" height="32" width="32" alt="Debian"/>
+                </a>
+                <a class="teal-text" href="https://dotnet.microsoft.com/download/dotnet-core">
+                    <img src="~/images/dotnet-logo.svg" height="32" width="32" alt=".NET Core"/>
+                </a>
+                <a class="teal-text" href="https://github.com/0fca/pika-core">
+                    <img src="~/images/github/PNG/GitHub-Mark-32px.png" alt="GitHub repo"/>
+                </a>
+                <a class="teal-text" href="https://freedns.afraid.org/">
+                    <span class="material-icons">
+                        dns
+                    </span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
