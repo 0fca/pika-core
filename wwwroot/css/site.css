@@ -10,7 +10,7 @@ body {
 
 main {
     flex: 1 0 auto;
-    background-color: white;
+    background-color: whitesmoke;
 }
 
 hr{
@@ -279,9 +279,8 @@ input[type="password"]:not(.browser-default):focus
     border-bottom: 1px solid teal;
 }
 
-.nav-menu-colors{
-    color: white !important;
-    background-color: inherit !important;
+.whitesmoke{
+    background-color: whitesmoke;
 }
 
 .hand-cursor{

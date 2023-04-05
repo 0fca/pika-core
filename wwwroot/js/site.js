@@ -1,34 +1,4 @@
 ﻿
-function searchFileList(){
-    let searchParam = document.getElementById("searchBox").value;
-    let fileList = document.getElementById("file-list").querySelectorAll(".card .card-content");
-
-    if(searchParam !== ""){
-        for(let i = 0; i < fileList.length; i ++){
-            if (!fileList[i].children[0].textContent.toLowerCase().includes(searchParam.toLowerCase())) {
-                fileList[i].parentElement.setAttribute("hidden", true);
-                
-            }else if(fileList[i].parentElement.hasAttribute("hidden")){
-                fileList[i].parentElement.removeAttribute("hidden");
-                let sibling = fileList[i].parentElement.nextElementSibling;
-                if (sibling !== null) {
-                    sibling.removeAttribute("hidden");
-                }
-            }
-        }
-    }else{
-        resetFileList();
-    }
-}
-
-
-function resetFileList(qualifiedName){
-    const fileList = document.getElementById("file-list").querySelectorAll("div");
-    for(let i = 0; i < fileList.length; i++){
-        fileList[i].removeAttribute("hidden");  
-    }
-} 
-
 function hideDownloadBox() {
     console.log("Hide download box.");
     let downloadPartial = document.getElementById("download-panel");
@@ -50,12 +20,6 @@ function showMessagePartial(message, isError) {
     alertDiv.removeAttribute("hidden");
     alertDiv.getAttribute("class").concat(ariaclass);
     alertText.innerText = message;
-}
-
-function copyToClipboard(id) {
-    let el = document.getElementById(id);
-    el.select();
-    document.execCommand('copy');
 }
 
 function resetListOnView() {
