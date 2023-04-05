@@ -112,7 +112,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             {
                 Objects = objects,
                 SelectedTag = tag,
-                Tags = tags[bucketId],
+                Tags = tags!.ContainsKey(bucketId) ? tags[bucketId] : new List<string>(),
                 CategoryId = categoryId,
                 BucketId = bucketId
             };
