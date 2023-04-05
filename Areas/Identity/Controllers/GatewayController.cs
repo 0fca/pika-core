@@ -32,9 +32,12 @@ public class GatewayController : Controller
 
     [HttpGet]
     [ActionName("Login")]
-    public async Task<IActionResult> Login()
+    public async Task<IActionResult> Login([FromQuery] string returnUrl)
     {
-        if (!HttpContext.Request.Cookies.ContainsKey(".AspNet.Identity")) return View();
+        if (!HttpContext.Request.Cookies.ContainsKey(".AspNet.Identity"))
+            return View(
+                new LoginViewModel { ReturnUrl = returnUrl }
+            );
         TempData["ReturnMessage"] = _localizer.GetString("You appear to be already logged in").Value;
         return Redirect("/Core");
     }
@@ -50,6 +53,7 @@ public class GatewayController : Controller
                 _localizer.GetString("Your username or password are not in valid format").Value;
             return View();
         }
+
         try
         {
             var token = await _oidcService.GetAccessToken(loginViewModel);
@@ -61,7 +65,7 @@ public class GatewayController : Controller
             {
                 Secure = true,
                 HttpOnly = true,
-                Expires =  jwst!.ValidTo.ToLocalTime(),
+                Expires = jwst!.ValidTo.ToLocalTime(),
                 SameSite = SameSiteMode.None,
                 Domain = _configuration.GetSection("Auth")["CookieDomain"]
             });

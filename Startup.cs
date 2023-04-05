@@ -337,7 +337,6 @@ namespace PikaCore
                     {
                         ctx.Context.Response.Headers.Append(
                             "Cache-Control", $"public, max-age={cacheMaxAge}");
-                        //ctx.Context.Response.Headers.Append("Pragma", "no-cache, no-store");
                     }
                 }
             );
