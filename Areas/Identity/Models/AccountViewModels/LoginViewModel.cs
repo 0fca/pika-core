@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PikaCore.Areas.Identity.Models.AccountViewModels
 {
@@ -14,7 +15,8 @@ namespace PikaCore.Areas.Identity.Models.AccountViewModels
         [StringLength(100, MinimumLength = 6)]
         [Display(Name = "Password")]
         public string Password { get; set; } = "";
-
+        
+        [AllowNull]
         public string ReturnUrl { get; set; } = "/";
     }
 }

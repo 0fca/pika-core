@@ -32,11 +32,11 @@ public class GatewayController : Controller
 
     [HttpGet]
     [ActionName("Login")]
-    public async Task<IActionResult> Login([FromQuery] string returnUrl)
+    public async Task<IActionResult> Login([FromQuery] string? returnUrl)
     {
         if (!HttpContext.Request.Cookies.ContainsKey(".AspNet.Identity"))
             return View(
-                new LoginViewModel { ReturnUrl = returnUrl }
+                new LoginViewModel { ReturnUrl = returnUrl ?? ""  }
             );
         TempData["ReturnMessage"] = _localizer.GetString("You appear to be already logged in").Value;
         return Redirect("/Core");

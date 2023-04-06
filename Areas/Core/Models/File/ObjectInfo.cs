@@ -38,7 +38,7 @@ public class ObjectInfo
         }
         if (this.Size > Math.Pow(10, 9))
         {
-            return $"{this.GetSizeInMegaBytes()} GB";
+            return $"{this.GetSizeInGigaBytes()} GB";
         }
 
         return $"{this.Size}B";

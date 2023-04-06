@@ -12,24 +12,5 @@ namespace PikaCore.Areas.Core.Models.File
         public List<string> Tags { get; set; }
         public string BucketId { get; set; }
         public string CategoryId { get; set; }
-        public static FileResultViewModel FromMinioItems(IEnumerable<Item> items)
-        {
-            var objects = new List<ObjectInfo>();
-            items.ToList().ForEach(i =>
-            {
-                objects.Add(new ObjectInfo()
-                {
-                    Name = i.Key,
-                    IsDir = i.IsDir,
-                    LastModified = i.LastModifiedDateTime ?? DateTime.Now,
-                    ETag = i.ETag,
-                    Size = i.Size
-                });
-            });
-            return new FileResultViewModel()
-            {
-                Objects = objects
-            };
-        } 
     }
 }
