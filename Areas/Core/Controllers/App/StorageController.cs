@@ -8,7 +8,9 @@ using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Pika.Domain.Security;
 using Pika.Domain.Storage.Data;
@@ -21,6 +23,7 @@ using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Identity.Attributes;
 using PikaCore.Infrastructure.Adapters;
 using PikaCore.Infrastructure.Security;
+using PikaCore.Infrastructure.Services.Helpers;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
@@ -37,6 +40,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         private readonly StorageIndexContext _storageIndexContext;
         private readonly IStorage _storage;
         private readonly IDistributedCache _cache;
+        private readonly IConfiguration _configuration;
         #region TempDataMessages
 
         [TempData(Key = "showGenerateUrlPartial")]
@@ -54,7 +58,8 @@ namespace PikaCore.Areas.Core.Controllers.App
                IMediator mediator,
                IMapper mapper,
                IStorage service,
-               IDistributedCache cache)
+               IDistributedCache cache,
+               IConfiguration configuration)
         {
             _urlGeneratorService = iUrlGenerator;
             _storageIndexContext = storageIndexContext;
@@ -64,6 +69,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             _mapper = mapper;
             _cache = cache;
             _storage = service;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -100,18 +106,32 @@ namespace PikaCore.Areas.Core.Controllers.App
         [Route("[area]/[controller]/[action]")]
         [AuthorizeUserBucketAccess]
         [AllowAnonymous]
-        public async Task<IActionResult> Browse([FromQuery] string categoryId, [FromQuery] string bucketId, [FromQuery] string? tag = null)
+        public async Task<IActionResult> Browse([FromQuery] string categoryId, 
+            [FromQuery] string bucketId, 
+            [FromQuery] int offset,
+            [FromQuery] int count = 50,
+            [FromQuery] string? tag = null)
         {
             var objects = JsonSerializer
                 .Deserialize<List<ObjectInfo>>(
                     await _cache.GetStringAsync($"{bucketId}.category.contents.{categoryId}") ?? "[]"
                 );
+            var total = objects!.Count;
+            if (objects!.Count > int.Parse(_configuration.GetSection("Storage")["OnePageMaxTotal"] ?? "2000"))
+            {
+                objects = Paginator<ObjectInfo>.Paginate(objects, offset, count);
+            }
+
             var tags = (await _mediator.Send(new GetCategoryByIdQuery(Guid.Parse(categoryId))))
                 .Tags;
             var lrmv = new FileResultViewModel
             {
                 Objects = objects,
                 SelectedTag = tag,
+                SelectedPage = (offset + count)/count,
+                PerPage = count,
+                Total = total,
+                OnePageMaxTotal = int.Parse(_configuration.GetSection("Storage")["OnePageMaxTotal"] ?? "2000"),
                 Tags = tags!.ContainsKey(bucketId) ? tags[bucketId] : new List<string>(),
                 CategoryId = categoryId,
                 BucketId = bucketId

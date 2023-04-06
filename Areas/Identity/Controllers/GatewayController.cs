@@ -36,7 +36,7 @@ public class GatewayController : Controller
     {
         if (!HttpContext.Request.Cookies.ContainsKey(".AspNet.Identity"))
             return View(
-                new LoginViewModel { ReturnUrl = returnUrl ?? ""  }
+                new LoginViewModel() 
             );
         TempData["ReturnMessage"] = _localizer.GetString("You appear to be already logged in").Value;
         return Redirect("/Core");
@@ -45,7 +45,7 @@ public class GatewayController : Controller
     [HttpPost]
     [AutoValidateAntiforgeryToken]
     [ActionName("Login")]
-    public async Task<IActionResult> Login(LoginViewModel loginViewModel)
+    public async Task<IActionResult> Login(LoginViewModel loginViewModel, [FromQuery] string? returnUrl)
     {
         if (!ModelState.IsValid)
         {
@@ -60,7 +60,6 @@ public class GatewayController : Controller
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token);
             var jwst = jsonToken as JwtSecurityToken;
-            var validTo = jwst.ValidTo;
             this.HttpContext.Response.Cookies.Append(".AspNet.Identity", token, new CookieOptions
             {
                 Secure = true,
@@ -77,7 +76,7 @@ public class GatewayController : Controller
             return View();
         }
 
-        return Redirect(loginViewModel.ReturnUrl);
+        return Redirect(returnUrl ?? "/");
     }
 
     [HttpPost]

@@ -12,6 +12,33 @@
             </div>
             <div class="col s12 m6 l6">
                 <div class="row valign-wrapper">
+                    @if (Model.Total > Model.OnePageMaxTotal)
+                    {
+                        <div class="input-field col s12 m11 l11 left-align">
+                            <span>
+                                <select id="page_select">
+                                    <option value="" disabled selected>@Localizer["Strona"]</option>
+                                    @{ var totalPages = (Model.Total / Model.PerPage) + 1; }
+                                    @for (var i = 0; i < totalPages; i += 1)
+                                    {
+                                        var t = i + 1;
+                                        if (t == Model.SelectedPage)
+                                        {
+                                            <option value="@i" selected>@t</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@t</option>
+                                        }
+                                    }
+                                </select>
+                                <label for="page_select">@Localizer["Strona: "]</label>
+                            </span>
+                        </div>
+                        <div class="col s2 m2 l2">
+                            @Localizer["z"] @totalPages
+                        </div>
+                    }
                     <div class="col s4 m1 l1 ">
                         <div class="input-field">
                             <a asp-area="Core"
@@ -24,6 +51,7 @@
                             </a>
                         </div>
                     </div>
+
                     <div class="input-field col s12 m11 l11">
                         <select id="tags_select">
                             <option value="" disabled selected>@Localizer["Filtruj po tagach"]</option>
@@ -57,31 +85,31 @@
             <div class="col s12 m6 l6 right">
                 <div class="input-field col s12">
                     <input id="search_input" value="" type="text" class="grey-text"/>
-                    <label for="search_input">@Localizer["Szukaj"]:</label>
+                    <label for="search_input">@Localizer["Szukaj"]</label>
                 </div>
             </div>
         </div>
 
-            <table class="responsive-table striped" id="dir_content">
-                <thead>
+        <table class="responsive-table striped" id="dir_content">
+            <thead>
+            <tr>
+                <th scope="col">@Localizer["Nazwa"]</th>
+                <th scope="col">@Localizer["Rozmiar"]</th>
+                <th scope="col">@Localizer["Data modyfikacji"]</th>
+                <th scope="col">@Localizer["Tagi"]</th>
+                <th scope="col">@Localizer["Szczegóły"]</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Objects)
+            {
                 <tr>
-                    <th scope="col">@Localizer["Nazwa"]</th>
-                    <th scope="col">@Localizer["Rozmiar"]</th>
-                    <th scope="col">@Localizer["Data modyfikacji"]</th>
-                    <th scope="col">@Localizer["Tagi"]</th>
-                    <th scope="col">@Localizer["Szczegóły"]</th>
+                    @await Html.PartialAsync("Partial/FileListItemPartial",
+                               new Tuple<ObjectInfo, string, string>(item, Model.CategoryId, Model.BucketId))
                 </tr>
-                </thead>
-                <tbody>
-                @foreach (var item in Model.Objects)
-                {
-                    <tr>
-                        @await Html.PartialAsync("Partial/FileListItemPartial",
-                            new Tuple<ObjectInfo, string, string>(item, Model.CategoryId, Model.BucketId))
-                    </tr>
-                }
-                </tbody>
-            </table>
+            }
+            </tbody>
+        </table>
 
     </div>
 
@@ -96,6 +124,13 @@
     <link rel="stylesheet" href="//cdn.datatables.net/1.13.2/css/jquery.dataTables.min.css"/>
     <script src="//cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js" defer=""></script>
     <script>
+        @{
+            var domConfig = "trpi";
+            if (Model.Total > Model.OnePageMaxTotal)
+            {
+                domConfig = "tri";
+            }
+        }
          $(document).ready( function () {
              const dt = $('#dir_content').DataTable({
                 "oSearch": {"sSearch": "@Model.SelectedTag"},
@@ -121,10 +156,16 @@
                           visible: false
                     } 
                 ],
-                dom: 'tpri'
+                dom: '@domConfig'
              }); 
+             $("#select_length").val(@Model.PerPage);
+             dt.page.len($('#select_length').val()).draw();
              $('#select_length').change(e => {
-                 dt.page.len($('#select_length').val()).draw(); 
+                 dt.page.len($('#select_length').val()).draw();
+                 const count = $('#select_length').val();
+                 window.location = 
+                    `/Core/Storage/Browse?categoryId=@Model.CategoryId&bucketId=@Model.BucketId&offset=0&count=${count}`;
+                 
              });
              $('#tags_select').change((e) => {
                  dt
@@ -139,5 +180,12 @@
                   .draw(); 
              });
          } );
+         $("#page_select").change((e) => {
+             const page = $('#page_select').val();
+             const count = @Model.PerPage;
+             window.location = 
+             `/Core/Storage/Browse?categoryId=@Model.CategoryId&bucketId=@Model.BucketId&offset=${page*count}&count=${count}`;
+         });
+
     </script>
 }
