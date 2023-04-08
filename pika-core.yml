@@ -14,6 +14,13 @@ services:
     deploy:
       mode: replicated
       replicas: 2
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.25'
+          memory: 500M
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
     restart: always
@@ -42,7 +49,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - backend
-
+    
 networks:
   backend:
     name: pika-core
