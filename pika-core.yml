@@ -21,15 +21,18 @@ services:
       - "traefik.http.routers.pika-core.rule=Host(`core.cloud.localhost`)"
   proxy:
     image: traefik:latest
+    command:
+      - --providers.docker=true
+      - --api=true
+      - --entrypoints.web.address=:80
     ports:
-      - "80:8081"
+      - "8081:80"
       - "8080:8080"
     labels:
       - "traefik.http.routers.api.rule=Host(`traefik.cloud.localhost`)"
       - "traefik.http.routers.api.service=api@internal"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.api.dashboard=true"
-      - "traefik.entrypoints.web.address=:80"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
