@@ -18,7 +18,7 @@ services:
     networks:
       - backend
     labels:
-      - "traefik.http.routers.pika-core.rule=Host(`core.cloud.localhost`)"
+      - "traefik.http.routers.pika-core.rule=Host(`192.168.1.252`)"
   proxy:
     image: traefik:latest
     command:
@@ -29,7 +29,7 @@ services:
       - "8081:80"
       - "8080:8080"
     labels:
-      - "traefik.http.routers.api.rule=Host(`traefik.cloud.localhost`)"
+      - "traefik.http.routers.api.rule=Host(`192.168.1.252`)"
       - "traefik.http.routers.api.service=api@internal"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.api.dashboard=true"
