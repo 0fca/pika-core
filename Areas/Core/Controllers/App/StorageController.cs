@@ -109,7 +109,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         public async Task<IActionResult> Browse([FromQuery] string categoryId, 
             [FromQuery] string bucketId, 
             [FromQuery] int offset,
-            [FromQuery] int count = 50,
+            [FromQuery] int count = 10,
             [FromQuery] string? tag = null)
         {
             var objects = JsonSerializer
