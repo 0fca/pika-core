@@ -22,14 +22,14 @@ services:
   proxy:
     image: traefik:latest
     ports:
-      - "8081:8081"
+      - "80:8081"
       - "8080:8080"
     labels:
       - "traefik.http.routers.api.rule=Host(`traefik.cloud.localhost`)"
       - "traefik.http.routers.api.service=api@internal"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.api.dashboard=true"
-      - "traefik.entrypoints.web.address=:8081"
+      - "traefik.entrypoints.web.address=:80"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
