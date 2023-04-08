@@ -7,16 +7,33 @@ services:
       - /srv/fms/certs/prod/:/Pika.Core/certs
       - /srv/fms/wwwroot/lib:/Pika.Core/wwwroot/lib
     ports:
-      - "5000:5000"
+      - "5000"
     command: ['dotnet', "PikaCore.dll"]
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 2
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
     restart: always
     networks:
       - backend
+    labels:
+      - "traefik.http.routers.pika-core.rule=Host(`core.cloud.localhost`)"
+  proxy:
+    image: traefik:latest
+    ports:
+      - "80:80"
+      - "8080:8080"
+    labels:
+      - "traefik.http.routers.api.rule=Host(`traefik.cloud.localhost`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.api.dashboard=true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - backend
+
 networks:
   backend:
     name: pika-core
