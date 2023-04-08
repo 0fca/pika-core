@@ -8,6 +8,8 @@ services:
       - /srv/fms/wwwroot/lib:/Pika.Core/wwwroot/lib
     ports:
       - "5000"
+    expose:
+      - "5000"
     command: ['dotnet', "PikaCore.dll"]
     deploy:
       mode: replicated
@@ -18,7 +20,7 @@ services:
     networks:
       - backend
     labels:
-      - "traefik.http.routers.pika-core.rule=HostSNI(`*`)"
+      - "traefik.http.routers.pika-core.rule=Host(`pika-core`)"
       - "traefik.http.routers.pika-core.entrypoints=web2"
   proxy:
     image: traefik:latest
