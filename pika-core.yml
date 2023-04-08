@@ -18,14 +18,17 @@ services:
     networks:
       - backend
     labels:
-      - "traefik.http.routers.pika-core.rule=Host(`192.168.1.252`)"
+      - "traefik.http.routers.pika-core.rule=HostSNI(`*`)"
+      - "traefik.http.routers.pika-core.entrypoints=web2"
   proxy:
     image: traefik:latest
     command:
       - --providers.docker=true
       - --api=true
       - --entrypoints.web.address=:80
+      - --entrypoints.web2.address=:5000
     ports:
+      - "5000:5000"
       - "8081:80"
       - "8080:8080"
     labels:
