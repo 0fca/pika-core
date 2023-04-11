@@ -18,44 +18,30 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
-    <data name="Pika Core is a core web application of whole web system called Pika Cloud. It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem. PikaCore first web app I've ever build. I started development on .NET Core 1.1 SDK, but now I use .NET Core SDK of version {0}" xml:space="preserve">
-        <value>Pika Core jest rdzeniem mojego autorskiego cloudu - Pika Cloud. Jego głównym przeznaczeniem od samego początku było i jest udostępnianie zasobów na moim serwerze, któe gromadzę na dysku mojego serwera. Sam PikaCore to moja pierwsza aplikacja Web, zacząłem budować ją na .NET Core 1.1, jednak teraz używam do tego wersji {0}</value>
-        <comment>Pika Core is a core web application of whole web system called Pika Cloud.It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem.PikaCore first web app I've ever build. I started development on .NET Core 1.1 SDK, but now I use .NET Core SDK of version {0}</comment>
-    </data>
     <data name="This is PikaCore aka Hannah" xml:space="preserve">
         <value>To jest PikaCore aka Hannah</value>
         <comment>This is PikaCore aka Hannah</comment>
     </data>
-    <data name="Some technical stuff for those who are interested" xml:space="preserve">
-        <value>Trochę technicznych szczegółów dla tych co są zainteresowani</value>
-        <comment>Some technical stuff for those who are interested</comment>
-    </data>
-    <data name="This neat simple web app is hosted on my private server and running on" xml:space="preserve">
-        <value>Ta schludna, prosta aplikacja Web jest hostowana na moim prywatnym serwerze z zainstalowanym OS </value>
-        <comment>This neat simple web app is hosted on my private server and running on</comment>
-    </data>
-    <data name=".NET Core is the technology I used to build Pika Core, its version is" xml:space="preserve">
-        <value>Użyłem .NET Core, aby zbudować Pika Core, aktualne wersja to </value>
-        <comment>.NET Core is the technology I used to build Pika Core, its version is</comment>
-    </data>
-    <data name="All this is open source under GPL v.3.0 license" xml:space="preserve">
-        <value>Wszystko to jest na licencji GPL v.3.0</value>
-        <comment>All this is open source under GPL v.3.0 license</comment>
-    </data>
     <data name="About" xml:space="preserve">
-        <value>O aplikacji</value>
+        <value>O systemie</value>
         <comment>About</comment>
     </data>
-    <data name="What is this" xml:space="preserve">
-        <value>Co to jest</value>
-        <comment>What is this</comment>
+    <data name="It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem. " xml:space="preserve">
+        <value>Głównym przeznaczeniem od samego początku  było i jest udsotępnianie zasobów, które gromadzę na swoim prywatnym serwerze.</value>
     </data>
-    <data name="Instance: " xml:space="preserve">
-        <value>Instancja: </value>
-        <comment>Instance: </comment>
+    <data name="As for now, Pika Core uses custom solution for organizing files which I called VCOS - Virtual Categorized Object System. " xml:space="preserve">
+        <value>Na ten moment, Pika Core używa mojego własnego rozwiązania do organizacji plików, który nazwałem VCOS - Virtual Categorized Object  System.</value>
     </data>
-    <data name="Technical information" xml:space="preserve">
-        <value>Informacje techniczne</value>
-        <comment>Technical information</comment>
+    <data name="Pika Core is a first web app I've ever build." xml:space="preserve">
+        <value>Pika Core jest pierwszą aplikacją typu Web, którą kiedykolwiek napisałem.</value>
+    </data>
+    <data name="Cluster" xml:space="preserve">
+        <value>Klaster</value>
+    </data>
+    <data name="Pika Core is a subsystem of" xml:space="preserve">
+        <value>Pika Core jest częścią</value>
+    </data>
+    <data name="About System" xml:space="preserve">
+        <value>O systemie</value>
     </data>
 </root>

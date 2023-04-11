@@ -1,0 +1,38 @@
+﻿<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="About" xml:space="preserve">
+        <value>About</value>
+    </data>
+    <data name="About System" xml:space="preserve">
+        <value>About System</value>
+    </data>
+    <data name="As for now, Pika Core uses custom solution for organizing files which I called VCOS - Virtual Categorized Object System. " xml:space="preserve">
+        <value>As for now, Pika Core uses custom solution for organizing files which I called VCOS - Virtual Categorized Object System. </value>
+    </data>
+    <data name="Cluster" xml:space="preserve">
+        <value>Cluster</value>
+    </data>
+    <data name="It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem. " xml:space="preserve">
+        <value>It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem. </value>
+    </data>
+    <data name="Pika Core is a first web app I've ever build." xml:space="preserve">
+        <value>Pika Core is a first web app I've ever build.</value>
+    </data>
+    <data name="Pika Core is a subsystem of" xml:space="preserve">
+        <value>Pika Core is a subsystem of</value>
+    </data>
+    <data name="This is PikaCore aka Hannah" xml:space="preserve">
+        <value>This is PikaCore aka Hannah</value>
+    </data>
+</root>

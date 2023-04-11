@@ -11,7 +11,22 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
-    <data name="Pika Core is a core web application of whole web system called Pika Cloud. It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem. PikaCore is a first web app I've ever build. I started development on .NET Core 1.1 SDK, but now I use .NET Core SDK of version {0}" xml:space="preserve">
+    <data name="Pika Core is a subsystem of" xml:space="preserve">
         <value />
+    </data>
+    <data name="About" xml:space="preserve">
+        
+    </data>
+    <data name="Cluster" xml:space="preserve">
+    </data>
+    <data name="This is PikaCore aka Hannah" xml:space="preserve">
+    </data>
+    <data name="About System" xml:space="preserve">
+    </data>
+    <data name="It's main purpose from its very beginning was to give an easy access to all resources I gather on my server's filesystem. " xml:space="preserve">
+    </data>
+    <data name="As for now, Pika Core uses custom solution for organizing files which I called VCOS - Virtual Categorized Object System. " xml:space="preserve">
+    </data>
+    <data name="Pika Core is a first web app I've ever build." xml:space="preserve">
     </data>
 </root>
