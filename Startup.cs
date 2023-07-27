@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,7 +14,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
-using AspNetCoreRateLimit;
 using AutoMapper;
 using Hangfire;
 using Hangfire.Redis;
@@ -233,7 +231,6 @@ namespace PikaCore
                         "https://core.cloud.localhost:5001")
                     .AllowAnyHeader();
             }));
-            services.AddHealthChecks();
 
             services.AddSignalR(hubOptions =>
                 {
@@ -264,7 +261,8 @@ namespace PikaCore
                 });
             services.AddRazorPages()
                 .AddRazorPagesOptions(options => { options.Conventions.AuthorizeAreaFolder("Admin", "/Index"); });
-            
+            services.AddHealthChecks();
+ 
             services.AddResponseCompression(opt =>
             {
                 opt.EnableForHttps = true;
@@ -387,9 +385,7 @@ namespace PikaCore
                         HttpTransportType.ServerSentEvents |
                         HttpTransportType.WebSockets;
                 });
-                endpoints.MapHealthChecks("/core/health")
-                    .RequireCors("CorsPolicy")
-                    .RequireHost("localhost", "core.localhost");
+                endpoints.MapHealthChecks("/Health");
             });
             if (env.IsDevelopment())
             {
