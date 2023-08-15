@@ -231,6 +231,7 @@ namespace PikaCore
                 builder
                     .WithMethods("POST", "GET")
                     .WithOrigins("https://core.lukas-bownik.net",
+                        "https://lukas-bownik.net",
                         "https://me.lukas-bownik.net",
                         "https://www.lukas-bownik.net",
                         "http://core.cloud.localhost:5000",
