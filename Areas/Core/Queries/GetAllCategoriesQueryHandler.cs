@@ -37,19 +37,6 @@ public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuer
     }
     public async Task<IEnumerable<CategoriesView>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
     {
-        /*var guid = await _distributedCache.GetStringAsync("category.streamids", cancellationToken);
-        var gsList = JsonSerializer.Deserialize<List<Guid>>(guid);
-        var objectInfos = new List<Category>();
-        foreach (var gid in gsList)
-        {
-            try
-            {
-                objectInfos.Add(await _aggregateRepository.LoadAsync<Category>(gid, ct: cancellationToken));
-            }
-            catch (InvalidOperationException e)
-            {
-            }
-        }*/
         var categories = await _aggregateRepository.GetAll();
         return new List<CategoriesView>(categories);
     }

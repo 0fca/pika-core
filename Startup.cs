@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using AutoMapper;
 using Hangfire;
+using Hangfire.Dashboard.Resources;
 using Hangfire.Redis;
 using Marten;
 using Marten.Events.Projections;
@@ -44,6 +45,9 @@ using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Identity.Extensions;
 using PikaCore.Areas.Identity.Filters;
 using PikaCore.Infrastructure.Adapters;
+using PikaCore.Infrastructure.Adapters.Console;
+using PikaCore.Infrastructure.Adapters.Console.Commands;
+using PikaCore.Infrastructure.Adapters.Console.Queries;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
 using Serilog;
@@ -76,25 +80,25 @@ namespace PikaCore
                     c.Connection(Configuration.GetConnectionString("DefaultConnection"));
                     if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!.Equals("Development"))
                     {
-                        c.AutoCreateSchemaObjects = AutoCreate.All;
+                        c.AutoCreateSchemaObjects = AutoCreate.CreateOrUpdate;
                     }
 
                     c.Projections.Add<BucketsProjection>(ProjectionLifecycle.Inline);
                     c.Projections.Add<CategoriesProjection>(ProjectionLifecycle.Inline);
+                    c.Projections.Add<CommandsProjection>(ProjectionLifecycle.Inline);
                 })
                 .UseLightweightSessions();
             services.AddDbContext<StorageIndexContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-
-
+            
             services.AddStackExchangeRedisCache(a =>
             {
                 a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
                 a.ConfigurationOptions = new ConfigurationOptions
                 {
                     DefaultDatabase = int.Parse(Configuration.GetSection("Redis")["RedisDb"] ?? "0"),
-                    EndPoints = { Configuration.GetConnectionString("RedisConnection") } 
-                }; 
+                    EndPoints = { Configuration.GetConnectionString("RedisConnection") }
+                };
             });
             var redis = ConnectionMultiplexer.Connect(new ConfigurationOptions
             {
@@ -151,7 +155,7 @@ namespace PikaCore
                     });
                 })
                 .AddValidation(o =>
-            {
+                {
                     o.SetIssuer(Configuration.GetSection("Auth")["Authority"]);
                     o.UseIntrospection()
                         .SetClientId(Configuration.GetSection("Auth")["ClientId"])
@@ -187,6 +191,7 @@ namespace PikaCore
             services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
+            services.AddTransient<CloudConsoleAdapter>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<AggregateRepository>();
             services.AddTransient<ISystemService, SystemService>();
@@ -196,6 +201,7 @@ namespace PikaCore
             services.AddSingleton<IMinioService, MinioService>();
             services.AddTransient<CategoryRepository>();
             services.AddTransient<BucketRepository>();
+            services.AddTransient<CommandRepository>();
             services.AddTransient<IStorage, MinioStorage>();
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
@@ -262,7 +268,7 @@ namespace PikaCore
             services.AddRazorPages()
                 .AddRazorPagesOptions(options => { options.Conventions.AuthorizeAreaFolder("Admin", "/Index"); });
             services.AddHealthChecks();
- 
+
             services.AddResponseCompression(opt =>
             {
                 opt.EnableForHttps = true;
@@ -356,7 +362,7 @@ namespace PikaCore
             app.UseMinioBucketAccessAuthorization();
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
             {
-                Authorization = new [] { new HangfireAuthorizationFilter() }
+                Authorization = new[] { new HangfireAuthorizationFilter() }
             });
             app.UseEndpoints(endpoints =>
             {
@@ -390,6 +396,7 @@ namespace PikaCore
             if (env.IsDevelopment())
             {
                 this.CreateBuckets(serviceProvider);
+                this.CreateDefaultCommands(serviceProvider);
             }
 
             if (bool.Parse(Configuration.GetSection("Workers")["RunWorkers"] ?? "true"))
@@ -445,6 +452,24 @@ namespace PikaCore
                     });
                 }
             });
+        }
+
+        private void CreateDefaultCommands(IServiceProvider serviceProvider)
+        {
+            var mediator = serviceProvider.GetService<IMediator>();
+            var defaultCommands = new List<Tuple<string, HashSet<string>, string>>
+            {
+                new(".SYSSTA", new HashSet<string>(){"TCP"}, ""),
+                new(".USRNFO", new HashSet<string>(){"ALL"}, "ofca")
+            };
+            foreach (var (name, headers, body) in defaultCommands)
+            {
+                var exists = mediator.Send(new AnyExistsByNameQuery(name)).Result;
+                if (!exists)
+                {
+                    mediator.Send(new CreateConsoleCmdCommand(name, headers, body));
+                }
+            }
         }
 
         #region LifetimeHelpers
