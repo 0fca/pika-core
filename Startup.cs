@@ -234,7 +234,8 @@ namespace PikaCore
                         "https://me.lukas-bownik.net",
                         "https://www.lukas-bownik.net",
                         "http://core.cloud.localhost:5000",
-                        "https://core.cloud.localhost:5001")
+                        "https://core.cloud.localhost:5001",
+                        "http://192.168.56.1:8080")
                     .AllowAnyHeader();
             }));
 
@@ -323,7 +324,7 @@ namespace PikaCore
             }
             else
             {
-                app.UseExceptionHandler("/Core/Error");
+                //app.UseExceptionHandler("/Core/Error");
                 app.UseStatusCodePagesWithRedirects("/Core/Status/{0}");
                 app.UseCertificateForwarding();
             }

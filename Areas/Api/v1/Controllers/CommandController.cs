@@ -36,6 +36,10 @@ public class CommandController : ControllerBase
             commandsView.Body = body;
         }
         var output = _cloudConsoleAdapter.ExecuteCommand(commandsView);
+        if (output.Contains("BAD-RQST-HDR"))
+        {
+            return BadRequest();
+        }
         return Ok(new
         {
             output

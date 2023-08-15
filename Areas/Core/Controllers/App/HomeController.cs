@@ -75,6 +75,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         public IActionResult Error([FromQuery] ErrorViewModel? errorViewModel)
         {
             errorViewModel!.Url = Request.Headers["Referer"];
+            this.Response.StatusCode = errorViewModel.ErrorCode;
             return errorViewModel != null ? View(errorViewModel) : View(nameof(Index));
         }
         

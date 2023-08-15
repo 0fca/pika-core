@@ -35,8 +35,20 @@ public sealed class CloudConsoleAdapter : IDisposable
         var data = new byte[4096];
         var b = stream.Read(data, 0, data.Length);
         var responseData = System.Text.Encoding.ASCII.GetString(data, 0, b);
-        _client.Close();
+
+        this.ProperlyClose(); 
         return responseData.TrimEnd();
+    }
+
+    private void ProperlyClose()
+    {
+        var stream = this._client.GetStream();
+        var bytes = new ReadOnlySpan<byte>(new byte[]{255});
+        if (stream.CanWrite)
+        {
+            stream.Write(bytes);
+        }
+        _client.Close();
     }
 
     public void Dispose()
