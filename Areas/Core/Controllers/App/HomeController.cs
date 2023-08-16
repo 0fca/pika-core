@@ -25,11 +25,6 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [ViewData] public string? InfoMessage { get; set; } = "";
 
-        public IActionResult Test()
-        {
-            return Ok(MimeTypes.GetMimeType("Pacific_Rim_2_en.mp4"));
-        }
-        
         [Route("/[area]")]
         [Route("", Name = "CoreIndex")]
         public async Task<IActionResult> Index()

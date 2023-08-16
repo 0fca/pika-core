@@ -463,7 +463,8 @@ namespace PikaCore
             {
                 new(".SYSSTA", new HashSet<string>(){"TCP"}, ""),
                 new(".USRNFO", new HashSet<string>(){"ALL"}, "ofca"),
-                new(".DIR", new HashSet<string>(){ "S1", "0" }, "")
+                new(".DIR", new HashSet<string>(){ "S1", "0" }, ""),
+                new(".S.CRT", new HashSet<string>(), ""),
             };
             foreach (var (name, headers, body) in defaultCommands)
             {
