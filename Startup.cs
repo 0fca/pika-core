@@ -462,7 +462,8 @@ namespace PikaCore
             var defaultCommands = new List<Tuple<string, HashSet<string>, string>>
             {
                 new(".SYSSTA", new HashSet<string>(){"TCP"}, ""),
-                new(".USRNFO", new HashSet<string>(){"ALL"}, "ofca")
+                new(".USRNFO", new HashSet<string>(){"ALL"}, "ofca"),
+                new(".DIR", new HashSet<string>(){ "S1", "0" }, "")
             };
             foreach (var (name, headers, body) in defaultCommands)
             {
