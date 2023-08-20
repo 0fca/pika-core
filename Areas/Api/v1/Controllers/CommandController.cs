@@ -19,7 +19,7 @@ public class CommandController : ControllerBase
     private readonly IMediator _mediator;
     
     public CommandController(CloudConsoleAdapter cloudConsoleAdapter,
-        IMediator mediator)
+                             IMediator mediator)
     {
         this._cloudConsoleAdapter = cloudConsoleAdapter;
         this._mediator = mediator;

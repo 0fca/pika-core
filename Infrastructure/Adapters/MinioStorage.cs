@@ -24,7 +24,7 @@ public class MinioStorage : IStorage
     private readonly IMapper _mapper;
     private readonly IDistributedCache _cache;
     private readonly IMinioService _minioService;
-    
+
     public MinioStorage(IMediator mediator,
         IMapper mapper,
         IDistributedCache cache,
@@ -53,6 +53,7 @@ public class MinioStorage : IStorage
         {
             return categoriesViews;
         }
+
         var categoriesIds = bucketsToCategories![bucketId.ToString()];
         foreach (var id in categoriesIds)
         {
@@ -76,21 +77,28 @@ public class MinioStorage : IStorage
         return statObject == null ? null : _mapper.Map<ObjectStat, ObjectInfo>(statObject);
     }
 
-    public async Task<Tuple<MemoryStream, string, string>> GetObjectAsStream(string bucket, 
-        string @object, 
+    public async Task<Tuple<MemoryStream, string, string>> GetObjectAsStream(string bucket,
+        string @object,
         long offset = 1024)
     {
         var returnStream = await _minioService.GetObjectAsStream(bucket, @object, offset);
         returnStream.Position = 0;
-        return new Tuple<MemoryStream, string, string>(returnStream, 
-            Path.GetFileName(@object), 
+        return new Tuple<MemoryStream, string, string>(returnStream,
+            Path.GetFileName(@object),
             MimeTypes.GetMimeType(@object));
     }
 
     public async Task<bool> UserHasBucketAccess(Guid bucketId, ClaimsPrincipal user)
     {
         var bucket = await _mediator.Send(new GetBucketByIdQuery(bucketId));
-        return user.Claims.Any(c => bucket.RoleClaims.Contains(c.Value));
+        if (bucket.RoleClaims == null)
+        {
+            throw new ApplicationException(
+                $"There was an error during downloading claims for bucket of {bucket.Id}"
+            );
+        }
+
+        return user.Claims.Any(c => bucket.RoleClaims!.Contains(c.Value));
     }
 
     public void Dispose()

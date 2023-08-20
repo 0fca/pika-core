@@ -106,5 +106,23 @@ namespace PikaCore.Infrastructure.Services
             await _minioClient.GetObjectAsync(getObjectArgs);
             return outputStream;
         }
+
+        public async Task PutObject(string fileName, Stream s, string bucket)
+        {
+            try
+            {
+                var putObjectArgs = new PutObjectArgs()
+                    .WithBucket(bucket)
+                    .WithStreamData(s)
+                    .WithObject(fileName)
+                    .WithObjectSize(s.Length)
+                    .WithContentType(MimeTypes.GetMimeType(fileName));
+                await _minioClient.PutObjectAsync(putObjectArgs);
+            }
+            catch (Exception e)
+            {
+                throw new ApplicationException(e.Message);
+            }
+        }
     }
 }

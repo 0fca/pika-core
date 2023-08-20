@@ -14,5 +14,6 @@ namespace PikaCore.Infrastructure.Services
         public Task<bool> StatObject(string bucket, string @object);
         public Task<ObjectStat?> ObjectInformation(string bucket, string @object);
         public Task<MemoryStream> GetObjectAsStream(string bucket, string @object, long offset = 1024);
+        public Task PutObject(string fileName, Stream s, string bucket);
     }
 }

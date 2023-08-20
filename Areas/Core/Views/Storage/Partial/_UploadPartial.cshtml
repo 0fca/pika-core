@@ -1,10 +1,13 @@
-﻿@model string
-@inject IViewLocalizer Localizer
+﻿@inject IViewLocalizer Localizer
+@model Tuple<string, string>
+@{
+    var bucketId = Model.Item1;
+    var categoryId = Model.Item2;
+}
 <div id="upload-modal" class="modal modal-fixed-footer">
     <form method="post" enctype="multipart/form-data" id="upload-form">
         <div class="modal-content container">
             <h4>@Localizer["Upload one or more files"]</h4>
-            
             <div class="row">
                 <p id="output-paragraph" class="transparent">
                     <output id="result"></output>
@@ -52,11 +55,12 @@
         if (getSummarySize() === 0) {
             uploadButton.setAttribute("disabled", "true");
         }
-        if (getSummarySize() >= 268435456) {
+        if (getSummarySize() >= 67110000) {
             messageLabel.innerText = "@Localizer["File or files are too big to upload it at once"]";
             uploadButton.setAttribute("disabled", "true");
             deleteAllFiles();
         } else if (uploadButton.hasAttribute("disabled")) {
+            console.log("Button enabled");
             uploadButton.removeAttribute("disabled");
         }
     });
@@ -71,23 +75,24 @@
             const formData = new FormData(oFormElement);
     
             try {
-                @{
-                    var replaced = @Model.Replace("\\", "\\\\");
-                }
-                const response = await fetch("/Core/Storage/Upload?returnPath=@replaced", {
+                const response = await fetch("/Core/Storage/Upload?categoryId=@categoryId&bucketId=@bucketId", {
                     method: 'POST',
                     body: formData
                 });
                 
                 response.text()
                 .then(function(text) {
-                    resultElement.value = text;
                      if(response.status === 202){
                          const fileRefLink = document.createElement('a');
                          fileRefLink.href = response.headers.get("Location");
                          fileRefLink.text = "@Localizer["You can see your file here"]";
                          fileRefLink.setAttribute("class", "indigo-text");
                          resultElement.appendChild(fileRefLink);
+                         resultElement.value = JSON.parse(text).message;
+                     }
+                     if (response.status === 500 || response.status === 404){
+                         resultElement.value = "@Localizer["Wystąpił błąd w trakcie wgrywania pliku do cloudu"]";
+                         console.log(text);
                      }
                  })
                 } catch (error) {

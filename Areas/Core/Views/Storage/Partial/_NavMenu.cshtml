@@ -1,9 +1,12 @@
 ﻿@inject IViewLocalizer Localizer
-@{
-    var user = Context.User.Identity?.Name;
-}
-<ul id="menu" style="display: none;" class="nav-context-menu">
-    <li id="download"><span class="material-icons">cloud_download</span></li>
+<ul id="menu" class="nav-context-menu">
+    @if (Context.User.Identity!.IsAuthenticated && Context.User.IsInRole("Administrator")
+         || Context.User.Identity!.IsAuthenticated && Context.User.IsInRole("Moderator"))
+    {
+        <li>
+            <a class="teal-text modal-trigger" href="#upload-modal"><span class="material-icons">cloud_upload</span></a>
+        </li>
+    }
 </ul>
 <script>
     $(document).ready(() => {
@@ -12,7 +15,7 @@
         infoSlide.hide();
         resetInfoView();
     });
-    $('button[type=button]').on('click', (e) => {
+    $('button[data-object-name]').on('click', (e) => {
         const infoSlide = $('#info-slide');   
         if(!infoSlide.is(':visible')){
           infoSlide.show();

@@ -7,53 +7,6 @@ namespace PikaCore.Infrastructure.Adapters.Filesystem
 {
     public static class UnixHelper
     {
-        public static string GetParent(string path)
-        {
-            var separator = Path.DirectorySeparatorChar.ToString();
-            if (!path.Equals(separator) && path.EndsWith(separator))
-            {
-                path = path.Remove(path.Length - 1, 1);
-            }
-            
-            var resultPath = separator;
-            var pathParts = path.Split(separator);
-            pathParts[^1] = null;
-
-            return pathParts.Where(part => !string.IsNullOrEmpty(part)).Aggregate(resultPath, (current, part) => string.Concat(current, separator, part));
-        }
-
-        private static void ClearPath(ref string path)
-        {
-            var separator = Path.DirectorySeparatorChar.ToString();
-            var pathParts = path.Split(separator);
-
-            if (Path.IsPathRooted(path))
-            {
-                path = pathParts.Where(part => !string.IsNullOrEmpty(part)).Aggregate(separator,
-                    (current, part) =>
-                        (current.Equals(separator)
-                            ? string.Concat(current, part.Trim())
-                            : string.Concat(current, separator, part.Trim())));
-            }
-            else
-            {
-                throw new InvalidPathException("The path must be rooted!");
-            }
-        }
-
-        public static string MapToSystemPath(string hostPath)
-        {
-            var systemPath = string.Concat("/", hostPath.Split(Path.GetPathRoot(hostPath))[1]);
-            if (systemPath.Contains("\\"))
-            {
-                systemPath = systemPath.Replace('\\', '/');
-            }
-
-            ClearPath(ref systemPath);
-
-            return systemPath;
-        }
-
         public static string DetectUnitBySize(long i)
         {
             string[] units = { "B", "kiB", "MiB", "GiB", "TiB" };

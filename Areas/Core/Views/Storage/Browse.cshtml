@@ -113,12 +113,13 @@
 
     </div>
 
-    //@await Html.PartialAsync("Partial/_UploadPartial.cshtml", lastPath)
+    @await Html.PartialAsync("Partial/_UploadPartial.cshtml", 
+               new Tuple<string, string>(Model.BucketId, Model.CategoryId))
 
     @await Html.PartialAsync("Partial/_InformationSidePartial.cshtml")
 
     <!--<script src="~/js/media.js" asp-append-version="true" defer=""></script>-->
-    <!--<script src="~/js/file.js" asp-append-version="true" defer=""></script>-->
+    <script src="~/js/file.js" asp-append-version="true" defer=""></script>
     <script src="~/lib/jquery-ui-1.12.1/jquery-ui.min.js" asp-append-version="true" defer=""></script>
     <link rel="stylesheet" href="~/lib/jquery-ui-1.12.1/jquery-ui.min.css" asp-append-version="true"/>
     <link rel="stylesheet" href="//cdn.datatables.net/1.13.2/css/jquery.dataTables.min.css"/>

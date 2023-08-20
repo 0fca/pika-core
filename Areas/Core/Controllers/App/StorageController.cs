@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
@@ -22,6 +23,7 @@ using PikaCore.Areas.Core.Queries;
 using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Identity.Attributes;
 using PikaCore.Infrastructure.Adapters;
+using PikaCore.Infrastructure.Adapters.Filesystem.Commands;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services.Helpers;
 using Serilog;
@@ -41,25 +43,25 @@ namespace PikaCore.Areas.Core.Controllers.App
         private readonly IStorage _storage;
         private readonly IDistributedCache _cache;
         private readonly IConfiguration _configuration;
+
         #region TempDataMessages
 
         [TempData(Key = "showGenerateUrlPartial")]
         public bool ShowGenerateUrlPartial { get; set; }
-        
-        [TempData(Key = "returnMessage")] 
-        public string ReturnMessage { get; set; } = "";
+
+        [TempData(Key = "returnMessage")] public string ReturnMessage { get; set; } = "";
 
         #endregion
 
         public StorageController(IUrlGenerator iUrlGenerator,
-               StorageIndexContext storageIndexContext,
-               IdDataProtection idDataProtection,
-               IStringLocalizer<StorageController> stringLocalizer,
-               IMediator mediator,
-               IMapper mapper,
-               IStorage service,
-               IDistributedCache cache,
-               IConfiguration configuration)
+            StorageIndexContext storageIndexContext,
+            IdDataProtection idDataProtection,
+            IStringLocalizer<StorageController> stringLocalizer,
+            IMediator mediator,
+            IMapper mapper,
+            IStorage service,
+            IDistributedCache cache,
+            IConfiguration configuration)
         {
             _urlGeneratorService = iUrlGenerator;
             _storageIndexContext = storageIndexContext;
@@ -75,7 +77,8 @@ namespace PikaCore.Areas.Core.Controllers.App
         [HttpGet]
         [AllowAnonymous]
         [Route("[area]/[controller]/")]
-        public async Task<IActionResult> Index([FromQuery(Name = "CurrentBucketName")]string currentBucketName = "storage")
+        public async Task<IActionResult> Index(
+            [FromQuery(Name = "CurrentBucketName")] string currentBucketName = "storage")
         {
             var role = HttpContext.User.Claims.FirstOrDefault(c => c.Type.Equals(ClaimTypes.Role));
             var buckets = await _storage.GetBucketsForRole(role?.Value ?? RoleString.User);
@@ -91,6 +94,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 ViewData["ReturnMessage"] = _stringLocalizer.GetString("Wystąpił problem z ładowaniem bucketów").Value;
                 return View();
             }
+
             var categoriesViews = await _storage.GetCategoriesForBucket(currentBucket.Id);
             var model = new IndexViewModel
             {
@@ -101,13 +105,13 @@ namespace PikaCore.Areas.Core.Controllers.App
             };
             return View(model);
         }
-        
+
         [HttpGet]
         [Route("[area]/[controller]/[action]")]
         [AuthorizeUserBucketAccess]
         [AllowAnonymous]
-        public async Task<IActionResult> Browse([FromQuery] string categoryId, 
-            [FromQuery] string bucketId, 
+        public async Task<IActionResult> Browse([FromQuery] string categoryId,
+            [FromQuery] string bucketId,
             [FromQuery] int offset,
             [FromQuery] int count = 10,
             [FromQuery] string? tag = null)
@@ -128,7 +132,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             {
                 Objects = objects,
                 SelectedTag = tag,
-                SelectedPage = (offset + count)/count,
+                SelectedPage = (offset + count) / count,
                 PerPage = count,
                 Total = total,
                 OnePageMaxTotal = int.Parse(_configuration.GetSection("Storage")["OnePageMaxTotal"] ?? "2000"),
@@ -140,19 +144,20 @@ namespace PikaCore.Areas.Core.Controllers.App
         }
 
         [HttpGet]
-        [Route("/[controller]/[action]/{name?}")]
+        //[Route("/[controller]/[action]/{name?}")]
         public async Task<IActionResult> GenerateUrl(string name, string returnUrl)
         {
             var entryName = _idDataProtection.Decode(name);
             var offset = int.Parse(Get("Offset"));
             var count = int.Parse(Get("Count"));
-            
+
             if (!string.IsNullOrEmpty(entryName))
             {
                 ShowGenerateUrlPartial = false;
                 try
                 {
-                    var s = _storageIndexContext.IndexStorage.ToList().Find(record => record.AbsolutePath.Equals(entryName));
+                    var s = _storageIndexContext.IndexStorage.ToList()
+                        .Find(record => record.AbsolutePath.Equals(entryName));
 
                     if (s == null)
                     {
@@ -160,7 +165,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                         {
                             AbsolutePath = entryName,
                             Urlhash = _urlGeneratorService.GenerateId(entryName),
-                            UserId = await IdentifyUser(),
+                            UserId = IdentifyUser(),
                             Expires = true
                         };
                     }
@@ -168,13 +173,14 @@ namespace PikaCore.Areas.Core.Controllers.App
                     {
                         s.ExpireDate = StorageIndexRecord.ComputeDateTime();
                     }
+
                     _storageIndexContext.Update(s);
                     await _storageIndexContext.SaveChangesAsync();
 
                     TempData["urlhash"] = s.Urlhash;
                     ShowGenerateUrlPartial = true;
                     var port = HttpContext.Request.Host.Port;
-                    TempData["host"] = HttpContext.Request.Host.Host + 
+                    TempData["host"] = HttpContext.Request.Host.Host +
                                        (port != null ? ":" + HttpContext.Request.Host.Port : "");
                     TempData["protocol"] = "https";
                     TempData["returnUrl"] = returnUrl;
@@ -191,12 +197,12 @@ namespace PikaCore.Areas.Core.Controllers.App
             ReturnMessage = _stringLocalizer.GetString("Couldn't generate token for that resource").Value;
             return RedirectToAction(nameof(Browse), new { @path = returnUrl });
         }
-        
+
         [HttpGet]
         [AllowAnonymous]
         [AuthorizeUserBucketAccess]
-        public async Task<ActionResult> Download([FromQuery] string bucketId, 
-            [FromQuery] string categoryId, 
+        public async Task<ActionResult> Download([FromQuery] string bucketId,
+            [FromQuery] string categoryId,
             [FromQuery] string objectName)
         {
             var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(bucketId)));
@@ -210,10 +216,37 @@ namespace PikaCore.Areas.Core.Controllers.App
             return File(memoryStream, mime, returnName);
         }
 
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        [Authorize(Roles = "Moderator, Administrator")]
+        [AuthorizeUserBucketAccess]
+        [Route("[area]/[controller]/[action]")]
+        public async Task<IActionResult> Upload([FromForm] List<IFormFile> files,
+            [FromQuery] string bucketId,
+            [FromQuery] string categoryId
+        )
+        {
+            var size = GetFilesSummarySize(files);
+            if (size >= long.Parse(this._configuration.GetSection("Storage")["MaxUploadSize"] ?? "0"))
+            {
+                return BadRequest();
+            }
+            
+            var response = await _mediator.Send(new SanitizeTemporaryFileCommand(files, bucketId));
+            
+            var message = _stringLocalizer.GetString( "Pomyślnie dodano pliki do kolejki.").Value;
+            var downloadUrl = $"{response}";
+            return Accepted(new
+            {
+                message,
+                downloadUrl
+            });
+        }
+
         [HttpGet]
         [AllowAnonymous]
         [AuthorizeUserBucketAccess]
-        public async Task<IActionResult> Information([FromQuery] string bucketId, 
+        public async Task<IActionResult> Information([FromQuery] string bucketId,
             [FromQuery] string categoryId,
             [FromQuery] string objectName)
         {
@@ -230,22 +263,28 @@ namespace PikaCore.Areas.Core.Controllers.App
             viewModel.BucketId = bucketId;
             return View(viewModel);
         }
-        
+
         #region HelperMethods
 
-        private async Task<string> IdentifyUser()
+        private static string IdentifyUser()
         {
             return "User";
         }
+
+        private static long GetFilesSummarySize(IEnumerable<IFormFile> files)
+        {
+            return files.Aggregate(0L, (i, file) => i + file.Length);
+        }
+
         #endregion
 
         #region CookieHelperMethods
-        
+
         private string Get(string key)
         {
-            return HttpContext.Request.Cookies[key];
+            return HttpContext.Request.Cookies[key] ?? "";
         }
-        
+
         #endregion
     }
 }

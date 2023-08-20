@@ -1,53 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security;
 
 namespace PikaCore.Infrastructure.Adapters.Filesystem
 {
     public static class FileSecurityHelper
     {
-        public static string ProcessTemporaryStoredFile(string originalEncodedName,
-            FileStream? fileStream, 
+        public static void ProcessTemporaryStoredFile(
+            string originalEncodedName,
+            Stream fileStream,
             List<string> permittedExtensions,
-            List<string> permittedMimes,
-            long sizeLimit,
-            bool isAdmin)
+            List<string> permittedMimes
+        )
         {
-            if (fileStream == null)
+            if (fileStream == null || permittedMimes.Count == 0 || permittedExtensions.Count == 0)
             {
-                return "Error during sanitizing files.";
+                throw new SecurityException(
+                    "Invalid configuration or stream, cannot validate file contents, aborting"
+                );
             }
 
             try
             {
                 if (fileStream.Length == 0)
                 {
-                   return "The file is empty.";
+                    throw new SecurityException("The file is empty.");
                 }
 
-                if (fileStream.Length > sizeLimit)
-                {
-                    var megabyteSizeLimit = sizeLimit / 1048576;
-                    return $"The file exceeds {megabyteSizeLimit:N1} MB.";
-                }
                 if (!IsValidFileExtensionAndMime(originalEncodedName,
-                    fileStream, 
-                    permittedExtensions,
-                    permittedMimes)
-                && !isAdmin)
+                        fileStream,
+                        permittedExtensions,
+                        permittedMimes))
                 {
-                    return "The file type isn't permitted or the file's MIME type doesn't match the file's extension.";
+                    throw new SecurityException(
+                        "The file type isn't permitted or the file's MIME type doesn't match the file's extension."
+                    );
                 }
-                return "";
             }
             catch (Exception ex)
             {
-                return "The upload failed." + $" Error: {ex.HResult}";
+                throw new SecurityException($"Sanitization failed: {ex.Message}");
             }
         }
 
         private static bool IsValidFileExtensionAndMime(string originalEncodedName,
-            FileStream data, 
+            Stream data,
             ICollection<string> permittedExtensions,
             ICollection<string> permittedMimes)
         {
@@ -57,8 +55,8 @@ namespace PikaCore.Infrastructure.Adapters.Filesystem
             }
 
             var ext = Path.GetExtension(originalEncodedName);
-            var mime = MimeAssistant.GetMimeType(data.Name);
-            
+            var mime = MimeTypes.GetMimeType(originalEncodedName);
+
             return !string.IsNullOrEmpty(ext) && (permittedExtensions.Contains(ext) && permittedMimes.Contains(mime));
         }
     }
