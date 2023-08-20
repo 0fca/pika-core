@@ -8,7 +8,7 @@ WORKDIR /Pika.Core
 COPY . .
 RUN dotnet publish PikaCore.csproj -c Release -o out
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /Pika.Core
 COPY --from=build-env /Pika.Core/out .
 EXPOSE 5000
