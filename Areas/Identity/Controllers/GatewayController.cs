@@ -57,14 +57,13 @@ public class GatewayController : Controller
         try
         {
             var token = await _oidcService.GetAccessToken(loginViewModel);
-            var handler = new JwtSecurityTokenHandler();
+            /*var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token);
-            var jwst = jsonToken as JwtSecurityToken;
+            var jwst = jsonToken as JwtSecurityToken;*/
             this.HttpContext.Response.Cookies.Append(".AspNet.Identity", token, new CookieOptions
             {
                 Secure = true,
                 HttpOnly = true,
-                Expires = jwst!.ValidTo.ToLocalTime(),
                 SameSite = SameSiteMode.None,
                 Domain = _configuration.GetSection("Auth")["CookieDomain"]
             });
@@ -80,7 +79,6 @@ public class GatewayController : Controller
     }
 
     [HttpPost]
-    [AutoValidateAntiforgeryToken]
     [ActionName("Logout")]
     public async Task<IActionResult> Logout()
     {

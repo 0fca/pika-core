@@ -4,7 +4,7 @@ using MediatR;
 
 namespace PikaCore.Areas.Core.Commands;
 
-public class UpdateCategoryCommand : IRequest
+public class UpdateCategoryCommand : IRequest<Unit>
 {
     public Guid Guid { get; set; }
     public string Name { get; set; }

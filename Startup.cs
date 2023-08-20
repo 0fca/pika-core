@@ -144,7 +144,7 @@ namespace PikaCore
                 .AddClient(o =>
                 {
                     o.AllowPasswordFlow();
-                    o.DisableTokenStorage();
+                    o.AllowRefreshTokenFlow();
                     o.UseSystemNetHttp()
                         .SetProductInformation(typeof(Program).Assembly);
                     o.AddRegistration(new OpenIddictClientRegistration
@@ -157,6 +157,7 @@ namespace PikaCore
                 .AddValidation(o =>
                 {
                     o.SetIssuer(Configuration.GetSection("Auth")["Authority"]);
+                    o.UseDataProtection();
                     o.UseIntrospection()
                         .SetClientId(Configuration.GetSection("Auth")["ClientId"])
                         .SetClientSecret(Configuration.GetSection("Auth")["ClientSecret"]);
@@ -278,7 +279,7 @@ namespace PikaCore
                 opt.EnableForHttps = true;
                 opt.MimeTypes = new[] { "image/jpeg", "image/png", "image/gif" };
             });
-            services.AddMediatR(typeof(Startup));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddMvc()

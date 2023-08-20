@@ -77,7 +77,8 @@ namespace PikaCore.Areas.Core.Controllers.App
         [AllowAnonymous]
         [Route("[area]/[controller]/")]
         public async Task<IActionResult> Index(
-            [FromQuery(Name = "CurrentBucketName")] string currentBucketName = "storage")
+            [FromQuery(Name = "CurrentBucketName")]
+            string currentBucketName = "storage")
         {
             var role = HttpContext.User.Claims.FirstOrDefault(c => c.Type.Equals(ClaimTypes.Role));
             var buckets = await _storage.GetBucketsForRole(role?.Value ?? RoleString.User);
@@ -144,57 +145,27 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         [HttpGet]
         //[Route("/[controller]/[action]/{name?}")]
-        public async Task<IActionResult> GenerateUrl(string name, string returnUrl)
+        public async Task<IActionResult> GenerateUrl(string name, string bucketId, string categoryId)
         {
-            var entryName = _idDataProtection.Decode(name);
             var offset = int.Parse(Get("Offset"));
             var count = int.Parse(Get("Count"));
 
-            if (!string.IsNullOrEmpty(entryName))
+            ShowGenerateUrlPartial = false;
+            try
             {
-                ShowGenerateUrlPartial = false;
-                try
-                {
-                    var s = _storageIndexContext.IndexStorage.ToList()
-                        .Find(record => record.AbsolutePath.Equals(entryName));
-
-                    if (s == null)
-                    {
-                        s = new StorageIndexRecord
-                        {
-                            AbsolutePath = entryName,
-                            Urlhash = _urlGeneratorService.GenerateId(entryName),
-                            UserId = IdentifyUser(),
-                            Expires = true
-                        };
-                    }
-                    else if (s.ExpireDate.Date <= DateTime.Now.Date)
-                    {
-                        s.ExpireDate = StorageIndexRecord.ComputeDateTime();
-                    }
-
-                    _storageIndexContext.Update(s);
-                    await _storageIndexContext.SaveChangesAsync();
-
-                    TempData["urlhash"] = s.Urlhash;
-                    ShowGenerateUrlPartial = true;
-                    var port = HttpContext.Request.Host.Port;
-                    TempData["host"] = HttpContext.Request.Host.Host +
-                                       (port != null ? ":" + HttpContext.Request.Host.Port : "");
-                    TempData["protocol"] = "https";
-                    TempData["returnUrl"] = returnUrl;
-                    return RedirectToAction(nameof(Browse), new { @path = returnUrl, offset, count });
-                }
-                catch (InvalidOperationException ex)
-                {
-                    Log.Error(ex, "StorageController#GenerateUrl");
-                    ReturnMessage = ex.Message;
-                    return RedirectToAction(nameof(Browse), new { @path = returnUrl, offset, count });
-                }
+                ShowGenerateUrlPartial = true;
+                var port = HttpContext.Request.Host.Port;
+                TempData["host"] = HttpContext.Request.Host.Host +
+                                   (port != null ? ":" + HttpContext.Request.Host.Port : "");
+                TempData["protocol"] = "https";
+                return RedirectToAction(nameof(Browse), new { offset, count });
             }
-
-            ReturnMessage = _stringLocalizer.GetString("Couldn't generate token for that resource").Value;
-            return RedirectToAction(nameof(Browse), new { @path = returnUrl });
+            catch (InvalidOperationException ex)
+            {
+                Log.Error(ex, "StorageController#GenerateUrl");
+                ReturnMessage = ex.Message;
+                return RedirectToAction(nameof(Browse), new { offset, count });
+            }
         }
 
         [HttpGet]
@@ -230,15 +201,13 @@ namespace PikaCore.Areas.Core.Controllers.App
             {
                 return BadRequest();
             }
-            
-            var response = await _mediator.Send(new SanitizeTemporaryFileCommand(files, bucketId));
-            
-            var message = _stringLocalizer.GetString( "Pomyślnie dodano pliki do kolejki.").Value;
-            // TODO: Retrieve data from cache
-            var downloadUrl = $"{response}";
+
+            await _mediator.Send(new SanitizeTemporaryFileCommand(files, bucketId));
+            const string actionPath = nameof(Browse);
+            var downloadUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/Core/Storage/{actionPath}" +
+                              $"?categoryId={categoryId}&bucketId={bucketId}";
             return Accepted(new
             {
-                message,
                 downloadUrl
             });
         }

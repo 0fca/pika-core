@@ -84,11 +84,11 @@
                 .then(function(text) {
                      if(response.status === 202){
                          const fileRefLink = document.createElement('a');
-                         fileRefLink.href = response.headers.get("Location");
-                         fileRefLink.text = "@Localizer["You can see your file here"]";
+                         fileRefLink.href = JSON.parse(text).downloadUrl;
+                         fileRefLink.text = "@Localizer["Plik będzie widoczny pod tym linkiem, gdy tylko będzie gotowy"]";
                          fileRefLink.setAttribute("class", "indigo-text");
+                         resultElement.value = ""; 
                          resultElement.appendChild(fileRefLink);
-                         resultElement.value = JSON.parse(text).message;
                      }
                      if (response.status === 500 || response.status === 404){
                          resultElement.value = "@Localizer["Wystąpił błąd w trakcie wgrywania pliku do cloudu"]";

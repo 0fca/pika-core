@@ -42,7 +42,6 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
         var buckets = await _mediator.Send(new GetAllBucketsQuery());
 
         var tagsCategoriesMap = new Dictionary<Guid, Dictionary<Guid, HashSet<string>>>();
-        var mimeTypes = new Winista.Mime.MimeTypes();
         foreach (var bucket in buckets)
         {
             var items = _minioService
@@ -52,8 +51,8 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
             {
                 foreach (var i in items)
                 {
-                    var mime = mimeTypes.GetMimeType(i.Key);
-                    if (mime is null || !c.Mimes.Contains(mime.Name)) continue;
+                    var mime = MimeTypes.GetMimeType(i.Key);
+                    if (string.IsNullOrEmpty(mime) || !c.Mimes.Contains(mime)) continue;
                     var tag = new List<string>();
                     if (i.Key.Contains('/'))
                     {

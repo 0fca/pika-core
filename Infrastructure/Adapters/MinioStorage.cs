@@ -8,13 +8,11 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
-using Minio;
 using Minio.DataModel;
 using Pika.Domain.Storage.Entity.View;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Queries;
 using PikaCore.Infrastructure.Services;
-using Winista.Mime;
 
 namespace PikaCore.Infrastructure.Adapters;
 
