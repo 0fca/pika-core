@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Azure;
 using Microsoft.AspNetCore.Authorization;
@@ -17,6 +18,7 @@ namespace PikaCore.Areas.Core.Controllers.App
     {
         private readonly IMessageService _messageService;
         private readonly IConfiguration _configuration;
+
         public HomeController(IMessageService messageService, IConfiguration configuration)
         {
             _messageService = messageService;
@@ -35,7 +37,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 Expires = DateTimeOffset.Now.Add(TimeSpan.FromDays(365)),
                 SameSite = SameSiteMode.Lax
             };
-            
+
             var message = (await _messageService.GetLatestMessage());
             if (message == null) return View();
             var date = message.UpdatedAt;
@@ -65,27 +67,37 @@ namespace PikaCore.Areas.Core.Controllers.App
 
             return View();
         }
-        
+
         [Route("/[area]/[action]")]
         public IActionResult Error([FromQuery] ErrorViewModel? errorViewModel)
         {
-            errorViewModel!.Url = Request.Headers["Referer"];
             this.Response.StatusCode = errorViewModel.ErrorCode;
-            return errorViewModel != null ? View(errorViewModel) : View(nameof(Index));
+            if (errorViewModel.ContentType == MediaTypeNames.Application.Json)
+            {
+                return new JsonResult(new
+                {
+                    errorViewModel.Message,
+                    errorViewModel.Url
+                });
+            }
+            return View(errorViewModel);
         }
-        
+
         [Route("/[area]/[action]/{id:int}")]
         public IActionResult Status(int id)
         {
-            return RedirectToAction("Error", 
-                new ErrorViewModel { 
-                    ErrorCode = id, 
-                    Message = "No specific error information passed", 
-                    RequestId = HttpContext.TraceIdentifier, 
-                }
+            return RedirectToAction("Error",
+                    new ErrorViewModel
+                    {
+                        ErrorCode = id,
+                        Message = "No specific error information passed",
+                        RequestId = HttpContext.TraceIdentifier,
+                        Url = HttpContext.Request.Headers["Referer"],
+                        ContentType = HttpContext.Request.ContentType
+                    }
             );
         }
-        
+
         [HttpGet]
         [Route("/[area]/[action]", Name = "SetLanguage")]
         [AllowAnonymous]
@@ -94,15 +106,17 @@ namespace PikaCore.Areas.Core.Controllers.App
             Response.Cookies.Append(
                 CookieRequestCultureProvider.DefaultCookieName,
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), 
+                new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddYears(1),
                     SameSite = SameSiteMode.Lax,
                     Domain = _configuration.GetSection("Auth")["CookieDomain"],
                     Secure = false
                 }
             );
 
-            return Redirect(string.IsNullOrEmpty(Request.Headers["Referer"].ToString()) 
-                ? returnUrl 
+            return Redirect(string.IsNullOrEmpty(Request.Headers["Referer"].ToString())
+                ? returnUrl
                 : Request.Headers["Referer"].ToString()
             );
         }

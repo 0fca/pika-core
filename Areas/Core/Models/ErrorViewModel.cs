@@ -9,5 +9,6 @@ namespace PikaCore.Areas.Core.Models
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
         public string Url { get; set; } = "Unknown";
         public string Message { get; set; } = "Unknown error occured.";
+        public string ContentType { get; set; } = "text/html";
     }
 }

@@ -261,6 +261,7 @@ namespace PikaCore
             });
 
             services.AddControllers()
+                .AddRazorRuntimeCompilation()
                 .ConfigureApiBehaviorOptions(options =>
                 {
                     options.SuppressInferBindingSourcesForParameters = true;
@@ -269,6 +270,7 @@ namespace PikaCore
                 });
             services.AddRazorPages()
                 .AddRazorPagesOptions(options => { options.Conventions.AuthorizeAreaFolder("Admin", "/Index"); });
+            
             services.AddHealthChecks();
 
             services.AddResponseCompression(opt =>
@@ -325,7 +327,7 @@ namespace PikaCore
             }
             else
             {
-                //app.UseExceptionHandler("/Core/Error");
+                app.UseExceptionHandler("/Core/Error");
                 app.UseStatusCodePagesWithRedirects("/Core/Status/{0}");
                 app.UseCertificateForwarding();
             }

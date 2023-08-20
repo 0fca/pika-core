@@ -235,6 +235,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             var response = await _mediator.Send(new SanitizeTemporaryFileCommand(files, bucketId));
             
             var message = _stringLocalizer.GetString( "Pomyślnie dodano pliki do kolejki.").Value;
+            // TODO: Retrieve data from cache
             var downloadUrl = $"{response}";
             return Accepted(new
             {
