@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
 
 RUN apt update & apt install git
 ADD "https://api.github.com/repos/0fca/Pika.Domain/commits?per_page=1" latest_commit
