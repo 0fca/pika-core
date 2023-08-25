@@ -5,12 +5,13 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace PikaCore.Areas.Core.Services
 {
-    public class HashUrlGeneratorService : IUrlGenerator
+    public class HashGeneratorService : IHashGenerator
     {
-        private static KeyDerivationPrf Prf { get; set; } = KeyDerivationPrf.HMACSHA1;
-        public string GenerateId(string aboslutePath)
+        private static KeyDerivationPrf Prf => KeyDerivationPrf.HMACSHA1;
+
+        public string GenerateId(string strToHash)
         {
-            return Hash(aboslutePath);
+            return Hash(strToHash);
         }
 
         private static string Hash(string input)
@@ -49,11 +50,6 @@ namespace PikaCore.Areas.Core.Services
             }
 
             hash = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(hash));
-        }
-
-        public void SetDerivationPrf(KeyDerivationPrf prf)
-        {
-            Prf = prf;
         }
     }
 }

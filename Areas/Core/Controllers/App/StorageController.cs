@@ -13,7 +13,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Pika.Domain.Security;
-using Pika.Domain.Storage.Data;
+using PikaCore.Areas.Core.Commands;
 using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.DTO;
@@ -33,12 +33,12 @@ namespace PikaCore.Areas.Core.Controllers.App
     [ResponseCache(CacheProfileName = "Default")]
     public class StorageController : Controller
     {
-        private readonly IUrlGenerator _urlGeneratorService;
+        //private readonly IUrlGenerator _urlGeneratorService;
         private readonly IMapper _mapper;
-        private readonly IdDataProtection _idDataProtection;
+
+        //private readonly IdDataProtection _idDataProtection;
         private readonly IStringLocalizer<StorageController> _stringLocalizer;
         private readonly IMediator _mediator;
-        private readonly StorageIndexContext _storageIndexContext;
         private readonly IStorage _storage;
         private readonly IDistributedCache _cache;
         private readonly IConfiguration _configuration;
@@ -52,9 +52,8 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         #endregion
 
-        public StorageController(IUrlGenerator iUrlGenerator,
-            StorageIndexContext storageIndexContext,
-            IdDataProtection idDataProtection,
+        public StorageController( //IUrlGenerator iUrlGenerator,
+            //IdDataProtection idDataProtection,
             IStringLocalizer<StorageController> stringLocalizer,
             IMediator mediator,
             IMapper mapper,
@@ -62,9 +61,9 @@ namespace PikaCore.Areas.Core.Controllers.App
             IDistributedCache cache,
             IConfiguration configuration)
         {
-            _urlGeneratorService = iUrlGenerator;
-            _storageIndexContext = storageIndexContext;
-            _idDataProtection = idDataProtection;
+            //_urlGeneratorService = iUrlGenerator;
+            //_storageIndexContext = storageIndexContext;
+            // _idDataProtection = idDataProtection;
             _stringLocalizer = stringLocalizer;
             _mediator = mediator;
             _mapper = mapper;
@@ -144,28 +143,42 @@ namespace PikaCore.Areas.Core.Controllers.App
         }
 
         [HttpGet]
-        //[Route("/[controller]/[action]/{name?}")]
-        public async Task<IActionResult> GenerateUrl(string name, string bucketId, string categoryId)
+        [Route("/[area]/[controller]/[action]/{bucketId}/{categoryId}")]
+        [ActionName("ShortLink")]
+        public async Task<IActionResult> GenerateUrl(
+            [FromQuery] string name,
+            [FromRoute] string bucketId,
+            [FromRoute] string categoryId
+        )
         {
-            var offset = int.Parse(Get("Offset"));
-            var count = int.Parse(Get("Count"));
-
-            ShowGenerateUrlPartial = false;
             try
             {
-                ShowGenerateUrlPartial = true;
-                var port = HttpContext.Request.Host.Port;
-                TempData["host"] = HttpContext.Request.Host.Host +
-                                   (port != null ? ":" + HttpContext.Request.Host.Port : "");
-                TempData["protocol"] = "https";
-                return RedirectToAction(nameof(Browse), new { offset, count });
+                var rId = await _mediator.Send(new GenerateShortLinkCommand(name, bucketId));
+                var hash = JsonSerializer.Deserialize<string>(_cache.Get(rId.ToString()));
+                await _cache.RemoveAsync(rId.ToString());
+                TempData["ShortLink"] = hash;
+                return RedirectToAction(nameof(Browse), new {categoryId, bucketId});
             }
             catch (InvalidOperationException ex)
             {
                 Log.Error(ex, "StorageController#GenerateUrl");
                 ReturnMessage = ex.Message;
-                return RedirectToAction(nameof(Browse), new { offset, count });
+                return BadRequest();
             }
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("[area]/[controller]/[action]")]
+        public async Task<IActionResult> ShortLinkDownload(
+            [FromQuery] string hash,
+            [FromQuery] string categoryId
+        )
+        {
+            var s = await _mediator.Send(new FindShortLinkByHashQuery(hash));
+            return Redirect(
+                $"/Core/Storage/Download?bucketId={s.BucketId}&categoryId={categoryId}&objectName={s.ObjectName}"
+            );
         }
 
         [HttpGet]
@@ -235,23 +248,9 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         #region HelperMethods
 
-        private static string IdentifyUser()
-        {
-            return "User";
-        }
-
         private static long GetFilesSummarySize(IEnumerable<IFormFile> files)
         {
             return files.Aggregate(0L, (i, file) => i + file.Length);
-        }
-
-        #endregion
-
-        #region CookieHelperMethods
-
-        private string Get(string key)
-        {
-            return HttpContext.Request.Cookies[key] ?? "";
         }
 
         #endregion

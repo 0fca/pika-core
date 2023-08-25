@@ -19,22 +19,11 @@ namespace PikaCore.Areas.Core.Queries;
 
 public class GetAllObjectByCategoryQueryHandler : IRequestHandler<GetAllObjectsByCategoryQuery, List<ObjectInfo>>
 {
-    private readonly IMinioService _minioService;
-    private readonly IConfiguration _configuration;
+
     private readonly IDistributedCache _distributedCache;
-    private readonly IMapper _mapper;
-    private readonly AggregateRepository _aggregateRepository;
-    public GetAllObjectByCategoryQueryHandler(IMinioService service, 
-        IConfiguration configuration, 
-        IDistributedCache distributedCache,
-        IMapper mapper,
-        AggregateRepository aggregateRepository) 
+    public GetAllObjectByCategoryQueryHandler(IDistributedCache distributedCache) 
     {
-        this._minioService = service;
-        this._configuration = configuration;
         this._distributedCache = distributedCache;
-        this._mapper = mapper;
-        this._aggregateRepository = aggregateRepository;
     }
     public async Task<List<ObjectInfo>> Handle(GetAllObjectsByCategoryQuery request, CancellationToken cancellationToken)
     {

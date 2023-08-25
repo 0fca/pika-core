@@ -1,0 +1,49 @@
+﻿@inject IViewLocalizer Localizer
+
+@{
+    Layout = null;
+    var hash = TempData["ShortLink"];
+    var categoryId = TempData["CategoryId"];
+}
+<div class="card-panel teal white-text">
+    @Localizer.GetString("Pomyślnie wygenerowano link do zasobu").Value
+    <a id="short_link" class="indigo-text" 
+       asp-area="Core"
+       asp-controller="Storage"
+       asp-action="ShortLinkDownload"
+       asp-route-hash="@hash"
+       asp-route-categoryId="@categoryId">
+        @Localizer["Kliknij, by pobrać plik"].Value
+    </a>
+    <button id="copy_button" class="btn btn-flat center white-text">
+        <i id="" class="fas fa-copy"></i>
+    </button>
+</div>
+
+<script>
+$(document).ready(() => {
+    
+function copyLink()
+{
+    const host = window.location.protocol + "//" + window.location.host;
+
+    const link = `${host}${$('#short_link').attr('href')}`;
+    navigator.clipboard.writeText(link).then(
+      () => {
+          $('i[class="fas fa-copy"]').attr("class", "fas fa-check");
+      },
+      () => {
+          $('i[class="fas fa-copy"]').attr("class", "fas fa-times");
+      },
+    );
+}
+$('#copy_button').on('click', () => {
+    copyLink();
+});
+    navigator.permissions.query({ name: "clipboard-write" }).then((result) => {
+      if (result.state === "granted" || result.state === "prompt") {
+        console.log("Granting clipboard access...");  
+      }
+    });
+});
+</script>

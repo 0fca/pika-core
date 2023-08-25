@@ -189,7 +189,7 @@ namespace PikaCore
             });
             services.AddHangfireServer();
             services.AddAspNetCoreCustomValidation();
-            services.AddTransient<IUrlGenerator, HashUrlGeneratorService>();
+            services.AddTransient<IHashGenerator, HashGeneratorService>();
             services.AddSingleton<UniqueCode>();
             services.AddSingleton<IdDataProtection>();
             services.AddTransient<CloudConsoleAdapter>();
@@ -351,9 +351,9 @@ namespace PikaCore
             );
             var webSocketOptions = new WebSocketOptions()
             {
-                KeepAliveInterval = TimeSpan.FromSeconds(120),
+                KeepAliveInterval = TimeSpan.FromSeconds(1200),
             };
-            webSocketOptions.AllowedOrigins.Add("https://core.lukas-bownik.net");
+            //webSocketOptions.AllowedOrigins.Add("https://core.lukas-bownik.net");
             app.UseWebSockets(webSocketOptions);
             app.UseRouting();
             app.UseCors("CorsPolicy");
@@ -381,19 +381,16 @@ namespace PikaCore
                 endpoints.MapHub<StatusHub>("/hubs/status", options =>
                 {
                     options.Transports =
-                        HttpTransportType.WebSockets |
-                        HttpTransportType.ServerSentEvents;
+                        HttpTransportType.LongPolling;
                 });
-                endpoints.MapHub<FileOperationHub>("/hubs/files", options =>
+                endpoints.MapHub<FileOperationHub>("/hubs/storage", options =>
                 {
                     options.Transports =
-                        HttpTransportType.WebSockets |
-                        HttpTransportType.ServerSentEvents;
+                        HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
                 });
                 endpoints.MapHub<MediaHub>("/hubs/media", options =>
                 {
                     options.Transports =
-                        HttpTransportType.ServerSentEvents |
                         HttpTransportType.WebSockets;
                 });
                 endpoints.MapHealthChecks("/Health");

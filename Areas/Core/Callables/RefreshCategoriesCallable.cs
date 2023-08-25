@@ -34,7 +34,7 @@ public class RefreshCategoriesCallable : BaseJobCallable
     public override async Task Execute(Dictionary<string, ParameterValueType>? parameterValueTypes)
     {
         var buckets = await _mediator.Send(new GetAllBucketsQuery());
-        var categories = await _mediator.Send(new GetAllCategoriesQuery());
+        var categories = (await _mediator.Send(new GetAllCategoriesQuery())).ToList();
         var bucketsToCategories = new Dictionary<string, List<string>>();
         foreach (var bucketsView in buckets)
         {
@@ -61,6 +61,7 @@ public class RefreshCategoriesCallable : BaseJobCallable
                     items.RemoveAt(ic);
                 });
                 bucketsCategories.Add(category.Id.ToString());
+                objectInfos = objectInfos.OrderBy(oi => oi.Name).ToList();
                 await _cache.SetAsync($"{bucketsView.Id}.category.contents.{category.Id}",
                     JsonSerializer.SerializeToUtf8Bytes(objectInfos));
             }

@@ -6,6 +6,10 @@
 {
     ViewData["Title"] = Localizer["Wyszukiwarka"];
     <div id="file-list">
+        @if (TempData["ShortLink"] != null)
+        {
+            @await Html.PartialAsync("Partial/_ShortLinkPartial.cshtml")
+        }
         <div class="row grey lighten-4 z-depth-0">
             <div class="col s6 m6 l6">
                 @await Html.PartialAsync("Partial/_NavMenu.cshtml")
@@ -133,6 +137,10 @@
             }
         }
          $(document).ready( function () {
+            @if (Model.Total > Model.OnePageMaxTotal)
+            {
+                @:registerCallbacks();
+            }
              const dt = $('#dir_content').DataTable({
                 "oSearch": {"sSearch": "@Model.SelectedTag"},
                 deferRender: true,
@@ -175,11 +183,14 @@
                  .draw(); 
              });
              $('#search_input').on('propertychange input', (e) => {
-                 dt
-                  .columns(3)
-                  .search($('#search_input').val())
-                  .draw(); 
-             });
+                 @if (Model.Total > Model.OnePageMaxTotal)
+                 {
+                     @:invokeReceiveListing("test");
+                 }
+                 else
+                 {
+                     @:filter(dt);
+                 }});
          } );
          $("#page_select").change((e) => {
              const page = $('#page_select').val();
@@ -187,6 +198,12 @@
              window.location = 
              `/Core/Storage/Browse?categoryId=@Model.CategoryId&bucketId=@Model.BucketId&offset=${page*count}&count=${count}`;
          });
-
+        function filter(dt)
+        {
+            dt
+             .columns(3)
+             .search($('#search_input').val())
+             .draw();
+        }
     </script>
 }

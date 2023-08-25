@@ -5,9 +5,11 @@ namespace PikaCore.Areas.Core.Commands;
 
 public class GenerateShortLinkCommand : IRequest<Guid>
 {
-    public GenerateShortLinkCommand()
+    public GenerateShortLinkCommand(string objectName, string bucketId)
     {
         this.Id = Guid.NewGuid();
+        this.ObjectName = objectName;
+        this.BucketId = bucketId;
     }
     
     public Guid Id { get; set; }
