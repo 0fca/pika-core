@@ -32,23 +32,15 @@ public class GenerateShortLinkCommandHandler : IRequestHandler<GenerateShortLink
     public async Task<Guid> Handle(GenerateShortLinkCommand request, CancellationToken cancellationToken)
     {
         var s = _storageIndexContext.IndexStorage.ToList()
-            .Find(record => record.ObjectName.Equals(request.ObjectName)
-                            && record.BucketId.Equals(request.BucketId));
-
-        if (s == null)
-        {
-            s = new StorageIndexRecord
-            {
-                ObjectName = request.ObjectName,
-                BucketId = request.BucketId,
-                Hash = _hashGenerator.GenerateId($"{request.ObjectName}{request.BucketId}"),
-                Expires = true
-            };
-        }
-        else if (s.ExpireDate.Date <= DateTime.Now.Date)
-        {
-            s.ExpireDate = StorageIndexRecord.ComputeDateTime();
-        }
+                    .Find(record => record.ObjectName.Equals(request.ObjectName)
+                                    && record.BucketId.Equals(request.BucketId))
+                ?? new StorageIndexRecord
+                {
+                    ObjectName = request.ObjectName,
+                    BucketId = request.BucketId,
+                    Hash = _hashGenerator.GenerateId($"{request.ObjectName}{request.BucketId}"),
+                    Expires = true
+                };
 
         _storageIndexContext.Update(s);
         await _storageIndexContext.SaveChangesAsync(cancellationToken);
