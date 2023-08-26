@@ -338,17 +338,22 @@ input[type="password"]:not(.browser-default):focus
     margin: 0 10px 0 8px;
 }
 
-@media (min-height: 680px), screen and (orientation: portrait) {
+@media (max-width: 680px), screen and (orientation: portrait) {
  .information-side-pane{
      width: 100%;
  }  
+}
+
+@media (min-width: 680px) {
+    .information-side-pane{
+        width: 20vw;
+    }
 }
 .information-side-pane{
     float: right;
     right: 0;
     position: fixed; 
     top: 65px;
-    width: 20%;
     bottom: 0;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     padding-left: 10px;
@@ -376,4 +381,13 @@ div .select-dropdown{
 .padded-item-content{
     padding-top: 1.5em;
     padding-bottom: 1.5em;
+}
+
+.interactive_rows {
+    cursor: pointer;
+}
+
+.row_selected {
+    color: whitesmoke;
+    background-color: rgb(50, 50, 50) !important;
 }

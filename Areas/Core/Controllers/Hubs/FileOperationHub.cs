@@ -1,7 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
+using PikaCore.Areas.Core.Models.File;
+using PikaCore.Areas.Core.Queries;
+using PikaCore.Areas.Identity.Attributes;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.Hubs
@@ -9,32 +15,36 @@ namespace PikaCore.Areas.Core.Controllers.Hubs
     public class FileOperationHub : Hub
     {
         private readonly IConfiguration _configuration;
+        private readonly IMediator _mediator;
 
-        public FileOperationHub(IConfiguration configuration)
+        public FileOperationHub(
+            IConfiguration configuration,
+            IMediator mediator
+        )
         {
             _configuration = configuration;
+            _mediator = mediator;
         }
 
-        public void Copy()
+        public async Task List(string search, string categoryId, string buckedId)
         {
-
-        }
-
-        public void Move()
-        {
-
-        }
-
-        public async Task List(string path)
-        {
-            var listing = new List<string>();
-
-            if (!string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(search))
             {
-
+                await this.Clients.User(this.Context.UserIdentifier).SendAsync("ReceiveListing", new
+                {
+                    status = false,
+                    listing = new List<ObjectInfo>()
+                });
             }
-            Log.Information("Returning a listing to unknown user.");
-            await this.Clients.All.SendAsync("ReceiveListing", listing);
+
+            var listing = await _mediator.Send(
+                new FindAllObjectsByNameQuery(search, categoryId, buckedId)
+            );
+            await this.Clients.User(this.Context.UserIdentifier).SendAsync("ReceiveListing", new
+            {
+                status = true,
+                listing
+            });
         }
     }
 }

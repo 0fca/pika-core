@@ -33,10 +33,7 @@ namespace PikaCore.Areas.Core.Controllers.App
     [ResponseCache(CacheProfileName = "Default")]
     public class StorageController : Controller
     {
-        //private readonly IUrlGenerator _urlGeneratorService;
         private readonly IMapper _mapper;
-
-        //private readonly IdDataProtection _idDataProtection;
         private readonly IStringLocalizer<StorageController> _stringLocalizer;
         private readonly IMediator _mediator;
         private readonly IStorage _storage;
@@ -52,8 +49,7 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         #endregion
 
-        public StorageController( //IUrlGenerator iUrlGenerator,
-            //IdDataProtection idDataProtection,
+        public StorageController(
             IStringLocalizer<StorageController> stringLocalizer,
             IMediator mediator,
             IMapper mapper,
@@ -61,9 +57,6 @@ namespace PikaCore.Areas.Core.Controllers.App
             IDistributedCache cache,
             IConfiguration configuration)
         {
-            //_urlGeneratorService = iUrlGenerator;
-            //_storageIndexContext = storageIndexContext;
-            // _idDataProtection = idDataProtection;
             _stringLocalizer = stringLocalizer;
             _mediator = mediator;
             _mapper = mapper;
@@ -115,31 +108,15 @@ namespace PikaCore.Areas.Core.Controllers.App
             [FromQuery] int count = 10,
             [FromQuery] string? tag = null)
         {
-            var objects = JsonSerializer
-                .Deserialize<List<ObjectInfo>>(
-                    await _cache.GetStringAsync($"{bucketId}.category.contents.{categoryId}") ?? "[]"
-                );
-            var total = objects!.Count;
-            if (objects!.Count > int.Parse(_configuration.GetSection("Storage")["OnePageMaxTotal"] ?? "2000"))
-            {
-                objects = Paginator<ObjectInfo>.Paginate(objects, offset, count);
-            }
-
             var tags = (await _mediator.Send(new GetCategoryByIdQuery(Guid.Parse(categoryId))))
                 .Tags;
-            var lrmv = new FileResultViewModel
+            return View(new FileResultViewModel
             {
-                Objects = objects,
                 SelectedTag = tag,
-                SelectedPage = (offset + count) / count,
-                PerPage = count,
-                Total = total,
-                OnePageMaxTotal = int.Parse(_configuration.GetSection("Storage")["OnePageMaxTotal"] ?? "2000"),
                 Tags = tags!.ContainsKey(bucketId) ? tags[bucketId] : new List<string>(),
                 CategoryId = categoryId,
                 BucketId = bucketId
-            };
-            return View(lrmv);
+            });
         }
 
         [HttpGet]
@@ -157,7 +134,7 @@ namespace PikaCore.Areas.Core.Controllers.App
                 var hash = JsonSerializer.Deserialize<string>(_cache.Get(rId.ToString()));
                 await _cache.RemoveAsync(rId.ToString());
                 TempData["ShortLink"] = hash;
-                return RedirectToAction(nameof(Browse), new {categoryId, bucketId});
+                return RedirectToAction(nameof(Browse), new { categoryId, bucketId });
             }
             catch (InvalidOperationException ex)
             {
@@ -236,7 +213,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             if (!await _storage.StatObject(bucket.Name, objectName))
             {
                 ReturnMessage = _stringLocalizer.GetString("Zasób nie istnieje").Value;
-                return View();
+                return View(null);
             }
 
             var objectInfo = await _storage.ObjectInformation(bucket.Name, objectName);
