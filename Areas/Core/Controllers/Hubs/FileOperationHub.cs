@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Queries;
 using PikaCore.Infrastructure.Adapters;
-using PikaCore.Infrastructure.Services;
+using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.Hubs
 {
@@ -39,6 +39,7 @@ namespace PikaCore.Areas.Core.Controllers.Hubs
                     message = "No user claim principal available",
                     listing = new List<ObjectInfo>()
                 });
+                Log.Error("There was an incident: Denied access to bucket through WS - client had no Claims Principal");
                 return;
             }
 
@@ -50,7 +51,8 @@ namespace PikaCore.Areas.Core.Controllers.Hubs
                     message = "Access Denied",
                     listing = new List<ObjectInfo>()
                 });
-                return; 
+                Log.Error("There was an incident: Denied access to bucket through WS - client had no proper roles!");
+                return;
             }
 
             var listing = await _mediator.Send(
