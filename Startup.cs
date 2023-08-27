@@ -374,7 +374,7 @@ namespace PikaCore
                 endpoints.MapHub<FileOperationHub>("/hubs/storage", options =>
                 {
                     options.Transports =
-                        HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
+                        HttpTransportType.WebSockets;
                 });
                 endpoints.MapHub<MediaHub>("/hubs/media", options =>
                 {
