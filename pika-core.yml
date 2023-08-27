@@ -45,6 +45,9 @@ services:
       - "traefik.http.routers.api.service=api@internal"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.api.dashboard=true"
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.name=lbcookie"
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.secure=true" 
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.httponly=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:

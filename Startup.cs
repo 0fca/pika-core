@@ -90,7 +90,7 @@ namespace PikaCore
                 .UseLightweightSessions();
             services.AddDbContext<StorageIndexContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-            
+
             services.AddStackExchangeRedisCache(a =>
             {
                 a.InstanceName = Configuration.GetSection("Redis")["InstanceName"];
@@ -105,13 +105,7 @@ namespace PikaCore
                 EndPoints = { Configuration.GetConnectionString("RedisConnection") }
             });
             services.AddMemoryCache();
-
-            services.AddResponseCaching(options =>
-            {
-                options.MaximumBodySize = 4096;
-                options.UseCaseSensitivePaths = true;
-            });
-
+            
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\PikaCloud\\PikaCore\\SecurityKeyRing", true);
@@ -241,13 +235,14 @@ namespace PikaCore
                     .AllowAnyHeader();
             }));
 
-            services.AddSignalR();
-                /*.AddStackExchangeRedis(o =>
+            services.AddSignalR()
+                .AddStackExchangeRedis(o =>
                 {
-                    o.Configuration.ClientName = "PikaCore";
+                    //o.Configuration.ClientName = "PikaCore";
                     o.Configuration.ChannelPrefix = "PikaCoreHub";
+                    o.Configuration.DefaultDatabase = int.Parse(Configuration.GetSection("Redis")["RedisDb"] ?? "0");
                     o.Configuration.EndPoints.Add(Configuration.GetConnectionString("RedisConnection"));
-                });*/
+                });
 
             services.AddSession(options =>
             {
@@ -267,7 +262,7 @@ namespace PikaCore
                 });
             services.AddRazorPages()
                 .AddRazorPagesOptions(options => { options.Conventions.AuthorizeAreaFolder("Admin", "/Index"); });
-            
+
             services.AddHealthChecks();
 
             services.AddResponseCompression(opt =>
@@ -338,12 +333,7 @@ namespace PikaCore
                     }
                 }
             );
-            /*var webSocketOptions = new WebSocketOptions()
-            {
-                KeepAliveInterval = TimeSpan.FromSeconds(1200),
-            };
-            //webSocketOptions.AllowedOrigins.Add("https://core.lukas-bownik.net");
-            app.UseWebSockets(webSocketOptions);*/
+             
             app.UseRouting();
             app.UseCors("CorsPolicy");
             app.UseOiddictAuthenticationCookieSupport();
@@ -449,9 +439,9 @@ namespace PikaCore
             var mediator = serviceProvider.GetService<IMediator>();
             var defaultCommands = new List<Tuple<string, HashSet<string>, string>>
             {
-                new(".SYSSTA", new HashSet<string>(){"TCP"}, ""),
-                new(".USRNFO", new HashSet<string>(){"ALL"}, "ofca"),
-                new(".DIR", new HashSet<string>(){ "S1", "0" }, ""),
+                new(".SYSSTA", new HashSet<string>() { "TCP" }, ""),
+                new(".USRNFO", new HashSet<string>() { "ALL" }, "ofca"),
+                new(".DIR", new HashSet<string>() { "S1", "0" }, ""),
                 new(".S.CRT", new HashSet<string>(), ""),
             };
             foreach (var (name, headers, body) in defaultCommands)
