@@ -33,7 +33,7 @@ services:
       - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.name=lbcookie"
       - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.secure=true"
       - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.httponly=true"
-      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.port=5000"
+      - "traefik.http.services.pika-core.loadBalancer.server.port=5000"
   proxy:
     image: traefik:latest
     command:
