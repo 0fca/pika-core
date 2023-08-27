@@ -14,23 +14,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Pika.Domain.Security;
 using PikaCore.Areas.Core.Commands;
-using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.DTO;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Queries;
-using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Identity.Attributes;
 using PikaCore.Infrastructure.Adapters;
 using PikaCore.Infrastructure.Adapters.Filesystem.Commands;
-using PikaCore.Infrastructure.Security;
-using PikaCore.Infrastructure.Services.Helpers;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {
     [Area("Core")]
-    [ResponseCache(CacheProfileName = "Default")]
     public class StorageController : Controller
     {
         private readonly IMapper _mapper;
@@ -42,10 +37,8 @@ namespace PikaCore.Areas.Core.Controllers.App
 
         #region TempDataMessages
 
-        [TempData(Key = "showGenerateUrlPartial")]
-        public bool ShowGenerateUrlPartial { get; set; }
 
-        [TempData(Key = "returnMessage")] public string ReturnMessage { get; set; } = "";
+        [TempData(Key = "returnMessage")] private string ReturnMessage { get; set; } = "";
 
         #endregion
 

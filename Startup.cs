@@ -284,13 +284,6 @@ namespace PikaCore
                 .AddMvcOptions(options =>
                 {
                     options.AllowEmptyInputInBodyModelBinding = true;
-                    options.CacheProfiles.Add("Default",
-                        new CacheProfile()
-                        {
-                            Duration = 360000,
-                            Location = ResponseCacheLocation.Client,
-                            NoStore = true
-                        });
                     options.MaxModelValidationErrors = 50;
                 });
 
@@ -353,7 +346,6 @@ namespace PikaCore
             app.UseWebSockets(webSocketOptions);*/
             app.UseRouting();
             app.UseCors("CorsPolicy");
-            app.UseResponseCaching();
             app.UseOiddictAuthenticationCookieSupport();
             app.UseAuthentication();
             app.UseResponseCompression();
