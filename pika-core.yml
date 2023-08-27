@@ -28,7 +28,12 @@ services:
       - backend
     labels:
       - "traefik.http.routers.pika-core.rule=Host(`core.lukas-bownik.net`)"
-      - "traefik.http.routers.pika-core.entrypoints=web2"
+      - "traefik.http.routers.pika-core.entrypoints=web2" 
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie=true"
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.name=lbcookie"
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.secure=true"
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.httponly=true"
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.port=5000"
   proxy:
     image: traefik:latest
     command:
@@ -45,11 +50,6 @@ services:
       - "traefik.http.routers.api.service=api@internal"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.api.dashboard=true"
-      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie=true"
-      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.name=lbcookie"
-      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.secure=true" 
-      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.httponly=true"
-      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.port=5000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
