@@ -241,11 +241,7 @@ namespace PikaCore
                     .AllowAnyHeader();
             }));
 
-            services.AddSignalR(hubOptions =>
-            {
-                hubOptions.EnableDetailedErrors = true;
-                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(5);
-            });
+            services.AddSignalR();
                 /*.AddStackExchangeRedis(o =>
                 {
                     o.Configuration.ClientName = "PikaCore";
@@ -349,12 +345,12 @@ namespace PikaCore
                     }
                 }
             );
-            var webSocketOptions = new WebSocketOptions()
+            /*var webSocketOptions = new WebSocketOptions()
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(1200),
             };
             //webSocketOptions.AllowedOrigins.Add("https://core.lukas-bownik.net");
-            app.UseWebSockets(webSocketOptions);
+            app.UseWebSockets(webSocketOptions);*/
             app.UseRouting();
             app.UseCors("CorsPolicy");
             app.UseResponseCaching();
