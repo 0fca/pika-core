@@ -242,16 +242,16 @@ namespace PikaCore
             }));
 
             services.AddSignalR(hubOptions =>
-                {
-                    hubOptions.EnableDetailedErrors = true;
-                    hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
-                })
-                .AddStackExchangeRedis(o =>
+            {
+                hubOptions.EnableDetailedErrors = true;
+                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(5);
+            });
+                /*.AddStackExchangeRedis(o =>
                 {
                     o.Configuration.ClientName = "PikaCore";
                     o.Configuration.ChannelPrefix = "PikaCoreHub";
                     o.Configuration.EndPoints.Add(Configuration.GetConnectionString("RedisConnection"));
-                });
+                });*/
 
             services.AddSession(options =>
             {
