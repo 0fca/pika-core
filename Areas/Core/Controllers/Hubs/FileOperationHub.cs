@@ -36,6 +36,7 @@ namespace PikaCore.Areas.Core.Controllers.Hubs
                 await this.Clients.Client(this.Context.ConnectionId).SendAsync("ReceiveListing", new
                 {
                     status = false,
+                    message = "No user claim principal available",
                     listing = new List<ObjectInfo>()
                 });
                 return;
@@ -46,6 +47,7 @@ namespace PikaCore.Areas.Core.Controllers.Hubs
                 await this.Clients.Client(this.Context.ConnectionId).SendAsync("ReceiveListing", new
                 {
                     status = false,
+                    message = "Access Denied",
                     listing = new List<ObjectInfo>()
                 });
                 return; 
