@@ -121,6 +121,9 @@ public class AutoMapperProfile : Profile
                 opt =>
                     opt.MapFrom(src => src.ContentType));
         CreateMap<ObjectInfo, ResourceInformationViewModel>()
+            .ForMember(o => o.HumanName, 
+                opt => 
+                    opt.MapFrom(src => src.Name.Split("/", StringSplitOptions.None).Last()))
             .ForMember(o => o.FullName,
                 opt =>
                     opt.MapFrom(src => src.Name))

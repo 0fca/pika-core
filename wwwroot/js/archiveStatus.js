@@ -1,4 +1,4 @@
-﻿const connection = new signalR.HubConnectionBuilder().withUrl("/hubs/status",{
+﻿let connection = new signalR.HubConnectionBuilder().withUrl("/hubs/status",{
     transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.WebSockets
 })
     .configureLogging(signalR.LogLevel.None)

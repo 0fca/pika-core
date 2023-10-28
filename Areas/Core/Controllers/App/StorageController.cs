@@ -21,6 +21,7 @@ using PikaCore.Areas.Core.Queries;
 using PikaCore.Areas.Identity.Attributes;
 using PikaCore.Infrastructure.Adapters;
 using PikaCore.Infrastructure.Adapters.Filesystem.Commands;
+using PikaCore.Infrastructure.Security;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
@@ -34,7 +35,8 @@ namespace PikaCore.Areas.Core.Controllers.App
         private readonly IStorage _storage;
         private readonly IDistributedCache _cache;
         private readonly IConfiguration _configuration;
-
+        private readonly IdDataProtection _idDataProtection;
+        
         #region TempDataMessages
 
 
@@ -48,7 +50,8 @@ namespace PikaCore.Areas.Core.Controllers.App
             IMapper mapper,
             IStorage service,
             IDistributedCache cache,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IdDataProtection protection)
         {
             _stringLocalizer = stringLocalizer;
             _mediator = mediator;
@@ -56,6 +59,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             _cache = cache;
             _storage = service;
             _configuration = configuration;
+            _idDataProtection = protection;
         }
 
         [HttpGet]
@@ -123,10 +127,12 @@ namespace PikaCore.Areas.Core.Controllers.App
         {
             try
             {
+                name = _idDataProtection.Decode(name);
                 var rId = await _mediator.Send(new GenerateShortLinkCommand(name, bucketId));
                 var hash = JsonSerializer.Deserialize<string>(_cache.Get(rId.ToString()));
                 await _cache.RemoveAsync(rId.ToString());
                 TempData["ShortLink"] = hash;
+                TempData["CategoryId"] = categoryId;
                 return RedirectToAction(nameof(Browse), new { categoryId, bucketId });
             }
             catch (InvalidOperationException ex)
@@ -146,8 +152,9 @@ namespace PikaCore.Areas.Core.Controllers.App
         )
         {
             var s = await _mediator.Send(new FindShortLinkByHashQuery(hash));
+            var encodedObjectName = _idDataProtection.Encode(s.ObjectName);
             return Redirect(
-                $"/Core/Storage/Download?bucketId={s.BucketId}&categoryId={categoryId}&objectName={s.ObjectName}"
+                $"/Core/Storage/Download?bucketId={s.BucketId}&categoryId={categoryId}&objectName={encodedObjectName}"
             );
         }
 
@@ -158,15 +165,16 @@ namespace PikaCore.Areas.Core.Controllers.App
             [FromQuery] string categoryId,
             [FromQuery] string objectName)
         {
+            var unprotectedObjectName = _idDataProtection.Decode(objectName);
             var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(bucketId)));
-            if (!await _storage.StatObject(bucket.Name, objectName))
+            if (!await _storage.StatObject(bucket.Name, unprotectedObjectName))
             {
                 ReturnMessage = _stringLocalizer.GetString("Zasób nie istnieje").Value;
                 return RedirectToAction(nameof(Browse), new { categoryId, bucketId });
             }
 
-            var (memoryStream, returnName, mime) = await _storage.GetObjectAsStream(bucket.Name, objectName);
-            return File(memoryStream, mime, returnName);
+            var (memoryStream, returnName, mime) = await _storage.GetObjectAsStream(bucket.Name, unprotectedObjectName);
+            return File(memoryStream, "application/octet-stream", returnName);
         }
 
         [HttpPost]
@@ -203,14 +211,16 @@ namespace PikaCore.Areas.Core.Controllers.App
             [FromQuery] string objectName)
         {
             var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(bucketId)));
-            if (!await _storage.StatObject(bucket.Name, objectName))
+            var decodedObjectName = _idDataProtection.Decode(objectName);
+            if (!await _storage.StatObject(bucket.Name, decodedObjectName))
             {
                 ReturnMessage = _stringLocalizer.GetString("Zasób nie istnieje").Value;
                 return View(null);
             }
 
-            var objectInfo = await _storage.ObjectInformation(bucket.Name, objectName);
+            var objectInfo = await _storage.ObjectInformation(bucket.Name, decodedObjectName);
             var viewModel = _mapper.Map<ResourceInformationViewModel>(objectInfo);
+            viewModel.FullName = objectName; 
             viewModel.CategoryId = categoryId;
             viewModel.BucketId = bucketId;
             return View(viewModel);

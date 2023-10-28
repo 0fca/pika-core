@@ -7,25 +7,26 @@ using Microsoft.Extensions.Configuration;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Queries;
 using PikaCore.Infrastructure.Adapters;
+using PikaCore.Infrastructure.Security;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.Hubs
 {
     public class FileOperationHub : Hub
     {
-        private readonly IConfiguration _configuration;
         private readonly IMediator _mediator;
         private readonly IStorage _storage;
+        private readonly IdDataProtection _idDataProtection;
 
         public FileOperationHub(
-            IConfiguration configuration,
             IMediator mediator,
-            IStorage storage
+            IStorage storage,
+            IdDataProtection dataProtection
         )
         {
-            _configuration = configuration;
             _mediator = mediator;
             _storage = storage;
+            _idDataProtection = dataProtection;
         }
         
         public async Task List(string search, string categoryId, string buckedId)
@@ -58,6 +59,10 @@ namespace PikaCore.Areas.Core.Controllers.Hubs
             var listing = await _mediator.Send(
                 new FindAllObjectsByNameQuery(search, categoryId, buckedId)
             );
+            foreach (var oi in listing)
+            {
+                oi.FullName = _idDataProtection.Encode(oi.FullName);
+            } 
             await this.Clients.Client(this.Context.ConnectionId).SendAsync("ReceiveListing", new
             {
                 status = true,

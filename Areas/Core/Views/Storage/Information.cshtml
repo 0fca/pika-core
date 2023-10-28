@@ -9,9 +9,8 @@
     var chunks = Model.FullName.Split("/");
     var tags = new List<string>();
     tags.AddRange(chunks.SkipLast(1).ToList());
-    var viewableName = Model.FullName.Split("/").Last();
     <ul class="collection" xmlns="http://www.w3.org/1999/html">
-        <li class="collection-item">@Localizer["Nazwa"]: @viewableName </li>
+        <li class="collection-item">@Localizer["Nazwa"]: @Model.HumanName </li>
         <li class="collection-item">MIME: @Model.MimeType</li>
 
         <li class="collection-item">@Localizer["Rozmiar"]: @UnixHelper.DetectUnitBySize(Model.Size)</li>
