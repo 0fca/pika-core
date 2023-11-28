@@ -1,7 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
 
-RUN apt update & apt install git
-RUN apt install xmlstarlet
+RUN apt update & apt install git xmlstarlet
 ADD "https://api.github.com/repos/0fca/Pika.Domain/commits?per_page=1" latest_commit
 RUN git clone https://github.com/0fca/Pika.Domain
 RUN cd Pika.Domain && dotnet restore
