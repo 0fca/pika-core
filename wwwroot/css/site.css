@@ -13,7 +13,7 @@ main {
     background-color: whitesmoke;
 }
 
-hr{
+hr {
     background-color: white;
     border-color: white;
 }
@@ -27,9 +27,9 @@ hr{
     color: #212121 !important;
 }
 
-    .navlink:hover, .navlink:focus {
-        color: #303F9F !important;
-    }
+.navlink:hover, .navlink:focus {
+    color: #303F9F !important;
+}
 
 
 a, a:hover, a:focus {
@@ -46,12 +46,12 @@ a, a:hover, a:focus {
     color: #fff;
 }
 
-    .btn-default:hover, .btn-default:focus {
-        background-color: #eee !important;
-        border-color: #095C9E !important;
-        color: #212121 !important;
-        transition-duration: 0.5s;
-    }
+.btn-default:hover, .btn-default:focus {
+    background-color: #eee !important;
+    border-color: #095C9E !important;
+    color: #212121 !important;
+    transition-duration: 0.5s;
+}
 
 .btn-primary {
     background-color: #009688 !important;
@@ -62,13 +62,13 @@ a, a:hover, a:focus {
     color: #fff !important;
 }
 
-    .btn-primary:hover {
-        background-color: #eee !important;
-        border-color: #095C9E !important;
-        color: #212121 !important;
-        width: 150px;
-        transition: background-color linear .5s;
-    }
+.btn-primary:hover {
+    background-color: #eee !important;
+    border-color: #095C9E !important;
+    color: #212121 !important;
+    width: 150px;
+    transition: background-color linear .5s;
+}
 
 .btn-danger {
     background-color: #aa1919 !important;
@@ -79,13 +79,13 @@ a, a:hover, a:focus {
     color: #fff;
 }
 
-    .btn-danger:hover {
-        background-color: #eee !important;
-        border-color: #aa1919 !important;
-        color: #aa1919 !important;
-        width: 150px;
-        transition: background-color linear .5s;
-    }
+.btn-danger:hover {
+    background-color: #eee !important;
+    border-color: #aa1919 !important;
+    color: #aa1919 !important;
+    width: 150px;
+    transition: background-color linear .5s;
+}
 
 .path-input {
     background-color: transparent !important;
@@ -105,7 +105,14 @@ a, a:hover, a:focus {
 }
 
 
-.truncate { width: 100%; height: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: justify; }
+.truncate {
+    width: 100%;
+    height: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: justify;
+}
 
 .path-button {
     background-color: transparent;
@@ -164,7 +171,7 @@ a, a:hover, a:focus {
 .brand-margin {
     margin-top: 5px !important;
     margin-left: 10px !important;
-    color: #303F9F  !important;
+    color: #303F9F !important;
 }
 
 .inputfile {
@@ -189,51 +196,51 @@ a, a:hover, a:focus {
     animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
 }
 
-.wrap{
+.wrap {
     color: #009688;
     font-size: 24px;
 }
 
-.toast{
+.toast {
     background-color: #eee !important;
     color: #009688 !important;
 }
 
-.toast-input{
+.toast-input {
     position: absolute;
     top: -9999px;
     left: -9999px;
 }
 
-.toast-button-color{
+.toast-button-color {
     color: #009688 !important;
 }
 
 
-.browse-collection-item, .app-menu-item{
-    color: rgb(12,12,12) !important;
+.browse-collection-item, .app-menu-item {
+    color: rgb(12, 12, 12) !important;
     background-color: inherit !important;
     border-bottom: #000 !important;
     border-width: 1px !important;
 }
 
-.borderless-collection{
+.borderless-collection {
     border-width: 0 !important;
 }
 
-.browse-collection-item:hover{
+.browse-collection-item:hover {
     color: teal !important;
 }
 
-.browse-icon-margin{
+.browse-icon-margin {
     margin-right: 10px;
 }
 
-.section_padding{
+.section_padding {
     margin-left: 120px !important;
 }
 
-.pagination li.active{
+.pagination li.active {
     background-color: #009688 !important;
 }
 
@@ -241,29 +248,28 @@ a, a:hover, a:focus {
     color: red;
 }
 
-.app-menu-button{
+.app-menu-button {
     color: #212121;
     background-color: transparent;
 }
 
-.app-menu-button:hover{
+.app-menu-button:hover {
     color: #303F9F;
     background-color: transparent;
 }
 
-.small-text{
+.small-text {
     font-size: small;
 }
 
-#searchBox::placeholder{
+#searchBox::placeholder {
     color: teal;
 }
 
-input[type="text"]:not(.browser-default), 
+input[type="text"]:not(.browser-default),
 input[type="email"]:not(.browser-default),
 input[type="tel"]:not(.browser-default),
-input[type="password"]:not(.browser-default)
-{
+input[type="password"]:not(.browser-default) {
     border-bottom-color: #f5f5f5;
     color: white;
 }
@@ -272,45 +278,44 @@ input[type="password"]:not(.browser-default)
 input[type="text"]:not(.browser-default):focus,
 input[type="tel"]:not(.browser-default):focus,
 input[type="email"]:not(.browser-default):focus,
-input[type="password"]:not(.browser-default):focus
- {
+input[type="password"]:not(.browser-default):focus {
     color: white;
     box-shadow: 0 1px 0 0 teal;
     border-bottom: 1px solid teal;
 }
 
-.whitesmoke{
+.whitesmoke {
     background-color: whitesmoke;
 }
 
-.hand-cursor{
+.hand-cursor {
     cursor: pointer;
 }
 
-.appdropdown{
+.appdropdown {
     width: 300px !important;
     top: 105% !important;
 }
 
-.brand-text{
+.brand-text {
     text-align: center !important;
 }
 
-.fit-image{
+.fit-image {
     object-fit: fill;
 }
 
-.nav-context-menu{
-    list-style-position: inside; 
-    margin: 2px 0 0 0; 
-    color:  teal;
+.nav-context-menu {
+    list-style-position: inside;
+    margin: 2px 0 0 0;
+    color: teal;
 }
 
-.nav-context-menu li{
+.nav-context-menu li {
     cursor: pointer;
 }
 
-.page-footer .container .row a{
+.page-footer .container .row a {
     color: teal;
 }
 
@@ -326,9 +331,9 @@ input[type="password"]:not(.browser-default):focus
     background-color: teal !important;
 }
 
-.breadcrumb::before{
+.breadcrumb::before {
     content: '\E5CC';
-    color: rgb(12,12,12);
+    color: rgb(12, 12, 12);
     vertical-align: top;
     display: inline-block;
     font-family: 'Material Icons';
@@ -339,20 +344,21 @@ input[type="password"]:not(.browser-default):focus
 }
 
 @media (max-width: 680px), screen and (orientation: portrait) {
- .information-side-pane{
-     width: 100%;
- }  
+    .information-side-pane {
+        width: 100%;
+    }
 }
 
 @media (min-width: 680px) {
-    .information-side-pane{
+    .information-side-pane {
         width: 20vw;
     }
 }
-.information-side-pane{
+
+.information-side-pane {
     float: right;
     right: 0;
-    position: fixed; 
+    position: fixed;
     top: 65px;
     bottom: 0;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -361,6 +367,7 @@ input[type="password"]:not(.browser-default):focus
     background-color: whitesmoke;
     z-index: 9999;
 }
+
 #menu > li {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -370,15 +377,15 @@ input[type="password"]:not(.browser-default):focus
     padding: 5px;
 }
 
-div .select-dropdown{
+div .select-dropdown {
     color: black !important;
     border-bottom: none !important;
     -webkit-box-shadow: none !important;
-    box-shadow: none !important; 
+    box-shadow: none !important;
     text-align: center !important;
 }
 
-.padded-item-content{
+.padded-item-content {
     padding-top: 1.5em;
     padding-bottom: 1.5em;
 }

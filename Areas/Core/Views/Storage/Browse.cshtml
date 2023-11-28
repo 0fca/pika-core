@@ -60,6 +60,7 @@
          const categoryId = "@Model.CategoryId";
          const bucketId = "@Model.BucketId";
          $(document).ready( function () {
+             const ev = new Event("dataLoaded");
              registerCallbacks();
              const dt = $('#dir_content').DataTable({
                 "oSearch": {"sSearch": "@Model.SelectedTag"},
@@ -87,16 +88,18 @@
                 ],
                 dom: domConfig
              }); 
+             dt.on( 'draw.dt', function ( e, settings, len ) {
+                   console.log("Draw");
+                   registerSelectionEventsContentTable();
+             });
              $("#select_length").val(@Model.PerPage);
              $('#search_input').on('propertychange input', (e) => {
                  if ($('#search_input').val().length >= 3){
-                    const ev = new Event("dataLoaded");
                     invokeReceiveListing($('#search_input').val(), "@Model.CategoryId", "@Model.BucketId", ev);
                 }
              });
              document.addEventListener("dataLoaded", (ev) => {
                const data = localStorage.getItem("data");
-               const infoSlide = $('#info-slide');   
                if (data !== null){
                    dt.clear();
                    const listing = JSON.parse(data).listing;
@@ -108,63 +111,42 @@
                    }
                    dt.draw();
                }
-               
-               dt.on( 'length', function ( e, settings, len ) {
-                   $('#dir_content tbody tr').on('click', function() {
-                      const data = dt.row(this).data();
-                      if ( $(this).hasClass('row_selected') ) {
-                           $(this).removeClass('row_selected');
-                      }
-                      else {
-                           dt.$('tr.row_selected').removeClass('row_selected');
-                           $(this).addClass('row_selected');
-                      }
-                   })
-               } );
-               $('#dir_content tbody tr').on('click', function() {
-                  const data = dt.row(this).data();
-                 if ( $(this).hasClass('row_selected') ) {
-                    $(this).removeClass('row_selected');
-                    infoSlide.hide();
-                    resetInfoView();
-                 }
-                 else {
-                      infoSlide.show();
-                      const name = data[3];
-                      fetch('@Url.Action("Information", "Storage")/' + `?bucketId=${bucketId}&objectName=${name}&categoryId=${categoryId}`)
-                           .then(r => {
-                                    if(r.ok){
-                                            r.text().then(t => {
-                                                    $('#loader').hide();
-                                                    $('#resource_information_content').html(t);
-                                            });
-                                    }else{
-                                             console.log(r.statusText); 
-                                    }
-                            });
-                    dt.$('tr.row_selected').removeClass('row_selected');
-                    $(this).addClass('row_selected');
-                 }         
-               }); 
              });
              function resetInfoView(){
                 const loader = $('#loader');
                 loader.show();
                 $('#resource_information_content').empty();
              }
-             function localizeDate(dateString)
-             {
-                 const d = new Date(dateString);
-                 let lang = getCookieValue('.AspNetCore.Culture');
-                 lang = decodeURI(lang).replaceAll("c%3D", "").split("|")[0];
-                 if(lang === ''){
-                    lang = navigator.language;
-                 }
-                 return d.toLocaleDateString(lang);
-             }
-             const getCookieValue = (name) => (
-               document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
-             );
+
+            function registerSelectionEventsContentTable(){
+                 const infoSlide = $('#info-slide');   
+                 $('#dir_content tbody tr').on('click', function() {
+                                        console.log("Test");
+                                                      const data = dt.row(this).data();
+                                                     if ( $(this).hasClass('row_selected') ) {
+                                                        $(this).removeClass('row_selected');
+                                                        infoSlide.hide();
+                                                        resetInfoView();
+                                                     }
+                                                     else {
+                                                          infoSlide.show();
+                                                          const name = data[3];
+                                                          fetch('@Url.Action("Information", "Storage")/' + `?bucketId=${bucketId}&objectName=${name}&categoryId=${categoryId}`)
+                                                               .then(r => {
+                                                                        if(r.ok){
+                                                                                r.text().then(t => {
+                                                                                        $('#loader').hide();
+                                                                                        $('#resource_information_content').html(t);
+                                                                                });
+                                                                        }else{
+                                                                                 console.error(r.statusText); 
+                                                                        }
+                                                                });
+                                                        dt.$('tr.row_selected').removeClass('row_selected');
+                                                        $(this).addClass('row_selected');
+                                                     }         
+                                                   }); 
+            }
               
          } );
     </script>

@@ -1,9 +1,8 @@
-﻿let connection = new signalR.HubConnectionBuilder().withUrl("/hubs/status",{
-    transport:  signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.WebSockets
+﻿let connection = new signalR.HubConnectionBuilder().withUrl("/hubs/status", {
+    transport: signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.WebSockets
 })
     .configureLogging(signalR.LogLevel.None)
     .build();
-
 
 
 connection.on("ReceiveArchivingStatus", function (message) {

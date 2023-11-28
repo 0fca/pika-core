@@ -2,6 +2,6 @@
     return console.error(err.toString());
 });
 
-msgConnection.on("ReceiveReturnMessage",  (message, isError) =>{
+msgConnection.on("ReceiveReturnMessage", (message, isError) => {
     showMessagePartial(message, isError);
 });

@@ -1,36 +1,32 @@
 ﻿'use strict';
 let hubConnection = null;
 let event = null;
-async function invokeReceiveListing(search, categoryId, bucketId, e)
-{
+
+async function invokeReceiveListing(search, categoryId, bucketId, e) {
     try {
         await hubConnection.invoke("List", search, categoryId, bucketId);
         event = e;
-    }catch (err) {
+    } catch (err) {
         console.error(err);
     }
 }
 
-function onReceiveListing(listing)
-{
-    if(event !== null){
+function onReceiveListing(listing) {
+    if (event !== null) {
         localStorage.setItem("data", JSON.stringify(listing));
         document.dispatchEvent(event);
     }
 }
 
-function onStart() 
-{
+function onStart() {
     console.log("Connection to Storage hub started!");
 }
 
-function onStartError()
-{
+function onStartError() {
     console.error("Couldnt connect to hub!");
 }
 
-function createSignalRConnection()
-{
+function createSignalRConnection() {
     return new signalR.HubConnectionBuilder()
         .withUrl("/hubs/storage")
         .configureLogging(signalR.LogLevel.Critical)
@@ -38,8 +34,7 @@ function createSignalRConnection()
         .build();
 }
 
-function connectToFilesHub()
-{
+function connectToFilesHub() {
     const connection = createSignalRConnection();
     connection.start()
         .then(onStart)
@@ -47,8 +42,7 @@ function connectToFilesHub()
     return connection;
 }
 
-function registerCallbacks()
-{
+function registerCallbacks() {
     const connection = connectToFilesHub();
     connection.on('ReceiveListing', onReceiveListing);
     hubConnection = connection;
@@ -73,7 +67,7 @@ function returnFileSize(number) {
     } else if (number >= 1048576) {
         return (number / 1048576).toFixed(1) + 'MB';
     } else if (number >= 1073741824) {
-        return (number / 1073741824).toFixed(1) + 'GB'; 
+        return (number / 1073741824).toFixed(1) + 'GB';
     }
 }
 
