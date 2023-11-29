@@ -105,7 +105,6 @@ namespace PikaCore
             {
                 EndPoints = { Configuration.GetConnectionString("RedisConnection") }
             });
-            services.AddMemoryCache();
             
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
