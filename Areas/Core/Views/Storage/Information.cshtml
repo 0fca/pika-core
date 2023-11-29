@@ -1,33 +1,51 @@
 ﻿@using UnixHelper = PikaCore.Infrastructure.Adapters.Filesystem.UnixHelper
-@model ResourceInformationViewModel
+@model ResourceInformationViewModel?
 @inject IViewLocalizer Localizer
 @{
     Layout = null;
+}
+@if (Model != null)
+{
     var chunks = Model.FullName.Split("/");
     var tags = new List<string>();
     tags.AddRange(chunks.SkipLast(1).ToList());
-    var viewableName = Model.FullName.Split("/").Last();
-}
-<ul class="collection" xmlns="http://www.w3.org/1999/html">
-    <li class="collection-item">@Localizer["Nazwa"]: @viewableName </li>
-    <li class="collection-item">MIME: @Model.MimeType</li>
+    <ul class="collection" xmlns="http://www.w3.org/1999/html">
+        <li class="collection-item">@Localizer["Nazwa"]: @Model.HumanName </li>
+        <li class="collection-item">MIME: @Model.MimeType</li>
 
-    <li class="collection-item">@Localizer["Rozmiar"]: @UnixHelper.DetectUnitBySize(Model.Size)</li>
-    <li class="collection-item">@Localizer["Data modyfikacji"]: @Model.LastModified.ToShortDateString()</li>
-    <li class="collection-item">
-        <p class="text-break">
-            @Localizer["Tagi"]:
-            @foreach (var tag in tags)
-            {
-                <a asp-area="Core"
-                   asp-controller="Storage"
-                   asp-action="Browse"
-                   asp-route-bucketId="@Model.BucketId"
-                   asp-route-tag="@tag"
-                   asp-route-categoryId="@Model.CategoryId">
+        <li class="collection-item">@Localizer["Rozmiar"]: @UnixHelper.DetectUnitBySize(Model.Size)</li>
+        <li class="collection-item">@Localizer["Data modyfikacji"]: @Model.LastModified.ToShortDateString()</li>
+        <li class="collection-item">
+            <p class="text-break">
+                @Localizer["Tagi"]:
+                @foreach (var tag in tags)
+                {
                     @tag
-                </a>
-            }
-        </p>
-    </li>
-</ul>
+                }
+            </p>
+        </li>
+        <li class="collection-item">
+            <a asp-area="Core"
+               asp-controller="Storage"
+               asp-action="Download"
+               asp-route-categoryId="@Model.CategoryId"
+               asp-route-bucketId="@Model.BucketId"
+               asp-route-objectName="@Model.FullName">
+                <i class="material-icons teal-text">cloud_download</i>
+            </a>
+            <a asp-area="Core"
+               asp-controller="Storage"
+               asp-action="ShortLink"
+               asp-route-categoryId="@Model.CategoryId"
+               asp-route-bucketId="@Model.BucketId"
+               asp-route-name="@Model.FullName">
+                <i class="material-icons teal-text">link</i>
+            </a>
+        </li>
+    </ul>
+}
+else
+{
+    var returnMessage = TempData["returnMessage"];
+    <div class="card card-panel red white-text">@returnMessage</div>
+}

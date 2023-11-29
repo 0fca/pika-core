@@ -93,18 +93,15 @@ namespace PikaCore.Infrastructure.Services
             } 
         }
 
-        public async Task<MemoryStream> GetObjectAsStream(string bucket, string @object, long offset = 1024)
+        public async Task<FileStream> GetObjectAsStream(string bucket, string @object, long offset = 0)
         {
-            var outputStream = new MemoryStream();
+            var fs = new FileStream(Path.Join(Path.GetTempPath(), Path.GetFileName(@object)), FileMode.Create);
             var getObjectArgs = new GetObjectArgs()
                 .WithBucket(bucket)
                 .WithObject(@object)
-                .WithCallbackStream((stream) =>
-                {
-                    stream.CopyTo(outputStream);
-                });
+                .WithCallbackStream((stream) => stream.CopyTo(fs));
             await _minioClient.GetObjectAsync(getObjectArgs);
-            return outputStream;
+            return fs;
         }
 
         public async Task PutObject(string fileName, Stream s, string bucket)

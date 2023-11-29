@@ -7,6 +7,7 @@ namespace PikaCore.Areas.Core.Models.File
 {
     public class ResourceInformationViewModel
     {
+        public string HumanName { get; set; }
         public string FullName { get; set; }
         public string MimeType { get; set; }
         public long Size { get; set; } = 0;

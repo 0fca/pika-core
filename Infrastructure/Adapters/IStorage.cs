@@ -17,5 +17,5 @@ public interface IStorage : IDisposable
     public Task<bool> StatObject(string bucketName, string @object);
 
     public Task<ObjectInfo?> ObjectInformation(string bucketName, string @objectName);
-    public Task<Tuple<MemoryStream, string, string>> GetObjectAsStream(string bucket, string @object, long offset = 1024);
+    public Task<Tuple<FileStream, string, string>> GetObjectAsStream(string bucket, string @object, long offset = 1024L);
 }

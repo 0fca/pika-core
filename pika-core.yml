@@ -1,8 +1,8 @@
 ﻿version: '3.9'
 services:
   pika-core:
-    build: .
-    volumes: 
+    image: pika-core:latest
+    volumes:
       - /srv/configs/fms/prod/appsettings.json:/Pika.Core/appsettings.json
       - /srv/fms/certs/prod/:/Pika.Core/certs
       - /srv/fms/wwwroot/lib:/Pika.Core/wwwroot/lib
@@ -10,7 +10,7 @@ services:
       - "5000"
     expose:
       - "5000"
-    command: ['dotnet', "PikaCore.dll"]
+    command: [ 'dotnet', "PikaCore.dll" ]
     deploy:
       mode: replicated
       replicas: 2
@@ -29,6 +29,11 @@ services:
     labels:
       - "traefik.http.routers.pika-core.rule=Host(`core.lukas-bownik.net`)"
       - "traefik.http.routers.pika-core.entrypoints=web2"
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie=true"
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.name=lbcookie"
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.secure=true"
+      - "traefik.http.services.pika-core.loadBalancer.sticky.cookie.httponly=true"
+      - "traefik.http.services.pika-core.loadBalancer.server.port=5000"
   proxy:
     image: traefik:latest
     command:
@@ -49,7 +54,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - backend
-    
+
 networks:
   backend:
     name: pika-core

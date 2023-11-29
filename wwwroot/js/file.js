@@ -1,4 +1,52 @@
 ﻿'use strict';
+let hubConnection = null;
+let event = null;
+
+async function invokeReceiveListing(search, categoryId, bucketId, e) {
+    try {
+        await hubConnection.invoke("List", search, categoryId, bucketId);
+        event = e;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function onReceiveListing(listing) {
+    if (event !== null) {
+        localStorage.setItem("data", JSON.stringify(listing));
+        document.dispatchEvent(event);
+    }
+}
+
+function onStart() {
+    console.log("Connection to Storage hub started!");
+}
+
+function onStartError() {
+    console.error("Couldnt connect to hub!");
+}
+
+function createSignalRConnection() {
+    return new signalR.HubConnectionBuilder()
+        .withUrl("/hubs/storage")
+        .configureLogging(signalR.LogLevel.Critical)
+        .withAutomaticReconnect()
+        .build();
+}
+
+function connectToFilesHub() {
+    const connection = createSignalRConnection();
+    connection.start()
+        .then(onStart)
+        .catch(onStartError);
+    return connection;
+}
+
+function registerCallbacks() {
+    const connection = connectToFilesHub();
+    connection.on('ReceiveListing', onReceiveListing);
+    hubConnection = connection;
+}
 
 function getSummarySize() {
     let input = document.getElementById("files");
@@ -13,11 +61,13 @@ function getSummarySize() {
 
 function returnFileSize(number) {
     if (number < 1024) {
-        return number + 'bytes';
+        return number + 'B';
     } else if (number >= 1024 && number < 1048576) {
         return (number / 1024).toFixed(1) + 'kB';
     } else if (number >= 1048576) {
         return (number / 1048576).toFixed(1) + 'MB';
+    } else if (number >= 1073741824) {
+        return (number / 1073741824).toFixed(1) + 'GB';
     }
 }
 

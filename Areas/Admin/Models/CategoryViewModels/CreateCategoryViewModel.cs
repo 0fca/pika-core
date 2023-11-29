@@ -5,26 +5,14 @@ namespace PikaCore.Areas.Admin.Models.CategoryViewModels;
 
 public class CreateCategoryViewModel
 {
-   public string Name
-   {
-      get;
-      set;
-   }
+    public string Name { get; set; }
 
-   public string Mimes
-   {
-      get; 
-      set;
-   }
-   
-   public string Description
-   {
-      get;
-      set;
-   }
+    public string Mimes { get; set; }
 
-   public List<string> GetMimes()
-   {
-      return this.Mimes.Split(";").ToList();
-   }
+    public string Description { get; set; }
+
+    public List<string> GetMimes()
+    {
+        return Mimes.Split(";").ToList();
+    }
 }

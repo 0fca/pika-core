@@ -1,17 +1,14 @@
 ﻿@using Microsoft.AspNetCore.Localization
 <!DOCTYPE html>
 @inject IViewLocalizer Localizer  
-@{ 
-    var role = "";
-    var roleName = "";
-
+@{
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
 }
 <html lang="@requestCulture.RequestCulture.UICulture.Name.ToLower()">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] @roleName Hannah</title>
+    <title>@ViewData["Title"] :: Hannah</title>
     <meta property="og:title" content="Pika Core" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://core.lukas-bownik.net/" />

@@ -292,5 +292,6 @@ appsettings.Development.json
 
 *.db
 *.sln
-
-lib/
+wwwroot/lib/jquery*
+wwwroot/lib/fontawesome-free-5.14.0-web
+wwwroot/lib/bootstrap

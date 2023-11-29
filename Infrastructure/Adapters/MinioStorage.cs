@@ -75,13 +75,13 @@ public class MinioStorage : IStorage
         return statObject == null ? null : _mapper.Map<ObjectStat, ObjectInfo>(statObject);
     }
 
-    public async Task<Tuple<MemoryStream, string, string>> GetObjectAsStream(string bucket,
+    public async Task<Tuple<FileStream, string, string>> GetObjectAsStream(string bucket,
         string @object,
         long offset = 1024)
     {
         var returnStream = await _minioService.GetObjectAsStream(bucket, @object, offset);
         returnStream.Position = 0;
-        return new Tuple<MemoryStream, string, string>(returnStream,
+        return new Tuple<FileStream, string, string>(returnStream,
             Path.GetFileName(@object),
             MimeTypes.GetMimeType(@object));
     }
