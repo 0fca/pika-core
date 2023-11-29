@@ -89,7 +89,6 @@
                 dom: domConfig
              }); 
              dt.on( 'draw.dt', function ( e, settings, len ) {
-                   console.log("Draw");
                    registerSelectionEventsContentTable();
              });
              $("#select_length").val(@Model.PerPage);
@@ -121,7 +120,6 @@
             function registerSelectionEventsContentTable(){
                  const infoSlide = $('#info-slide');   
                  $('#dir_content tbody tr').on('click', function() {
-                                        console.log("Test");
                                                       const data = dt.row(this).data();
                                                      if ( $(this).hasClass('row_selected') ) {
                                                         $(this).removeClass('row_selected');
