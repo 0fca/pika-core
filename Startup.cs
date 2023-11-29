@@ -51,6 +51,7 @@ using PikaCore.Infrastructure.Adapters.Console.Queries;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
 using Serilog;
+using Serilog.Sinks.Grafana.Loki;
 using StackExchange.Redis;
 using TanvirArjel.CustomValidation.AspNetCore.Extensions;
 using Weasel.Core;
@@ -71,8 +72,8 @@ namespace PikaCore
         {
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
-                .MinimumLevel.Warning()
                 .WriteTo.Console()
+                .WriteTo.GrafanaLoki(Configuration.GetSection("Logging").GetSection("GrafanaLoki")["Uri"])
                 .CreateLogger();
             services.AddLogging();
             services.AddMarten(c =>
@@ -460,12 +461,12 @@ namespace PikaCore
         {
             var currentVersion = (Assembly.GetEntryAssembly() ?? throw new InvalidOperationException())
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-            Console.WriteLine($"PikaCore v.{currentVersion} is booting... Hellorld!");
+            Log.Information($"PikaCore v.{currentVersion} is booting... Hellorld!");
         }
 
         private static void OnShutdown()
         {
-            Console.WriteLine("PikaCore is shutting down... Good bye.");
+            Log.Information("PikaCore is shutting down... Good bye.");
         }
 
         #endregion

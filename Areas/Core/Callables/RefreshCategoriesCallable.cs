@@ -1,15 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Pika.Domain.Storage.Callables;
 using Pika.Domain.Storage.Callables.ValueTypes;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Queries;
 using PikaCore.Infrastructure.Services;
+using Serilog;
 
 namespace PikaCore.Areas.Core.Callables;
 
@@ -38,37 +41,49 @@ public class RefreshCategoriesCallable : BaseJobCallable
         var bucketsToCategories = new Dictionary<string, List<string>>();
         foreach (var bucketsView in buckets)
         {
-            var bucketsCategories = new List<string>();
-            var items = await _minioService
+            var items = _minioService
                 .ListObjects(bucketsView.Name, true);
-            foreach (var category in categories)
-            {
-                var mimes = category.Mimes;
-                var objectInfos = new List<ObjectInfo>();
-                var itemsChecked = new List<int>();
-                items.ToList().ForEach(i =>
+            var categoryMap = 
+                categories.ToDictionary(c => 
+                    c.Id.ToString(), c => 
+                    Enumerable.Empty<ObjectInfo>()
+                    );
+            items.Subscribe(
+                item =>
                 {
-                    var mime = MimeTypes.GetMimeType(i.Key);
-                    if (string.IsNullOrEmpty(mime) || !mimes.Contains(mime)) return;
-                    var oi = _mapper.Map<ObjectInfo>(i);
-                    oi.MimeType = mime;
-                    objectInfos.Add(oi);
-                    itemsChecked.Add(items.IndexOf(i));
-                });
-                itemsChecked.Reverse();
-                itemsChecked.ForEach(ic =>
+                    var mime = MimeTypes.GetMimeType(item.Key);
+                    foreach (var category in categories)
+                    {
+                        var mimes = category.Mimes;
+                        if (string.IsNullOrEmpty(mime) || !mimes.Contains(mime)) continue;
+                        categoryMap[category.Id.ToString()] = 
+                            categoryMap[category.Id.ToString()].Append(_mapper.Map<ObjectInfo>(item));
+                    }
+                },
+                ex =>
                 {
-                    items.RemoveAt(ic);
+                    Log.Error(
+                        "ListObjects: {Type} occured with following message: {Message}",
+                        ex.GetType().FullName,
+                        ex.Message
+                    );
+                }, 
+                () =>
+                {
+                    Log.Information(
+                        "ListObjects: Operation Succeeded"
+                    );
+                    foreach (var (categoryId,categoryContents) in categoryMap)
+                    {
+                        _cache.SetAsync($"{bucketsView.Id}.category.contents.{categoryId}",
+                            JsonSerializer.SerializeToUtf8Bytes(categoryContents));
+                    } 
+                    bucketsToCategories.Add(bucketsView.Id.ToString(), 
+                        categoryMap.Keys
+                        .Where(c => categoryMap[c].Any())
+                        .ToList());
+                    _cache.SetAsync($"buckets.categories.map", JsonSerializer.SerializeToUtf8Bytes(bucketsToCategories));
                 });
-                bucketsCategories.Add(category.Id.ToString());
-                objectInfos = objectInfos.OrderBy(oi => oi.Name).ToList();
-                await _cache.SetAsync($"{bucketsView.Id}.category.contents.{category.Id}",
-                    JsonSerializer.SerializeToUtf8Bytes(objectInfos));
-            }
-
-            bucketsToCategories.Add(bucketsView.Id.ToString(), bucketsCategories);
         }
-
-        await _cache.SetAsync($"buckets.categories.map", JsonSerializer.SerializeToUtf8Bytes(bucketsToCategories));
     }
 }

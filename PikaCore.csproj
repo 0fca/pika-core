@@ -16,37 +16,37 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Remove="Services\Helpers\Jobs\**"/>
-        <Content Remove="Services\Helpers\Jobs\**"/>
-        <Content Update="Views\Shared\_Partial\Errors\404.cshtml"/>
-        <Content Update="Views\Shared\_Partial\Errors\500.cshtml"/>
-        <Content Update="Views\Shared\_Partial\Errors\502.cshtml"/>
-        <Content Update="Views\Shared\_Partial\Errors\503.cshtml"/>
-        <EmbeddedResource Remove="Services\Helpers\Jobs\**"/>
-        <None Remove="Services\Helpers\Jobs\**"/>
-        <TypeScriptCompile Remove="Services\Helpers\Jobs\**"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\AbortController.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\browser-index.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Errors.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HandshakeProtocol.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HttpClient.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HttpConnection.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HubConnection.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HubConnectionBuilder.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\IConnection.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\IHttpConnectionOptions.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\IHubProtocol.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\ILogger.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\index.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\ITransport.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\JsonHubProtocol.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Loggers.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\LongPollingTransport.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\ServerSentEventsTransport.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Stream.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\TextMessageFormat.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Utils.d.ts"/>
-        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.d.ts"/>
+        <Compile Remove="Services\Helpers\Jobs\**" />
+        <Content Remove="Services\Helpers\Jobs\**" />
+        <Content Update="Views\Shared\_Partial\Errors\404.cshtml" />
+        <Content Update="Views\Shared\_Partial\Errors\500.cshtml" />
+        <Content Update="Views\Shared\_Partial\Errors\502.cshtml" />
+        <Content Update="Views\Shared\_Partial\Errors\503.cshtml" />
+        <EmbeddedResource Remove="Services\Helpers\Jobs\**" />
+        <None Remove="Services\Helpers\Jobs\**" />
+        <TypeScriptCompile Remove="Services\Helpers\Jobs\**" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\AbortController.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\browser-index.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Errors.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HandshakeProtocol.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HttpClient.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HttpConnection.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HubConnection.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\HubConnectionBuilder.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\IConnection.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\IHttpConnectionOptions.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\IHubProtocol.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\ILogger.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\index.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\ITransport.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\JsonHubProtocol.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Loggers.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\LongPollingTransport.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\ServerSentEventsTransport.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Stream.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\TextMessageFormat.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\Utils.d.ts" />
+        <TypeScriptCompile Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.d.ts" />
         <Content Update="wwwroot\robots.txt">
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
             <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -763,38 +763,38 @@
         </Compile>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.6"/>
-        <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="6.0.6"/>
-        <PackageReference Include="AspNet.Security.OAuth.Reddit" Version="6.0.6"/>
-        <PackageReference Include="AspNetCoreRateLimit" Version="4.0.2"/>
-        <PackageReference Include="AspNetCoreRateLimit.Redis" Version="1.0.1"/>
-        <PackageReference Include="AutoMapper" Version="11.0.1"/>
-        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0"/>
-        <PackageReference Include="Domain.RateLimiting.AspNetCore" Version="5.0.3-alpha"/>
-        <PackageReference Include="Domain.RateLimiting.Core" Version="5.0.3-alpha"/>
-        <PackageReference Include="EventBus" Version="1.1.2"/>
-        <PackageReference Include="Google.Apis" Version="1.57.0"/>
-        <PackageReference Include="Hangfire" Version="1.8.0-rc2"/>
-        <PackageReference Include="Hangfire.AspNetCore" Version="1.8.0-rc2"/>
-        <PackageReference Include="Hangfire.Redis.StackExchange" Version="1.9.1-beta"/>
-        <PackageReference Include="IdentityModel" Version="6.1.0-preview.2"/>
-        <PackageReference Include="IdentityModel.AspNetCore" Version="4.3.0"/>
-        <PackageReference Include="IdentityModel.OidcClient" Version="5.2.1"/>
-        <PackageReference Include="IdentityModel.OidcClient.IdentityTokenValidator" Version="5.2.1"/>
-        <PackageReference Include="Localization.AspNetCore.TagHelpers" Version="0.6.0"/>
-        <PackageReference Include="Marten" Version="6.0.0-alpha.8"/>
-        <PackageReference Include="MediatR" Version="12.0.1"/>
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.10"/>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10"/>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.10"/>
-        <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="7.0.10"/>
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.10"/>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.10"/>
-        <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Https" Version="2.2.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="7.0.10"/>
+        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.6" />
+        <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="6.0.6" />
+        <PackageReference Include="AspNet.Security.OAuth.Reddit" Version="6.0.6" />
+        <PackageReference Include="AspNetCoreRateLimit" Version="4.0.2" />
+        <PackageReference Include="AspNetCoreRateLimit.Redis" Version="1.0.1" />
+        <PackageReference Include="AutoMapper" Version="11.0.1" />
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+        <PackageReference Include="Domain.RateLimiting.AspNetCore" Version="5.0.3-alpha" />
+        <PackageReference Include="Domain.RateLimiting.Core" Version="5.0.3-alpha" />
+        <PackageReference Include="EventBus" Version="1.1.2" />
+        <PackageReference Include="Google.Apis" Version="1.57.0" />
+        <PackageReference Include="Hangfire" Version="1.8.0-rc2" />
+        <PackageReference Include="Hangfire.AspNetCore" Version="1.8.0-rc2" />
+        <PackageReference Include="Hangfire.Redis.StackExchange" Version="1.9.1-beta" />
+        <PackageReference Include="IdentityModel" Version="6.1.0-preview.2" />
+        <PackageReference Include="IdentityModel.AspNetCore" Version="4.3.0" />
+        <PackageReference Include="IdentityModel.OidcClient" Version="5.2.1" />
+        <PackageReference Include="IdentityModel.OidcClient.IdentityTokenValidator" Version="5.2.1" />
+        <PackageReference Include="Localization.AspNetCore.TagHelpers" Version="0.6.0" />
+        <PackageReference Include="Marten" Version="6.0.0-alpha.8" />
+        <PackageReference Include="MediatR" Version="12.0.1" />
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="7.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Https" Version="2.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="7.0.10" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.10">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -803,261 +803,262 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.10"/>
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.10"/>
-        <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.10"/>
-        <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.5"/>
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.5" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
         <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.7.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.9"/>
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.9" />
         <PackageReference Include="MimeTypes" Version="2.4.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Minio" Version="5.0.0"/>
-        <PackageReference Include="Minio.AspNetCore" Version="5.0.0"/>
-        <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0"/>
-        <PackageReference Include="NCrontab.Signed" Version="3.3.2"/>
-        <PackageReference Include="Npgsql" Version="7.0.2"/>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.3"/>
-        <PackageReference Include="NReco.Csv" Version="1.0.1"/>
-        <PackageReference Include="OpenIddict" Version="4.7.0"/>
-        <PackageReference Include="OpenIddict.AspNetCore" Version="4.7.0"/>
-        <PackageReference Include="Serilog.AspNetCore" Version="5.0.0"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2"/>
-        <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0"/>
-        <PackageReference Include="System.Drawing.Common" Version="6.0.0"/>
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.18.0"/>
-        <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0"/>
-        <PackageReference Include="System.Threading.AccessControl" Version="6.0.0"/>
-        <PackageReference Include="TanvirArjel.CustomValidation.AspNetCore" Version="1.2.2"/>
-        <PackageReference Include="xFFmpeg.NET" Version="7.1.3"/>
+        <PackageReference Include="Minio" Version="5.0.0" />
+        <PackageReference Include="Minio.AspNetCore" Version="5.0.0" />
+        <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
+        <PackageReference Include="NCrontab.Signed" Version="3.3.2" />
+        <PackageReference Include="Npgsql" Version="7.0.2" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.3" />
+        <PackageReference Include="NReco.Csv" Version="1.0.1" />
+        <PackageReference Include="OpenIddict" Version="4.7.0" />
+        <PackageReference Include="OpenIddict.AspNetCore" Version="4.7.0" />
+        <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+        <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0" />
+        <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="7.1.1" />
+        <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.18.0" />
+        <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
+        <PackageReference Include="System.Threading.AccessControl" Version="6.0.0" />
+        <PackageReference Include="TanvirArjel.CustomValidation.AspNetCore" Version="1.2.2" />
+        <PackageReference Include="xFFmpeg.NET" Version="7.1.3" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="app.db"/>
+        <None Remove="app.db" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Areas\Core\Data\Migrations"/>
-        <Folder Include="Areas\Core\Models\File\Mappers"/>
-        <Folder Include="Areas\Identity\Models"/>
-        <Folder Include="Resources\Areas\Admin\Views"/>
-        <Folder Include="Resources\Views"/>
-        <Folder Include="wwwroot\images\github\"/>
+        <Folder Include="Areas\Core\Data\Migrations" />
+        <Folder Include="Areas\Core\Models\File\Mappers" />
+        <Folder Include="Areas\Identity\Models" />
+        <Folder Include="Resources\Areas\Admin\Views" />
+        <Folder Include="Resources\Views" />
+        <Folder Include="wwwroot\images\github\" />
     </ItemGroup>
 
     <ItemGroup>
-        <_ContentIncludedByDefault Remove="Views\Video\Watch.cshtml"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\browser\signalr.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\browser\signalr.min.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\AbortController.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\AbortController.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\browser-index.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\browser-index.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Errors.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Errors.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HandshakeProtocol.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HandshakeProtocol.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HttpClient.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HttpClient.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HttpConnection.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HttpConnection.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HubConnection.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HubConnection.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HubConnectionBuilder.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HubConnectionBuilder.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IConnection.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IConnection.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IHttpConnectionOptions.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IHttpConnectionOptions.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IHubProtocol.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IHubProtocol.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ILogger.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ILogger.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\index.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\index.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ITransport.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ITransport.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\JsonHubProtocol.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\JsonHubProtocol.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Loggers.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Loggers.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\LongPollingTransport.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\LongPollingTransport.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ServerSentEventsTransport.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ServerSentEventsTransport.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Stream.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Stream.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\TextMessageFormat.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\TextMessageFormat.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Utils.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Utils.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\WebSocketTransport.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\WebSocketTransport.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\AbortController.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\AbortController.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\AbortController.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\browser-index.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\browser-index.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\browser-index.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Errors.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Errors.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Errors.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HandshakeProtocol.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HandshakeProtocol.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HandshakeProtocol.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpClient.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpClient.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpClient.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpConnection.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpConnection.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpConnection.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnection.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnection.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnection.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnectionBuilder.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnectionBuilder.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnectionBuilder.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IConnection.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IConnection.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IConnection.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHttpConnectionOptions.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHttpConnectionOptions.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHttpConnectionOptions.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHubProtocol.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHubProtocol.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHubProtocol.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ILogger.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ILogger.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ILogger.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\index.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\index.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\index.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ITransport.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ITransport.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ITransport.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\JsonHubProtocol.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\JsonHubProtocol.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\JsonHubProtocol.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Loggers.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Loggers.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Loggers.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\LongPollingTransport.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\LongPollingTransport.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\LongPollingTransport.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ServerSentEventsTransport.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ServerSentEventsTransport.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ServerSentEventsTransport.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Stream.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Stream.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Stream.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\TextMessageFormat.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\TextMessageFormat.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\TextMessageFormat.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Utils.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Utils.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Utils.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.d.ts"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.js.map"/>
-        <_ContentIncludedByDefault Remove="wwwroot\@microsoft\signalr\dist\browser\signalr.js"/>
-        <_ContentIncludedByDefault Remove="wwwroot\@microsoft\signalr\dist\browser\signalr.min.js"/>
-        <_ContentIncludedByDefault Remove="Views\Api\ApiIndex.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\AccessDenied.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\AdminUserPanel.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\ExternalLogin.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\ForgotPassword.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\ForgotPasswordConfirmation.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\Lockout.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\Login.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\LoginWith2fa.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\LoginWithRecoveryCode.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\Register.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\ResetPassword.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\ResetPasswordConfirmation.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Account\SignedOut.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Admin\Delete.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Admin\Edit.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Admin\Index.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Admin\_GeneratePasswordViewPartial.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Admin\_LogsViewPartial.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Admin\_StatusMessage.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Home\Partial\_StatusMessage.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\ChangePassword.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\Disable2fa.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\EnableAuthenticator.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\ExternalLogins.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\GenerateRecoveryCodes.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\Index.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\ResetAuthenticator.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\SetPassword.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\ShowRecoveryCodes.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\TwoFactorAuthentication.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\_Layout.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\_ManageNav.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\_StatusMessage.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Manage\_ViewImports.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Shared\Error.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Shared\_Layout.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Shared\_LinksPartial.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Shared\_Sidenav.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Shared\_Sidenav.cshtml.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Shared\_ValidationScriptsPartial.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Storage\Browse.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Storage\Delete.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_AddDirectoryPartial.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_DownloadPartial.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_FileOperationPartialView.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_GenerateUrlPartial.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_PaginationPartial.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_StatusMessage.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_UploadPartial.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\Storage\Rename.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\_ViewImports.cshtml"/>
-        <_ContentIncludedByDefault Remove="Views\_ViewStart.cshtml"/>
-        <_ContentIncludedByDefault Remove="Pages\Home\About.cshtml"/>
-        <_ContentIncludedByDefault Remove="Pages\_ViewStart.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\ChangePassword.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\Disable2fa.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\EnableAuthenticator.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\ExternalLogins.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\GenerateRecoveryCodes.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\Index.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\ResetAuthenticator.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\SetPassword.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\ShowRecoveryCodes.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\TwoFactorAuthentication.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\_Layout.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\_ManageNav.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\_StatusMessage.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\_ViewImports.cshtml"/>
-        <_ContentIncludedByDefault Remove="MinioAccessClient\obj\MinioAccessClient.csproj.nuget.dgspec.json"/>
-        <_ContentIncludedByDefault Remove="MinioAccessClient\obj\project.assets.json"/>
-        <_ContentIncludedByDefault Remove="MinioAccessClient\obj\project.packagespec.json"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\AdminUserPanel.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\Delete.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\ExportData.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\ExternalLogin.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\ForgotPassword.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\ForgotPasswordConfirmation.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\Lockout.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\Login.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\Register.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\ResetPassword.cshtml"/>
-        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\SignedOut.cshtml"/>
+        <_ContentIncludedByDefault Remove="Views\Video\Watch.cshtml" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\browser\signalr.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\browser\signalr.min.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\AbortController.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\AbortController.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\browser-index.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\browser-index.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Errors.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Errors.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HandshakeProtocol.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HandshakeProtocol.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HttpClient.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HttpClient.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HttpConnection.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HttpConnection.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HubConnection.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HubConnection.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HubConnectionBuilder.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\HubConnectionBuilder.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IConnection.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IConnection.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IHttpConnectionOptions.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IHttpConnectionOptions.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IHubProtocol.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\IHubProtocol.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ILogger.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ILogger.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\index.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\index.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ITransport.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ITransport.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\JsonHubProtocol.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\JsonHubProtocol.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Loggers.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Loggers.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\LongPollingTransport.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\LongPollingTransport.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ServerSentEventsTransport.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\ServerSentEventsTransport.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Stream.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Stream.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\TextMessageFormat.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\TextMessageFormat.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Utils.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\Utils.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\WebSocketTransport.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\cjs\WebSocketTransport.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\AbortController.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\AbortController.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\AbortController.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\browser-index.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\browser-index.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\browser-index.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Errors.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Errors.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Errors.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HandshakeProtocol.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HandshakeProtocol.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HandshakeProtocol.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpClient.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpClient.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpClient.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpConnection.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpConnection.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HttpConnection.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnection.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnection.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnection.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnectionBuilder.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnectionBuilder.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\HubConnectionBuilder.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IConnection.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IConnection.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IConnection.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHttpConnectionOptions.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHttpConnectionOptions.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHttpConnectionOptions.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHubProtocol.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHubProtocol.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\IHubProtocol.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ILogger.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ILogger.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ILogger.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\index.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\index.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\index.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ITransport.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ITransport.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ITransport.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\JsonHubProtocol.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\JsonHubProtocol.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\JsonHubProtocol.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Loggers.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Loggers.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Loggers.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\LongPollingTransport.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\LongPollingTransport.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\LongPollingTransport.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ServerSentEventsTransport.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ServerSentEventsTransport.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\ServerSentEventsTransport.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Stream.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Stream.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Stream.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\TextMessageFormat.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\TextMessageFormat.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\TextMessageFormat.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Utils.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Utils.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\Utils.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.d.ts" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\lib\signalr\dist\esm\WebSocketTransport.js.map" />
+        <_ContentIncludedByDefault Remove="wwwroot\@microsoft\signalr\dist\browser\signalr.js" />
+        <_ContentIncludedByDefault Remove="wwwroot\@microsoft\signalr\dist\browser\signalr.min.js" />
+        <_ContentIncludedByDefault Remove="Views\Api\ApiIndex.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\AccessDenied.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\AdminUserPanel.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\ExternalLogin.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\ForgotPassword.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\ForgotPasswordConfirmation.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\Lockout.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\Login.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\LoginWith2fa.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\LoginWithRecoveryCode.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\Register.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\ResetPassword.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\ResetPasswordConfirmation.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Account\SignedOut.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Admin\Delete.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Admin\Edit.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Admin\Index.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Admin\_GeneratePasswordViewPartial.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Admin\_LogsViewPartial.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Admin\_StatusMessage.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Home\Partial\_StatusMessage.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\ChangePassword.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\Disable2fa.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\EnableAuthenticator.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\ExternalLogins.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\GenerateRecoveryCodes.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\Index.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\ResetAuthenticator.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\SetPassword.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\ShowRecoveryCodes.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\TwoFactorAuthentication.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\_Layout.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\_ManageNav.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\_StatusMessage.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Manage\_ViewImports.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Shared\Error.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Shared\_Layout.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Shared\_LinksPartial.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Shared\_Sidenav.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Shared\_Sidenav.cshtml.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Shared\_ValidationScriptsPartial.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Storage\Browse.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Storage\Delete.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_AddDirectoryPartial.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_DownloadPartial.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_FileOperationPartialView.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_GenerateUrlPartial.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_PaginationPartial.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_StatusMessage.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Storage\Partial\_UploadPartial.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\Storage\Rename.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\_ViewImports.cshtml" />
+        <_ContentIncludedByDefault Remove="Views\_ViewStart.cshtml" />
+        <_ContentIncludedByDefault Remove="Pages\Home\About.cshtml" />
+        <_ContentIncludedByDefault Remove="Pages\_ViewStart.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\ChangePassword.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\Disable2fa.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\EnableAuthenticator.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\ExternalLogins.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\GenerateRecoveryCodes.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\Index.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\ResetAuthenticator.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\SetPassword.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\ShowRecoveryCodes.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\TwoFactorAuthentication.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\_Layout.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\_ManageNav.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\_StatusMessage.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Core\Views\Manage\_ViewImports.cshtml" />
+        <_ContentIncludedByDefault Remove="MinioAccessClient\obj\MinioAccessClient.csproj.nuget.dgspec.json" />
+        <_ContentIncludedByDefault Remove="MinioAccessClient\obj\project.assets.json" />
+        <_ContentIncludedByDefault Remove="MinioAccessClient\obj\project.packagespec.json" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\AdminUserPanel.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\Delete.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\ExportData.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\ExternalLogin.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\ForgotPassword.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\ForgotPasswordConfirmation.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\Lockout.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\Login.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\Register.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\ResetPassword.cshtml" />
+        <_ContentIncludedByDefault Remove="Areas\Identity\Views\Account\SignedOut.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Pika.Domain\Pika.Domain.csproj"/>
+        <ProjectReference Include="..\Pika.Domain\Pika.Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="Areas\Admin\Views\Category\Create.cshtml"/>
+        <AdditionalFiles Include="Areas\Admin\Views\Category\Create.cshtml" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -1067,13 +1068,13 @@
         <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
         <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
         <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
-        <TypeScriptOutFile/>
-        <TypeScriptOutDir/>
+        <TypeScriptOutFile />
+        <TypeScriptOutDir />
         <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
         <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
         <TypeScriptSourceMap>True</TypeScriptSourceMap>
-        <TypeScriptMapRoot/>
-        <TypeScriptSourceRoot/>
+        <TypeScriptMapRoot />
+        <TypeScriptSourceRoot />
     </PropertyGroup>
 
 </Project>

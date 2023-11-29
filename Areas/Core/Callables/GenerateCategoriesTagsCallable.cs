@@ -3,6 +3,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Hangfire;
@@ -45,7 +46,7 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
         foreach (var bucket in buckets)
         {
             var items = _minioService
-                .ListObjects(bucket.Name, true).Result;
+                .ListObjects(bucket.Name, true);
 
             foreach (var c in categories)
             {
