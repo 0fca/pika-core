@@ -1,5 +1,4 @@
-﻿
-function hideDownloadBox() {
+﻿function hideDownloadBox() {
     console.log("Hide download box.");
     let downloadPartial = document.getElementById("download-panel");
     downloadPartial.setAttribute("hidden", "true");

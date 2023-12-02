@@ -1,9 +1,9 @@
 ﻿const mediaHubconnection = new signalR.HubConnectionBuilder()
-                        .withUrl("/hubs/media", {
-                            transport: signalR.HttpTransportType.ServerSentEvents 
-                        })
-                .configureLogging(signalR.LogLevel.None)
-				.build();
+    .withUrl("/hubs/media", {
+        transport: signalR.HttpTransportType.ServerSentEvents
+    })
+    .configureLogging(signalR.LogLevel.None)
+    .build();
 
 mediaHubconnection.onclose(async () => {
     await start();
@@ -38,7 +38,7 @@ function loadThumb(path, s) {
         if (img.hasAttribute("id")) {
             const guid = img.getAttribute("id");
             const text = img.getAttribute("data-name");
-            const systemPath = path.toString() + directorySeparator +text;
+            const systemPath = path.toString() + directorySeparator + text;
 
             mediaHubconnection.invoke("CreateThumb", systemPath, guid, 1).catch(err => {
                 setErrorIcon(guid, err.toString());
@@ -51,8 +51,8 @@ function ReceiveThumb(isSuccess, thumbId) {
     if (isSuccess) {
         const url = "/Core/Storage/Thumb?id=" + thumbId;
         document.getElementById(thumbId).setAttribute("srcset", encodeURI(url));
-    }else{
-        document.getElementById(thumbId).setAttribute("srcset", ""); 
-        setErrorIcon(thumbId, "Error receiving thumb for: "+thumbId);
+    } else {
+        document.getElementById(thumbId).setAttribute("srcset", "");
+        setErrorIcon(thumbId, "Error receiving thumb for: " + thumbId);
     }
 }

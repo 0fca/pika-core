@@ -14,62 +14,52 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Pika.Domain.Security;
 using PikaCore.Areas.Core.Commands;
-using PikaCore.Areas.Core.Data;
 using PikaCore.Areas.Core.Models;
 using PikaCore.Areas.Core.Models.DTO;
 using PikaCore.Areas.Core.Models.File;
 using PikaCore.Areas.Core.Queries;
-using PikaCore.Areas.Core.Services;
 using PikaCore.Areas.Identity.Attributes;
 using PikaCore.Infrastructure.Adapters;
 using PikaCore.Infrastructure.Adapters.Filesystem.Commands;
 using PikaCore.Infrastructure.Security;
-using PikaCore.Infrastructure.Services.Helpers;
 using Serilog;
 
 namespace PikaCore.Areas.Core.Controllers.App
 {
     [Area("Core")]
-    [ResponseCache(CacheProfileName = "Default")]
     public class StorageController : Controller
     {
-        //private readonly IUrlGenerator _urlGeneratorService;
         private readonly IMapper _mapper;
-
-        //private readonly IdDataProtection _idDataProtection;
         private readonly IStringLocalizer<StorageController> _stringLocalizer;
         private readonly IMediator _mediator;
         private readonly IStorage _storage;
         private readonly IDistributedCache _cache;
         private readonly IConfiguration _configuration;
-
+        private readonly IdDataProtection _idDataProtection;
+        
         #region TempDataMessages
 
-        [TempData(Key = "showGenerateUrlPartial")]
-        public bool ShowGenerateUrlPartial { get; set; }
 
-        [TempData(Key = "returnMessage")] public string ReturnMessage { get; set; } = "";
+        [TempData(Key = "returnMessage")] private string ReturnMessage { get; set; } = "";
 
         #endregion
 
-        public StorageController( //IUrlGenerator iUrlGenerator,
-            //IdDataProtection idDataProtection,
+        public StorageController(
             IStringLocalizer<StorageController> stringLocalizer,
             IMediator mediator,
             IMapper mapper,
             IStorage service,
             IDistributedCache cache,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IdDataProtection protection)
         {
-            //_urlGeneratorService = iUrlGenerator;
-            //_storageIndexContext = storageIndexContext;
-            // _idDataProtection = idDataProtection;
             _stringLocalizer = stringLocalizer;
             _mediator = mediator;
             _mapper = mapper;
             _cache = cache;
             _storage = service;
             _configuration = configuration;
+            _idDataProtection = protection;
         }
 
         [HttpGet]
@@ -115,31 +105,15 @@ namespace PikaCore.Areas.Core.Controllers.App
             [FromQuery] int count = 10,
             [FromQuery] string? tag = null)
         {
-            var objects = JsonSerializer
-                .Deserialize<List<ObjectInfo>>(
-                    await _cache.GetStringAsync($"{bucketId}.category.contents.{categoryId}") ?? "[]"
-                );
-            var total = objects!.Count;
-            if (objects!.Count > int.Parse(_configuration.GetSection("Storage")["OnePageMaxTotal"] ?? "2000"))
-            {
-                objects = Paginator<ObjectInfo>.Paginate(objects, offset, count);
-            }
-
             var tags = (await _mediator.Send(new GetCategoryByIdQuery(Guid.Parse(categoryId))))
                 .Tags;
-            var lrmv = new FileResultViewModel
+            return View(new FileResultViewModel
             {
-                Objects = objects,
                 SelectedTag = tag,
-                SelectedPage = (offset + count) / count,
-                PerPage = count,
-                Total = total,
-                OnePageMaxTotal = int.Parse(_configuration.GetSection("Storage")["OnePageMaxTotal"] ?? "2000"),
                 Tags = tags!.ContainsKey(bucketId) ? tags[bucketId] : new List<string>(),
                 CategoryId = categoryId,
                 BucketId = bucketId
-            };
-            return View(lrmv);
+            });
         }
 
         [HttpGet]
@@ -153,11 +127,13 @@ namespace PikaCore.Areas.Core.Controllers.App
         {
             try
             {
+                name = _idDataProtection.Decode(name);
                 var rId = await _mediator.Send(new GenerateShortLinkCommand(name, bucketId));
                 var hash = JsonSerializer.Deserialize<string>(_cache.Get(rId.ToString()));
                 await _cache.RemoveAsync(rId.ToString());
                 TempData["ShortLink"] = hash;
-                return RedirectToAction(nameof(Browse), new {categoryId, bucketId});
+                TempData["CategoryId"] = categoryId;
+                return RedirectToAction(nameof(Browse), new { categoryId, bucketId });
             }
             catch (InvalidOperationException ex)
             {
@@ -176,8 +152,9 @@ namespace PikaCore.Areas.Core.Controllers.App
         )
         {
             var s = await _mediator.Send(new FindShortLinkByHashQuery(hash));
+            var encodedObjectName = _idDataProtection.Encode(s.ObjectName);
             return Redirect(
-                $"/Core/Storage/Download?bucketId={s.BucketId}&categoryId={categoryId}&objectName={s.ObjectName}"
+                $"/Core/Storage/Download?bucketId={s.BucketId}&categoryId={categoryId}&objectName={encodedObjectName}"
             );
         }
 
@@ -188,15 +165,16 @@ namespace PikaCore.Areas.Core.Controllers.App
             [FromQuery] string categoryId,
             [FromQuery] string objectName)
         {
+            var unprotectedObjectName = _idDataProtection.Decode(objectName);
             var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(bucketId)));
-            if (!await _storage.StatObject(bucket.Name, objectName))
+            if (!await _storage.StatObject(bucket.Name, unprotectedObjectName))
             {
                 ReturnMessage = _stringLocalizer.GetString("Zasób nie istnieje").Value;
                 return RedirectToAction(nameof(Browse), new { categoryId, bucketId });
             }
 
-            var (memoryStream, returnName, mime) = await _storage.GetObjectAsStream(bucket.Name, objectName);
-            return File(memoryStream, mime, returnName);
+            var (memoryStream, returnName, mime) = await _storage.GetObjectAsStream(bucket.Name, unprotectedObjectName);
+            return File(memoryStream, "application/octet-stream", returnName);
         }
 
         [HttpPost]
@@ -233,14 +211,16 @@ namespace PikaCore.Areas.Core.Controllers.App
             [FromQuery] string objectName)
         {
             var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(bucketId)));
-            if (!await _storage.StatObject(bucket.Name, objectName))
+            var decodedObjectName = _idDataProtection.Decode(objectName);
+            if (!await _storage.StatObject(bucket.Name, decodedObjectName))
             {
                 ReturnMessage = _stringLocalizer.GetString("Zasób nie istnieje").Value;
-                return View();
+                return View(null);
             }
 
-            var objectInfo = await _storage.ObjectInformation(bucket.Name, objectName);
+            var objectInfo = await _storage.ObjectInformation(bucket.Name, decodedObjectName);
             var viewModel = _mapper.Map<ResourceInformationViewModel>(objectInfo);
+            viewModel.FullName = objectName; 
             viewModel.CategoryId = categoryId;
             viewModel.BucketId = bucketId;
             return View(viewModel);

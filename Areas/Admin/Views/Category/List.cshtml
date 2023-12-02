@@ -2,7 +2,7 @@
 @inject IViewLocalizer Localizer
 @{
     Layout = "_Layout";
-    ViewData["Title"] = @Localizer["Lista kategorii"];
+    ViewData["Title"] = Localizer["Lista kategorii"];
     var text = TempData["Success"] == null ? "gradient-warning" : "success";
     var icon = TempData["Success"] == null ? "fa-xmark" : "fa-check";
 }
@@ -30,7 +30,7 @@
                 <h3 class="card-title">@category.Name</h3>
             </div>
             <div class="card-body">
-              @category.Description  
+                @category.Description
             </div>
             <div class="card-footer">
                 <a asp-area="Admin" asp-controller="Category" asp-action="Edit" asp-route-id="@category.Id" class="btn-link">

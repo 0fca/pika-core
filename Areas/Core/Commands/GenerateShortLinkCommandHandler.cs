@@ -39,7 +39,8 @@ public class GenerateShortLinkCommandHandler : IRequestHandler<GenerateShortLink
                     ObjectName = request.ObjectName,
                     BucketId = request.BucketId,
                     Hash = _hashGenerator.GenerateId($"{request.ObjectName}{request.BucketId}"),
-                    Expires = true
+                    Expires = true,
+                    ExpireDate = DateTime.UtcNow.AddDays(10).ToUniversalTime()
                 };
 
         _storageIndexContext.Update(s);

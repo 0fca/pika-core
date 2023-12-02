@@ -18,24 +18,24 @@ using PikaCore.Areas.Core.Queries;
 namespace PikaCore.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles="Administrator")]
+[Authorize(Roles = "Administrator")]
 [Route("[area]/[controller]/[action]")]
 public class CategoryController : Controller
 {
-    private readonly IStringLocalizer<CategoryController> _localizer;
-    private readonly IMediator _mediator;
     private readonly IDistributedCache _distributedCache;
+    private readonly IStringLocalizer<CategoryController> _localizer;
     private readonly IMapper _mapper;
-    
+    private readonly IMediator _mediator;
+
     public CategoryController(IStringLocalizer<CategoryController> localizer,
         IMediator mediator,
         IDistributedCache cache,
         IMapper mapper)
     {
-        this._localizer = localizer;
-        this._mediator = mediator;
-        this._distributedCache = cache;
-        this._mapper = mapper;
+        _localizer = localizer;
+        _mediator = mediator;
+        _distributedCache = cache;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -46,13 +46,13 @@ public class CategoryController : Controller
         listModel.Categories = categories.ToList();
         return View(listModel);
     }
-    
+
     [HttpGet]
     public IActionResult Create()
     {
         return View();
     }
-    
+
     [HttpPost]
     [AutoValidateAntiforgeryToken]
     public IActionResult Create([FromForm] CreateCategoryViewModel createCategoryViewModel)
@@ -62,8 +62,9 @@ public class CategoryController : Controller
             ViewData["ReturnMessage"] = _localizer.GetString("Niepoprawne dane dla kategorii").Value;
             return View();
         }
+
         var callable = new CreateCategoryCallable(_mediator);
-        var parameters = new Dictionary<string, ParameterValueType>()
+        var parameters = new Dictionary<string, ParameterValueType>
         {
             ["Name"] = new(createCategoryViewModel.Name),
             ["Description"] = new(createCategoryViewModel.Description),
@@ -72,7 +73,7 @@ public class CategoryController : Controller
 
         BackgroundJob.Schedule(() => callable.Execute(parameters), TimeSpan.Zero);
         ViewData["Success"] = true;
-        ViewData["ReturnMessage"] = this._localizer.GetString("Kategoria przekazana do utworzenia").Value;
+        ViewData["ReturnMessage"] = _localizer.GetString("Kategoria przekazana do utworzenia").Value;
         return View();
     }
 
@@ -80,20 +81,20 @@ public class CategoryController : Controller
     public async Task<IActionResult> Edit(Guid id)
     {
         var category = await _mediator.Send(new GetCategoryByIdQuery(id));
-        var editViewModel = _mapper.Map<EditCategoryViewModel>(category); 
+        var editViewModel = _mapper.Map<EditCategoryViewModel>(category);
         return View(editViewModel);
     }
-    
+
     [HttpPost]
     [AutoValidateAntiforgeryToken]
     public async Task<IActionResult> Edit(EditCategoryViewModel editCategoryViewModel)
     {
         await _mediator.Send(_mapper.Map<UpdateCategoryCommand>(editCategoryViewModel));
         TempData["Success"] = true;
-        TempData["ReturnMessage"] = this._localizer.GetString("Kategoria przekazana do aktualizacji").Value;
+        TempData["ReturnMessage"] = _localizer.GetString("Kategoria przekazana do aktualizacji").Value;
         return RedirectPermanent($"/Admin/Category/Edit?id={editCategoryViewModel.Id}");
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -106,7 +107,7 @@ public class CategoryController : Controller
     {
         var rid = await _mediator.Send(new ArchiveCategoryCommand(id));
         TempData["Success"] = true;
-        TempData["ReturnMessage"] = this._localizer.GetString($"Kategoria {rid} przekazana do usunięcia").Value; 
+        TempData["ReturnMessage"] = _localizer.GetString($"Kategoria {rid} przekazana do usunięcia").Value;
         return Redirect("/Admin/Category/List");
     }
 }

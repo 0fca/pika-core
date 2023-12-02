@@ -13,7 +13,6 @@ using PikaCore.Infrastructure.Services;
 namespace PikaCore.Areas.Core.Controllers.App
 {
     [Area("Core")]
-    [ResponseCache(CacheProfileName = "Default")]
     public class HomeController : Controller
     {
         private readonly IMessageService _messageService;
