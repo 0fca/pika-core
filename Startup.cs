@@ -73,14 +73,15 @@ namespace PikaCore
         public void ConfigureServices(IServiceCollection services)
         {
             var fileName = new StringBuilder();
+            fileName.Append("pika-core-");
             fileName.Append(Environment.GetEnvironmentVariable("HOSTNAME"));
             fileName.Append(".log");
             var logPath = Path.Combine(
                 Configuration.GetSection("Logging").GetSection("File")["Path"], 
                 fileName.ToString());
+            Console.WriteLine($"Log File: {fileName}");
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
-                .MinimumLevel.Warning()
                 .WriteTo.Console()
                 .WriteTo.File(
                     logPath, 
