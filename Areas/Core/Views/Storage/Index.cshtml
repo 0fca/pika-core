@@ -44,7 +44,7 @@
         </div>
     </div>
 }
-@if (Model.Categories.Count > 0)
+@if (Model is {Categories.Count: > 0 })
 {
     <ul class="collection with-header">
         <li class="collection-header"><h4>@Localizer["Kategorie"]</h4></li>
