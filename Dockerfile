@@ -1,4 +1,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0.404-1-alpine3.18-amd64 AS build-env
+
+ARG MAJOR
+ARG MINOR
+ARG REV
+
 RUN apk add xmlstarlet bash --update --repository http://dl-4.alpinelinux.org/alpine/edge/testing \
 	&& rm -rf /var/cache/apk/*
 RUN apk add git xmlstarlet
