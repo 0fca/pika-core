@@ -14,6 +14,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using AutoMapper;
 using Hangfire;
 using Hangfire.Dashboard.Resources;
@@ -28,6 +29,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using OpenIddict.Client;
@@ -51,6 +53,7 @@ using PikaCore.Infrastructure.Adapters.Console.Queries;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
 using Serilog;
+using Serilog.Events;
 using StackExchange.Redis;
 using TanvirArjel.CustomValidation.AspNetCore.Extensions;
 using Weasel.Core;
@@ -69,10 +72,20 @@ namespace PikaCore
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var fileName = new StringBuilder();
+            fileName.Append(Environment.GetEnvironmentVariable("HOSTNAME"));
+            fileName.Append(".log");
+            var logPath = Path.Combine(
+                Configuration.GetSection("Logging").GetSection("File")["Path"], 
+                fileName.ToString());
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .MinimumLevel.Warning()
                 .WriteTo.Console()
+                .WriteTo.File(
+                    logPath, 
+                    LogEventLevel.Information
+                    )
                 .CreateLogger();
             services.AddLogging();
             services.AddMarten(c =>
