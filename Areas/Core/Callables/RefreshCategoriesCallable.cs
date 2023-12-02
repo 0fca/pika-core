@@ -26,7 +26,7 @@ public class RefreshCategoriesCallable : BaseJobCallable
     public RefreshCategoriesCallable(IDistributedCache cache,
         IMediator mediator,
         IMinioService minioService,
-        IMapper mapper)
+        IMapper mapper) : base(cache)
     {
         this._cache = cache;
         this._mediator = mediator;
@@ -36,6 +36,10 @@ public class RefreshCategoriesCallable : BaseJobCallable
 
     public override async Task Execute(Dictionary<string, ParameterValueType>? parameterValueTypes)
     {
+        if (!await this.IsJobRunningOnMaster())
+        {
+            return;
+        }
         var buckets = await _mediator.Send(new GetAllBucketsQuery());
         var categories = (await _mediator.Send(new GetAllCategoriesQuery())).ToList();
         var bucketsToCategories = new Dictionary<string, List<string>>();
@@ -62,7 +66,7 @@ public class RefreshCategoriesCallable : BaseJobCallable
                 },
                 ex =>
                 {
-                    Log.Error(
+                    Log.Logger.Error(
                         "ListObjects: {Type} occured with following message: {Message}",
                         ex.GetType().FullName,
                         ex.Message
@@ -70,8 +74,10 @@ public class RefreshCategoriesCallable : BaseJobCallable
                 }, 
                 () =>
                 {
-                    Log.Information(
-                        "ListObjects: Operation Succeeded"
+                    Log.Logger.Information(
+                        "{Type}: ListObjects: {Message}",
+                        this.GetType().FullName,
+                        "Operation Succeeded"
                     );
                     foreach (var (categoryId,categoryContents) in categoryMap)
                     {

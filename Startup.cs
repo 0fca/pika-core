@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,9 +13,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using AutoMapper;
 using Hangfire;
-using Hangfire.Dashboard.Resources;
 using Hangfire.Redis;
 using Marten;
 using Marten.Events.Projections;
@@ -55,7 +54,6 @@ using Serilog.Sinks.Grafana.Loki;
 using StackExchange.Redis;
 using TanvirArjel.CustomValidation.AspNetCore.Extensions;
 using Weasel.Core;
-using WebSocketOptions = Microsoft.AspNetCore.Builder.WebSocketOptions;
 
 namespace PikaCore
 {
@@ -105,6 +103,12 @@ namespace PikaCore
             {
                 EndPoints = { Configuration.GetConnectionString("RedisConnection") }
             });
+            if (!redis.IsConnected)
+            {
+                // Redis is mandatory for now, we dont support scenario single-instance only,
+                // so we need to abort if there is no Redis instance.
+                Environment.Exit(1);
+            }
             
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -238,7 +242,6 @@ namespace PikaCore
             services.AddSignalR()
                 .AddStackExchangeRedis(o =>
                 {
-                    //o.Configuration.ClientName = "PikaCore";
                     o.Configuration.ChannelPrefix = "PikaCoreHub";
                     o.Configuration.DefaultDatabase = int.Parse(Configuration.GetSection("Redis")["RedisDb"] ?? "0");
                     o.Configuration.EndPoints.Add(Configuration.GetConnectionString("RedisConnection"));
@@ -379,16 +382,35 @@ namespace PikaCore
                 this.CreateDefaultCommands(serviceProvider);
             }
 
-            if (bool.Parse(Configuration.GetSection("Workers")["RunWorkers"] ?? "true"))
+            var cache = serviceProvider.GetService<IDistributedCache>();
+            var masterHost = cache?.GetString("MasterHost");
+            var areWorkersEnabledByUser = 
+                bool.Parse(Configuration.GetSection("Storage").GetSection("Workers")["RunWorkers"] ?? "true");
+            var masterIsAlreadyRunning = !string.IsNullOrEmpty(masterHost);
+            var reasonString = new StringBuilder();
+            if (!areWorkersEnabledByUser)
+            {
+                reasonString.Append("> user\n");
+            }
+
+            if (masterIsAlreadyRunning)
+            {
+                reasonString.Append("> master check \n");
+            }
+            
+            if (areWorkersEnabledByUser
+                && !masterIsAlreadyRunning)
             {
                 this.RegisterRecurringCategoryJobs(serviceProvider);
             }
             else
             {
-                Log.Warning("Workers won't be running, because disabled by user!");
+                Log.Warning("{Type}: Workers won't be registered on startup, because disabled by:\n {WorkersDisabledReason}", 
+                    "Startup",
+                    reasonString);
             }
         }
-
+        
         private void RegisterRecurringCategoryJobs(IServiceProvider serviceProvider)
         {
             var cache = serviceProvider.GetService<IDistributedCache>();
@@ -411,6 +433,7 @@ namespace PikaCore
                 Configuration
                     .GetSection("Storage")
                     .GetSection("Workers")["CategoriesTagsRefreshWorkerCron"]);
+            cache.SetString("MasterHost", Environment.GetEnvironmentVariable("HOSTNAME"));
         }
 
         private void CreateBuckets(IServiceProvider serviceProvider)
@@ -460,12 +483,15 @@ namespace PikaCore
         {
             var currentVersion = (Assembly.GetEntryAssembly() ?? throw new InvalidOperationException())
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-            Log.Information($"PikaCore v.{currentVersion} is booting... Hellorld!");
+            Log.Information(
+                "{Type}: PikaCore v.{CurrentVersion} is booting... Hellorld!", 
+                "Startup", currentVersion
+                );
         }
 
         private static void OnShutdown()
         {
-            Log.Information("PikaCore is shutting down... Good bye.");
+            Log.Information("{Type}: PikaCore is shutting down... Good bye.", "Shutdown");
         }
 
         #endregion
