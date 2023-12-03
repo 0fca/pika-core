@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using OpenIddict.Client;
@@ -51,6 +52,7 @@ using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
 using Serilog;
 using Serilog.Sinks.Grafana.Loki;
+using Serilog.Events;
 using StackExchange.Redis;
 using TanvirArjel.CustomValidation.AspNetCore.Extensions;
 using Weasel.Core;
@@ -68,10 +70,22 @@ namespace PikaCore
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var fileName = new StringBuilder();
+            fileName.Append("pika-core-");
+            fileName.Append(Environment.GetEnvironmentVariable("HOSTNAME"));
+            fileName.Append(".log");
+            var logPath = Path.Combine(
+                Configuration.GetSection("Logging").GetSection("File")["Path"], 
+                fileName.ToString());
+            Console.WriteLine($"Log File: {fileName}");
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.GrafanaLoki(Configuration.GetSection("Logging").GetSection("GrafanaLoki")["Uri"])
+                .WriteTo.File(
+                    logPath, 
+                    LogEventLevel.Information
+                    )
                 .CreateLogger();
             services.AddLogging();
             services.AddMarten(c =>
