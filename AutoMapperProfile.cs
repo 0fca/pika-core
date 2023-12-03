@@ -93,7 +93,10 @@ public class AutoMapperProfile : Profile
         CreateMap<BucketsView, BucketDTO>()
             .ForMember(d => d.Name,
                 opt =>
-                    opt.MapFrom(src => src.Name));
+                    opt.MapFrom(src => src.Name))
+            .ForMember(d => d.Roles,
+                opt => 
+                    opt.MapFrom(src => src.RoleClaims));
         CreateMap<Bucket, BucketsView>()
             .ForMember(b => b.Id,
                 opt =>
