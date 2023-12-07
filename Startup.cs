@@ -184,6 +184,7 @@ namespace PikaCore
             services.AddAuthorization();
             services.AddHangfire(o =>
             {
+                o.UseDarkModeSupportForDashboard();
                 o.UseSerializerSettings(new JsonSerializerSettings()
                 {
                     MaxDepth = 128,
@@ -199,7 +200,15 @@ namespace PikaCore
                         });
                 }
             });
-            services.AddHangfireServer();
+            var options = new BackgroundJobServerOptions
+            {
+                Queues = new[] { "alpha", "beta", "default" }
+            };
+            services.AddHangfireServer(o =>
+            {
+                o.WorkerCount = 5;
+                o.SchedulePollingInterval = TimeSpan.FromSeconds(5);
+            });
             services.AddAspNetCoreCustomValidation();
             services.AddTransient<IHashGenerator, HashGeneratorService>();
             services.AddSingleton<UniqueCode>();

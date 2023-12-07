@@ -58,7 +58,7 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
         }
         var updateCallable = new UpdateCategoryCallable(_mediator, _distributedCache);
         var hostName = Environment.GetEnvironmentVariable("HOSTNAME");
-        var jobId = BackgroundJob.Schedule(hostName,
+        var jobId = BackgroundJob.Schedule(hostName.ToLower(),
             () => updateCallable.Execute(null),
             TimeSpan.FromSeconds(5));
         await _distributedCache.SetStringAsync("update.job.identifier", jobId,
@@ -66,6 +66,7 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(300)
             });
+        BackgroundJob.Requeue(jobId);
     }
 
     private void OnNext(Item i, BucketsView bucket, 
