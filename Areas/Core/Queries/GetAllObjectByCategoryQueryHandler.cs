@@ -24,7 +24,8 @@ public class GetAllObjectByCategoryQueryHandler : IRequestHandler<GetAllObjectsB
             cancellationToken);
         if (string.IsNullOrEmpty(serializedObjectInfos))
         {
-            RecurringJob.TriggerJob("UpdateCategories");
+            var hostName = Environment.GetEnvironmentVariable("HOSTNAME");
+            RecurringJob.TriggerJob($"{hostName}-UpdateCategories");
             return new List<ObjectInfo>(); //TODO: Just for now, need to handle it properly
         }
         var objectInfos = JsonSerializer

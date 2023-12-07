@@ -435,14 +435,15 @@ namespace PikaCore
                 mediator,
                 clientService,
                 mapper);
-            RecurringJob.AddOrUpdate("UpdateCategories", () =>
+            var hostName = Environment.GetEnvironmentVariable("HOSTNAME");
+            RecurringJob.AddOrUpdate($"{hostName}-UpdateCategories", () =>
                     refreshCallable.Execute(null),
                 Configuration
                     .GetSection("Storage")
                     .GetSection("Workers")["CategoriesRefreshWorkerCron"]
             );
             var updateTagsCallables = new GenerateCategoriesTagsCallable(mediator, clientService, cache);
-            RecurringJob.AddOrUpdate("UpdateCategoriesTags",
+            RecurringJob.AddOrUpdate($"{hostName}-UpdateCategoriesTags",
                 () => updateTagsCallables.Execute(null),
                 Configuration
                     .GetSection("Storage")
