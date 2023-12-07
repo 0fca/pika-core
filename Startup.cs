@@ -433,20 +433,18 @@ namespace PikaCore
                 mediator,
                 clientService,
                 mapper);
-            var hostName = Environment.GetEnvironmentVariable("HOSTNAME");
-            RecurringJob.AddOrUpdate($"{hostName}-UpdateCategories", () =>
+            RecurringJob.AddOrUpdate($"RefreshCategoriesCallable", () =>
                     refreshCallable.Execute(null),
                 Configuration
                     .GetSection("Storage")
                     .GetSection("Workers")["CategoriesRefreshWorkerCron"]
             );
             var updateTagsCallables = new GenerateCategoriesTagsCallable(mediator, clientService, cache);
-            RecurringJob.AddOrUpdate($"{hostName}-UpdateCategoriesTags",
+            RecurringJob.AddOrUpdate($"GenerateCategoriesTagsCallable",
                 () => updateTagsCallables.Execute(null),
                 Configuration
                     .GetSection("Storage")
                     .GetSection("Workers")["CategoriesTagsRefreshWorkerCron"]);
-            cache.SetString("MasterHost", Environment.GetEnvironmentVariable("HOSTNAME"));
         }
 
         private void CreateBuckets(IServiceProvider serviceProvider)
