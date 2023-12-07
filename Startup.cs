@@ -200,10 +200,7 @@ namespace PikaCore
                         });
                 }
             });
-            var options = new BackgroundJobServerOptions
-            {
-                Queues = new[] { "alpha", "beta", "default" }
-            };
+
             services.AddHangfireServer(o =>
             {
                 o.WorkerCount = 5;
@@ -406,23 +403,15 @@ namespace PikaCore
             }
 
             var cache = serviceProvider.GetService<IDistributedCache>();
-            var masterHost = cache?.GetString("MasterHost");
             var areWorkersEnabledByUser = 
                 bool.Parse(Configuration.GetSection("Storage").GetSection("Workers")["RunWorkers"] ?? "true");
-            var masterIsAlreadyRunning = !string.IsNullOrEmpty(masterHost);
             var reasonString = new StringBuilder();
             if (!areWorkersEnabledByUser)
             {
                 reasonString.Append("> user\n");
             }
 
-            if (masterIsAlreadyRunning)
-            {
-                reasonString.Append("> master check \n");
-            }
-            
-            if (areWorkersEnabledByUser
-                && !masterIsAlreadyRunning)
+            if (areWorkersEnabledByUser)
             {
                 this.RegisterRecurringCategoryJobs(serviceProvider);
             }

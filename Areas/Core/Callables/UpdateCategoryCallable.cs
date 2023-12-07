@@ -25,10 +25,6 @@ public class UpdateCategoryCallable : BaseJobCallable
 
     public override async Task Execute(Dictionary<string, ParameterValueType>? parameterValueTypes)
     {
-        if (!await this.IsJobRunningOnMaster())
-        {
-            return;
-        }
         if (parameterValueTypes == null)
         {
             await ExecuteMultipleUpdates();
