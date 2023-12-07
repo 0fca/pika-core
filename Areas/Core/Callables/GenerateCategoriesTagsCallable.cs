@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Minio.DataModel;
 using Newtonsoft.Json;
+using NuGet.Packaging;
 using Pika.Domain.Storage.Callables;
 using Pika.Domain.Storage.Callables.ValueTypes;
 using Pika.Domain.Storage.Entity.View;
@@ -23,6 +24,8 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
     private readonly IMinioService _minioService;
     private readonly IDistributedCache _distributedCache;
 
+    private static readonly Dictionary<Guid, Dictionary<Guid, HashSet<string>>> CategoriesTagsMap = new();
+    
     public GenerateCategoriesTagsCallable(IMediator mediator,
         IMinioService minioService,
         IDistributedCache cache) : base(cache)
@@ -42,73 +45,64 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
         var buckets = await _mediator.Send(new GetAllBucketsQuery());
 
         var categories = await _mediator.Send(new GetAllCategoriesQuery());
-        var parameterDictList = new List<Dictionary<string, ParameterValueType>>();
-        var tagsCategoriesMap = new Dictionary<Guid, Dictionary<Guid, HashSet<string>>>();
-        await _distributedCache.SetStringAsync("update.categories.tags.map",
-            JsonConvert.SerializeObject(tagsCategoriesMap));
-        await _distributedCache.SetStringAsync("update.categories.parameters",
-            JsonConvert.SerializeObject(parameterDictList));
+        
         foreach (var bucket in buckets)
         {
             var items = _minioService
                 .ListObjects(bucket.Name, true);
             items.Subscribe(
                 item => OnNext(item, bucket, categories),
-                OnError,
+                OnError, 
                 OnCompleted
             );
         }
+        var updateCallable = new UpdateCategoryCallable(_mediator, _distributedCache);
+        var jobId = BackgroundJob.Schedule("default",
+            () => updateCallable.Execute(null),
+            TimeSpan.FromSeconds(5));
+        await _distributedCache.SetStringAsync("update.job.identifier", jobId,
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(300)
+            });
     }
 
-    private void OnNext(Item i, BucketsView bucket, IEnumerable<CategoriesView> categories)
+    private void OnNext(Item i, BucketsView bucket, 
+        IEnumerable<CategoriesView> categories)
     {
+ 
         var mime = MimeTypes.GetMimeType(i.Key);
-        var tagsCategoriesMap = JsonConvert.DeserializeObject<Dictionary<Guid, Dictionary<Guid, HashSet<string>>>>(
-            _distributedCache.GetString("update.categories.tags.map")!
-        );
-        var categoriesView = categories
-            .FirstOrDefault(c => !string.IsNullOrEmpty(mime) || c.Mimes.Contains(mime));
-
-        if (categoriesView == null)
+        if (string.IsNullOrEmpty(mime))
         {
             return;
         }
-
-        var tag = new List<string>();
-        if (i.Key.Contains('/'))
+        var categoriesView = categories
+            .FirstOrDefault(c => c.Mimes.Contains(mime));
+        
+        if (categoriesView == null || !i.Key.Contains('/'))
         {
-            var s = new Stack<string>(i.Key.Split('/'));
-            s.Pop();
-            tag.AddRange(s);
+            return;
+        }
+        
+        if (!CategoriesTagsMap.ContainsKey(categoriesView.Id))
+        {
+            CategoriesTagsMap.Add(categoriesView.Id, new Dictionary<Guid, HashSet<string>>());
         }
 
-        if (!tagsCategoriesMap.ContainsKey(categoriesView.Id))
+        if (!CategoriesTagsMap[categoriesView.Id].ContainsKey(bucket.Id))
         {
-            tagsCategoriesMap.Add(categoriesView.Id, new Dictionary<Guid, HashSet<string>>());
+            CategoriesTagsMap[categoriesView.Id].Add(bucket.Id, new HashSet<string>());
         }
 
-        if (!tagsCategoriesMap[categoriesView.Id].ContainsKey(bucket.Id))
-        {
-            tagsCategoriesMap[categoriesView.Id].Add(bucket.Id, new HashSet<string>());
-        }
-
-        tag.ForEach(t =>
-        {
-            if (!string.IsNullOrEmpty(t))
-            {
-                tagsCategoriesMap[categoriesView.Id][bucket.Id].Add(t);
-            }
-        });
-        _distributedCache.SetString("update.categories.tags.map", JsonConvert.SerializeObject(tagsCategoriesMap));
+        var s = new Stack<string>(i.Key.Split('/'));
+        s.Pop();
+        CategoriesTagsMap[categoriesView.Id][bucket.Id].AddRange(s);
     }
 
     private void OnCompleted()
     {
         var parameterDictList = new List<Dictionary<string, ParameterValueType>>();
-        var tagsCategoriesMap = JsonConvert.DeserializeObject<Dictionary<Guid, Dictionary<Guid, HashSet<string>>>>(
-            _distributedCache.GetString("update.categories.tags.map")!
-        );
-        foreach (var (categoryId, tags) in tagsCategoriesMap)
+        foreach (var (categoryId, tags) in CategoriesTagsMap)
         {
             var parameters = new Dictionary<string, ParameterValueType>
             {
@@ -124,15 +118,7 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
         _distributedCache.SetString("update.categories.parameters",
             serializedDict
         );
-        var updateCallable = new UpdateCategoryCallable(_mediator, _distributedCache);
-        var jobId = BackgroundJob.Schedule("default",
-            () => updateCallable.Execute(null),
-            TimeSpan.FromMilliseconds(500));
-        _distributedCache.SetString("update.job.identifier", jobId,
-            new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(300)
-            });
+        
         Log.Logger.Information(
             "{Type}: Execute Succeeded, No Further Action Required",
             this.GetType().FullName
