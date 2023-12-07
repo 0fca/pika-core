@@ -29,6 +29,7 @@ function onStartError() {
 function createSignalRConnection() {
     return new signalR.HubConnectionBuilder()
         .withUrl("/hubs/storage")
+        .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
         .configureLogging(signalR.LogLevel.Critical)
         .withAutomaticReconnect()
         .build();

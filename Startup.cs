@@ -260,6 +260,7 @@ namespace PikaCore
             }));
 
             services.AddSignalR()
+                .AddMessagePackProtocol()
                 .AddStackExchangeRedis(o =>
                 {
                     o.Configuration.ChannelPrefix = "PikaCoreHub";

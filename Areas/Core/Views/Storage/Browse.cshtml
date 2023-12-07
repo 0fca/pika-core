@@ -49,6 +49,7 @@
     @await Html.PartialAsync("Partial/_InformationSidePartial.cshtml")
 
     <!--<script src="~/js/media.js" asp-append-version="true" defer=""></script>-->
+    <script src="~/microsoft/signalr-protocol-msgpack/signalr-protocol-msgpack.min.js" asp-append-version="true" defer=""></script>
     <script src="~/lib/he/he.js" asp-append-version="true"></script>                                                                                
     <script src="~/js/file.js" asp-append-version="true" defer=""></script>
     <script src="~/lib/jquery-ui-1.12.1/jquery-ui.min.js" asp-append-version="true" defer=""></script>
@@ -106,7 +107,7 @@
                        const objectInfo = listing[i];
                        dt
                        .row
-                       .add([ objectInfo.humanName, objectInfo.formattedSize, objectInfo.formattedDateTime, objectInfo.fullName]);
+                       .add([ objectInfo.HumanName, objectInfo.FormattedSize, objectInfo.FormattedDateTime, objectInfo.FullName]);
                    }
                    dt.draw();
                }
