@@ -10,7 +10,7 @@ namespace PikaCore.Infrastructure.Services
     public interface IMinioService : IDisposable
     {
         public Task<IList<Bucket>> GetBuckets();
-        public Task<IList<Item>> ListObjects(string bucket, bool recursive = false, string? prefix = null);
+        public IObservable<Item> ListObjects(string bucket, bool recursive = false, string? prefix = null);
         public Task<bool> StatObject(string bucket, string @object);
         public Task<ObjectStat?> ObjectInformation(string bucket, string @object);
         public Task<FileStream> GetObjectAsStream(string bucket, string @object, long offset = 1024);

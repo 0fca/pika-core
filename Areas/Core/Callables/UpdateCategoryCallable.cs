@@ -9,8 +9,6 @@ using Pika.Domain.Storage.Callables;
 using Pika.Domain.Storage.Callables.ValueTypes;
 using PikaCore.Areas.Core.Commands;
 using PikaCore.Areas.Core.Queries;
-using PikaCore.Infrastructure.Services.Helpers;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace PikaCore.Areas.Core.Callables;
 
@@ -19,7 +17,7 @@ public class UpdateCategoryCallable : BaseJobCallable
     private readonly IMediator _mediator;
     private readonly IDistributedCache _cache;
 
-    public UpdateCategoryCallable(IMediator mediator, IDistributedCache cache)
+    public UpdateCategoryCallable(IMediator mediator, IDistributedCache cache): base(cache)
     {
         this._mediator = mediator;
         this._cache = cache;
@@ -49,9 +47,10 @@ public class UpdateCategoryCallable : BaseJobCallable
         var updateCommand = MapParameterTypeValueDictToUpdateCommand(parameterValueTypes);
         if (await CheckIfUpdateNeeded(updateCommand.Guid))
         {
-                await _mediator.Send(updateCommand);
+            await _mediator.Send(updateCommand);
             await UpdateCategoryHash(updateCommand.Guid);
         }
+        await _cache.RemoveAsync("update.categories.parameters");
     }
 
     private async Task ExecuteMultipleUpdates()

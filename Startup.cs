@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +16,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using AutoMapper;
 using Hangfire;
-using Hangfire.Dashboard.Resources;
 using Hangfire.Redis;
 using Marten;
 using Marten.Events.Projections;
@@ -53,11 +51,11 @@ using PikaCore.Infrastructure.Adapters.Console.Queries;
 using PikaCore.Infrastructure.Security;
 using PikaCore.Infrastructure.Services;
 using Serilog;
+using Serilog.Sinks.Grafana.Loki;
 using Serilog.Events;
 using StackExchange.Redis;
 using TanvirArjel.CustomValidation.AspNetCore.Extensions;
 using Weasel.Core;
-using WebSocketOptions = Microsoft.AspNetCore.Builder.WebSocketOptions;
 
 namespace PikaCore
 {
@@ -83,6 +81,7 @@ namespace PikaCore
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
+                .WriteTo.GrafanaLoki(Configuration.GetSection("Logging").GetSection("GrafanaLoki")["Uri"])
                 .WriteTo.File(
                     logPath, 
                     LogEventLevel.Information
@@ -118,7 +117,12 @@ namespace PikaCore
             {
                 EndPoints = { Configuration.GetConnectionString("RedisConnection") }
             });
-            services.AddMemoryCache();
+            if (!redis.IsConnected)
+            {
+                // Redis is mandatory for now, we dont support scenario single-instance only,
+                // so we need to abort if there is no Redis instance.
+                Environment.Exit(1);
+            }
             
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -180,6 +184,7 @@ namespace PikaCore
             services.AddAuthorization();
             services.AddHangfire(o =>
             {
+                o.UseDarkModeSupportForDashboard();
                 o.UseSerializerSettings(new JsonSerializerSettings()
                 {
                     MaxDepth = 128,
@@ -195,7 +200,12 @@ namespace PikaCore
                         });
                 }
             });
-            services.AddHangfireServer();
+
+            services.AddHangfireServer(o =>
+            {
+                o.WorkerCount = 5;
+                o.SchedulePollingInterval = TimeSpan.FromSeconds(5);
+            });
             services.AddAspNetCoreCustomValidation();
             services.AddTransient<IHashGenerator, HashGeneratorService>();
             services.AddSingleton<UniqueCode>();
@@ -250,9 +260,9 @@ namespace PikaCore
             }));
 
             services.AddSignalR()
+                .AddMessagePackProtocol()
                 .AddStackExchangeRedis(o =>
                 {
-                    //o.Configuration.ClientName = "PikaCore";
                     o.Configuration.ChannelPrefix = "PikaCoreHub";
                     o.Configuration.DefaultDatabase = int.Parse(Configuration.GetSection("Redis")["RedisDb"] ?? "0");
                     o.Configuration.EndPoints.Add(Configuration.GetConnectionString("RedisConnection"));
@@ -393,16 +403,27 @@ namespace PikaCore
                 this.CreateDefaultCommands(serviceProvider);
             }
 
-            if (bool.Parse(Configuration.GetSection("Workers")["RunWorkers"] ?? "true"))
+            var cache = serviceProvider.GetService<IDistributedCache>();
+            var areWorkersEnabledByUser = 
+                bool.Parse(Configuration.GetSection("Storage").GetSection("Workers")["RunWorkers"] ?? "true");
+            var reasonString = new StringBuilder();
+            if (!areWorkersEnabledByUser)
+            {
+                reasonString.Append("> user\n");
+            }
+
+            if (areWorkersEnabledByUser)
             {
                 this.RegisterRecurringCategoryJobs(serviceProvider);
             }
             else
             {
-                Log.Warning("Workers won't be running, because disabled by user!");
+                Log.Warning("{Type}: Workers won't be registered on startup, because disabled by:\n {WorkersDisabledReason}", 
+                    "Startup",
+                    reasonString);
             }
         }
-
+        
         private void RegisterRecurringCategoryJobs(IServiceProvider serviceProvider)
         {
             var cache = serviceProvider.GetService<IDistributedCache>();
@@ -413,14 +434,14 @@ namespace PikaCore
                 mediator,
                 clientService,
                 mapper);
-            RecurringJob.AddOrUpdate("UpdateCategories", () =>
+            RecurringJob.AddOrUpdate($"RefreshCategoriesCallable", () =>
                     refreshCallable.Execute(null),
                 Configuration
                     .GetSection("Storage")
                     .GetSection("Workers")["CategoriesRefreshWorkerCron"]
             );
             var updateTagsCallables = new GenerateCategoriesTagsCallable(mediator, clientService, cache);
-            RecurringJob.AddOrUpdate("UpdateCategoriesTags",
+            RecurringJob.AddOrUpdate($"GenerateCategoriesTagsCallable",
                 () => updateTagsCallables.Execute(null),
                 Configuration
                     .GetSection("Storage")
@@ -474,12 +495,15 @@ namespace PikaCore
         {
             var currentVersion = (Assembly.GetEntryAssembly() ?? throw new InvalidOperationException())
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-            Console.WriteLine($"PikaCore v.{currentVersion} is booting... Hellorld!");
+            Log.Information(
+                "{Type}: PikaCore v.{CurrentVersion} is booting... Hellorld!", 
+                "Startup", currentVersion
+                );
         }
 
         private static void OnShutdown()
         {
-            Console.WriteLine("PikaCore is shutting down... Good bye.");
+            Log.Information("{Type}: PikaCore is shutting down... Good bye.", "Shutdown");
         }
 
         #endregion

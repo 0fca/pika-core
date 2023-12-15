@@ -19,11 +19,17 @@
         </li>
         @if (!Context.User.Identity!.IsAuthenticated)
         {
-            <li><a asp-area="Identity" asp-controller="Gateway" asp-action="Login" class="navlink">@Localizer["Login"]</a></li>
+            <li>
+                <a asp-area="Identity" asp-controller="Gateway" asp-action="Login" class="navlink">@Localizer["Login"]</a>
+            </li>
         }
         else
         {
-            <li><button class="btn btn-flat">@Localizer["Logout"]</button></li>
+            <li>
+                <a id="user-drop-link" class='dropdown-trigger navlink' href='#' data-target='user-dropdown' title="@Context.User.Identity.Name">
+                    <i class="large material-icons">account_circle</i>
+                </a>
+            </li>
         }
     </ul>
 </div>
@@ -52,7 +58,7 @@
                 </span>
                 Pika Status
             </a>
-            
+
             @if (Context.User.Identity!.IsAuthenticated && User.IsInRole("Administrator"))
             {
                 <a href="/Admin/Index" class="collection-item navlink app-menu-item" title="Pika Cloud Admin">
@@ -62,6 +68,21 @@
                     Pika Cloud Admin
                 </a>
             }
+        </div>
+    </div>
+</div>
+
+<div id="user-dropdown" class="card dropdown-content hide-on-small-and-down appdropdown right z-depth-1-half" tabindex="0">
+    <div class="card-content text-left">
+        <span class="card-title grey-text text-darken-4 center">
+            @Context.User.Identity.Name
+        </span>
+        <div class="container center-align">
+            <span>
+                <button class="btn">
+                    @Localizer["Logout"]
+                </button>
+            </span>
         </div>
     </div>
 </div>

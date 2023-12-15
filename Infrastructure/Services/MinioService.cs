@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Minio;
 using Minio.DataModel;
 using PikaCore.Infrastructure.Adapters.Minio;
+using Serilog;
 
 namespace PikaCore.Infrastructure.Services
 {
@@ -34,9 +34,8 @@ namespace PikaCore.Infrastructure.Services
             return (await _minioClient.ListBucketsAsync()).Buckets;
         }
 
-        public async Task<IList<Item>> ListObjects(string bucket, bool recursive = false, string? prefix = null)
+        public IObservable<Item> ListObjects(string bucket, bool recursive = false, string? prefix = null)
         {
-            var items = new List<Item>(); 
             var args = new ListObjectsArgs()
                 .WithBucket(bucket);
                 if (!string.IsNullOrEmpty(prefix))
@@ -44,21 +43,7 @@ namespace PikaCore.Infrastructure.Services
                     args.WithPrefix(prefix);
                 }
                 args.WithRecursive(recursive);
-                var lck = true;
-                _minioClient.ListObjectsAsync(args).Subscribe(
-                    item => items.Add(item),
-                    ex =>
-                    {
-                        lck = false;
-                        Console.WriteLine(ex.Message);
-                    },
-                    () =>  lck = false
-                    );
-                while (lck)
-                {
-                   Thread.Sleep(1); 
-                }
-                return items;
+                return _minioClient.ListObjectsAsync(args);
         }
 
         public async Task<bool> StatObject(string bucket, string @object)
@@ -72,6 +57,11 @@ namespace PikaCore.Infrastructure.Services
             }
             catch(Exception ex)
             {
+                Log.Error("StatObject: {Type} occured with following message: {Message}", 
+                    ex.GetType().FullName, 
+                    ex.Message
+                    );
+                
                 return false;
             }
 
@@ -89,6 +79,11 @@ namespace PikaCore.Infrastructure.Services
             }
             catch(Exception ex)
             {
+                Log.Error("ObjectInformation: {Type} occured with following message: {Message}", 
+                    ex.GetType().FullName, 
+                    ex.Message
+                    );
+                
                 return null;
             } 
         }
@@ -116,9 +111,12 @@ namespace PikaCore.Infrastructure.Services
                     .WithContentType(MimeTypes.GetMimeType(fileName));
                 await _minioClient.PutObjectAsync(putObjectArgs);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new ApplicationException(e.Message);
+                Log.Error("PutObject: {Type} occured with following message: {Message}", 
+                    ex.GetType().FullName, 
+                    ex.Message);
+                throw new ApplicationException(ex.Message);
             }
         }
     }
