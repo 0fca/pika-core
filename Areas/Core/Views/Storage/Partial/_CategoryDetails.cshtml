@@ -12,13 +12,16 @@
                     <strong>@Model.Item2.Name</strong>
                 </h5>
                 <small class="whitesmoke-text">@Model.Item2.Description</small>
-                <p class="white-text">
-                    Tags:
-                    @foreach (var t in Model.Item2.Tags[Model.Item1])
-                    {
-                        <span class="tag label">@t</span> 
-                    }
-                </p>
+                @if (Model.Item2.Tags.ContainsKey(Model.Item1))
+                {
+                    <p class="white-text">
+                        Tags:
+                        @foreach (var t in Model.Item2.Tags[Model.Item1])
+                        {
+                            <span class="tag label">@t</span>
+                        }
+                    </p>
+                }
             </span>
         </div>
     </div>

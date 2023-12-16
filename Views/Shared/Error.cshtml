@@ -1,39 +1,11 @@
 ﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error - ";
+    ViewData["Title"] = "Error";
 }
 
 <div class="row">
-    <div class="col s12 m12 l12">
-           <div class="card large sticky-action indigo white-text center">
-               <div class="card-content">
-                   @await Html.PartialAsync($"_Partial/Errors/{Model.ErrorCode}")
-                   <img class="responsive-img center-align activator" src="https://http.cat/@Model.ErrorCode" width="390" height="270" alt="Couldn't load kitty :c." style="margin-top: 25px;"/>
-               </div>
-               <div class="card-action white-text">
-                   <a href="#" class="activator white-text">Show details</a>
-               </div>
-               <div class="card-reveal teal-text center">
-                   <span class="card-title grey-text text-darken-4">Error Details<i class="material-icons right">close</i></span>
-                   <div class="row">
-                       <div class="col s12 m6 l6">
-                           <span class="text-info">
-                               @if (Model.ShowRequestId)
-                               {
-                                   <strong>Request ID:</strong>
-                                   <code>@Model.RequestId</code>
-                                   <br/>
-                               }
-                               <strong>Message: </strong><code>@Model.Message</code>
-                               <br>
-                               <strong>Code: </strong><code>@Model.ErrorCode</code>
-                           </span>
-                       </div>
-                       <div class="col s12 m6 l6">
-                           <img class="responsive-img center-align activator" src="~/images/error.jpg" width="300" height="300" alt="Welp, even this does not work..."/>
-                       </div>
-                   </div>
-               </div>
-           </div>
-       </div>
+    <div class="col s12 m12 l12 center">
+        @await Html.PartialAsync($"_Partial/Errors/{Model.ErrorCode}")
+        <img class="responsive-img center-align activator" src="https://http.cat/@Model.ErrorCode" width="390" height="270" alt="Couldn't load kitty :c." style="margin-top: 25px;"/>
+    </div>
 </div>
