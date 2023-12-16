@@ -432,3 +432,14 @@ div .select-dropdown {
     color: whitesmoke;
     background-color: rgb(50, 50, 50) !important;
 }
+
+.scrollable {
+    overflow-y: scroll;
+    max-height: 15rem;
+    overflow-x: hidden;
+    
+}
+
+.details {
+    max-height: 35rem;
+}

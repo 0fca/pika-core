@@ -4,7 +4,7 @@
 @model Tuple<string, PikaCore.Areas.Core.Models.DTO.CategoryDTO>
 <div class="row">
     <div class="col s12 m12 l12">
-        <div class="card-panel havelock">
+        <div class="card-panel havelock details">
             <span>
                 <h5 class="white-text">
                     <i class="material-icons amber-text text-darken-4">info</i>
@@ -12,16 +12,19 @@
                     <strong>@Model.Item2.Name</strong>
                 </h5>
                 <small class="whitesmoke-text">@Model.Item2.Description</small>
-                @if (Model.Item2.Tags.ContainsKey(Model.Item1))
-                {
-                    <p class="white-text">
-                        Tags:
-                        @foreach (var t in Model.Item2.Tags[Model.Item1])
-                        {
-                            <span class="tag label">@t</span>
-                        }
-                    </p>
-                }
+                <div class="scrollable">
+                    @if (Model.Item2.Tags.ContainsKey(Model.Item1))
+                    {
+                        <p class="white-text">
+                            Tags:
+                            @foreach (var t in Model.Item2.Tags[Model.Item1])
+                            {
+                                <span class="tag label">@t</span>
+                            }
+                        </p>
+                    }
+                </div>
+
             </span>
         </div>
     </div>
