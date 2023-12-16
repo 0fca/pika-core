@@ -11,6 +11,7 @@ body {
 main {
     flex: 1 0 auto;
     background-color: whitesmoke;
+    font-family: monospace, "IBM Plex Mono";
 }
 
 hr {
@@ -19,7 +20,7 @@ hr {
 }
 
 .footer {
-    background-color: #303F9F !important;
+    background-color: #607FBA !important;
     color: #212121 !important;
 }
 
@@ -28,7 +29,7 @@ hr {
 }
 
 .navlink:hover, .navlink:focus {
-    color: #303F9F !important;
+    color: #607FBA !important;
 }
 
 
@@ -36,9 +37,16 @@ a, a:hover, a:focus {
     text-decoration: none !important;
 }
 
+.havelock-text {
+    color: #607FBA !important;
+}
+
+.havelock {
+    background-color: #607FBA !important;;
+}
+
 
 .btn-default {
-    background-color: #009688 !important;
     border-color: #095C9E !important;
     display: block;
     width: 150px;
@@ -54,8 +62,7 @@ a, a:hover, a:focus {
 }
 
 .btn-primary {
-    background-color: #009688 !important;
-    border-color: #009688 !important;
+    border-color: #607FBA !important;
     display: block;
     width: 150px;
     transition-duration: 0.5s;
@@ -95,6 +102,28 @@ a, a:hover, a:focus {
     width: 95%;
 }
 
+
+span.label.tag {
+    font-weight: 300;
+    font-size: 0.8rem;
+    color: #fff;
+    background-color: #ff6f00;
+    border-radius: 2px;
+}
+
+span.label{
+    min-width: 3rem;
+    padding: 0.5rem 6px;
+    margin-left: 14px;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 2.25rem;
+    height: 22px;
+    color: #757575;
+    /* float: right; */
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
 
 .inside-nav-link:hover {
     color: #757575;
@@ -171,7 +200,7 @@ a, a:hover, a:focus {
 .brand-margin {
     margin-top: 5px !important;
     margin-left: 10px !important;
-    color: #303F9F !important;
+    color: #607FBA !important
 }
 
 .inputfile {
@@ -197,13 +226,13 @@ a, a:hover, a:focus {
 }
 
 .wrap {
-    color: #009688;
+    color: #ff6f00;
     font-size: 24px;
 }
 
 .toast {
     background-color: #eee !important;
-    color: #009688 !important;
+    color: #ff6f00 !important;
 }
 
 .toast-input {
@@ -213,7 +242,7 @@ a, a:hover, a:focus {
 }
 
 .toast-button-color {
-    color: #009688 !important;
+    color: #ff6f00 !important;
 }
 
 
@@ -229,7 +258,7 @@ a, a:hover, a:focus {
 }
 
 .browse-collection-item:hover {
-    color: teal !important;
+    color: #ff6f00;
 }
 
 .browse-icon-margin {
@@ -241,11 +270,11 @@ a, a:hover, a:focus {
 }
 
 .pagination li.active {
-    background-color: #009688 !important;
+    color: #ff6f00;
 }
 
 .alert-danger {
-    color: red;
+    color: #c62828;
 }
 
 .app-menu-button {
@@ -254,7 +283,7 @@ a, a:hover, a:focus {
 }
 
 .app-menu-button:hover {
-    color: #303F9F;
+    color: #607FBA !important;
     background-color: transparent;
 }
 
@@ -263,7 +292,7 @@ a, a:hover, a:focus {
 }
 
 #searchBox::placeholder {
-    color: teal;
+    color: #ff6f00;
 }
 
 input[type="text"]:not(.browser-default),
@@ -280,12 +309,16 @@ input[type="tel"]:not(.browser-default):focus,
 input[type="email"]:not(.browser-default):focus,
 input[type="password"]:not(.browser-default):focus {
     color: white;
-    box-shadow: 0 1px 0 0 teal;
-    border-bottom: 1px solid teal;
+    box-shadow: 0 1px 0 0 #c62828;
+    border-bottom: 1px solid #c62828;
 }
 
 .whitesmoke {
     background-color: whitesmoke;
+}
+
+.whitesmoke-text {
+    color: whitesmoke;
 }
 
 .hand-cursor {
@@ -308,7 +341,7 @@ input[type="password"]:not(.browser-default):focus {
 .nav-context-menu {
     list-style-position: inside;
     margin: 2px 0 0 0;
-    color: teal;
+    color: #ff6f00;
 }
 
 .nav-context-menu li {
@@ -316,7 +349,7 @@ input[type="password"]:not(.browser-default):focus {
 }
 
 .page-footer .container .row a {
-    color: teal;
+    color: #ff6f00;
 }
 
 .tabs .tab a {
@@ -324,11 +357,12 @@ input[type="password"]:not(.browser-default):focus {
 }
 
 .tabs .tab a:hover, .tabs .tab a.active {
-    color: teal;
+    color: #ff6f00;
 }
 
 .tabs .indicator {
-    background-color: teal !important;
+    background-color:  #ff6f00;
+
 }
 
 .breadcrumb::before {

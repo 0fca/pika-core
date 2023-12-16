@@ -91,6 +91,9 @@ public class AutoMapperProfile : Profile
             .ForMember(d => d.Mimes, opt =>
                 opt.MapFrom(src => src.GetMimesAsString()));
         CreateMap<BucketsView, BucketDTO>()
+            .ForMember(d => d.Id, 
+                opt => 
+                    opt.MapFrom(src => src.Id))
             .ForMember(d => d.Name,
                 opt =>
                     opt.MapFrom(src => src.Name))

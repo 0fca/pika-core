@@ -8,25 +8,25 @@
             @await Html.PartialAsync("_Partial/_LocaleSwitch")
         </div>
         <li>
-            <a class="navlink left center-align" asp-area="Core" asp-controller="Storage" asp-action="Index" title="Pika Browser">
-                Pika Browser
+            <a class="navlink left center-align havelock-text" asp-area="Core" asp-controller="Storage" asp-action="Browse" title="Pika Browser">
+               PIKA BROWSER 
             </a>
         </li>
         <li>
-            <a id="app-drop-link" class='dropdown-trigger navlink' href='#' data-target='app-dropdown' title="@Localizer["PikaCloudApps"]">
+            <a id="app-drop-link" class='dropdown-trigger navlink havelock-text' href='#' data-target='app-dropdown' title="@Localizer["PikaCloudApps"]">
                 <i class="large material-icons">apps</i>
             </a>
         </li>
         @if (!Context.User.Identity!.IsAuthenticated)
         {
             <li>
-                <a asp-area="Identity" asp-controller="Gateway" asp-action="Login" class="navlink">@Localizer["Login"]</a>
+                <a asp-area="Identity" asp-controller="Gateway" asp-action="Login" class="navlink havelock-text">@Localizer["Login"]</a>
             </li>
         }
         else
         {
             <li>
-                <a id="user-drop-link" class='dropdown-trigger navlink' href='#' data-target='user-dropdown' title="@Context.User.Identity.Name">
+                <a id="user-drop-link" class='dropdown-trigger navlink havelock-text' href='#' data-target='user-dropdown' title="@Context.User.Identity.Name">
                     <i class="large material-icons">account_circle</i>
                 </a>
             </li>

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using PikaCore.Areas.Core.Models.DTO;
 
 namespace PikaCore.Areas.Core.Models.File
 {
@@ -13,5 +14,9 @@ namespace PikaCore.Areas.Core.Models.File
         public List<string> Tags { get; set; }
         public string BucketId { get; set; }
         public string CategoryId { get; set; }
+        
+        public List<CategoryDTO> Categories { get; set; }
+        public List<BucketDTO> Buckets { get; set; } = new();
+
     }
 }

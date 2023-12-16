@@ -21,14 +21,14 @@ namespace PikaCore.Resources.Areas.Core.Views.Storage {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Browse_pl {
+    internal class Browse_en {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Browse_pl() {
+        internal Browse_en() {
         }
         
         /// <summary>
@@ -38,7 +38,7 @@ namespace PikaCore.Resources.Areas.Core.Views.Storage {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PikaCore.Resources.Areas.Core.Views.Storage.Browse.pl", typeof(Browse_pl).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PikaCore.Resources.Areas.Core.Views.Storage.Browse.en", typeof(Browse_en).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -56,6 +56,231 @@ namespace PikaCore.Resources.Areas.Core.Views.Storage {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data.
+        /// </summary>
+        internal static string Brak_danych {
+            get {
+                return ResourceManager.GetString("Brak danych", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No matching records.
+        /// </summary>
+        internal static string Brak_pasujących_rekordów {
+            get {
+                return ResourceManager.GetString("Brak pasujących rekordów", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date Modified.
+        /// </summary>
+        internal static string Data_modyfikacji {
+            get {
+                return ResourceManager.GetString("Data modyfikacji", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter by tags.
+        /// </summary>
+        internal static string Filtruj_po_tagach {
+            get {
+                return ResourceManager.GetString("Filtruj po tagach", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Record count.
+        /// </summary>
+        internal static string Ilość_rekordów {
+            get {
+                return ResourceManager.GetString("Ilość rekordów", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It is a little empty in here.
+        /// </summary>
+        internal static string Jakoś_pusto_tutaj {
+            get {
+                return ResourceManager.GetString("Jakoś pusto tutaj", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Categories.
+        /// </summary>
+        internal static string Kategorie {
+            get {
+                return ResourceManager.GetString("Kategorie", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading.
+        /// </summary>
+        internal static string Ładowanie {
+            get {
+                return ResourceManager.GetString("Ładowanie", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Next.
+        /// </summary>
+        internal static string Następny {
+            get {
+                return ResourceManager.GetString("Następny", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        internal static string Nazwa {
+            get {
+                return ResourceManager.GetString("Nazwa", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last.
+        /// </summary>
+        internal static string Ostatni {
+            get {
+                return ResourceManager.GetString("Ostatni", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to First.
+        /// </summary>
+        internal static string Pierwszy {
+            get {
+                return ResourceManager.GetString("Pierwszy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Previous.
+        /// </summary>
+        internal static string Poprzedni {
+            get {
+                return ResourceManager.GetString("Poprzedni", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Size.
+        /// </summary>
+        internal static string Rozmiar {
+            get {
+                return ResourceManager.GetString("Rozmiar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Details.
+        /// </summary>
+        internal static string Szczegóły {
+            get {
+                return ResourceManager.GetString("Szczegóły", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search.
+        /// </summary>
+        internal static string Szukaj {
+            get {
+                return ResourceManager.GetString("Szukaj", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tags.
+        /// </summary>
+        internal static string Tagi {
+            get {
+                return ResourceManager.GetString("Tagi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type a name to search for i.e. a file extension (min. 3 chars).
+        /// </summary>
+        internal static string Wpisz_nazwę_do_wyszukania_w_nazwach_np__rozszerzenie_pliku__min__3_znaki____ {
+            get {
+                return ResourceManager.GetString("Wpisz nazwę do wyszukania w nazwach np. rozszerzenie pliku (min. 3 znaki)...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose bucket.
+        /// </summary>
+        internal static string Wybierz_bucket {
+            get {
+                return ResourceManager.GetString("Wybierz bucket", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose bucket, to choose category.
+        /// </summary>
+        internal static string Wybierz_bucket__by_móc_wybrać_kategorię {
+            get {
+                return ResourceManager.GetString("Wybierz bucket, by móc wybrać kategorię", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It seems there are no categories configured.
+        /// </summary>
+        internal static string Wygląda_na_to__że_żadne_kategorie_nie_są_dostępne {
+            get {
+                return ResourceManager.GetString("Wygląda na to, że żadne kategorie nie są dostępne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search results for input phrase will appear here.
+        /// </summary>
+        internal static string Wyniki_wyszukiwania_wpisanej_frazy__pojawią_się_tutaj {
+            get {
+                return ResourceManager.GetString("Wyniki wyszukiwania wpisanej frazy, pojawią się tutaj", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shown from 0 to 0 of 0 records.
+        /// </summary>
+        internal static string Wyświetlono_0_do_0_z_0_rekordów {
+            get {
+                return ResourceManager.GetString("Wyświetlono 0 do 0 z 0 rekordów", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shown from _START_ to  _END_ of _TOTAL_ records.
+        /// </summary>
+        internal static string Wyświetlono_start_do_end_z_total_rekordów {
+            get {
+                return ResourceManager.GetString("Wyświetlono start do end z total rekordów", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Browse.
+        /// </summary>
+        internal static string Wyszukiwarka {
+            get {
+                return ResourceManager.GetString("Wyszukiwarka", resourceCulture);
             }
         }
     }

@@ -18,4 +18,13 @@
     <data name="Wyświetlono start do end z total rekordów" xml:space="preserve">
         <value>Wyświetlono od _START_ do  _END_ z _TOTAL_ rekordów</value>
     </data>
+    <data name="Wpisz nazwę do wyszukania w nazwach np. rozszerzenie pliku (min. 3 znaki)..." xml:space="preserve">
+        <value />
+    </data>
+    <data name="Wyniki wyszukiwania wpisanej frazy, pojawią się tutaj" xml:space="preserve">
+        <value />
+    </data>
+    <data name="Wybierz bucket, by móc wybrać kategorię" xml:space="preserve">
+        <value />
+    </data>
 </root>

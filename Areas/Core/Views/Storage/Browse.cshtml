@@ -1,7 +1,94 @@
-﻿@model FileResultViewModel
+﻿@using PikaCore.Areas.Core.Models.DTO
+@model FileResultViewModel
 @inject IViewLocalizer Localizer 
 
-<!-- TODO Add detailed list view -->
+
+<div class="row">
+    <div class="col s12 m12 l2 left">
+        @await Html.PartialAsync("Partial/_NavMenu.cshtml")
+    </div>
+    
+    <form asp-area="Core" asp-controller="Storage" asp-action="Browse" method="get">
+        <div class="col s12 m12 l5 right">
+            <div class="row">
+                <div class="col s1 m1 l1">
+                    <i class="material-icons">storage</i>
+                </div>
+                <div class="col s11 m11 l11">
+                    <select style="width: 10em;"
+                            id="buckets_select"
+                            onchange="this.form.submit()"
+                            asp-for="BucketId">
+                        <option value="" disabled selected>@Localizer["Wybierz bucket"]</option>
+                        @foreach (var bucket in Model.Buckets)
+                        {
+                            var hasAccess = bucket.Roles.Any(role => Context.User.IsInRole(role));
+                            if (!hasAccess)
+                            {
+                                continue;
+                            }
+                            var selected = !string.IsNullOrEmpty(Model.BucketId) && Model.BucketId.Equals(bucket.Id);
+                            if (selected)
+                            {
+                                <option value="@bucket.Id" selected>@bucket.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@bucket.Id">@bucket.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m12 l5 right">
+            <div class="row">
+                <div class="col s2 m2 l2 left">
+                    <i class="material-icons">folder</i>
+                </div>
+
+                @if (Model is {Categories.Count: > 0 })
+                {
+                    <div class="col s10 m10 l10 right">
+                        <select style="width: 10em;"
+                                id="category_select"
+                                onchange="this.form.submit()"
+                                asp-for="CategoryId">
+                            <option value="" disabled selected>@Localizer["Wybierz kategorię"]</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                @(await Html.PartialAsync("Partial/CategoryCardPartial",
+                                    new Tuple<CategoryDTO, string>(category, Model.CategoryId)))
+                            }
+                        </select>
+                    </div>
+                }
+                else
+                {
+                    <div class="col s10 m10 l10 right">
+                        <select style="width: 10em;" id="category_select" disabled="disabled" aria-disabled="True">
+                            <option value="" disabled selected>@Localizer["Wybierz bucket, by móc wybrać kategorię"]</option>
+                        </select>
+                    </div>
+                }
+            </div>
+        </div>
+    </form>
+</div>
+<div class="row">
+    <div class="col s12 m12 l12">
+            @if (!string.IsNullOrEmpty(Model.CategoryId))
+            {
+                var category = Model.Categories.Find(c => c.Guid.ToString().Equals(Model.CategoryId));
+                @await Html.PartialAsync("Partial/_CategoryDetails.cshtml", 
+                           new Tuple<string, CategoryDTO>(
+                               Model.BucketId,
+                               category)
+                       )
+            }
+        </div>
+</div>
+
 @if (Model?.Objects != null)
 {
     ViewData["Title"] = Localizer["Wyszukiwarka"];
@@ -10,19 +97,11 @@
         {
             @await Html.PartialAsync("Partial/_ShortLinkPartial.cshtml")
         }
-        <div class="row grey lighten-4 z-depth-0">
-            <div class="col s6 m6 l6">
-                @await Html.PartialAsync("Partial/_NavMenu.cshtml")
-            </div>
-            <div class="col s12 m6 l6">
-                <div class="row valign-wrapper">
-                </div>
-            </div>
-        </div>
+
         <div class="row lighten-4 z-depth-0">
             <div class="col s12 m12 l12 right">
                 <div class="input-field col s12">
-                    <input id="search_input" value="" placeholder="@Localizer["Wpisz nazwę do wyszukania w nazwach np. rozszerzenie pliku..."]" type="text" class="grey-text"/>
+                    <input id="search_input" value="@Model.SelectedTag" placeholder="@Localizer["Wpisz nazwę do wyszukania w nazwach np. rozszerzenie pliku (min. 3 znaki)..."]" type="text" class="grey-text"/>
                     <label for="search_input">@Localizer["Szukaj"]</label>
                 </div>
             </div>
@@ -43,14 +122,14 @@
 
     </div>
 
-    @await Html.PartialAsync("Partial/_UploadPartial.cshtml", 
+    @await Html.PartialAsync("Partial/_UploadPartial.cshtml",
                new Tuple<string, string>(Model.BucketId, Model.CategoryId))
 
     @await Html.PartialAsync("Partial/_InformationSidePartial.cshtml")
 
     <!--<script src="~/js/media.js" asp-append-version="true" defer=""></script>-->
     <script src="~/microsoft/signalr-protocol-msgpack/signalr-protocol-msgpack.min.js" asp-append-version="true" defer=""></script>
-    <script src="~/lib/he/he.js" asp-append-version="true"></script>                                                                                
+    <script src="~/lib/he/he.js" asp-append-version="true"></script>
     <script src="~/js/file.js" asp-append-version="true" defer=""></script>
     <script src="~/lib/jquery-ui-1.12.1/jquery-ui.min.js" asp-append-version="true" defer=""></script>
     <link rel="stylesheet" href="~/lib/jquery-ui-1.12.1/jquery-ui.min.css" asp-append-version="true"/>
@@ -67,7 +146,7 @@
                 "oSearch": {"sSearch": "@Model.SelectedTag"},
                 autoWidth: false,
                 language: {
-                  "emptyTable": '@Localizer["Brak danych"]',
+                  "emptyTable": '@Localizer["Wyniki wyszukiwania wpisanej frazy, pojawią się tutaj"]',
                   "loadingRecord": '@Localizer["Ładowanie"]...',
                   "search": '@Localizer["Szukaj"]:',
                   "info": '@Localizer["Wyświetlono start do end z total rekordów"]',
@@ -93,9 +172,10 @@
                    registerSelectionEventsContentTable();
              });
              $("#select_length").val(@Model.PerPage);
-             $('#search_input').on('propertychange input', (e) => {
-                 if ($('#search_input').val().length >= 3){
-                    invokeReceiveListing($('#search_input').val(), "@Model.CategoryId", "@Model.BucketId", ev);
+             const searchInput = $('#search_input');
+             searchInput.on('propertychange input', (e) => {
+                 if (searchInput.val().length >= 1){
+                    invokeReceiveListing(searchInput.val(), "@Model.CategoryId", "@Model.BucketId", ev);
                 }
              });
              document.addEventListener("dataLoaded", (ev) => {
@@ -118,35 +198,63 @@
                 $('#resource_information_content').empty();
              }
 
-            function registerSelectionEventsContentTable(){
-                 const infoSlide = $('#info-slide');   
-                 $('#dir_content tbody tr').on('click', function() {
-                                                      const data = dt.row(this).data();
-                                                     if ( $(this).hasClass('row_selected') ) {
-                                                        $(this).removeClass('row_selected');
-                                                        infoSlide.hide();
-                                                        resetInfoView();
-                                                     }
-                                                     else {
-                                                          infoSlide.show();
-                                                          const name = data[3];
-                                                          fetch('@Url.Action("Information", "Storage")/' + `?bucketId=${bucketId}&objectName=${name}&categoryId=${categoryId}`)
-                                                               .then(r => {
-                                                                        if(r.ok){
-                                                                                r.text().then(t => {
-                                                                                        $('#loader').hide();
-                                                                                        $('#resource_information_content').html(t);
-                                                                                });
-                                                                        }else{
-                                                                                 console.error(r.statusText); 
-                                                                        }
-                                                                });
-                                                        dt.$('tr.row_selected').removeClass('row_selected');
-                                                        $(this).addClass('row_selected');
-                                                     }         
-                                                   }); 
-            }
-              
-         } );
+           function registerSelectionEventsContentTable() {
+               const infoSlide = $('#info-slide');
+               $('#dir_content tbody tr').off('click');
+               $('#dir_content tbody tr').on('click', function() {
+                   const data = dt.row(this).data();
+                   if ($(this).hasClass('row_selected')) {
+                       $(this).removeClass('row_selected');
+                       infoSlide.hide();
+                       resetInfoView();
+                   } else {
+                       infoSlide.show();
+                       const name = data[3];
+                       fetch('@Url.Action("Information", "Storage")/' + `?bucketId=${bucketId}&objectName=${name}&categoryId=${categoryId}`)
+                           .then(r => {
+                               if (r.ok) {
+                                   r.text().then(t => {
+                                       $('#loader').hide();
+                                       $('#resource_information_content').html(t);
+                                   });
+                               } else {
+                                   console.error(r.statusText);
+                               }
+                           });
+                       dt.$('tr.row_selected').removeClass('row_selected');
+                       $(this).addClass('row_selected');
+                   }
+               });
+           }  
+           
+           $('#close_button').on('click', () => {
+               const infoSlide = $('#info-slide');
+               infoSlide.hide();
+               resetInfoView();
+           });
+           $('button[data-object-name]').on('click', (e) => {
+               const infoSlide = $('#info-slide');
+               if (!infoSlide.is(':visible')) {
+                   infoSlide.show();
+                   const bucketId = $(e.currentTarget).attr("data-bucket-id");
+                   const name = $(e.currentTarget).attr('data-object-name');
+                   const categoryId = $(e.currentTarget).attr('data-category-id');
+                   fetch('@Url.Action("Information", "Storage")/' + `?bucketId=${bucketId}&objectName=${name}&categoryId=${categoryId}`)
+                       .then(r => {
+                           if (r.ok) {
+                               r.text().then(t => {
+                                   $('#loader').hide();
+                                   $('#resource_information_content').html(t);
+                               });
+                           } else {
+                               console.log(r.statusText);
+                           }
+                       });
+               } else {
+                   infoSlide.hide();
+                   resetInfoView();
+               }
+           }); 
+         } );           
     </script>
 }

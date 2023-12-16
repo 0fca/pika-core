@@ -8,7 +8,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] :: Hannah</title>
+    <title>PikaCloud :: PikaCore :: @ViewData["Title"]</title>
     <meta property="og:title" content="Pika Core" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://core.lukas-bownik.net/" />
@@ -24,7 +24,7 @@
                 <div class="nav-wrapper whitesmoke">
                     <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons indigo-text">menu</i></a>
                     <a asp-area="Core" asp-controller="Home" asp-action="Index" class="brand-logo brand-margin brand-text">
-                        <img src="~/images/pika-logos/pikacore_brand.png" class="responsive-img" alt="Pika Cloud"/>
+                        <img src="~/images/pika-logos/pikacore.svg" class="responsive-img" alt="Pika Cloud" />
                     </a>
                     @await Html.PartialAsync("_LinksPartial")
                     @await RenderSectionAsync("LocaleSwitch", required: false)

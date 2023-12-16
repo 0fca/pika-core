@@ -61,58 +61,56 @@ namespace PikaCore.Areas.Core.Controllers.App
             _configuration = configuration;
             _idDataProtection = protection;
         }
-
-        [HttpGet]
-        [AllowAnonymous]
-        [Route("[area]/[controller]/")]
-        public async Task<IActionResult> Index(
-            [FromQuery(Name = "CurrentBucketName")]
-            string currentBucketName = "storage")
-        {
-            var role = HttpContext.User.Claims.FirstOrDefault(c => c.Type.Equals(ClaimTypes.Role));
-            var buckets = await _storage.GetBucketsForRole(role?.Value ?? RoleString.User);
-            if (buckets.Count == 0)
-            {
-                ViewData["ReturnMessage"] = _stringLocalizer.GetString("Wystąpił problem z ładowaniem bucketów").Value;
-                return View();
-            }
-
-            var currentBucket = buckets.FirstOrDefault(b => b.Name.Equals(currentBucketName));
-            if (currentBucket == null)
-            {
-                ViewData["ReturnMessage"] = _stringLocalizer.GetString("Wystąpił problem z ładowaniem bucketów").Value;
-                return View();
-            }
-
-            var categoriesViews = await _storage.GetCategoriesForBucket(currentBucket.Id);
-            var model = new IndexViewModel
-            {
-                CurrentBucketId = currentBucket.Id,
-                CurrentBucketName = currentBucketName,
-                Categories = categoriesViews.ConvertAll(c => _mapper.Map<CategoryDTO>(c)),
-                Buckets = buckets.ToList().ConvertAll(b => _mapper.Map<BucketDTO>(b))
-            };
-            return View(model);
-        }
-
+        
+      
+        
         [HttpGet]
         [Route("[area]/[controller]/[action]")]
         [AuthorizeUserBucketAccess]
         [AllowAnonymous]
-        public async Task<IActionResult> Browse([FromQuery] string categoryId,
-            [FromQuery] string bucketId,
-            [FromQuery] int offset,
-            [FromQuery] int count = 10,
-            [FromQuery] string? tag = null)
+        public async Task<IActionResult> Browse([FromQuery] string? CategoryId, 
+            [FromQuery] string? BucketId, 
+            [FromQuery] string? tag
+            )
         {
-            var tags = (await _mediator.Send(new GetCategoryByIdQuery(Guid.Parse(categoryId))))
-                .Tags;
+            var role = HttpContext.User.Claims.FirstOrDefault(c => c.Type.Equals(ClaimTypes.Role));
+            var buckets = await _storage.GetBucketsForRole(role?.Value ?? RoleString.User);
+            var bucketsDtos = buckets.ToList().ConvertAll(b => _mapper.Map<BucketDTO>(b));
+            if (buckets.Count == 0)
+            {
+                ViewData["ReturnMessage"] = _stringLocalizer.GetString("Wystąpił problem z ładowaniem bucketów").Value;
+                return View(new FileResultViewModel
+                {
+                    Buckets = bucketsDtos
+                });
+            }
+
+            var currentBucket = buckets.FirstOrDefault(b => b.Id.ToString().Equals(BucketId));
+            if (currentBucket == null)
+            {
+                ViewData["ReturnMessage"] = _stringLocalizer.GetString("Wystąpił problem z ładowaniem bucketów").Value;
+                return View(new FileResultViewModel
+                {
+                    Buckets = bucketsDtos
+                });
+            }
+
+            var categoriesViews = await _storage.GetCategoriesForBucket(currentBucket.Id);
+            var tags = new Dictionary<string, List<string>>();
+            if (!string.IsNullOrEmpty(CategoryId))
+            {
+                
+                tags = (await _mediator.Send(new GetCategoryByIdQuery(Guid.Parse(CategoryId))))
+                    .Tags;
+            }
             return View(new FileResultViewModel
             {
                 SelectedTag = tag,
-                Tags = tags!.ContainsKey(bucketId) ? tags[bucketId] : new List<string>(),
-                CategoryId = categoryId,
-                BucketId = bucketId
+                Tags = tags!.TryGetValue(BucketId, out List<string> value) ? value : new List<string>(),
+                CategoryId = CategoryId,
+                BucketId = BucketId,
+                Categories = categoriesViews.ConvertAll(c => _mapper.Map<CategoryDTO>(c)),
+                Buckets = bucketsDtos 
             });
         }
 

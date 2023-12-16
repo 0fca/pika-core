@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Marten;
+using Marten.Linq.SoftDeletes;
 using Pika.Domain.Storage.Entity.View;
 using Pika.Domain.Storage.Repository;
 
@@ -18,7 +19,8 @@ public class CategoryRepository : AggregateRepository
     public async Task<IEnumerable<CategoriesView>> GetAll()
     {
         await using var session = _store.LightweightSession();
-        var e = session.Query<CategoriesView>().ToList();
+        var e = session.Query<CategoriesView>();
+        
         return e;
     } 
 }

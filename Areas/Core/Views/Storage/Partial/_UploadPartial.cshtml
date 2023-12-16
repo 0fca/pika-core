@@ -9,12 +9,12 @@
         <div class="modal-content container">
             <h4>@Localizer["Upload one or more files"]</h4>
             <div class="row">
-                <p id="output-paragraph" class="transparent">
+                <p id="output-paragraph" class="transparent havelock">
                     <output id="result"></output>
                 </p>
                     <div class="col s12 m12 l12">
                         <div class="file-field input-field">
-                            <div class="btn">
+                            <div class="btn btn-primary">
                                 <span>@Localizer["Choose"]</span>
                                 <input id="files" name="files" type="file" multiple>
                                 </div>
@@ -39,7 +39,7 @@
                 </div>
             </div>
         <div class="modal-footer">
-            <button id="upload-submit" type="button" class="waves-effect waves-green btn-flat" disabled>@Localizer["Upload"]</button>
+            <button id="upload-submit" type="button" class="btn btn-primary" disabled>@Localizer["Upload"]</button>
             <button type="button" class="btn btn-danger modal-close">@Localizer["Close"]</button>
         </div>
     </form>
@@ -50,7 +50,7 @@
         const messageLabel = document.getElementById("result");
         const uploadButton = document.getElementById("upload-submit");
         messageLabel.innerText = returnFileSize(getSummarySize());
-        document.getElementById("output-paragraph").setAttribute("class", "card-panel teal white-text");
+        document.getElementById("output-paragraph").setAttribute("class", "card-panel havelock white-text");
 
         if (getSummarySize() === 0) {
             uploadButton.setAttribute("disabled", "true");
@@ -60,7 +60,6 @@
             uploadButton.setAttribute("disabled", "true");
             deleteAllFiles();
         } else if (uploadButton.hasAttribute("disabled")) {
-            console.log("Button enabled");
             uploadButton.removeAttribute("disabled");
         }
     });
@@ -70,7 +69,7 @@
         progressSpinner.setAttribute("class", progressSpinner.getAttribute("class").concat(" active"));
         const oFormElement = document.getElementById("upload-form");
             const resultElement = oFormElement.elements.namedItem("result");
-            document.getElementById("output-paragraph").setAttribute("class", "card-panel teal white-text");
+            document.getElementById("output-paragraph").setAttribute("class", "card-panel havelock white-text");
 
             const formData = new FormData(oFormElement);
     

@@ -64,7 +64,7 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
         BackgroundJob.Requeue(jobId);
     }
 
-    private void OnNext(Item i, BucketsView bucket, 
+    private static void OnNext(Item i, BucketsView bucket, 
         IEnumerable<CategoriesView> categories)
     {
  

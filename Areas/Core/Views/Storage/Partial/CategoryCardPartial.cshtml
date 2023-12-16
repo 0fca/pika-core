@@ -1,15 +1,12 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Tuple<PikaCore.Areas.Core.Models.DTO.CategoryDTO, Guid>
+@model Tuple<PikaCore.Areas.Core.Models.DTO.CategoryDTO, string>
 
-<li class="collection-item">
-    <div class="padded-item-content">
-        <a asp-area="Core" asp-controller="Storage" asp-action="Browse"
-           asp-route-categoryId="@Model.Item1.Guid"
-           asp-route-bucketId="@Model.Item2"
-           class="teal-text"
-           style="font-size: 20px;">
-            @Model.Item1.Name
-        </a>
-        <p class="secondary-content grey-text text-darken-1 hide-on-small-only">@Model.Item1.Description</p>
-    </div>
-</li>
+@{ var selected = !string.IsNullOrEmpty(Model.Item2) && Model.Item1.Guid.ToString().Equals(Model.Item2); }
+@if (selected)
+{
+    <option value="@Model.Item1.Guid" selected>@Model.Item1.Name</option>
+}
+else
+{
+    <option value="@Model.Item1.Guid">@Model.Item1.Name</option>
+}

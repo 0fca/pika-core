@@ -32,7 +32,9 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using OpenIddict.Client;
 using OpenIddict.Validation.AspNetCore;
+using Pika.Domain.Storage.Entity;
 using Pika.Domain.Storage.Entity.Projection;
+using Pika.Domain.Storage.Entity.View;
 using Pika.Domain.Storage.Repository;
 using PikaCore.Areas.Api.v1.Services;
 using PikaCore.Areas.Core.Callables;
@@ -454,6 +456,7 @@ namespace PikaCore
             var mediator = serviceProvider.GetService<IMediator>();
             var buckets = client.GetBuckets().Result;
             var savedBuckets = mediator.Send(new GetAllBucketsQuery()).Result;
+            // TODO: Check if any buckets are in db with count query
             buckets.ToList().ForEach(b =>
             {
                 if (!savedBuckets.Any(sb => sb.Name.Equals(b.Name)))

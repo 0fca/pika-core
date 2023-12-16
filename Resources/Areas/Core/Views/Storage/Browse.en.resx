@@ -89,4 +89,13 @@
     <data name="Brak pasujących rekordów" xml:space="preserve">
         <value>No matching records</value>
     </data>
+    <data name="Wpisz nazwę do wyszukania w nazwach np. rozszerzenie pliku (min. 3 znaki)..." xml:space="preserve">
+        <value>Type a name to search for i.e. a file extension (min. 3 chars)</value>
+    </data>
+    <data name="Wyniki wyszukiwania wpisanej frazy, pojawią się tutaj" xml:space="preserve">
+        <value>Search results for input phrase will appear here</value>
+    </data>
+    <data name="Wybierz bucket, by móc wybrać kategorię" xml:space="preserve">
+        <value>Choose bucket, to choose category</value>
+    </data>
 </root>
