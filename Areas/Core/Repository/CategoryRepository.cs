@@ -19,7 +19,7 @@ public class CategoryRepository : AggregateRepository
     public async Task<IEnumerable<CategoriesView>> GetAll()
     {
         await using var session = _store.LightweightSession();
-        var e = session.Query<CategoriesView>();
+        var e = session.Query<CategoriesView>().ToList();
         
         return e;
     } 

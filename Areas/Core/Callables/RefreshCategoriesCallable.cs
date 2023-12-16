@@ -37,7 +37,7 @@ public class RefreshCategoriesCallable : BaseJobCallable
     public override async Task Execute(Dictionary<string, ParameterValueType>? parameterValueTypes)
     {
         var buckets = await _mediator.Send(new GetAllBucketsQuery());
-        var categories = (await _mediator.Send(new GetAllCategoriesQuery())).ToList();
+        var categories = (await _mediator.Send(new GetAllCategoriesQuery()));
         var bucketsToCategories = new Dictionary<string, List<string>>();
         foreach (var bucketsView in buckets)
         {

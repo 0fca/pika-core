@@ -24,7 +24,7 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
     private readonly IMinioService _minioService;
     private readonly IDistributedCache _distributedCache;
 
-    private static readonly Dictionary<Guid, Dictionary<Guid, HashSet<string>>> CategoriesTagsMap = new();
+    private readonly Dictionary<Guid, Dictionary<Guid, HashSet<string>>> CategoriesTagsMap = new();
     
     public GenerateCategoriesTagsCallable(IMediator mediator,
         IMinioService minioService,
@@ -53,18 +53,17 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
         }
         var updateCallable = new UpdateCategoryCallable(_mediator, _distributedCache);
         var hostName = Environment.GetEnvironmentVariable("HOSTNAME");
-        var jobId = BackgroundJob.Schedule(hostName.ToLower(),
-            () => updateCallable.Execute(null),
-            TimeSpan.FromSeconds(5));
+        var jobId = BackgroundJob.Enqueue<UpdateCategoryCallable>( 
+            c => updateCallable.Execute(null));
         await _distributedCache.SetStringAsync("update.job.identifier", jobId,
             new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(300)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
             });
-        BackgroundJob.Requeue(jobId);
+        
     }
 
-    private static void OnNext(Item i, BucketsView bucket, 
+    private void OnNext(Item i, BucketsView bucket, 
         IEnumerable<CategoriesView> categories)
     {
  
@@ -113,7 +112,11 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
 
         var serializedDict = JsonConvert.SerializeObject(parameterDictList);
         _distributedCache.SetString("update.categories.parameters",
-            serializedDict
+            serializedDict,
+            new DistributedCacheEntryOptions()
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
+            }
         );
         
         Log.Logger.Information(

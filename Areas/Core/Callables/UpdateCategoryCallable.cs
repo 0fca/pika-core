@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using MediatR;
@@ -25,6 +26,7 @@ public class UpdateCategoryCallable : BaseJobCallable
 
     public override async Task Execute(Dictionary<string, ParameterValueType>? parameterValueTypes)
     {
+        Thread.Sleep(500);
         if (parameterValueTypes == null)
         {
             await ExecuteMultipleUpdates();
