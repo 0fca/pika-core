@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = Localizer["Log in"];
     var returnMessage = ViewData["ReturnMessage"] ?? "";
-    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
 }
 
 <div class="container">
@@ -16,6 +15,7 @@
                     <br/>
                     <h6>@Localizer["Log in using PikaCloud Account"]</h6>
                     <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+                        <input asp-for="ReturnUrl" value="@Model.ReturnUrl" aria-hidden="True" hidden="hidden"/> 
                         <div class="row">
                             @if (!ViewData.ModelState.IsValid)
                             {
@@ -59,7 +59,7 @@
                $('select[name="culture"]').change((e) => {
                     const locale = $(e.target).select().val();
                     window.location = `@Url.Link("SetLanguage", 
-                                           new { culture = "locale", returnUrl = returnUrl})`
+                                           new { culture = "locale", returnUrl = Model.ReturnUrl})`
                                            .replace('locale', locale).replace(/&amp;/g, "&");
                 })}
          );

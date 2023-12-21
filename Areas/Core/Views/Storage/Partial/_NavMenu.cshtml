@@ -1,7 +1,9 @@
 ﻿@inject IViewLocalizer Localizer
+@model string
 <ul id="menu" class="nav-context-menu">
-    @if (Context.User.Identity!.IsAuthenticated && Context.User.IsInRole("Administrator")
+    @if ((Context.User.Identity!.IsAuthenticated && Context.User.IsInRole("Administrator")
          || Context.User.Identity!.IsAuthenticated && Context.User.IsInRole("Moderator"))
+        && !string.IsNullOrEmpty(Model))
     {
         <li>
             <a class="havelock-text modal-trigger" href="#upload-modal"><span class="material-icons">cloud_upload</span></a>

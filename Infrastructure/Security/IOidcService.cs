@@ -7,4 +7,5 @@ namespace PikaCore.Infrastructure.Security;
 public interface IOidcService
 {
    public Task<string> GetAccessToken(LoginViewModel loginViewModel);
+   public Task<string> VerifyRemoteClientWithClientId(string clientId);
 }

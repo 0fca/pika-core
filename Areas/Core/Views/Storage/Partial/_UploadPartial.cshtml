@@ -1,4 +1,6 @@
 ﻿@inject IViewLocalizer Localizer
+@inject IConfiguration Configuration
+@using Microsoft.Extensions.Configuration
 @model Tuple<string, string>
 @{
     var bucketId = Model.Item1;
@@ -55,7 +57,7 @@
         if (getSummarySize() === 0) {
             uploadButton.setAttribute("disabled", "true");
         }
-        if (getSummarySize() >= 67110000) {
+        if (getSummarySize() >= @Configuration.GetSection("Storage")["MaxUploadSize"]) {
             messageLabel.innerText = "@Localizer["File or files are too big to upload it at once"]";
             uploadButton.setAttribute("disabled", "true");
             deleteAllFiles();

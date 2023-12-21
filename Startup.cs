@@ -159,13 +159,27 @@ namespace PikaCore
                 {
                     o.AllowPasswordFlow();
                     o.AllowRefreshTokenFlow();
-                    o.UseSystemNetHttp()
-                        .SetProductInformation(typeof(Program).Assembly);
                     o.AddRegistration(new OpenIddictClientRegistration
                     {
+                        RegistrationId = "pika-core",
                         ClientId = Configuration.GetSection("Auth")["ClientId"],
                         ClientSecret = Configuration.GetSection("Auth")["ClientSecret"],
                         Issuer = new Uri(Configuration.GetSection("Auth")["Authority"], UriKind.Absolute)
+                    });
+                    
+                    o.SetClientAssertionTokenLifetime(TimeSpan.FromHours(3));
+                })
+                .AddClient(o =>
+                {
+                    o.AllowClientCredentialsFlow();
+                    o.UseSystemNetHttp()
+                        .SetProductInformation(typeof(Program).Assembly);
+                    o.AddRegistration(new OpenIddictClientRegistration()
+                    {
+                        RegistrationId = "noteapi-dev",
+                        ClientId = "noteapi-dev",
+                        ClientSecret = "noteapi-dev",
+                        Issuer = new Uri(Configuration.GetSection("Auth")["Authority"], UriKind.Absolute) 
                     });
                 })
                 .AddValidation(o =>
@@ -277,7 +291,7 @@ namespace PikaCore
                 options.Cookie.SameSite = SameSiteMode.Lax;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
-
+            
             services.AddControllers()
                 .AddRazorRuntimeCompilation()
                 .ConfigureApiBehaviorOptions(options =>

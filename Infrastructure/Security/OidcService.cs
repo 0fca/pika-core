@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using JasperFx.Core;
 using Microsoft.Extensions.Configuration;
+using OpenIddict.Abstractions;
 using PikaCore.Areas.Identity.Models.AccountViewModels;
 using OpenIddict.Client;
 
@@ -18,17 +21,30 @@ public class OidcService : IOidcService
     }
     public async Task<string> GetAccessToken(LoginViewModel loginViewModel)
     {
-        var (response, info) = await _client.AuthenticateWithPasswordAsync(
-            issuer: new Uri(_configuration.GetSection("Auth")["Authority"], UriKind.Absolute),
-            username: loginViewModel.Username,
-            password: loginViewModel.Password,
-            scopes: new []{ "Base" }
-            );
-        var token = response.AccessToken;
+        var props = new Dictionary<string, OpenIddictParameter> { { "RegistrationId", new OpenIddictParameter("pika-core") } };
+
+        var result = await _client.AuthenticateWithPasswordAsync(
+            new OpenIddictClientModels.PasswordAuthenticationRequest()
+            {
+                Username = loginViewModel.Username,
+                Password = loginViewModel.Password,
+                Issuer = new Uri(_configuration.GetSection("Auth")["Authority"]),
+                RegistrationId = "pika-core"
+            });
+        var token = result.AccessToken;
         if (string.IsNullOrEmpty(token))
         {
             throw new ApplicationException("Failed to retrieve token");
         }
         return token;
+    }
+
+    public async Task<string> VerifyRemoteClientWithClientId(string clientId)
+    { 
+        var result = await _client.AuthenticateWithClientCredentialsAsync(new OpenIddictClientModels.ClientCredentialsAuthenticationRequest
+        {
+            RegistrationId = "noteapi-dev"
+        });
+        return result.AccessToken;
     }
 }

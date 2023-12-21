@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+using Minio.Exceptions;
 using OpenIddict.Abstractions;
 using PikaCore.Areas.Identity.Models.AccountViewModels;
 using PikaCore.Infrastructure.Security;
@@ -32,20 +34,32 @@ public class GatewayController : Controller
 
     [HttpGet]
     [ActionName("Login")]
-    public async Task<IActionResult> Login([FromQuery] string? returnUrl)
+    public async Task<IActionResult> Login([FromQuery] string? returnUrl, [FromQuery] string? clientId = null)
     {
+        if (!string.IsNullOrEmpty(clientId))
+        {
+            var token = await _oidcService.VerifyRemoteClientWithClientId(clientId);
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new AuthenticationException("The remote client appears to be not authorized to such call.");
+            }
+        }
         if (!HttpContext.Request.Cookies.ContainsKey(".AspNet.Identity"))
             return View(
-                new LoginViewModel() 
+                new LoginViewModel()
+                {
+                    ReturnUrl = returnUrl ?? "/Core"
+                } 
             );
+        
         TempData["ReturnMessage"] = _localizer.GetString("You appear to be already logged in").Value;
-        return Redirect("/Core");
+        return Redirect(returnUrl ?? "/Core");
     }
 
     [HttpPost]
     [AutoValidateAntiforgeryToken]
     [ActionName("Login")]
-    public async Task<IActionResult> Login(LoginViewModel loginViewModel, [FromQuery] string? returnUrl)
+    public async Task<IActionResult> Login(LoginViewModel loginViewModel)
     {
         if (!ModelState.IsValid)
         {
@@ -57,15 +71,22 @@ public class GatewayController : Controller
         try
         {
             var token = await _oidcService.GetAccessToken(loginViewModel);
-            /*var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadToken(token);
-            var jwst = jsonToken as JwtSecurityToken;*/
+            
             this.HttpContext.Response.Cookies.Append(".AspNet.Identity", token, new CookieOptions
+                {
+                    Secure = true,
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.Lax,
+                    Domain = _configuration.GetSection("Auth")["CookieDomain"]
+                });
+            var expiryDate = DateTime.Now.AddHours(1);
+            this.HttpContext.Response.Cookies.Append(".Temp.AspNet.Identity", token, new CookieOptions
             {
                 Secure = true,
-                HttpOnly = true,
-                SameSite = SameSiteMode.None,
-                Domain = _configuration.GetSection("Auth")["CookieDomain"]
+                HttpOnly = false,
+                SameSite = SameSiteMode.Lax,
+                Domain = _configuration.GetSection("Auth")["CookieDomain"],
+                Expires = expiryDate
             });
         }
         catch (OpenIddictExceptions.ProtocolException e)
@@ -75,7 +96,7 @@ public class GatewayController : Controller
             return View();
         }
 
-        return Redirect(returnUrl ?? "/");
+        return Redirect(loginViewModel.ReturnUrl ?? "/");
     }
 
     [HttpPost]
