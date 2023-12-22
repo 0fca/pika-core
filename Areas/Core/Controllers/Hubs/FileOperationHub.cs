@@ -29,7 +29,7 @@ namespace PikaCore.Areas.Core.Controllers.Hubs
             _idDataProtection = dataProtection;
         }
         
-        public async Task List(string search, string categoryId, string buckedId)
+        public async Task List(string? search, string categoryId, string buckedId)
         {
             var user = this.Context.GetHttpContext()?.User;
             if (string.IsNullOrEmpty(search) || user == null)

@@ -4,7 +4,6 @@
 @model Tuple<string, string>
 @{
     var bucketId = Model.Item1;
-    var categoryId = Model.Item2;
 }
 <div id="upload-modal" class="modal modal-fixed-footer">
     <form method="post" enctype="multipart/form-data" id="upload-form">
@@ -16,7 +15,7 @@
                 </p>
                     <div class="col s12 m12 l12">
                         <div class="file-field input-field">
-                            <div class="btn btn-primary">
+                            <div class="btn btn-primary havelock">
                                 <span>@Localizer["Choose"]</span>
                                 <input id="files" name="files" type="file" multiple>
                                 </div>
@@ -41,7 +40,7 @@
                 </div>
             </div>
         <div class="modal-footer">
-            <button id="upload-submit" type="button" class="btn btn-primary" disabled>@Localizer["Upload"]</button>
+            <button id="upload-submit" type="button" class="btn btn-primary havelock" disabled>@Localizer["Upload"]</button>
             <button type="button" class="btn btn-danger modal-close">@Localizer["Close"]</button>
         </div>
     </form>
@@ -51,7 +50,7 @@
     document.getElementById("files").addEventListener("change", () => {
         const messageLabel = document.getElementById("result");
         const uploadButton = document.getElementById("upload-submit");
-        messageLabel.innerText = returnFileSize(getSummarySize());
+        messageLabel.innerText = `@Localizer["Łączny rozmiar"]: ${returnFileSize(getSummarySize())}`;
         document.getElementById("output-paragraph").setAttribute("class", "card-panel havelock white-text");
 
         if (getSummarySize() === 0) {
@@ -76,7 +75,7 @@
             const formData = new FormData(oFormElement);
     
             try {
-                const response = await fetch("/Core/Storage/Upload?categoryId=@categoryId&bucketId=@bucketId", {
+                const response = await fetch("/Core/Storage/Upload?bucketId=@bucketId", {
                     method: 'POST',
                     body: formData
                 });
@@ -87,7 +86,7 @@
                          const fileRefLink = document.createElement('a');
                          fileRefLink.href = JSON.parse(text).downloadUrl;
                          fileRefLink.text = "@Localizer["Plik będzie widoczny pod tym linkiem, gdy tylko będzie gotowy"]";
-                         fileRefLink.setAttribute("class", "indigo-text");
+                         fileRefLink.setAttribute("class", "white-text");
                          resultElement.value = ""; 
                          resultElement.appendChild(fileRefLink);
                      }

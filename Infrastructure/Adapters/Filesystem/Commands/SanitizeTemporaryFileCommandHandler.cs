@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.Configuration;
 using PikaCore.Areas.Core.Queries;
 using PikaCore.Infrastructure.Services;
@@ -30,8 +32,17 @@ public class SanitizeTemporaryFileCommandHandler : IRequestHandler<SanitizeTempo
     public async Task<Guid> Handle(SanitizeTemporaryFileCommand request, CancellationToken cancellationToken)
     {
         var paths = request.FormFiles;
-        var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(request.BucketId)), cancellationToken);
-        paths.ToList().ForEach(ff =>
+        var bucket = await _mediator.Send(new GetBucketByIdQuery(Guid.Parse(request.BucketId)), cancellationToken); 
+        var memStreams = new Dictionary<string, MemoryStream>();
+        foreach (var ff in request.FormFiles.AsEnumerable())
+        {
+            var ms = new MemoryStream();
+            await ff.CopyToAsync(ms, cancellationToken);
+            ms.Position = 0;
+            memStreams.Add(ff.FileName, ms);
+        }
+
+        memStreams.ToList().ForEach(kv =>
         {
             var permittedMimes = 
                 _configuration.GetSection("Storage:PermittedMimes").Get<List<string>>() 
@@ -40,12 +51,12 @@ public class SanitizeTemporaryFileCommandHandler : IRequestHandler<SanitizeTempo
                 _configuration.GetSection("Storage:PermittedExtensions").Get<List<string>>() 
                 ?? new List<string>();
             FileSecurityHelper.ProcessTemporaryStoredFile(
-                Path.GetFileName(ff.FileName),
-                ff.OpenReadStream(),
+                Path.GetFileName(kv.Key),
+                kv.Value,
                 permittedExtensions,
                 permittedMimes
             );
-            _minioService.PutObject(ff.FileName, ff.OpenReadStream(), bucket.Name);
+            _minioService.PutObject(kv.Key, kv.Value, bucket.Name);
         });
         return request.Id;
     }

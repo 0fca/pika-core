@@ -181,8 +181,7 @@ namespace PikaCore.Areas.Core.Controllers.App
         [AuthorizeUserBucketAccess]
         [Route("[area]/[controller]/[action]")]
         public async Task<IActionResult> Upload([FromForm] List<IFormFile> files,
-            [FromQuery] string bucketId,
-            [FromQuery] string categoryId
+            [FromQuery] string bucketId
         )
         {
             var size = GetFilesSummarySize(files);
@@ -194,7 +193,7 @@ namespace PikaCore.Areas.Core.Controllers.App
             await _mediator.Send(new SanitizeTemporaryFileCommand(files, bucketId));
             const string actionPath = nameof(Browse);
             var downloadUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/Core/Storage/{actionPath}" +
-                              $"?categoryId={categoryId}&bucketId={bucketId}";
+                              $"?bucketId={bucketId}";
             return Accepted(new
             {
                 downloadUrl

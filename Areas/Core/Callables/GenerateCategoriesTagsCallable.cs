@@ -52,7 +52,6 @@ public class GenerateCategoriesTagsCallable : BaseJobCallable
             );
         }
         var updateCallable = new UpdateCategoryCallable(_mediator, _distributedCache);
-        var hostName = Environment.GetEnvironmentVariable("HOSTNAME");
         var jobId = BackgroundJob.Enqueue<UpdateCategoryCallable>( 
             c => updateCallable.Execute(null));
         await _distributedCache.SetStringAsync("update.job.identifier", jobId,
