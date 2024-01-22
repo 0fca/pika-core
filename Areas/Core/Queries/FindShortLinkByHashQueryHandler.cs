@@ -25,8 +25,11 @@ public class FindShortLinkByHashQueryHandler : IRequestHandler<FindShortLinkByHa
                     s.Hash.Equals(request.Hash),
                 cancellationToken: cancellationToken
             );
-        if (storageIndexRecord!.Expires && 
-            storageIndexRecord!.ExpireDate.Subtract(DateTime.UtcNow).Days > 0)
+        if (!storageIndexRecord!.Expires)
+        {
+            return storageIndexRecord;
+        }
+        if (storageIndexRecord!.ExpireDate.Subtract(DateTime.UtcNow).Days > 0)
         {
             return storageIndexRecord;
         } 
