@@ -1,65 +1,41 @@
-# ![""](https://me.lukas-bownik.net/img/logos/pikacloud_core.svg)
+# ![""](https://lukas-bownik.net/img/logos/pikacloud_core.svg)
 
-__Pika Core__ is a simple file management system written in C# with ASP.NET Core. Its main functionality is to give
-anonymous access to some parts of filesystem however it is supposed to give full access to server's filesystem to all
-registered users.
+__Pika Core__ is a simple cloud system of my own doing. It started as a basic directory contents listing. It is written in C# with ASP.NET Core.
 
-Developer Instance: https://dev-core.lukas-bownik.net/
+Cloudfront: https://cloud.lukas-bownik.net/
+Pika Core Landing: https://core.lukas-bownik.net/
 
-Production Instance: https://core.lukas-bownik.net/
-
-*Done features*
-
-* Registered and anonymous access to public part of the server's filesystem,
-* Registration via local built-in auth or via Google, Discord, Microsoft, GitHub,
-* Authorization using Roles: Admin, FileManagerUser and User,
-* Permanent download links,
-* Downloading folder as zip files, (actually not accessible now due to major refactor)
-* Easy to use file view with on-write searching and interactive navigation path on the top, sorting by type: folders and
-  files.
-* Partially addedd icons in file view,
-* Uploading files (up to 256MB) to public part of the filesystem,
-* Other registration forms,
-
-*Planned changes*
-
-* Downloading whole folders as Archives formats(zip, possibly 7-zip, tar.gz),
-* Redesign it to be a core of whole PikaCloud system (Federation pattern),
-* Removing log in page(to be moved as SSO)
-* Redirect to view all resources on-demand just after PikaPlayer goes live,
-* Internationalization of text,
-* Add dark theme,
-* Redesign Browser to support mosaic view as well as detailed list.
+### Versions ###
+| Major Version  | Overall Description  |
+|---|---|
+| 1.0   |  It was just a listing of a hardcoded directory from server's filesystem. At the end of its lifetime 1st major version was actually not much more than simple sign in, registration and file browsing  | 
+| 2.0  | Better visuals - till that version I used MaterializeJS instead of raw Bootstrap. Still, it was just a listing of my directories read from configuration. Authorization was implemented using local Identity store + 3rd parties like Google, Microsoft, Discord.  | 
+|  3.0 | Better colour pallete, standarized colour scheme across systems in the cloud. I managed to refactor the system, thus the system uses MinIO as a storage of resources. Following that change, PikaCore "describes" everything as a resource and uses my own solution - VCOS (Virtual Categorized Object System) to manage data stored in object storage. VCOS is not standarized till the moment of commithing this change to README.  | 
 
 ### Technical information ###
 
 *Technology stack*
 
-* .NET Core 3.1,
+* .NET 7,
 * Template Engine "Razor",
-* Identity Framework,
-* HTML5 with Materialize and JS,
-* Entity Framework Core.
+* Identity Framework with Orchard Core as IdP,
+* HTML5 with Materialize and JS, jQuery,
+* Entity Framework Core,
+* MartenDB for Event Sourcing,
+* Net.EventBus,
+* AutoMapper,
+* Serilog with Grafana adapter.
 
 3rd party software:
-
+* MinIO,
 * Newtonsoft,
 * Microsoft Npgsql,
 * FFmpeg.NET amd ffmpeg,
 * Redis cache,
 * PostgreSQL RDBMS,
 * Docker
-* Filebeat, Elasticsearch and Kibana for logs management & searching.
-
-*Deployment*
-
-Server OS: Debian 10
-
-WWW: Apache 2 as HTTP Proxy
-
-Core is deployed on localhost.
-Some services are deployed as Docker containers.
+* Grafana and Loki for logs.
 
 __Docs__
 
-There will be simple public auth and filesystem access API.
+There will be OIDC authorization VCOS filesystem access API.
